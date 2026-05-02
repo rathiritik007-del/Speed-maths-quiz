@@ -8,20 +8,20 @@
   <style>
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    *:focus { outline: none; }
-    *:focus-visible { outline: 2px solid rgba(127,176,105,0.5); outline-offset: 2px; }
 
     html, body {
       height: 100%;
       min-height: 100%;
+      background:
+        linear-gradient(135deg, #170019, #100015),
+        radial-gradient(circle at 20% 20%, #573280 0%, transparent 70%),
+        radial-gradient(circle at 80% 80%, #3d1860 0%, transparent 80%);
       align-items: flex-start;
       justify-content: center;
       font-family: 'Inter', sans-serif;
       overflow-x: hidden;
       overflow-y: auto;
       max-width: 100%;
-      background: #1C2B1A;
-      color: #FFFBBD;
     }
 
     /* ── Page wrapper ── */
@@ -40,20 +40,31 @@
 
     /* ── Main app card ── */
     .app {
-      width: 100%;
-      max-width: 900px;
-      margin: 0 auto;
-      border-radius: 20px;
-      position: relative;
-      overflow: hidden;
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border: 1px solid rgba(255,255,255,0.12);
-      box-shadow: 0 25px 80px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.05);
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-    }
+  width: 100%;
+  max-width: 900px;     /* control width */
+  margin: 0 auto;       /* center horizontally */
+
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;     /* 🔥 prevents glass bleed */
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  background: linear-gradient(
+    135deg,
+    rgba(87,50,128, 0.25),
+    rgba(35,2,46, 0.55)
+  );
+
+  border: 1px solid rgba(255,255,255,0.12);
+
+  box-shadow:
+    0 25px 80px rgba(0,0,0,0.65),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+
+  padding: 16px;  /* 🔥 replaces ALL inner margins */
+}
 
 .app::after {
   content: "";
@@ -62,7 +73,7 @@
   border-radius: inherit;
 
   box-shadow:
-    inset 0 0 30px rgba(127,176,105,0.08);
+    inset 0 0 30px rgba(173,168,182,0.08);
 
   pointer-events: none;
 }
@@ -75,8 +86,8 @@
 
   background: linear-gradient(
     135deg,
-    rgba(255,251,189,0.95),
-    rgba(255,251,189,0.75)
+    rgba(239,248,226,0.95),
+    rgba(239,248,226,0.75)
   );
 
   backdrop-filter: blur(10px);
@@ -123,16 +134,14 @@
       .page-wrap { align-items: center; padding: 40px 20px; }
     }
 
-    /* Only one screen visible at a time */
     .screen {
-      display: none;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .screen.active {
-      display: flex;
-      flex: 1;
-    }
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: 16px; /* 🔥 THIS replaces ALL margins */
+}
+    .screen.active { display: flex; }
 
     /* ════════════════════════════════════
        SETUP SCREEN
@@ -141,7 +150,7 @@
     .setup-header h1 {
       font-size: clamp(22px, 6vw, 34px);
       font-weight: 700;
-      color: #1C2B1A;
+      color: #23022e;
       margin-bottom: 6px;
       letter-spacing: -0.5px;
       line-height: 1.2;
@@ -149,7 +158,7 @@
     .setup-header p {
       /* golden ratio: title / 1.618 → clamped proportionally */
       font-size: clamp(13.6px, 3.7vw, 21px);
-      color: rgba(28,43,26,0.6);
+      color: rgba(35,2,46,0.6);
       font-weight: 400;
     }
 
@@ -159,11 +168,11 @@
   padding: clamp(16px, 4vw, 24px);
 
   border-radius: 20px;
-  background: rgba(36, 48, 34, 0.9);
+  background: rgba(45,10,61, 0.9);
 
   backdrop-filter: blur(12px);
 
-  border: 1px solid rgba(255,251,189,0.1);
+  border: 1px solid rgba(239,248,226,0.1);
 
   box-shadow: 0 25px 60px rgba(0,0,0,0.6);
 
@@ -175,16 +184,16 @@
   width: 100%;
 }
     .card {
-      background: #243022;
+      background: #2d0a3d;
       border-radius: clamp(10px, 3vw, 16px);
       padding: clamp(10px, 3.5vw, 20px);
       margin-bottom: clamp(8px, 2.5vw, 14px);
-      border: 1px solid rgba(255,251,189,0.12);
+      border: 1px solid rgba(239,248,226,0.12);
     }
     .card-title {
       font-size: clamp(10px, 2.5vw, 11px);
       font-weight: 600;
-      color: rgba(255,251,189,0.4);
+      color: rgba(239,248,226,0.4);
       text-transform: uppercase;
       letter-spacing: 0.07em;
       margin-bottom: clamp(8px, 2.5vw, 12px);
@@ -200,7 +209,7 @@
     .field-row:last-child { margin-bottom: 0; }
     .field-label {
       font-size: clamp(13px, 3.5vw, 15px);
-      color: #FFFBBD;
+      color: #eff8e2;
       flex: 1;
       min-width: 100px;
     }
@@ -209,10 +218,10 @@
       width: clamp(64px, 18vw, 80px);
       padding: clamp(6px, 2vw, 9px) 10px;
       font-size: clamp(13px, 3.5vw, 15px);
-      border: 1.5px solid rgba(255,251,189,0.25);
+      border: 1.5px solid rgba(239,248,226,0.25);
       border-radius: 10px;
-      background: #1C2B1A;
-      color: #FFFBBD;
+      background: #23022e;
+      color: #eff8e2;
       text-align: center;
       outline: none;
       font-family: 'Inter', sans-serif;
@@ -220,17 +229,17 @@
     }
     .num-inp::-webkit-inner-spin-button,
     .num-inp::-webkit-outer-spin-button { -webkit-appearance: none; }
-    .num-inp:focus { border-color: #FFFBBD; }
+    .num-inp:focus { border-color: #eff8e2; }
 
     .type-row { display: flex; gap: clamp(6px, 2vw, 8px); }
     .type-btn {
       flex: 1;
       min-width: 0;
       padding: clamp(9px, 2.5vw, 11px) 4px;
-      border: 1.5px solid rgba(255,251,189,0.2);
+      border: 1.5px solid rgba(239,248,226,0.2);
       border-radius: 10px;
       background: transparent;
-      color: rgba(255,251,189,0.45);
+      color: rgba(239,248,226,0.45);
       font-size: clamp(11px, 2.8vw, 14px);
       cursor: pointer;
       transition: all 0.18s;
@@ -238,25 +247,25 @@
       font-weight: 500;
       overflow: hidden;
     }
-    .type-btn.active { border-color: #CA3C25; background: rgba(202,60,37,0.15); color: #CA3C25; }
+    .type-btn.active { border-color: #7b44a8; background: rgba(87,50,128,0.45); color: #eff8e2; }
 
     .tog-row {
       display: flex;
       align-items: center;
       gap: 12px;
       padding: clamp(7px, 2vw, 12px) 0;
-      border-bottom: 1px solid rgba(255,251,189,0.1);
+      border-bottom: 1px solid rgba(239,248,226,0.1);
     }
     .tog-row:last-child { border-bottom: none; padding-bottom: 0; }
     .tog-label {
       font-size: clamp(13px, 3.5vw, 15px);
-      color: #FFFBBD;
+      color: #eff8e2;
       flex: 1;
       font-weight: 400;
     }
     .tog-sub {
       font-size: clamp(10px, 2.5vw, 11px);
-      color: rgba(255,251,189,0.35);
+      color: rgba(239,248,226,0.35);
       display: block;
       margin-top: 2px;
     }
@@ -266,41 +275,30 @@
     .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
     .tslider {
       position: absolute; inset: 0;
-      background: rgba(255,251,189,0.12);
+      background: #23022e;
       border-radius: 14px;
-      transition: background 0.2s, border-color 0.2s;
-      border: 1.5px solid rgba(255,251,189,0.25);
+      transition: background 0.2s;
+      border: 1.5px solid rgba(239,248,226,0.25);
     }
     .tslider::before {
       content: '';
       position: absolute;
       width: 19px; height: 19px;
       left: 3px; top: 2px;
-      background: rgba(255,251,189,0.5);
+      background: #eff8e2;
       border-radius: 50%;
       transition: transform 0.2s, background 0.2s;
     }
-    .toggle input:checked + .tslider {
-      background: #CA3C25;
-      border-color: #CA3C25;
-    }
-    .toggle input:checked + .tslider::before {
-      transform: translateX(23px);
-      background: #FFFBBD;
-    }
-    /* Remove orange browser focus outline on all inputs/buttons */
-    input:focus, button:focus, .toggle input:focus + .tslider {
-      outline: none;
-      box-shadow: none;
-    }
+    .toggle input:checked + .tslider { background: #573280; border-color: #573280; }
+    .toggle input:checked + .tslider::before { transform: translateX(23px); background: #eff8e2; }
 
     #s-setup .start-btn {
       margin: 4px clamp(12px, 4vw, 20px) clamp(12px, 4vw, 20px);
       padding: clamp(12px, 3.2vw, 16px);
       border: none;
       border-radius: 14px;
-      background: #CA3C25;
-      color: #FFFBBD;
+      background: #573280;
+      color: #eff8e2;
       font-size: clamp(14px, 3.8vw, 17px);
       font-weight: 600;
       cursor: pointer;
@@ -325,7 +323,7 @@
        TEST SCREEN
     ════════════════════════════════════ */
     .test-top {
-      background: #FFFBBD;
+      background: #eff8e2;
   padding: clamp(14px, 4vw, 22px) clamp(14px, 5vw, 24px) clamp(12px, 3.5vw, 18px);
   display: flex;
   align-items: center;
@@ -339,7 +337,7 @@
       width: clamp(32px, 8vw, 38px);
       height: clamp(32px, 8vw, 38px);
       border-radius: 10px;
-      background: #243022;
+      background: #2d0a3d;
       border: none;
       cursor: pointer;
       display: flex;
@@ -350,28 +348,28 @@
     .back-btn svg {
       width: clamp(15px, 4vw, 19px);
       height: clamp(15px, 4vw, 19px);
-      stroke: #FFFBBD; fill: none; stroke-width: 2;
+      stroke: #eff8e2; fill: none; stroke-width: 2;
       stroke-linecap: round; stroke-linejoin: round;
     }
     .top-meta { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 6px; flex-wrap: wrap; }
     .q-pill {
-      background: #243022;
+      background: #2d0a3d;
       border-radius: 20px;
       padding: clamp(5px, 1.5vw, 7px) clamp(10px, 3vw, 15px);
       font-size: clamp(11px, 3vw, 14px);
-      color: rgba(255,251,189,0.55);
+      color: rgba(239,248,226,0.55);
       font-weight: 500;
       white-space: nowrap;
     }
-    .q-pill span { color: #FFFBBD; font-weight: 600; }
+    .q-pill span { color: #eff8e2; font-weight: 600; }
     .score-pill {
-      background: rgba(202,60,37,0.15);
+      background: rgba(87,50,128,0.15);
       border-radius: 20px;
       padding: clamp(5px, 1.5vw, 7px) clamp(10px, 3vw, 15px);
       font-size: clamp(11px, 3vw, 14px);
-      color: #CA3C25;
+      color: #573280;
       font-weight: 600;
-      border: 1px solid rgba(202,60,37,0.3);
+      border: 1px solid rgba(87,50,128,0.3);
       white-space: nowrap;
     }
 
@@ -382,7 +380,7 @@
   border-radius: 6px;
   overflow: hidden;
 }
-    .prog-fill { height: 100%; background: #CA3C25; border-radius: 2px; transition: width 0.35s; }
+    .prog-fill { height: 100%; background: #573280; border-radius: 2px; transition: width 0.35s; }
 .prog-wrap {
   margin-top: 18px;   /* spacing inside header */
 }
@@ -392,8 +390,8 @@ display: block;
   padding: 14px 16px;
   border-radius: 16px;
 
-  background: rgba(36, 48, 34, 0.6);
-  border: 1px solid rgba(255,251,189,0.08);
+  background: rgba(45,10,61, 0.6);
+  border: 1px solid rgba(239,248,226,0.08);
 
   backdrop-filter: blur(10px);
 }
@@ -407,17 +405,17 @@ display: block;
 
 .timer-left {
   font-size: 13px;
-  color: rgba(255,251,189,0.4);
+  color: rgba(239,248,226,0.4);
 }
 
 .timer-right {
   font-weight: 600;
-  color: #7FB069;
+  color: #ada8b6;
 }
 
 .timer-bar {
   height: 6px;
-  background: rgba(255,251,189,0.25);
+  background: rgba(239,248,226,0.25);
   border-radius: 6px;
   overflow: hidden;
 }
@@ -425,7 +423,7 @@ display: block;
 .timer-bar-fill {
   height: 100%;
   width: 100%;
-  background: linear-gradient(90deg, #CA3C25, #7FB069);
+  background: linear-gradient(90deg, #573280, #ada8b6);
   transition: width 0.1s linear;
 }
 
@@ -433,29 +431,29 @@ display: block;
   margin: 0 clamp(12px, 4vw, 20px) clamp(10px, 3vw, 16px);
   padding: 14px 16px;
   border-radius: 16px;
-  background: rgba(36, 48, 34, 0.6);
-  border: 1px solid rgba(255,251,189,0.08);
+  background: rgba(45,10,61, 0.6);
+  border: 1px solid rgba(239,248,226,0.08);
   display: none;
   justify-content: space-between;
   align-items: center;
 }
 .stopwatch-label {
   font-size: 13px;
-  color: rgba(255,251,189,0.4);
+  color: rgba(239,248,226,0.4);
 }
 .stopwatch-num {
   font-size: clamp(20px, 5vw, 26px);
   font-weight: 700;
-  color: #7FB069;
+  color: #ada8b6;
   font-variant-numeric: tabular-nums;
 }
 
     .q-card {
       margin: 0 clamp(12px, 4vw, 20px) clamp(10px, 3vw, 16px);
-      background: #243022;
+      background: #2d0a3d;
       border-radius: clamp(14px, 4vw, 20px);
       padding: clamp(16px, 5vw, 24px);
-      border: 1px solid rgba(255,251,189,0.12);
+      border: 1px solid rgba(239,248,226,0.12);
       flex-shrink: 0;
     }
     .q-badge {
@@ -467,24 +465,24 @@ display: block;
       margin-bottom: clamp(8px, 2.5vw, 13px);
       letter-spacing: 0.03em;
     }
-    .badge-sq { background: rgba(127,176,105,0.15); color: #7FB069; border: 1px solid rgba(127,176,105,0.35); }
-    .badge-cu { background: rgba(202,60,37,0.15); color: #CA3C25; border: 1px solid rgba(202,60,37,0.35); }
+    .badge-sq { background: rgba(239,248,226,0.1); color: #eff8e2; border: 1px solid rgba(239,248,226,0.3); }
+    .badge-cu { background: rgba(87,50,128,0.35); color: #cecfc7; border: 1px solid rgba(87,50,128,0.6); }
     .q-number {
       font-size: clamp(11px, 3vw, 14px);
-      color: rgba(255,251,189,0.35);
+      color: rgba(239,248,226,0.35);
       margin-bottom: 4px;
       font-weight: 400;
     }
     .q-expr {
       font-size: clamp(24px, 7vw, 32px);
       font-weight: 700;
-      color: #FFFBBD;
+      color: #eff8e2;
       text-align: center;
       margin: clamp(8px, 2.5vw, 12px) 0 clamp(4px, 1.5vw, 8px);
     }
     .q-sub {
       font-size: clamp(11px, 3vw, 14px);
-      color: rgba(255,251,189,0.35);
+      color: rgba(239,248,226,0.35);
       text-align: center;
       font-weight: 400;
     }
@@ -505,10 +503,10 @@ display: block;
       padding: clamp(11px, 3.5vw, 15px);
       font-size: clamp(17px, 5vw, 22px);
       font-weight: 600;
-      border: 2px solid rgba(255,251,189,0.2);
+      border: 2px solid rgba(239,248,226,0.2);
       border-radius: clamp(10px, 3vw, 13px);
-      background: #243022;
-      color: #FFFBBD;
+      background: #2d0a3d;
+      color: #eff8e2;
       text-align: center;
       outline: none;
       transition: border-color 0.2s;
@@ -518,16 +516,16 @@ display: block;
     }
     .ans-input::-webkit-inner-spin-button,
     .ans-input::-webkit-outer-spin-button { -webkit-appearance: none; }
-    .ans-input:focus { border-color: #FFFBBD; }
-    .ans-input.correct { border-color: #FFFBBD; background: rgba(127,176,105,0.12); color: #7FB069; }
-    .ans-input.wrong  { border-color: #CA3C25; background: rgba(202,60,37,0.1); color: #CA3C25; }
+    .ans-input:focus { border-color: #eff8e2; }
+    .ans-input.correct { border-color: #eff8e2; background: rgba(239,248,226,0.08); color: #eff8e2; }
+    .ans-input.wrong  { border-color: #ada8b6; background: rgba(173,168,182,0.08); color: #ada8b6; }
 
     .check-btn {
       padding: clamp(11px, 3.5vw, 15px) clamp(14px, 4vw, 22px);
       border: none;
       border-radius: clamp(10px, 3vw, 13px);
-      background: #CA3C25;
-      color: #FFFBBD;
+      background: #573280;
+      color: #eff8e2;
       font-size: clamp(13px, 3.5vw, 16px);
       font-weight: 600;
       cursor: pointer;
@@ -548,16 +546,16 @@ display: block;
       display: none;
       flex-shrink: 0;
     }
-    .fb-ok { background: rgba(127,176,105,0.15); color: #7FB069; border: 1px solid rgba(127,176,105,0.3); }
-    .fb-no { background: rgba(202,60,37,0.15); color: #CA3C25; border: 1px solid rgba(202,60,37,0.3); }
+    .fb-ok { background: rgba(173,168,182,0.15); color: #ada8b6; border: 1px solid rgba(173,168,182,0.3); }
+    .fb-no { background: rgba(87,50,128,0.15); color: #573280; border: 1px solid rgba(87,50,128,0.3); }
 
     .next-btn {
       margin: 0 clamp(12px, 4vw, 20px) clamp(14px, 4vw, 20px);
       padding: clamp(11px, 3.5vw, 15px);
-      border: 1.5px solid rgba(255,251,189,0.2);
+      border: 1.5px solid rgba(239,248,226,0.2);
       border-radius: clamp(10px, 3vw, 13px);
       background: transparent;
-      color: #FFFBBD;
+      color: #eff8e2;
       font-size: clamp(13px, 3.5vw, 15px);
       font-weight: 500;
       cursor: pointer;
@@ -567,7 +565,7 @@ display: block;
       font-family: 'Inter', sans-serif;
       flex-shrink: 0;
     }
-    .next-btn:hover { background: #243022; }
+    .next-btn:hover { background: #2d0a3d; }
 
     /* ════════════════════════════════════
        RESULTS SCREEN
@@ -575,7 +573,7 @@ display: block;
     .res-title {
       font-size: clamp(15px, 4.5vw, 20px);
       font-weight: 700;
-      color: #1C2B1A;
+      color: #23022e;
       flex: 1;
     }
     .score-circle {
@@ -588,12 +586,12 @@ display: block;
     .big-pct {
       font-size: clamp(44px, 13vw, 62px);
       font-weight: 700;
-      color: #CA3C25;
+      color: #573280;
       letter-spacing: -1px;
     }
     .big-sub {
       font-size: clamp(12px, 3.2vw, 15px);
-      color: rgba(255,251,189,0.4);
+      color: rgba(239,248,226,0.4);
       margin-top: 4px;
       font-weight: 400;
     }
@@ -605,24 +603,24 @@ display: block;
       flex-shrink: 0;
     }
     .stat-c {
-      background: #243022;
+      background: #2d0a3d;
       border-radius: 12px;
       padding: clamp(10px, 3vw, 16px) clamp(8px, 2vw, 14px);
       text-align: center;
-      border: 1px solid rgba(255,251,189,0.1);
+      border: 1px solid rgba(239,248,226,0.1);
     }
     .stat-v { font-size: clamp(18px, 5.5vw, 24px); font-weight: 700; }
     .stat-l { font-size: clamp(10px, 2.5vw, 12px); color: rgba(237,221,212,0.35); margin-top: 3px; }
-    .sv-ok  { color: #7FB069; }
-    .sv-no  { color: #CA3C25; }
-    .sv-tot { color: rgba(255,251,189,0.6); }
+    .sv-ok  { color: #eff8e2; }
+    .sv-no  { color: #ada8b6; }
+    .sv-tot { color: rgba(239,248,226,0.6); }
 
     .review-wrap {
       margin: 0 clamp(12px, 4vw, 20px) clamp(12px, 3.5vw, 18px);
-      background: #243022;
+      background: #2d0a3d;
       border-radius: 16px;
       overflow: hidden;
-      border: 1px solid rgba(255,251,189,0.1);
+      border: 1px solid rgba(239,248,226,0.1);
       flex: 1;
       display: flex;
       flex-direction: column;
@@ -632,17 +630,17 @@ display: block;
       padding: clamp(10px, 3vw, 14px) clamp(12px, 4vw, 18px);
       font-size: clamp(10px, 2.5vw, 12px);
       font-weight: 600;
-      color: rgba(255,251,189,0.35);
+      color: rgba(239,248,226,0.35);
       text-transform: uppercase;
       letter-spacing: 0.07em;
-      border-bottom: 1px solid rgba(255,251,189,0.1);
+      border-bottom: 1px solid rgba(239,248,226,0.1);
       flex-shrink: 0;
     }
     .review-scroll { flex: 1; overflow-y: auto; max-height: clamp(160px, 30vw, 260px); }
     .history-empty {
       padding: 16px;
       text-align: center;
-      color: rgba(255,251,189,0.25);
+      color: rgba(239,248,226,0.25);
       font-size: 13px;
     }
     .review-item {
@@ -650,13 +648,13 @@ display: block;
       justify-content: space-between;
       align-items: center;
       padding: clamp(8px, 2.5vw, 12px) clamp(12px, 4vw, 18px);
-      border-bottom: 1px solid rgba(255,251,189,0.08);
+      border-bottom: 1px solid rgba(239,248,226,0.08);
     }
     .review-item:last-child { border-bottom: none; }
-    .ri-q { font-size: clamp(12px, 3.2vw, 15px); color: rgba(255,251,189,0.5); }
+    .ri-q { font-size: clamp(12px, 3.2vw, 15px); color: rgba(239,248,226,0.5); }
     .ri-a { font-size: clamp(12px, 3.2vw, 15px); font-weight: 600; }
-    .ri-ok { color: #7FB069; }
-    .ri-no { color: #CA3C25; }
+    .ri-ok { color: #eff8e2; }
+    .ri-no { color: #ada8b6; }
 
     .res-btns {
       display: flex;
@@ -669,8 +667,8 @@ display: block;
       padding: clamp(12px, 3.5vw, 16px);
       border: none;
       border-radius: 12px;
-      background: #CA3C25;
-      color: #FFFBBD;
+      background: #573280;
+      color: #eff8e2;
       font-size: clamp(13px, 3.5vw, 16px);
       font-weight: 600;
       cursor: pointer;
@@ -680,17 +678,17 @@ display: block;
     .again-btn:hover { opacity: 0.88; }
     .home-btn {
       padding: clamp(12px, 3.5vw, 16px) clamp(14px, 4vw, 22px);
-      border: 1.5px solid rgba(255,251,189,0.2);
+      border: 1.5px solid rgba(239,248,226,0.2);
       border-radius: 12px;
       background: transparent;
-      color: #FFFBBD;
+      color: #eff8e2;
       font-size: clamp(13px, 3.5vw, 15px);
       font-weight: 500;
       cursor: pointer;
       font-family: 'Inter', sans-serif;
       transition: background 0.15s;
     }
-    .home-btn:hover { background: #243022; }
+    .home-btn:hover { background: #2d0a3d; }
 
 
     /* ════════════════════════════════════
@@ -711,10 +709,10 @@ display: block;
 }
     .pick-btn {
       padding: clamp(14px, 4vw, 20px) clamp(10px, 3vw, 16px);
-      border: 2px solid rgba(255,251,189,0.18);
+      border: 2px solid rgba(239,248,226,0.18);
       border-radius: clamp(10px, 3vw, 14px);
-      background: #243022;
-      color: #FFFBBD;
+      background: #2d0a3d;
+      color: #eff8e2;
       font-size: clamp(18px, 5.5vw, 26px);
       font-weight: 700;
       cursor: pointer;
@@ -726,23 +724,23 @@ display: block;
       overflow: hidden;
     }
     .pick-btn:hover:not(:disabled) {
-      border-color: rgba(255,251,189,0.4);
-      background: #2d3d2a;
+      border-color: rgba(239,248,226,0.4);
+      background: rgba(87,50,128,0.2);
     }
     .pick-btn.correct {
-      border-color: #7FB069;
-      background: rgba(127,176,105,0.18);
-      color: #7FB069;
+      border-color: #eff8e2;
+      background: rgba(239,248,226,0.1);
+      color: #eff8e2;
     }
     .pick-btn.wrong {
-      border-color: #CA3C25;
-      background: rgba(202,60,37,0.15);
-      color: #CA3C25;
+      border-color: #ada8b6;
+      background: rgba(173,168,182,0.1);
+      color: #ada8b6;
     }
     .pick-btn.reveal {
-      border-color: #7FB069;
-      background: rgba(127,176,105,0.1);
-      color: rgba(127,176,105,0.7);
+      border-color: #eff8e2;
+      background: rgba(239,248,226,0.06);
+      color: rgba(239,248,226,0.6);
     }
     .pick-btn:disabled { cursor: default; }
     .pick-icon {
@@ -801,10 +799,10 @@ select {
   -webkit-appearance: none;
   -moz-appearance: none;
 
-  background: #1C2B1A;
-  color: #FFFBBD;
+  background: #23022e;
+  color: #eff8e2;
 
-  border: 1px solid rgba(255,251,189,0.2);
+  border: 1px solid rgba(239,248,226,0.2);
   border-radius: 8px;
 
   padding: 8px;
@@ -821,10 +819,10 @@ select {
   padding: 10px 12px;
 
   border-radius: 12px;
-  border: 1px solid rgba(255,251,189,0.2);
+  border: 1px solid rgba(239,248,226,0.2);
 
-  background: #1C2B1A;
-  color: #FFFBBD;
+  background: #23022e;
+  color: #eff8e2;
 
   font-family: 'Inter', sans-serif;
   font-size: 14px;
@@ -838,8 +836,8 @@ select {
 /* focus state (replaces blue) */
 select:focus {
   outline: none;
-  border-color: #CA3C25;
-  box-shadow: 0 0 0 2px rgba(202,60,37,0.25);
+  border-color: #573280;
+  box-shadow: 0 0 0 2px rgba(87,50,128,0.25);
 }
 
 /* ───────── CUSTOM SELECT ───────── */
@@ -852,9 +850,9 @@ select:focus {
 .select-trigger {
   padding: 8px 10px;              /* smaller */
   border-radius: 10px;            /* slightly tighter */
-  border: 1px solid rgba(255,251,189,0.2);
-  background: #1C2B1A;
-  color: #FFFBBD;
+  border: 1px solid rgba(239,248,226,0.2);
+  background: #23022e;
+  color: #eff8e2;
   cursor: pointer;
   position: relative;
   font-size: 13px;                /* smaller text */
@@ -868,7 +866,7 @@ select:focus {
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #FFFBBD;
+  color: #eff8e2;
 }
 
 /* dropdown */
@@ -878,9 +876,9 @@ select:focus {
   left: 0;
   right: 0;
 
-  background: #1C2B1A;
+  background: #23022e;
   border-radius: 14px;
-  border: 1px solid rgba(255,251,189,0.15);
+  border: 1px solid rgba(239,248,226,0.15);
 
   box-shadow: 0 10px 30px rgba(0,0,0,0.6);
 
@@ -902,18 +900,18 @@ select:focus {
 /* options */
 .select-option {
   padding: 10px 12px;
-  color: #FFFBBD;
+  color: #eff8e2;
   cursor: pointer;
   transition: background 0.15s;
 }
 
 .select-option:hover {
-  background: #243022;
+  background: #2d0a3d;
 }
 
 .select-option.active {
-  background: rgba(202,60,37,0.2);
-  color: #CA3C25;
+  background: rgba(87,50,128,0.2);
+  color: #573280;
 }
 
 #s-results
@@ -950,9 +948,9 @@ select:focus {
   font-size: 20px;
   font-weight: 600;
   border-radius: 12px;
-  border: 1px solid rgba(255,251,189,0.2);
-  background: #243022;
-  color: #FFFBBD;
+  border: 1px solid rgba(239,248,226,0.2);
+  background: #2d0a3d;
+  color: #eff8e2;
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -963,12 +961,12 @@ select:focus {
 }
 
 .kb-del {
-  color: #CA3C25;
+  color: #573280;
 }
 
 .kb-enter {
-  background: #CA3C25;
-  color: #FFFBBD;
+  background: #573280;
+  color: #eff8e2;
 }
 
 .page-wrap {
@@ -982,12 +980,12 @@ select:focus {
        STREAK
     ════════════════════════════════════ */
     .streak-pill {
-      background: rgba(202,60,37,0.15);
-      border: 1px solid rgba(202,60,37,0.3);
+      background: rgba(87,50,128,0.15);
+      border: 1px solid rgba(87,50,128,0.3);
       border-radius: 20px;
       padding: clamp(5px,1.5vw,7px) clamp(10px,3vw,15px);
       font-size: clamp(11px,3vw,14px);
-      color: #CA3C25;
+      color: #573280;
       font-weight: 600;
       white-space: nowrap;
       display: none;
@@ -998,12 +996,12 @@ select:focus {
        LIVES
     ════════════════════════════════════ */
     .lives-pill {
-      background: rgba(202,60,37,0.12);
-      border: 1px solid rgba(202,60,37,0.25);
+      background: rgba(87,50,128,0.12);
+      border: 1px solid rgba(87,50,128,0.25);
       border-radius: 20px;
       padding: clamp(5px,1.5vw,7px) clamp(10px,3vw,15px);
       font-size: clamp(11px,3vw,14px);
-      color: #FFFBBD;
+      color: #eff8e2;
       font-weight: 600;
       white-space: nowrap;
       letter-spacing: 0.05em;
@@ -1025,25 +1023,25 @@ select:focus {
     .gameover-title {
       font-size: clamp(26px,7vw,36px);
       font-weight: 700;
-      color: #FFFBBD;
+      color: #eff8e2;
       letter-spacing: -0.5px;
     }
     .gameover-sub {
       font-size: clamp(13px,3.5vw,16px);
-      color: rgba(255,251,189,0.45);
+      color: rgba(239,248,226,0.45);
       text-align: center;
     }
     .gameover-score {
       font-size: clamp(44px,13vw,62px);
       font-weight: 700;
-      color: #CA3C25;
+      color: #573280;
       letter-spacing: -1px;
     }
 
     /* range label */
     .bento-range-lbl {
       font-size: 13px;
-      color: rgba(255,251,189,0.4);
+      color: rgba(239,248,226,0.4);
       white-space: nowrap;
     }
     /* full-width questions input inside bento cell */
@@ -1063,10 +1061,10 @@ select:focus {
       flex: 1;
       min-width: 0;
       padding: clamp(7px,2vw,10px) 4px;
-      border: 1.5px solid rgba(255,251,189,0.2);
+      border: 1.5px solid rgba(239,248,226,0.2);
       border-radius: 10px;
       background: transparent;
-      color: rgba(255,251,189,0.45);
+      color: rgba(239,248,226,0.45);
       font-size: clamp(11px,2.8vw,13px);
       cursor: pointer;
       transition: all 0.18s;
@@ -1076,12 +1074,12 @@ select:focus {
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .diff-btn.active { border-color: #7FB069; background: rgba(127,176,105,0.15); color: #7FB069; }
+    .diff-btn.active { border-color: #7b44a8; background: rgba(87,50,128,0.45); color: #eff8e2; }
 
     /* ════════════════════════════════════
        REVERSE MODE
     ════════════════════════════════════ */
-    .badge-rev { background: rgba(127,176,105,0.15); color: #7FB069; border: 1px solid rgba(127,176,105,0.35); }
+    .badge-rev { background: rgba(173,168,182,0.15); color: #ada8b6; border: 1px solid rgba(173,168,182,0.35); }
 
     /* ════════════════════════════════════
        FOCUS MODE — number chips
@@ -1095,9 +1093,9 @@ select:focus {
     .focus-chip {
       padding: 5px 11px;
       border-radius: 8px;
-      border: 1.5px solid rgba(255,251,189,0.2);
+      border: 1.5px solid rgba(239,248,226,0.2);
       background: transparent;
-      color: rgba(255,251,189,0.5);
+      color: rgba(239,248,226,0.5);
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
@@ -1105,22 +1103,22 @@ select:focus {
       font-family: 'Inter', sans-serif;
     }
     .focus-chip.selected {
-      border-color: #7FB069;
-      background: rgba(127,176,105,0.18);
-      color: #7FB069;
+      border-color: #ada8b6;
+      background: rgba(173,168,182,0.18);
+      color: #ada8b6;
     }
     .focus-all-btn {
       padding: 5px 11px;
       border-radius: 8px;
-      border: 1.5px solid rgba(255,251,189,0.15);
+      border: 1.5px solid rgba(239,248,226,0.15);
       background: transparent;
-      color: rgba(255,251,189,0.3);
+      color: rgba(239,248,226,0.3);
       font-size: 12px;
       cursor: pointer;
       font-family: 'Inter', sans-serif;
       transition: all 0.15s;
     }
-    .focus-all-btn:hover { border-color: rgba(255,251,189,0.3); color: rgba(255,251,189,0.5); }
+    .focus-all-btn:hover { border-color: rgba(239,248,226,0.3); color: rgba(239,248,226,0.5); }
 
     /* ════════════════════════════════════
        RESULTS — personal bests + chart
@@ -1133,28 +1131,28 @@ select:focus {
       flex-shrink: 0;
     }
     .pb-c {
-      background: #243022;
+      background: #2d0a3d;
       border-radius: 12px;
       padding: clamp(10px,3vw,14px);
       text-align: center;
-      border: 1px solid rgba(255,251,189,0.1);
+      border: 1px solid rgba(239,248,226,0.1);
     }
-    .pb-v { font-size: clamp(16px,4.5vw,20px); font-weight: 700; color: #FFFBBD; }
-    .pb-l { font-size: clamp(10px,2.5vw,11px); color: rgba(255,251,189,0.35); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.06em; }
-    .pb-new { color: #7FB069; }
+    .pb-v { font-size: clamp(16px,4.5vw,20px); font-weight: 700; color: #eff8e2; }
+    .pb-l { font-size: clamp(10px,2.5vw,11px); color: rgba(239,248,226,0.35); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .pb-new { color: #eff8e2; }
 
     .chart-wrap {
       margin: 0 clamp(12px,4vw,20px) clamp(10px,3vw,14px);
-      background: #243022;
+      background: #2d0a3d;
       border-radius: 16px;
       padding: clamp(12px,3.5vw,18px);
-      border: 1px solid rgba(255,251,189,0.1);
+      border: 1px solid rgba(239,248,226,0.1);
       flex-shrink: 0;
     }
     .chart-title {
       font-size: clamp(10px,2.5vw,11px);
       font-weight: 600;
-      color: rgba(255,251,189,0.35);
+      color: rgba(239,248,226,0.35);
       text-transform: uppercase;
       letter-spacing: 0.07em;
       margin-bottom: 12px;
@@ -1177,10 +1175,10 @@ select:focus {
       transition: height 0.4s ease;
       min-height: 3px;
     }
-    .chart-bar-sq { background: rgba(127,176,105,0.7); }
-    .chart-bar-cu { background: rgba(202,60,37,0.7); }
-    .chart-lbl { font-size: 11px; color: rgba(255,251,189,0.4); }
-    .chart-val { font-size: 12px; font-weight: 600; color: #FFFBBD; }
+    .chart-bar-sq { background: rgba(206,207,199,0.75); }
+    .chart-bar-cu { background: rgba(87,50,128,0.85); }
+    .chart-lbl { font-size: 11px; color: rgba(239,248,226,0.4); }
+    .chart-val { font-size: 12px; font-weight: 600; color: #eff8e2; }
 
     /* ════════════════════════════════════
        WEAKNESS SECTION
@@ -1190,13 +1188,13 @@ select:focus {
       justify-content: space-between;
       align-items: center;
       padding: clamp(8px,2.5vw,11px) clamp(12px,4vw,18px);
-      border-bottom: 1px solid rgba(255,251,189,0.08);
+      border-bottom: 1px solid rgba(239,248,226,0.08);
     }
     .weakness-item:last-child { border-bottom: none; }
-    .wi-n { font-size: clamp(12px,3.2vw,15px); color: rgba(255,251,189,0.5); }
-    .wi-bar-wrap { flex: 1; margin: 0 12px; height: 6px; background: rgba(255,251,189,0.1); border-radius: 3px; overflow: hidden; }
-    .wi-bar { height: 100%; background: #CA3C25; border-radius: 3px; transition: width 0.4s; }
-    .wi-pct { font-size: clamp(11px,2.8vw,13px); font-weight: 600; color: #CA3C25; min-width: 80px; text-align: right; }
+    .wi-n { font-size: clamp(12px,3.2vw,15px); color: rgba(239,248,226,0.5); }
+    .wi-bar-wrap { display: none; }
+    .wi-bar { display: none; }
+    .wi-pct { font-size: clamp(11px,2.8vw,13px); font-weight: 600; color: #573280; min-width: 80px; text-align: right; }
 
     /* ════════════════════════════════════
        CONFETTI
@@ -1219,7 +1217,7 @@ select:focus {
     ════════════════════════════════════ */
     .kb-hint {
       font-size: 11px;
-      color: rgba(255,251,189,0.2);
+      color: rgba(239,248,226,0.2);
       text-align: center;
       padding: 4px 0 2px;
     }
@@ -1233,9 +1231,9 @@ select:focus {
       font-weight: 600;
       padding: 2px 8px;
       border-radius: 10px;
-      background: rgba(202,60,37,0.2);
-      color: #CA3C25;
-      border: 1px solid rgba(202,60,37,0.35);
+      background: rgba(87,50,128,0.2);
+      color: #573280;
+      border: 1px solid rgba(87,50,128,0.35);
       margin-left: 6px;
       vertical-align: middle;
       letter-spacing: 0.04em;
@@ -1260,9 +1258,9 @@ select:focus {
 
     /* full-width cells */
     .bento-cell { 
-      background: #243022;
+      background: #2d0a3d;
       border-radius: 16px;
-      border: 1px solid rgba(255,251,189,0.1);
+      border: 1px solid rgba(239,248,226,0.1);
       padding: clamp(12px,3.5vw,18px);
       display: flex;
       flex-direction: column;
@@ -1272,29 +1270,27 @@ select:focus {
     }
     .bento-cell.wide { grid-column: 1 / -1; }
     .bento-cell.accent {
-      background: rgba(202,60,37,0.12);
-      border-color: rgba(202,60,37,0.25);
+      background: rgba(87,50,128,0.12);
+      border-color: rgba(87,50,128,0.25);
     }
     .bento-cell.green {
-      background: rgba(127,176,105,0.1);
-      border-color: rgba(127,176,105,0.2);
+      background: rgba(173,168,182,0.1);
+      border-color: rgba(173,168,182,0.2);
     }
 
     .bento-label {
       font-size: clamp(9px,2.2vw,10px);
       font-weight: 700;
-      color: rgba(255,251,189,0.35);
+      color: rgba(239,248,226,0.35);
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      margin-bottom: 6px;
     }
 
     /* range row inside bento */
     .bento-range-row {
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       gap: 8px;
-      min-width: 0;
     }
     .bento-range-col {
       display: flex;
@@ -1303,10 +1299,12 @@ select:focus {
       flex: 1;
       min-width: 0;
     }
+    .bento-range-col .bento-range-lbl { margin-bottom: 0; }
     .bento-range-row .num-inp { width: 100%; min-width: 0; }
     .bento-range-sep {
-      color: rgba(255,251,189,0.3);
+      color: rgba(239,248,226,0.3);
       font-size: 13px;
+      padding-bottom: 10px;
     }
 
     /* toggle row inside bento — compact */
@@ -1318,13 +1316,13 @@ select:focus {
     }
     .bento-tog-label {
       font-size: clamp(12px,3.2vw,14px);
-      color: #FFFBBD;
+      color: #eff8e2;
       font-weight: 400;
       flex: 1;
     }
     .bento-tog-sub {
       font-size: 10px;
-      color: rgba(255,251,189,0.3);
+      color: rgba(239,248,226,0.3);
       display: block;
       margin-top: 1px;
     }
@@ -1335,8 +1333,8 @@ select:focus {
       padding: clamp(14px,3.5vw,18px);
       border: none;
       border-radius: 16px;
-      background: #CA3C25;
-      color: #FFFBBD;
+      background: #573280;
+      color: #eff8e2;
       font-size: clamp(15px,4vw,18px);
       font-weight: 700;
       cursor: pointer;
@@ -1366,9 +1364,9 @@ select:focus {
     .timer-opt {
       padding: 8px 4px;
       border-radius: 10px;
-      border: 1.5px solid rgba(255,251,189,0.15);
-      background: #1C2B1A;
-      color: rgba(255,251,189,0.5);
+      border: 1.5px solid rgba(239,248,226,0.15);
+      background: #23022e;
+      color: rgba(239,248,226,0.5);
       font-size: clamp(11px,2.8vw,12px);
       font-weight: 600;
       cursor: pointer;
@@ -1378,8 +1376,8 @@ select:focus {
       min-width: 0;
       overflow: hidden;
     }
-    .timer-opt:hover { border-color: rgba(255,251,189,0.3); color: rgba(255,251,189,0.7); }
-    .timer-opt.active { border-color: #CA3C25; background: rgba(202,60,37,0.15); color: #CA3C25; }
+    .timer-opt:hover { border-color: rgba(239,248,226,0.3); color: rgba(239,248,226,0.7); }
+    .timer-opt.active { border-color: #7b44a8; background: rgba(87,50,128,0.45); color: #eff8e2; }
 
     /* ════════════════════════════════════
        MOBILE FIXES
@@ -1407,146 +1405,59 @@ select:focus {
       }
     }
 
+    .review-wrap {
+      overflow-y: auto;
+    }
+
+    .setup-header h1,
+    .setup-header p,
+    .res-title {
+      position: relative;
+      z-index: 1;
+    }
     .tables-select-btn {
       padding: 4px 10px;
       border-radius: 7px;
-      border: 1.5px solid rgba(255,251,189,0.2);
+      border: 1.5px solid rgba(239,248,226,0.2);
       background: transparent;
-      color: rgba(255,251,189,0.5);
+      color: rgba(239,248,226,0.5);
       font-size: 11px;
       font-weight: 600;
       cursor: pointer;
       font-family: 'Inter', sans-serif;
       transition: all 0.15s;
     }
-    .tables-select-btn:hover { border-color: rgba(255,251,189,0.4); color: rgba(255,251,189,0.8); }
+    .tables-select-btn:hover { border-color: rgba(239,248,226,0.4); color: rgba(239,248,226,0.8); }
 
-    .exam-disabled { opacity: 0.35; pointer-events: none; }
-    /* disabled toggle styling */
-    .bento-tog.tog-disabled { opacity: 0.35; pointer-events: none; }
-
-    /* ── Collapsible history ── */
-    .history-toggle {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: clamp(10px,3vw,14px) clamp(12px,4vw,18px);
-      cursor: pointer;
-      user-select: none;
-    }
-    .history-toggle-label {
-      font-size: clamp(10px,2.5vw,12px);
-      font-weight: 600;
-      color: rgba(255,251,189,0.35);
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-    }
-    .history-toggle-arrow {
-      font-size: 12px;
-      color: rgba(255,251,189,0.35);
-      transition: transform 0.25s;
-    }
-    .history-toggle-arrow.open { transform: rotate(180deg); }
-    .history-collapsible {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease;
-    }
-    .history-collapsible.open { max-height: 400px; }
-
-    /* ── Hint button ── */
-    .hint-btn {
-      display: block;
-      width: 100%;
-      margin-top: 8px;
-      padding: 9px;
-      border: 1.5px dashed rgba(255,251,189,0.25);
-      border-radius: 10px;
-      background: transparent;
-      color: rgba(255,251,189,0.5);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: 'Inter', sans-serif;
-      transition: all 0.15s;
-    }
-    .hint-btn:hover { border-color: rgba(255,251,189,0.5); color: rgba(255,251,189,0.8); }
-    .hint-btn:disabled { opacity: 0.3; cursor: default; }
-    .hint-btn.used { border-color: #CA3C25; color: #CA3C25; }
-
-    /* ── Export button ── */
-    .export-btn {
-      padding: clamp(12px,3.5vw,16px) clamp(10px,3vw,16px);
-      border: 1.5px solid rgba(255,251,189,0.2);
-      border-radius: 12px;
-      background: transparent;
-      color: #FFFBBD;
-      font-size: clamp(12px,3vw,14px);
-      font-weight: 500;
-      cursor: pointer;
-      font-family: 'Inter', sans-serif;
-      transition: background 0.15s;
-      white-space: nowrap;
-    }
-    .export-btn:hover { background: rgba(255,251,189,0.08); }
-
-    /* ── Adaptive difficulty badge ── */
-    .adaptive-badge {
-      display: inline-block;
-      font-size: 11px;
-      background: rgba(127,176,105,0.2);
-      border: 1px solid rgba(127,176,105,0.35);
-      color: #7FB069;
-      border-radius: 6px;
-      padding: 2px 7px;
-      margin-left: 6px;
-      font-weight: 600;
-    }
-
-    /* ── Speed graph ── */
-    .speed-graph-container { width: 100%; overflow-x: auto; }
-    #speedCanvas { width: 100%; display: block; }
-
-    /* ── 2-digit multiplication config ── */
-    .mult2d-section {
-      border-top: 1px solid rgba(255,251,189,0.1);
-      padding-top: 10px;
-      margin-top: 4px;
-    }
     .mult2d-note {
       font-size: 11px;
-      color: rgba(255,251,189,0.35);
-      margin-top: 6px;
-      line-height: 1.5;
+      color: rgba(239,248,226,0.35);
+      margin-top: 8px;
+      line-height: 1.45;
     }
-    .mult2d-note a {
-      color: rgba(202,60,37,0.8);
-      text-decoration: none;
-      cursor: pointer;
-    }
+    .mult2d-section { margin-top: 8px; }
   </style>
 </head>
 <body>
 <div class="page-wrap">
 <div class="app">
-<!-- SETUP SCREEN -->
+
+  <!-- SETUP SCREEN -->
   <div class="screen active" id="s-setup">
     <div class="setup-header">
-      <div>
-        <h1>Quiz — Squares &amp; Cubes</h1>
-        <p>Configure your test below</p>
-      </div>
+      <h1>Quiz — Squares &amp; Cubes</h1>
+      <p>Configure your test below</p>
     </div>
 
     <div class="bento-grid">
 
-      <!-- RANGE / LEVEL — left cell (squares/cubes mode) -->
+      <!-- RANGE — left cell -->
       <div class="bento-cell" id="rangeCell">
-        <div class="bento-label">🎯 Level</div>
+        <div class="bento-label">📐 Number range</div>
         <div class="diff-row">
-          <button class="diff-btn" onclick="setDiff('easy',event)">Easy</button>
-          <button class="diff-btn active" onclick="setDiff('medium',event)">Medium</button>
-          <button class="diff-btn" onclick="setDiff('hard',event)">Hard</button>
+          <button class="diff-btn" onclick="setDiff('easy',event)">1–10</button>
+          <button class="diff-btn active" onclick="setDiff('medium',event)">1–20</button>
+          <button class="diff-btn" onclick="setDiff('hard',event)">1–30</button>
         </div>
         <div class="bento-range-row">
           <div class="bento-range-col">
@@ -1561,17 +1472,13 @@ select:focus {
         </div>
       </div>
 
-      <!-- MULTIPLICATION CONFIG — left cell (multiplication mode) -->
+      <!-- MULTIPLICATION CONFIG — left cell (shown when multiplication selected) -->
       <div class="bento-cell" id="tablesCell" style="display:none;">
         <div class="bento-label">✖️ Multiplication</div>
-
-        <!-- Mode: Tables vs 2-digit -->
         <div class="timer-grid" id="multTypeGrid">
           <button class="timer-opt active" data-mtype="tables" onclick="setMultType(this)">Times Tables</button>
           <button class="timer-opt" data-mtype="2digit" onclick="setMultType(this)">2-digit × 2-digit</button>
         </div>
-
-        <!-- TABLES sub-section -->
         <div id="tablesSection">
           <div class="bento-range-row" style="margin-top:8px;">
             <div class="bento-range-col">
@@ -1584,18 +1491,16 @@ select:focus {
               <input type="number" class="num-inp" id="tablesTo" value="12" min="1" onchange="onTablesRangeChange()">
             </div>
           </div>
-          <div class="mult2d-note">💡 Use <span style="color:rgba(255,251,189,0.6);font-weight:600;">Focus mode</span> in Feedback settings to practise specific tables from your range</div>
+          <div class="mult2d-note">💡 Use <span style="color:rgba(239,248,226,0.6);font-weight:600;">Focus mode</span> in Feedback settings to practise specific tables</div>
         </div>
-
-        <!-- 2-DIGIT sub-section — random pairs, difficulty controls range -->
         <div id="twoDigitSection" style="display:none;" class="mult2d-section">
           <div class="bento-label" style="margin-top:0;">Difficulty</div>
           <div class="timer-grid" id="mult2dDiffGrid">
-            <button class="timer-opt active" data-2ddiff="easy"   onclick="set2dDiff(this)">Easy<span style="display:block;font-size:10px;opacity:0.6;">10–19</span></button>
-            <button class="timer-opt"        data-2ddiff="medium" onclick="set2dDiff(this)">Medium<span style="display:block;font-size:10px;opacity:0.6;">10–49</span></button>
-            <button class="timer-opt"        data-2ddiff="hard"   onclick="set2dDiff(this)">Hard<span style="display:block;font-size:10px;opacity:0.6;">10–99</span></button>
+            <button class="timer-opt active" data-2ddiff="easy" onclick="set2dDiff(this)">Easy<span style="display:block;font-size:10px;opacity:0.6;">10–19</span></button>
+            <button class="timer-opt" data-2ddiff="medium" onclick="set2dDiff(this)">Medium<span style="display:block;font-size:10px;opacity:0.6;">10–49</span></button>
+            <button class="timer-opt" data-2ddiff="hard" onclick="set2dDiff(this)">Hard<span style="display:block;font-size:10px;opacity:0.6;">10–99</span></button>
           </div>
-          <div class="mult2d-note" style="margin-top:6px;">Random 2-digit pairs are generated each session within the selected range</div>
+          <div class="mult2d-note" style="margin-top:6px;">Random 2-digit pairs generated each session within the selected range</div>
         </div>
       </div>
 
@@ -1635,7 +1540,7 @@ select:focus {
           <button class="timer-opt" data-value="custom" onclick="setTimerOpt(this)">Custom</button>
           <button class="timer-opt" data-value="stopwatch" onclick="setTimerOpt(this)">⏱ Watch</button>
         </div>
-        <input type="number" id="customTimerInput" placeholder="Seconds (e.g. 10)" style="display:none;width:100%;padding:8px;border-radius:8px;background:#1C2B1A;color:#FFFBBD;border:1px solid rgba(255,251,189,0.2);font-family:'Inter',sans-serif;margin-top:4px;">
+        <input type="number" id="customTimerInput" placeholder="Seconds (e.g. 10)" style="display:none;width:100%;padding:8px;border-radius:8px;background:#23022e;color:#eff8e2;border:1px solid rgba(239,248,226,0.2);font-family:'Inter',sans-serif;margin-top:4px;">
       </div>
 
       <!-- INPUT MODE — right cell -->
@@ -1647,8 +1552,8 @@ select:focus {
         </div>
         <div id="pickModeDropdown" style="display:none;">
           <div class="timer-grid" id="pickModeGrid">
-            <button class="timer-opt active" data-value="auto" onclick="setPickModeOpt(this)">Auto Submit</button>
-            <button class="timer-opt" data-value="manual" onclick="setPickModeOpt(this)">Manual Submit</button>
+            <button class="timer-opt active" data-value="auto" onclick="setPickModeOpt(this)">Auto</button>
+            <button class="timer-opt" data-value="manual" onclick="setPickModeOpt(this)">Manual</button>
           </div>
           <select id="pickModeType" style="display:none;">
             <option value="auto" selected>Auto submit</option>
@@ -1676,10 +1581,6 @@ select:focus {
           <span class="bento-tog-label">Shuffle<span class="bento-tog-sub">Randomise order</span></span>
           <label class="toggle"><input type="checkbox" id="shuffleTog" checked><span class="tslider"></span></label>
         </div>
-        <div class="bento-tog">
-          <span class="bento-tog-label">Exam mode<span class="bento-tog-sub">No feedback until end</span></span>
-          <label class="toggle"><input type="checkbox" id="examTog" onchange="onExamToggle()"><span class="tslider"></span></label>
-        </div>
       </div>
 
       <!-- FEEDBACK + FOCUS — right cell -->
@@ -1694,21 +1595,16 @@ select:focus {
           <label class="toggle"><input type="checkbox" id="autosubTog"><span class="tslider"></span></label>
         </div>
         <div class="bento-tog">
-          <span class="bento-tog-label">Focus mode<span class="bento-tog-sub" id="focusTogSub">Pick specific numbers</span></span>
+          <span class="bento-tog-label">Focus mode<span class="bento-tog-sub">Pick specific numbers</span></span>
           <label class="toggle"><input type="checkbox" id="focusTog" onchange="toggleFocusGrid()"><span class="tslider"></span></label>
         </div>
       </div>
 
       <!-- FOCUS GRID — full width, hidden by default -->
       <div class="bento-cell wide green" id="focusGridCell" style="display:none;">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-          <div class="bento-label" id="focusGridLabel">🎯 Focus numbers</div>
-          <div class="tables-select-row" style="margin:0;">
-            <button class="tables-select-btn" onclick="focusSelectAll()">All</button>
-            <button class="tables-select-btn" onclick="focusClearAll()">None</button>
-          </div>
-        </div>
+        <div class="bento-label">🎯 Focus numbers</div>
         <div class="focus-grid" id="focusChips"></div>
+        <button class="focus-all-btn" onclick="toggleAllChips()">Toggle all</button>
       </div>
 
     </div><!-- .bento-grid -->
@@ -1779,7 +1675,6 @@ select:focus {
 >
         <button class="check-btn" id="checkBtn" onclick="checkAnswer()">Check</button>
       </div>
-      <button class="hint-btn" id="hintBtn" onclick="useHint()">💡 Hint</button>
     </div>
 
     <!-- PICK mode -->
@@ -1857,7 +1752,6 @@ select:focus {
   <!-- SAME BODY STYLE -->
   <div class="setup-body">
 
-    <!-- SCORE + PB -->
     <div class="score-circle">
       <div class="big-pct" id="resPct">0%</div>
       <div class="big-sub" id="resSub">0 of 0 correct</div>
@@ -1868,15 +1762,7 @@ select:focus {
       <div class="pb-c"><div class="pb-v" id="pbStreak">—</div><div class="pb-l">Best Streak</div></div>
     </div>
 
-    <!-- STATS -->
-    <div class="stat-row">
-      <div class="stat-c"><div class="stat-v sv-ok" id="sCorrect">0</div><div class="stat-l">Correct</div></div>
-      <div class="stat-c"><div class="stat-v sv-no" id="sWrong">0</div><div class="stat-l">Wrong</div></div>
-      <div class="stat-c"><div class="stat-v sv-tot" id="sTotal">0</div><div class="stat-l">Total</div></div>
-    </div>
-
-    <!-- ACCURACY CHART -->
-    <div class="chart-wrap" id="chartWrap" style="display:none;">
+    <div class="chart-wrap" id="chartWrap">
       <div class="chart-title">Accuracy — Squares vs Cubes</div>
       <div class="chart-vals">
         <div class="chart-val" id="chartSqVal">—</div>
@@ -1894,43 +1780,39 @@ select:focus {
       </div>
     </div>
 
-    <!-- SPEED GRAPH -->
-    <div class="chart-wrap" id="speedGraphWrap" style="display:none;">
-      <div class="chart-title">⚡ Response time per question</div>
-      <div class="speed-graph-container">
-        <canvas id="speedCanvas" height="100"></canvas>
+    <div class="stat-row">
+      <div class="stat-c">
+        <div class="stat-v sv-ok" id="sCorrect">0</div>
+        <div class="stat-l">Correct</div>
+      </div>
+      <div class="stat-c">
+        <div class="stat-v sv-no" id="sWrong">0</div>
+        <div class="stat-l">Wrong</div>
+      </div>
+      <div class="stat-c">
+        <div class="stat-v sv-tot" id="sTotal">0</div>
+        <div class="stat-l">Total</div>
       </div>
     </div>
 
-    <!-- WEAKNESS -->
     <div class="review-wrap" id="weaknessWrap" style="display:none;">
       <div class="review-head">⚠️ Struggled with these</div>
       <div class="review-scroll" id="weaknessList"></div>
     </div>
 
-    <!-- ANSWER REVIEW -->
+    <div class="review-wrap">
+      <div class="review-head">History</div>
+      <div class="review-scroll" id="historyList"><div class="history-empty">No history yet</div></div>
+    </div>
+
     <div class="review-wrap">
       <div class="review-head">Answer review</div>
       <div class="review-scroll" id="reviewList"></div>
     </div>
 
-    <!-- COLLAPSIBLE HISTORY -->
-    <div class="review-wrap" id="historyWrap">
-      <div class="history-toggle" onclick="toggleHistory()">
-        <span class="history-toggle-label">📋 Result history</span>
-        <span class="history-toggle-arrow" id="historyArrow">▼</span>
-      </div>
-      <div class="history-collapsible" id="historyCollapsible">
-        <div style="border-top:1px solid rgba(255,251,189,0.1);">
-          <div class="review-scroll" id="historyList"><div class="history-empty">No history yet</div></div>
-        </div>
-      </div>
-    </div>
-
     <div class="res-btns">
       <button class="home-btn" onclick="goHome()">Setup</button>
       <button class="again-btn" onclick="startTest()">Try again</button>
-      <button class="export-btn" onclick="exportResults()">⬇ Export</button>
     </div>
 
   </div>
@@ -1944,10 +1826,6 @@ const isMobile = window.matchMedia("(pointer: coarse)").matches;
 
   let qs=[], cur=0, score=0, results=[], qType='both';
 let instant=true, autoSub=false, answered=false, pickMode=false;
-let examMode=false;
-let hintUsed=false;
-let questionTimes=[]; // ms per question
-let qStartTime=null;
 
 let timerInterval=null;
 let stopwatchInterval=null;
@@ -1956,10 +1834,6 @@ let stopwatchStart=null;
 let timerMode = 'fixed';
 let duration = 7;
 const CIRC=188.5;
-
-// ── Adaptive difficulty state ──
-const ADAPTIVE_KEY = 'quiz_adaptive';
-let adaptiveData = {};  // key: "n_type" → { correct, total }
 
 // ── new feature state ──
 let streak = 0, bestStreak = 0;
@@ -1970,91 +1844,55 @@ let wrongQueue = [];   // spaced repetition re-queue
 let retrySet = new Set();
 const PB_KEY = 'quiz_pb';
 
+let tablesScope = 'custom';
+let selectedTables = new Set();
+const multUpTo = 10;
+let multSubType = 'tables';
+let mult2dDiff  = 'easy';
+
+function getTablesRange(){
+  const f = parseInt(document.getElementById('tablesFrom').value) || 2;
+  const t = parseInt(document.getElementById('tablesTo').value) || 12;
+  return { from: Math.min(f,t), to: Math.max(f,t) };
+}
+function onTablesRangeChange(){
+  const focusOn = document.getElementById('focusTog').checked;
+  if(focusOn && qType === 'multiplication') { selectedTables.clear(); buildFocusGrid(); }
+}
+function set2dDiff(btn){
+  document.querySelectorAll('#mult2dDiffGrid .timer-opt').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  mult2dDiff = btn.dataset['2ddiff'];
+}
+function setMultType(btn){
+  document.querySelectorAll('#multTypeGrid .timer-opt').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  multSubType = btn.dataset.mtype;
+  document.getElementById('tablesSection').style.display = multSubType === 'tables' ? '' : 'none';
+  document.getElementById('twoDigitSection').style.display = multSubType === '2digit' ? '' : 'none';
+  const focusSubEl = document.getElementById('focusTogSub');
+  if(focusSubEl) focusSubEl.textContent = multSubType === 'tables' ? 'Pick specific tables' : 'Pick specific numbers';
+}
+
   function show(id){
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
-    window.scrollTo(0,0);
   }
-  let tablesScope = 'custom'; // kept for legacy, unused
-  let selectedTables = new Set(); // focus-mode selected table numbers
-  const multUpTo = 10; // Always ×10 for times tables
-
-  function getTablesRange(){
-    const f = parseInt(document.getElementById('tablesFrom').value) || 2;
-    const t = parseInt(document.getElementById('tablesTo').value) || 12;
-    return { from: Math.min(f,t), to: Math.max(f,t) };
-  }
-
-  function onTablesRangeChange(){
-    const focusOn = document.getElementById('focusTog').checked;
-    if(focusOn && qType === 'multiplication') {
-      selectedTables.clear();
-      buildFocusGrid();
-    }
-  }
-
-  function buildTablesChips(){ /* no longer used — chips live in focus grid */ }
-  function selectTableRange(){ }
-  function selectAllTables(){ }
-  function clearAllTables(){ }
-  function getTablesNSet(){
-    const {from, to} = getTablesRange();
-    return Array.from({length: to - from + 1}, (_, i) => from + i);
-  }
-
-  let multSubType = 'tables'; // 'tables' or '2digit'
-  let mult2dDiff  = 'easy';   // 'easy' | 'medium' | 'hard'
-
-  function set2dDiff(btn){
-    document.querySelectorAll('#mult2dDiffGrid .timer-opt').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    mult2dDiff = btn.dataset['2ddiff'];
-  }
-
-  function setMultType(btn){
-    document.querySelectorAll('#multTypeGrid .timer-opt').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    multSubType = btn.dataset.mtype;
-    document.getElementById('tablesSection').style.display = multSubType === 'tables' ? '' : 'none';
-    document.getElementById('twoDigitSection').style.display = multSubType === '2digit' ? '' : 'none';
-    // focus mode sub-label
-    const focusSubEl = document.getElementById('focusTogSub');
-    if(focusSubEl) focusSubEl.textContent = multSubType === 'tables' ? 'Pick specific tables' : 'Pick specific numbers';
-    // hide focus toggle for 2digit (not applicable)
-    const focusRow = document.getElementById('focusTog')?.closest('.bento-tog');
-    if(focusRow) focusRow.style.display = multSubType === '2digit' ? 'none' : '';
-  }
-
   function setType(t){
     qType = t;
     const isMultiplication = t === 'multiplication';
-
     ['squares','cubes','both','multiplication'].forEach(x=>{
       const btn=document.getElementById('btn-'+x);
       if(btn) btn.classList.toggle('active', x===t);
     });
-
     document.getElementById('rangeCell').style.display  = isMultiplication ? 'none' : '';
     document.getElementById('tablesCell').style.display = isMultiplication ? ''     : 'none';
-
     const revTog = document.getElementById('reverseTog');
     const revRow = revTog ? revTog.closest('.bento-tog') : null;
-    if(revRow){
-      revRow.classList.toggle('tog-disabled', isMultiplication);
-      if(isMultiplication) revTog.checked = false;
-    }
-
-    // Focus mode — always visible except for 2-digit multiplication
-    const hide2dFocus = isMultiplication && multSubType === '2digit';
-    const focusSubEl = document.getElementById('focusTogSub');
-    if(focusSubEl) focusSubEl.textContent = (isMultiplication && multSubType==='tables') ? 'Pick specific tables' : 'Pick specific numbers';
-    const focusRow = document.getElementById('focusTog')?.closest('.bento-tog');
-    if(focusRow) focusRow.style.display = hide2dFocus ? 'none' : '';
-
+    if(revRow){ revRow.classList.toggle('tog-disabled', isMultiplication); if(isMultiplication) revTog.checked = false; }
     const focusOn = document.getElementById('focusTog').checked;
     if(focusOn) buildFocusGrid();
   }
-
   function goHome(){ clearTimer(); clearStopwatch(); show('s-setup'); }
 
   function setDiff(d, e){
@@ -2071,7 +1909,6 @@ const PB_KEY = 'quiz_pb';
     const grid = document.getElementById('focusChips');
     const label = document.getElementById('focusGridLabel');
     grid.innerHTML = '';
-
     if(isTable){
       if(label) label.textContent = '🎯 Focus tables';
       const {from, to} = getTablesRange();
@@ -2121,15 +1958,12 @@ const PB_KEY = 'quiz_pb';
     }
     buildFocusGrid();
   }
-
   function focusClearAll(){
     const isTable = qType === 'multiplication' && multSubType === 'tables';
     if(isTable){ selectedTables.clear(); }
     else { focusNums.clear(); }
     buildFocusGrid();
   }
-
-  // Legacy alias
   function toggleAllChips(){ focusSelectAll(); }
 
   function genQs(){
@@ -2141,7 +1975,6 @@ const PB_KEY = 'quiz_pb';
 
     if(qType === 'multiplication'){
       if(multSubType === 'tables'){
-        // Times tables mode
         const {from: tFrom, to: tTo} = getTablesRange();
         let nSet;
         if(focusMode && selectedTables.size > 0){
@@ -2156,10 +1989,8 @@ const PB_KEY = 'quiz_pb';
           }
         }
       } else {
-        // 2-digit × 2-digit — random pairs within difficulty range
         const diffMap = {easy:[10,19], medium:[10,49], hard:[10,99]};
         const [lo, hi] = diffMap[mult2dDiff] || [10,19];
-        // generate a large pool of random pairs
         for(let i=0; i<200; i++){
           const a = Math.floor(Math.random()*(hi-lo+1))+lo;
           const b = Math.floor(Math.random()*(hi-lo+1))+lo;
@@ -2175,30 +2006,18 @@ const PB_KEY = 'quiz_pb';
     }
 
     if(!pool.length) return [];
-
-    // Adaptive: bias shuffle toward weak questions
-    loadAdaptive();
-    const weighted = pool.map(q => {
-      const key = q.type==='table' ? `${q.n}x${q.m}` : `${q.n}_${q.type}`;
-      const d = adaptiveData[key];
-      const errorRate = d ? (d.total - d.correct) / d.total : 0.5;
-      return { q, weight: 1 + errorRate * 2 };
-    });
-
-    if(shuffle){
-      // Weighted shuffle
-      weighted.sort(() => Math.random() - 0.5);
-      weighted.sort((a,b) => b.weight - a.weight + (Math.random()-0.5)*0.8);
+    if(shuffle) for(let i=pool.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [pool[i],pool[j]]=[pool[j],pool[i]];
     }
-    return weighted.map(w=>w.q).slice(0,count);
+    return pool.slice(0,count);
   }
 
   function startTest(){
-reverseMode = document.getElementById('reverseTog').checked;
   qs=genQs();
   if(!qs.length){ alert('No questions — check your range!'); return; }
 
-  cur=0; score=0; results=[]; questionTimes=[];
+  cur=0; score=0; results=[];
   streak=0; wrongQueue=[];retrySet=new Set();
   instant    = document.getElementById('feedbackTog').checked;
   autoSub    = document.getElementById('autosubTog').checked;
@@ -2207,13 +2026,7 @@ reverseMode = document.getElementById('reverseTog').checked;
   livesMode  = document.getElementById('livesTog').checked;
   spacedMode = document.getElementById('spacedTog').checked;
   focusMode  = document.getElementById('focusTog').checked;
-  examMode   = document.getElementById('examTog').checked;
-
-  // Exam mode forces no feedback, no auto-submit
-  if(examMode){ instant=false; autoSub=false; }
-
   lives = 3;
-  hintUsed = false;
   document.getElementById('livesPill').style.display = livesMode ? 'block' : 'none';
   updateLivesPill();
   document.getElementById('streakPill').classList.remove('active');
@@ -2237,7 +2050,6 @@ reverseMode = document.getElementById('reverseTog').checked;
     const candidates = [];
 
     if(qObj.type === 'table'){
-      // For tables: nearby multiples of n, and nearby products
       const n = qObj.n, m = qObj.m;
       for(let d=1; d<=6; d++){
         candidates.push(n*(m+d));
@@ -2261,6 +2073,7 @@ reverseMode = document.getElementById('reverseTog').checked;
       }
     }
 
+    // Shuffle candidates and pick unique ones
     for(let i=candidates.length-1;i>0;i--){
       const j=Math.floor(Math.random()*(i+1));
       [candidates[i],candidates[j]]=[candidates[j],candidates[i]];
@@ -2271,11 +2084,14 @@ reverseMode = document.getElementById('reverseTog').checked;
         if(opts.size === 4) break;
       }
     }
+    // Fallback if not enough
     let fallback = 1;
     while(opts.size < 4){
       if(!opts.has(fallback)) opts.add(fallback);
       fallback++;
     }
+
+    // Shuffle final 4
     const arr = [...opts];
     for(let i=arr.length-1;i>0;i--){
       const j=Math.floor(Math.random()*(i+1));
@@ -2285,16 +2101,13 @@ reverseMode = document.getElementById('reverseTog').checked;
   }
 
   function loadQ(){
-    clearTimer(); answered=false; hintUsed=false;
-    qStartTime = performance.now();
-    const q=qs[cur], total=qs.length;
-    const sym=q.type==='square'?'²':'³';
+    clearTimer(); answered=false;
+    const q=qs[cur], total=qs.length, sym=q.type==='square'?'²':'³';
     document.getElementById('qNum').textContent   = String(cur+1).padStart(2,'0');
     document.getElementById('qTotal').textContent = total;
     document.getElementById('scorePill').textContent = `Score: ${score}`;
     document.getElementById('progFill').style.width  = `${(cur/total)*100}%`;
     const badge=document.getElementById('qBadge');
-
     if(q.type==='table'){
       badge.textContent = 'Tables';
       badge.className = 'q-badge badge-sq';
@@ -2302,11 +2115,8 @@ reverseMode = document.getElementById('reverseTog').checked;
       badge.textContent = q.type==='square'?'Square':'Cube';
       badge.className   = 'q-badge '+(q.type==='square'?'badge-sq':'badge-cu');
     }
-
     const isRetry = retrySet.has(cur);
-    const adaptBadge = getAdaptiveBadge(q);
-    document.getElementById('qLabel').innerHTML = `Question ${String(cur+1).padStart(2,'0')}` + (isRetry ? '<span class="retry-badge">RETRY</span>' : '') + adaptBadge;
-
+    document.getElementById('qLabel').innerHTML = `Question ${String(cur+1).padStart(2,'0')}` + (isRetry ? '<span class="retry-badge">RETRY</span>' : '');
     if(q.type==='table'){
       document.getElementById('qExpr').textContent = `${q.n} × ${q.m}`;
       document.getElementById('qSub').textContent = 'What is the answer?';
@@ -2318,60 +2128,64 @@ reverseMode = document.getElementById('reverseTog').checked;
     } else {
       document.getElementById('qExpr').textContent = `${q.n}${sym}`;
     }
-
     document.getElementById('fbBox').style.display   = 'none';
     document.getElementById('nextBtn').style.display = 'none';
     document.getElementById('timerZone').style.display = (timerMode === 'fixed' || timerMode === 'custom') ? 'block' : 'none';
     document.getElementById('stopwatchZone').style.display = timerMode === 'stopwatch' ? 'flex' : 'none';
 
-    // hint btn — hide in exam mode or pick mode
-    const hb = document.getElementById('hintBtn');
-    if(hb) { hb.style.display = (examMode || pickMode) ? 'none' : 'block'; hb.disabled=false; hb.classList.remove('used'); hb.textContent='💡 Hint'; }
-
     if(pickMode){
+      // PICK MODE
       document.getElementById('typeZone').style.display = 'none';
       document.getElementById('pickZone').style.display = 'block';
       document.getElementById('keyboard').style.display = 'none';
       document.getElementById('qSub').textContent = 'Choose the correct answer';
       buildPickGrid(q);
     } else {
+      // TYPE MODE
       document.getElementById('typeZone').style.display = 'block';
       document.getElementById('pickZone').style.display = 'none';
       const digits = q.reverse ? String(q.n).length : String(q.answer).length;
-      if(q.type !== 'table' && !q.reverse){
+      if(!q.reverse){
         document.getElementById('qSub').textContent = autoSub?`Answer has ${digits} digit${digits>1?'s':''}`:'What is the answer?';
       }
       const inp=document.getElementById('ansInput');
-      const keyboard = document.getElementById('keyboard');
+const keyboard = document.getElementById('keyboard');
 
-      if (isMobile) {
-        inp.setAttribute('readonly', true);
-        inp.setAttribute('inputmode', 'none');
-        keyboard.style.display = 'block';
-        const hint = document.getElementById('kbHint');
-        if(hint) hint.style.display = 'none';
-      } else {
-        inp.removeAttribute('readonly');
-        inp.setAttribute('inputmode', 'numeric');
-        keyboard.style.display = 'none';
-        const hint = document.getElementById('kbHint');
-        if(hint) hint.style.display = 'block';
-      }
+if (isMobile) {
+  inp.setAttribute('readonly', true);
+  inp.setAttribute('inputmode', 'none');
+  keyboard.style.display = 'block';
+  const hint = document.getElementById('kbHint');
+  if(hint) hint.style.display = 'none';
+} else {
+  inp.removeAttribute('readonly');
+  inp.setAttribute('inputmode', 'numeric');
+  keyboard.style.display = 'none';
+  const hint = document.getElementById('kbHint');
+  if(hint) hint.style.display = 'block';
+}
       inp.value=''; inp.className='ans-input'; inp.disabled=false;
-      document.getElementById('checkBtn').disabled = false;
+      document.getElementById('checkBtn').disabled     = false;
       const checkBtn = document.getElementById('checkBtn');
 
-      if (autoSub) {
-        checkBtn.style.display = 'none';
-      } else {
-        checkBtn.style.display = 'inline-block';
-        checkBtn.textContent = instant ? 'Check' : 'Next';
-      }
-      if (!isMobile) { inp.focus(); }
+if (autoSub) {
+  checkBtn.style.display = 'none';
+} else {
+  checkBtn.style.display = 'inline-block';
+  checkBtn.textContent = instant ? 'Check' : 'Next';
+}
+      if (!isMobile) {
+  inp.focus();
+}
     }
 
-    if(timerMode === 'fixed' || timerMode === 'custom'){ startTimer(); }
-    if(timerMode === 'stopwatch'){ startStopwatch(); }
+    if(timerMode === 'fixed' || timerMode === 'custom'){
+  startTimer();
+}
+
+if(timerMode === 'stopwatch'){
+  startStopwatch();
+}
   }
 
   function buildPickGrid(q){
@@ -2418,13 +2232,11 @@ reverseMode = document.getElementById('reverseTog').checked;
   answered = true;
 
   const isCorrect = chosen === correct;
-  const elapsed = qStartTime ? Math.round(performance.now() - qStartTime) : 0;
-  questionTimes.push(elapsed);
   if(isCorrect){ score++; streak++; if(streak>bestStreak) bestStreak=streak; }
   else { streak=0; if(spacedMode) wrongQueue.push(cur); }
   updateStreakPill();
-  updateAdaptive(qs[cur], isCorrect);
-  results.push({q:qs[cur], userAnswer:chosen, correct:isCorrect, timedOut:false, elapsed});
+
+  results.push({q:qs[cur], userAnswer:chosen, correct:isCorrect, timedOut:false});
 
   const btns = document.querySelectorAll('.pick-btn');
   btns.forEach(btn => {
@@ -2439,22 +2251,6 @@ reverseMode = document.getElementById('reverseTog').checked;
   });
 
   document.getElementById('scorePill').textContent = `Score: ${score}`;
-
-  // Show feedback box
-  if(instant){
-    const fb = document.getElementById('fbBox');
-    const q = qs[cur];
-    const sym = q.type==='square'?'²':'³';
-    fb.style.display = 'block';
-    if(q.type==='table'){
-      fb.textContent = isCorrect ? `Correct! ${q.n} × ${q.m} = ${q.answer}` : `Not quite — ${q.n} × ${q.m} = ${q.answer}`;
-    } else {
-      fb.textContent = isCorrect
-        ? `Correct! ${q.n}${sym} = ${q.answer}`
-        : `Not quite — ${q.n}${sym} = ${q.answer}`;
-    }
-    fb.className = 'fb-box ' + (isCorrect ? 'fb-ok' : 'fb-no');
-  }
 
   if(!isCorrect && livesMode){
     lives--; updateLivesPill();
@@ -2484,8 +2280,6 @@ function startTimer(){
   function timeUp(){
     answered = true;
     const q = qs[cur];
-    const elapsed = qStartTime ? Math.round(performance.now() - qStartTime) : 0;
-    questionTimes.push(elapsed);
 
     if(pickMode){
       const btns = document.querySelectorAll('.pick-btn');
@@ -2494,14 +2288,12 @@ function startTimer(){
         btn.disabled = true;
         if(parseInt(btn.textContent.replace(/,/g, '')) === correctPick){
           btn.classList.add('reveal');
-          btn.querySelector('.pick-icon').textContent = '✓ correct';
         }
       });
       streak=0; updateStreakPill();
       if(spacedMode) wrongQueue.push(cur);
       if(livesMode){ lives--; updateLivesPill(); }
-      updateAdaptive(q, false);
-      results.push({q, userAnswer:'—', correct:false, timedOut:true, elapsed});
+      results.push({q, userAnswer:'—', correct:false, timedOut:true});
     } else {
       const val = parseInt(document.getElementById('ansInput').value);
       const correctVal2 = q.type==='table' ? q.answer : (q.reverse ? q.n : q.answer);
@@ -2510,13 +2302,12 @@ function startTimer(){
       if(correct){ score++; streak++; if(streak>bestStreak)bestStreak=streak; }
       else { streak=0; if(spacedMode) wrongQueue.push(cur); }
       updateStreakPill();
-      updateAdaptive(q, correct);
-      results.push({q, userAnswer:isNaN(val)?'—':val, correct, timedOut:true, elapsed});
+
+      results.push({q, userAnswer:isNaN(val)?'—':val, correct, timedOut:true});
 
       document.getElementById('ansInput').disabled = true;
       document.getElementById('checkBtn').disabled = true;
       if(!correct && livesMode){ lives--; updateLivesPill(); }
-      if(lives <= 0 && livesMode){ setTimeout(()=>gameOver(), 1300); return; }
     }
 
     document.getElementById('scorePill').textContent = `Score: ${score}`;
@@ -2538,11 +2329,11 @@ function startTimer(){
     num.textContent = Math.ceil(remaining) + 's';
 
     if (remaining <= 2) {
-      fill.style.background = '#CA3C25';
-      num.style.color = '#CA3C25';
+      fill.style.background = '#573280';
+      num.style.color = '#573280';
     } else {
-      fill.style.background = 'linear-gradient(90deg, #CA3C25, #7FB069)';
-      num.style.color = '#7FB069';
+      fill.style.background = 'linear-gradient(90deg, #573280, #ada8b6)';
+      num.style.color = '#ada8b6';
     }
 
     if (remaining > 0){
@@ -2569,18 +2360,13 @@ function startTimer(){
   clearTimer();
   answered = true;
 
-  // Record time
-  const elapsed = qStartTime ? Math.round(performance.now() - qStartTime) : 0;
-  questionTimes.push(elapsed);
-
   const correctVal = q.type==='table' ? q.answer : (q.reverse ? q.n : q.answer);
   const correct = val === correctVal;
   if(correct){ score++; streak++; if(streak>bestStreak) bestStreak=streak; }
   else { streak=0; if(spacedMode) wrongQueue.push(cur); }
 
   updateStreakPill();
-  updateAdaptive(q, correct);
-  results.push({q, userAnswer:val, correct, timedOut:false, elapsed, hintUsed});
+  results.push({q,userAnswer:val,correct,timedOut:false});
 
   const input = document.getElementById('ansInput');
   input.disabled = true;
@@ -2620,6 +2406,7 @@ function startTimer(){
     btn.textContent = 'Next';
   }
 
+  // ✅ FIXED: independent auto submit
   if(autoSub){
     setTimeout(() => {
       if(answered) nextQ();
@@ -2677,10 +2464,8 @@ function startTimer(){
       const cls=r.correct?'ri-ok':'ri-no', mark=r.correct?'✓':'✗';
       const disp = r.q.type==='table' ? `${r.q.n}×${r.q.m}` : (r.q.reverse ? r.q.answer.toLocaleString() : `${r.q.n}${sym}`);
       const correctAns = r.q.type==='table' ? r.q.answer : (r.q.reverse ? r.q.n : r.q.answer);
-      const hintMark = r.hintUsed ? ' 💡' : '';
-      const note=r.correct?`${correctAns}${hintMark}`:r.timedOut?`${correctAns} (time's up)`:`${correctAns} (you: ${r.userAnswer})`;
-      const timeStr = r.elapsed ? ` · ${(r.elapsed/1000).toFixed(1)}s` : '';
-      return `<div class="review-item"><span class="ri-q">${disp}${timeStr}</span><span class="ri-a ${cls}">${mark} ${note}</span></div>`;
+      const note=r.correct?`${correctAns}`:r.timedOut?`${correctAns} (time's up)`:`${correctAns} (you: ${r.userAnswer})`;
+      return `<div class="review-item"><span class="ri-q">${disp}</span><span class="ri-a ${cls}">${mark} ${note}</span></div>`;
     }).join('');
 
     // squares vs cubes chart
@@ -2693,8 +2478,8 @@ function startTimer(){
       document.getElementById('chartSqVal').textContent = sqPct+'%';
       document.getElementById('chartCuVal').textContent = cuPct+'%';
       setTimeout(()=>{
-        document.getElementById('chartSqBar').style.height = sqPct+'%';
-        document.getElementById('chartCuBar').style.height = cuPct+'%';
+        document.getElementById('chartSqBar').style.height = (sqPct*0.70)+'px';
+        document.getElementById('chartCuBar').style.height = (cuPct*0.70)+'px';
       },50);
     }
 
@@ -2734,7 +2519,6 @@ function startTimer(){
 
     saveHistory(score, total, pct);
     renderHistory();
-    renderSpeedGraph();
   }
 
   document.getElementById('ansInput').addEventListener('input',()=>{
@@ -2771,7 +2555,7 @@ pickTog.addEventListener('change', () => {
 
 // ───────── TIMER MINI GRID ─────────
 function setTimerOpt(el){
-  document.querySelectorAll('#timerGrid .timer-opt').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.timer-opt').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
   timerMode = el.dataset.value;
   const ci = document.getElementById('customTimerInput');
@@ -2856,7 +2640,7 @@ function savePB(pb){
 
 // ───────── CONFETTI ─────────
 function launchConfetti(){
-  const colors=['#CA3C25','#7FB069','#FFFBBD','#3a6b35','#fff'];
+  const colors=['#573280','#ada8b6','#eff8e2','#573280','#fff'];
   for(let i=0;i<80;i++){
     setTimeout(()=>{
       const el=document.createElement('div');
@@ -2924,168 +2708,6 @@ function renderHistory() {
     </div>
   `).join('');
 }
-
-// ───────── HINT ─────────
-function useHint(){
-  if(answered || hintUsed) return;
-  const q = qs[cur];
-  const hb = document.getElementById('hintBtn');
-  hb.disabled = true; hb.classList.add('used');
-  hintUsed = true;
-  let hint = '';
-  if(q.type==='table'){
-    hint = `💡 ${q.n} × ${q.m}: think ${q.n} × ${Math.floor(q.m/2)} = ${q.n*Math.floor(q.m/2)}, then add ${q.n * (q.m - Math.floor(q.m/2))}`;
-  } else if(q.type==='square'){
-    const prev = q.n - 1;
-    hint = `💡 ${q.n}² = ${prev}² + ${prev} + ${q.n} = ${prev*prev} + ${prev+q.n}`;
-  } else {
-    hint = `💡 ${q.n}³ = ${q.n} × ${q.n}² = ${q.n} × ${q.n*q.n}`;
-  }
-  hb.textContent = hint;
-  hb.style.fontSize = '12px';
-}
-
-// ───────── EXAM MODE TOGGLE ─────────
-function onExamToggle(){
-  const on = document.getElementById('examTog').checked;
-  const toDisable = ['feedbackTog','autosubTog','livesTog','spacedTog'];
-  toDisable.forEach(id => {
-    const el = document.getElementById(id);
-    const row = el ? el.closest('.bento-tog') : null;
-    if(on){
-      if(el){ el.checked=false; el.disabled=true; }
-      if(row) row.classList.add('exam-disabled');
-    } else {
-      if(el) el.disabled=false;
-      if(row) row.classList.remove('exam-disabled');
-    }
-  });
-}
-
-// ───────── ADAPTIVE DIFFICULTY ─────────
-function loadAdaptive(){
-  try { adaptiveData = JSON.parse(localStorage.getItem(ADAPTIVE_KEY)) || {}; } catch(e){ adaptiveData={}; }
-}
-function saveAdaptive(){
-  try { localStorage.setItem(ADAPTIVE_KEY, JSON.stringify(adaptiveData)); } catch(e){}
-}
-function updateAdaptive(q, correct){
-  const key = q.type==='table' ? `${q.n}x${q.m}` : `${q.n}_${q.type}`;
-  if(!adaptiveData[key]) adaptiveData[key]={correct:0,total:0};
-  adaptiveData[key].total++;
-  if(correct) adaptiveData[key].correct++;
-  saveAdaptive();
-}
-function getAdaptiveBadge(q){
-  loadAdaptive();
-  const key = q.type==='table' ? `${q.n}x${q.m}` : `${q.n}_${q.type}`;
-  const d = adaptiveData[key];
-  if(!d || d.total < 2) return '';
-  const rate = d.correct / d.total;
-  if(rate < 0.5) return '<span class="adaptive-badge">⚠ Weak</span>';
-  if(rate >= 0.9 && d.total >= 4) return '<span class="adaptive-badge" style="color:#7FB069;border-color:rgba(127,176,105,0.35);">✓ Strong</span>';
-  return '';
-}
-
-// ───────── SPEED GRAPH ─────────
-function renderSpeedGraph(){
-  const wrap = document.getElementById('speedGraphWrap');
-  if(!questionTimes.length || !results.length){ wrap.style.display='none'; return; }
-  wrap.style.display = 'block';
-
-  const canvas = document.getElementById('speedCanvas');
-  const dpr = window.devicePixelRatio || 1;
-  const W = canvas.parentElement.offsetWidth || 300;
-  const H = 100;
-  canvas.width = W * dpr;
-  canvas.height = H * dpr;
-  canvas.style.width = W + 'px';
-  canvas.style.height = H + 'px';
-
-  const ctx = canvas.getContext('2d');
-  ctx.scale(dpr, dpr);
-
-  const times = questionTimes;
-  const maxT = Math.max(...times, 1000);
-  const n = times.length;
-  const padL=30, padR=10, padT=10, padB=20;
-  const gW = W - padL - padR;
-  const gH = H - padT - padB;
-
-  ctx.clearRect(0,0,W,H);
-
-  // Grid lines
-  ctx.strokeStyle = 'rgba(255,251,189,0.08)';
-  ctx.lineWidth = 1;
-  [0.25,0.5,0.75,1].forEach(frac=>{
-    const y = padT + gH*(1-frac);
-    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
-    ctx.fillStyle='rgba(255,251,189,0.25)';
-    ctx.font='9px Inter,sans-serif';
-    ctx.fillText(Math.round(maxT*frac/1000)+'s', 2, y+3);
-  });
-
-  // Line
-  ctx.beginPath();
-  times.forEach((t,i)=>{
-    const x = padL + (i/(Math.max(n-1,1)))*gW;
-    const y = padT + gH*(1 - t/maxT);
-    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
-  });
-  ctx.strokeStyle='rgba(127,176,105,0.7)'; ctx.lineWidth=2; ctx.stroke();
-
-  // Dots
-  times.forEach((t,i)=>{
-    const x = padL + (i/(Math.max(n-1,1)))*gW;
-    const y = padT + gH*(1 - t/maxT);
-    ctx.beginPath(); ctx.arc(x,y,3.5,0,Math.PI*2);
-    ctx.fillStyle = results[i]?.correct ? '#7FB069' : '#CA3C25';
-    ctx.fill();
-  });
-}
-
-// ───────── HISTORY TOGGLE ─────────
-function toggleHistory(){
-  const col = document.getElementById('historyCollapsible');
-  const arrow = document.getElementById('historyArrow');
-  const isOpen = col.classList.contains('open');
-  col.classList.toggle('open', !isOpen);
-  arrow.classList.toggle('open', !isOpen);
-}
-
-// ───────── EXPORT ─────────
-function exportResults(){
-  const lines = ['Question,Type,Your Answer,Correct Answer,Result,Time(ms)'];
-  results.forEach(r=>{
-    const q = r.q;
-    const sym = q.type==='square'?'²':q.type==='cube'?'³':'×';
-    const qStr = q.type==='table' ? `${q.n}×${q.m}` : `${q.n}${sym}`;
-    const correctAns = q.type==='table' ? q.answer : (q.reverse ? q.n : q.answer);
-    lines.push(`"${qStr}","${q.type}","${r.userAnswer}","${correctAns}","${r.correct?'Correct':'Wrong'}","${r.elapsed||''}"`);
-  });
-  const csv = lines.join('\n');
-  const filename = `quiz_results_${new Date().toISOString().slice(0,10)}.csv`;
-  try {
-    const blob = new Blob([csv], {type:'text/csv'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
-  } catch(e) {
-    // Fallback: data URI
-    const a = document.createElement('a');
-    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  }
-}
-
-
 </script>
 </body>
 </html>
