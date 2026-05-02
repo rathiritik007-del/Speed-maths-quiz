@@ -40,20 +40,20 @@
 
     /* ── Main app card ── */
     .app {
-  width: 100%;
-  max-width: 900px;
-  margin: 0 auto;
-  border-radius: 20px;
-  position: relative;
-  overflow: hidden;
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(255,255,255,0.12);
-  box-shadow:
-    0 25px 80px rgba(0,0,0,0.65),
-    inset 0 1px 0 rgba(255,255,255,0.05);
-  padding: 16px;
-}
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      border-radius: 20px;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 25px 80px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.05);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+    }
 
 .app::after {
   content: "";
@@ -123,14 +123,16 @@
       .page-wrap { align-items: center; padding: 40px 20px; }
     }
 
+    /* Only one screen visible at a time */
     .screen {
-  display: none;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-  gap: 16px; /* 🔥 THIS replaces ALL margins */
-}
-    .screen.active { display: flex; }
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .screen.active {
+      display: flex;
+      flex: 1;
+    }
 
     /* ════════════════════════════════════
        SETUP SCREEN
@@ -1284,6 +1286,7 @@ select:focus {
       color: rgba(255,251,189,0.35);
       text-transform: uppercase;
       letter-spacing: 0.08em;
+      margin-bottom: 6px;
     }
 
     /* range row inside bento */
@@ -1503,20 +1506,35 @@ select:focus {
     /* ── Speed graph ── */
     .speed-graph-container { width: 100%; overflow-x: auto; }
     #speedCanvas { width: 100%; display: block; }
+
+    /* ── 2-digit multiplication config ── */
+    .mult2d-section {
+      border-top: 1px solid rgba(255,251,189,0.1);
+      padding-top: 10px;
+      margin-top: 4px;
+    }
+    .mult2d-note {
+      font-size: 11px;
+      color: rgba(255,251,189,0.35);
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+    .mult2d-note a {
+      color: rgba(202,60,37,0.8);
+      text-decoration: none;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
 <div class="page-wrap">
 <div class="app">
-
-  <!-- SETUP SCREEN -->
+<!-- SETUP SCREEN -->
   <div class="screen active" id="s-setup">
     <div class="setup-header">
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div>
-          <h1>Quiz — Squares &amp; Cubes</h1>
-          <p>Configure your test below</p>
-        </div>
+      <div>
+        <h1>Quiz — Squares &amp; Cubes</h1>
+        <p>Configure your test below</p>
       </div>
     </div>
 
@@ -1543,28 +1561,41 @@ select:focus {
         </div>
       </div>
 
-      <!-- TABLES CONFIG — left cell (tables mode, hidden by default) -->
+      <!-- MULTIPLICATION CONFIG — left cell (multiplication mode) -->
       <div class="bento-cell" id="tablesCell" style="display:none;">
-        <div class="bento-label">✖️ Tables</div>
+        <div class="bento-label">✖️ Multiplication</div>
 
-        <!-- Which tables (range of table numbers) -->
-        <div class="bento-range-row">
-          <div class="bento-range-col">
-            <span class="bento-range-lbl">From</span>
-            <input type="number" class="num-inp" id="tablesFrom" value="2" min="1" onchange="onTablesRangeChange()">
-          </div>
-          <span class="bento-range-sep">→</span>
-          <div class="bento-range-col">
-            <span class="bento-range-lbl">To</span>
-            <input type="number" class="num-inp" id="tablesTo" value="12" min="1" onchange="onTablesRangeChange()">
-          </div>
+        <!-- Mode: Tables vs 2-digit -->
+        <div class="timer-grid" id="multTypeGrid">
+          <button class="timer-opt active" data-mtype="tables" onclick="setMultType(this)">Times Tables</button>
+          <button class="timer-opt" data-mtype="2digit" onclick="setMultType(this)">2-digit × 2-digit</button>
         </div>
 
-        <!-- Multiply up to: Standard vs Extended -->
-        <div class="bento-label" style="margin-top:4px;">Multiply up to</div>
-        <div class="timer-grid" id="multModeGrid">
-          <button class="timer-opt active" data-mult="10" onclick="setMultMode(this)">×10 Standard</button>
-          <button class="timer-opt" data-mult="20" onclick="setMultMode(this)">×20 Extended</button>
+        <!-- TABLES sub-section -->
+        <div id="tablesSection">
+          <div class="bento-range-row" style="margin-top:8px;">
+            <div class="bento-range-col">
+              <span class="bento-range-lbl">From</span>
+              <input type="number" class="num-inp" id="tablesFrom" value="2" min="1" onchange="onTablesRangeChange()">
+            </div>
+            <span class="bento-range-sep">→</span>
+            <div class="bento-range-col">
+              <span class="bento-range-lbl">To</span>
+              <input type="number" class="num-inp" id="tablesTo" value="12" min="1" onchange="onTablesRangeChange()">
+            </div>
+          </div>
+          <div class="mult2d-note">💡 Use <span style="color:rgba(255,251,189,0.6);font-weight:600;">Focus mode</span> in Feedback settings to practise specific tables from your range</div>
+        </div>
+
+        <!-- 2-DIGIT sub-section — random pairs, difficulty controls range -->
+        <div id="twoDigitSection" style="display:none;" class="mult2d-section">
+          <div class="bento-label" style="margin-top:0;">Difficulty</div>
+          <div class="timer-grid" id="mult2dDiffGrid">
+            <button class="timer-opt active" data-2ddiff="easy"   onclick="set2dDiff(this)">Easy<span style="display:block;font-size:10px;opacity:0.6;">10–19</span></button>
+            <button class="timer-opt"        data-2ddiff="medium" onclick="set2dDiff(this)">Medium<span style="display:block;font-size:10px;opacity:0.6;">10–49</span></button>
+            <button class="timer-opt"        data-2ddiff="hard"   onclick="set2dDiff(this)">Hard<span style="display:block;font-size:10px;opacity:0.6;">10–99</span></button>
+          </div>
+          <div class="mult2d-note" style="margin-top:6px;">Random 2-digit pairs are generated each session within the selected range</div>
         </div>
       </div>
 
@@ -1577,7 +1608,7 @@ select:focus {
           <button class="type-btn" id="btn-squares" onclick="setType('squares')">x²</button>
           <button class="type-btn" id="btn-cubes" onclick="setType('cubes')">x³</button>
           <button class="type-btn active" id="btn-both" onclick="setType('both')">Both</button>
-          <button class="type-btn" id="btn-tables" onclick="setType('tables')">Tables</button>
+          <button class="type-btn" id="btn-multiplication" onclick="setType('multiplication')">× Mult</button>
         </div>
       </div>
 
@@ -1942,16 +1973,11 @@ const PB_KEY = 'quiz_pb';
   function show(id){
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
+    window.scrollTo(0,0);
   }
   let tablesScope = 'custom'; // kept for legacy, unused
   let selectedTables = new Set(); // focus-mode selected table numbers
-  let multUpTo = 10; // Standard=10, Extended=20
-
-  function setMultMode(btn){
-    document.querySelectorAll('#multModeGrid .timer-opt').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    multUpTo = parseInt(btn.dataset.mult);
-  }
+  const multUpTo = 10; // Always ×10 for times tables
 
   function getTablesRange(){
     const f = parseInt(document.getElementById('tablesFrom').value) || 2;
@@ -1960,9 +1986,8 @@ const PB_KEY = 'quiz_pb';
   }
 
   function onTablesRangeChange(){
-    // If focus grid is open, rebuild it to match new range
     const focusOn = document.getElementById('focusTog').checked;
-    if(focusOn && qType === 'tables') {
+    if(focusOn && qType === 'multiplication') {
       selectedTables.clear();
       buildFocusGrid();
     }
@@ -1977,23 +2002,55 @@ const PB_KEY = 'quiz_pb';
     return Array.from({length: to - from + 1}, (_, i) => from + i);
   }
 
+  let multSubType = 'tables'; // 'tables' or '2digit'
+  let mult2dDiff  = 'easy';   // 'easy' | 'medium' | 'hard'
+
+  function set2dDiff(btn){
+    document.querySelectorAll('#mult2dDiffGrid .timer-opt').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    mult2dDiff = btn.dataset['2ddiff'];
+  }
+
+  function setMultType(btn){
+    document.querySelectorAll('#multTypeGrid .timer-opt').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    multSubType = btn.dataset.mtype;
+    document.getElementById('tablesSection').style.display = multSubType === 'tables' ? '' : 'none';
+    document.getElementById('twoDigitSection').style.display = multSubType === '2digit' ? '' : 'none';
+    // focus mode sub-label
+    const focusSubEl = document.getElementById('focusTogSub');
+    if(focusSubEl) focusSubEl.textContent = multSubType === 'tables' ? 'Pick specific tables' : 'Pick specific numbers';
+    // hide focus toggle for 2digit (not applicable)
+    const focusRow = document.getElementById('focusTog')?.closest('.bento-tog');
+    if(focusRow) focusRow.style.display = multSubType === '2digit' ? 'none' : '';
+  }
+
   function setType(t){
-    qType=t;
-    ['squares','cubes','both','tables'].forEach(x=>{
+    qType = t;
+    const isMultiplication = t === 'multiplication';
+
+    ['squares','cubes','both','multiplication'].forEach(x=>{
       const btn=document.getElementById('btn-'+x);
-      if(btn) btn.classList.toggle('active',x===t);
+      if(btn) btn.classList.toggle('active', x===t);
     });
-    const isTable = t==='tables';
-    document.getElementById('rangeCell').style.display = isTable ? 'none' : '';
-    document.getElementById('tablesCell').style.display = isTable ? '' : 'none';
+
+    document.getElementById('rangeCell').style.display  = isMultiplication ? 'none' : '';
+    document.getElementById('tablesCell').style.display = isMultiplication ? ''     : 'none';
+
     const revTog = document.getElementById('reverseTog');
     const revRow = revTog ? revTog.closest('.bento-tog') : null;
     if(revRow){
-      revRow.classList.toggle('tog-disabled', isTable);
-      if(isTable){ revTog.checked=false; }
+      revRow.classList.toggle('tog-disabled', isMultiplication);
+      if(isMultiplication) revTog.checked = false;
     }
+
+    // Focus mode — always visible except for 2-digit multiplication
+    const hide2dFocus = isMultiplication && multSubType === '2digit';
     const focusSubEl = document.getElementById('focusTogSub');
-    if(focusSubEl) focusSubEl.textContent = isTable ? 'Pick specific tables' : 'Pick specific numbers';
+    if(focusSubEl) focusSubEl.textContent = (isMultiplication && multSubType==='tables') ? 'Pick specific tables' : 'Pick specific numbers';
+    const focusRow = document.getElementById('focusTog')?.closest('.bento-tog');
+    if(focusRow) focusRow.style.display = hide2dFocus ? 'none' : '';
+
     const focusOn = document.getElementById('focusTog').checked;
     if(focusOn) buildFocusGrid();
   }
@@ -2010,7 +2067,7 @@ const PB_KEY = 'quiz_pb';
   }
 
   function buildFocusGrid(){
-    const isTable = qType === 'tables';
+    const isTable = qType === 'multiplication' && multSubType === 'tables';
     const grid = document.getElementById('focusChips');
     const label = document.getElementById('focusGridLabel');
     grid.innerHTML = '';
@@ -2053,7 +2110,7 @@ const PB_KEY = 'quiz_pb';
   }
 
   function focusSelectAll(){
-    const isTable = qType === 'tables';
+    const isTable = qType === 'multiplication' && multSubType === 'tables';
     if(isTable){
       const {from, to} = getTablesRange();
       for(let n=from;n<=to;n++) selectedTables.add(n);
@@ -2066,7 +2123,7 @@ const PB_KEY = 'quiz_pb';
   }
 
   function focusClearAll(){
-    const isTable = qType === 'tables';
+    const isTable = qType === 'multiplication' && multSubType === 'tables';
     if(isTable){ selectedTables.clear(); }
     else { focusNums.clear(); }
     buildFocusGrid();
@@ -2082,19 +2139,31 @@ const PB_KEY = 'quiz_pb';
     const shuffle=document.getElementById('shuffleTog').checked;
     const pool=[];
 
-    if(qType === 'tables'){
-      const {from: tFrom, to: tTo} = getTablesRange();
-      // If focus mode on and user has selected specific tables, use those; else all in range
-      let nSet;
-      if(focusMode && selectedTables.size > 0){
-        nSet = [...selectedTables].filter(n => n >= tFrom && n <= tTo).sort((a,b)=>a-b);
-        if(!nSet.length) nSet = Array.from({length: tTo-tFrom+1}, (_,i)=>tFrom+i);
+    if(qType === 'multiplication'){
+      if(multSubType === 'tables'){
+        // Times tables mode
+        const {from: tFrom, to: tTo} = getTablesRange();
+        let nSet;
+        if(focusMode && selectedTables.size > 0){
+          nSet = [...selectedTables].filter(n => n >= tFrom && n <= tTo).sort((a,b)=>a-b);
+          if(!nSet.length) nSet = Array.from({length: tTo-tFrom+1}, (_,i)=>tFrom+i);
+        } else {
+          nSet = Array.from({length: tTo-tFrom+1}, (_,i)=>tFrom+i);
+        }
+        for(const n of nSet){
+          for(let m=1; m<=multUpTo; m++){
+            pool.push({n, m, type:'table', answer:n*m, reverse:false});
+          }
+        }
       } else {
-        nSet = Array.from({length: tTo-tFrom+1}, (_,i)=>tFrom+i);
-      }
-      for(const n of nSet){
-        for(let m=1; m<=multUpTo; m++){
-          pool.push({n, m, type:'table', answer:n*m, reverse:false});
+        // 2-digit × 2-digit — random pairs within difficulty range
+        const diffMap = {easy:[10,19], medium:[10,49], hard:[10,99]};
+        const [lo, hi] = diffMap[mult2dDiff] || [10,19];
+        // generate a large pool of random pairs
+        for(let i=0; i<200; i++){
+          const a = Math.floor(Math.random()*(hi-lo+1))+lo;
+          const b = Math.floor(Math.random()*(hi-lo+1))+lo;
+          pool.push({n:a, m:b, type:'table', answer:a*b, reverse:false});
         }
       }
     } else {
