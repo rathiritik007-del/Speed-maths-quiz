@@ -984,7 +984,7 @@ display: block;
     .ri-q { font-size: clamp(12px, 3.2vw, 15px); color: rgba(239,248,226,0.5); }
     .ri-a { font-size: clamp(12px, 3.2vw, 15px); font-weight: 600; }
     .ri-ok { color: #B8D45C; }
-    .ri-no { color: #ada8b6; }
+    .ri-no { color: #ff6b6b; }
 
     .res-btns {
       display: flex;
@@ -1804,6 +1804,22 @@ select:focus {
       white-space: nowrap;
     }
     .export-btn:hover { background: rgba(239,248,226,0.08); }
+    .erase-btn {
+      background: none;
+      border: none;
+      color: rgba(239,248,226,0.2);
+      font-size: 11px;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: color 0.2s, background 0.2s;
+      letter-spacing: 0.04em;
+      display: block;
+      margin: -8px auto 4px;
+      text-align: center;
+    }
+    .erase-btn:hover { color: #ff6b6b; background: rgba(255,107,107,0.08); }
 
     .tables-select-btn {
       padding: 4px 10px;
@@ -1826,6 +1842,32 @@ select:focus {
       line-height: 1.45;
     }
     .mult2d-section { margin-top: 8px; }
+
+    /* ══════════════════════════════════════
+       CUSTOM SCROLLBARS — match UI palette
+    ══════════════════════════════════════ */
+
+    /* Firefox */
+    * { scrollbar-width: thin; scrollbar-color: rgba(184,212,92,0.25) transparent; }
+
+    /* WebKit (Chrome, Safari, Edge) */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(184,212,92,0.2);
+      border-radius: 99px;
+      transition: background 0.2s;
+    }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(184,212,92,0.45); }
+    ::-webkit-scrollbar-corner { background: transparent; }
+
+    /* Scrollable review lists — slightly more visible */
+    .review-scroll::-webkit-scrollbar { width: 3px; }
+    .review-scroll::-webkit-scrollbar-thumb {
+      background: rgba(184,212,92,0.18);
+      border-radius: 99px;
+    }
+    .review-scroll::-webkit-scrollbar-thumb:hover { background: rgba(184,212,92,0.4); }
   </style>
 </head>
 <body>
@@ -2197,6 +2239,13 @@ select:focus {
     </div>
 
     <!-- COLLAPSIBLE HISTORY -->
+    <div id="eraseWrap" style="text-align:center;margin:-8px 0 4px;">
+      <button class="erase-btn" id="eraseBtn" onclick="eraseHistoryAsk()">🗑 erase history</button>
+      <span id="eraseConfirm" style="display:none;font-size:11px;color:rgba(239,248,226,0.5);gap:6px;align-items:center;justify-content:center;">
+        Sure? <button class="erase-btn" style="color:#ff6b6b;display:inline;" onclick="eraseHistoryConfirm()">Yes, erase</button>
+        <button class="erase-btn" style="display:inline;" onclick="eraseHistoryCancel()">Cancel</button>
+      </span>
+    </div>
     <div class="review-wrap" id="historyWrap">
       <div class="history-toggle" onclick="toggleHistory()">
         <span class="history-toggle-label">📋 Result history</span>
@@ -3095,6 +3144,21 @@ function clearStopwatch() {
 // ───────── HISTORY ─────────
 const HISTORY_KEY = 'quiz_history';
 const MAX_HISTORY = 20;
+
+function eraseHistoryAsk() {
+  document.getElementById('eraseBtn').style.display = 'none';
+  const ec = document.getElementById('eraseConfirm');
+  ec.style.display = 'inline-flex';
+}
+function eraseHistoryCancel() {
+  document.getElementById('eraseBtn').style.display = 'inline';
+  document.getElementById('eraseConfirm').style.display = 'none';
+}
+function eraseHistoryConfirm() {
+  try { localStorage.removeItem(HISTORY_KEY); } catch(e){}
+  eraseHistoryCancel();
+  renderHistory();
+}
 
 function saveHistory(score, total, pct) {
   let history = [];
