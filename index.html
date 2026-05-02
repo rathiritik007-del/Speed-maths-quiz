@@ -586,7 +586,7 @@ display: block;
     .big-pct {
       font-size: clamp(44px, 13vw, 62px);
       font-weight: 700;
-      color: #573280;
+      color: #cbb7ff;
       letter-spacing: -1px;
     }
     .big-sub {
@@ -728,20 +728,24 @@ display: block;
       background: rgba(87,50,128,0.2);
     }
     .pick-btn.correct {
-      border-color: #eff8e2;
-      background: rgba(239,248,226,0.1);
-      color: #eff8e2;
-    }
-    .pick-btn.wrong {
-      border-color: #ada8b6;
-      background: rgba(173,168,182,0.1);
-      color: #ada8b6;
-    }
-    .pick-btn.reveal {
-      border-color: #eff8e2;
-      background: rgba(239,248,226,0.06);
-      color: rgba(239,248,226,0.6);
-    }
+  border-color: #00e676;
+  background: rgba(0, 230, 118, 0.18);
+  color: #00e676;
+}
+
+.pick-btn.wrong {
+  border-color: #ff5252;
+  background: rgba(255, 82, 82, 0.18);
+  color: #ff5252;
+}
+
+.pick-btn.reveal {
+  border-color: #00e676;
+  background: rgba(0, 230, 118, 0.10);
+  color: rgba(0, 230, 118, 0.7);
+}
+
+
     .pick-btn:disabled { cursor: default; }
     .pick-icon {
       display: block;
@@ -1500,9 +1504,9 @@ select:focus {
       <div class="bento-cell" id="rangeCell">
         <div class="bento-label">📐 Number range</div>
         <div class="diff-row">
-          <button class="diff-btn" onclick="setDiff('easy',event)">1–10</button>
-          <button class="diff-btn active" onclick="setDiff('medium',event)">1–20</button>
-          <button class="diff-btn" onclick="setDiff('hard',event)">1–30</button>
+          <button class="diff-btn" onclick="setDiff('easy',event)">Easy</button>
+          <button class="diff-btn active" onclick="setDiff('medium',event)">Medium</button>
+          <button class="diff-btn" onclick="setDiff('hard',event)">Hard</button>
         </div>
         <div class="bento-range-row">
           <div class="bento-range-col">
@@ -1539,7 +1543,7 @@ select:focus {
           <div class="mult2d-note">💡 Use <span style="color:rgba(239,248,226,0.6);font-weight:600;">Focus mode</span> in Feedback settings to practise specific tables</div>
         </div>
         <div id="twoDigitSection" style="display:none;" class="mult2d-section">
-          <div class="bento-label" style="margin-top:0;">Difficulty</div>
+          <div class="bento-label" style="padding-bottom:8px;">Difficulty</div>
           <div class="timer-grid" id="mult2dDiffGrid">
             <button class="timer-opt active" data-2ddiff="easy" onclick="set2dDiff(this)">Easy<span style="display:block;font-size:10px;opacity:0.6;">10–19</span></button>
             <button class="timer-opt" data-2ddiff="medium" onclick="set2dDiff(this)">Medium<span style="display:block;font-size:10px;opacity:0.6;">10–49</span></button>
@@ -1557,7 +1561,7 @@ select:focus {
         <div class="type-row">
           <button class="type-btn" id="btn-squares" onclick="setType('squares')">x²</button>
           <button class="type-btn" id="btn-cubes" onclick="setType('cubes')">x³</button>
-          <button class="type-btn active" id="btn-both" onclick="setType('both')">Both</button>
+          <button class="type-btn active" id="btn-both" onclick="setType('both')">x²/x³</button>
           <button class="type-btn" id="btn-multiplication" onclick="setType('multiplication')">× Mult</button>
         </div>
       </div>
@@ -1592,13 +1596,13 @@ select:focus {
       <div class="bento-cell">
         <div class="bento-label">✏️ Input mode</div>
         <div class="bento-tog">
-          <span class="bento-tog-label">Pick mode<span class="bento-tog-sub">Choose options</span></span>
+          <span class="bento-tog-label">Options mode<span class="bento-tog-sub">Choose options</span></span>
           <label class="toggle"><input type="checkbox" id="pickModeTog"><span class="tslider"></span></label>
         </div>
         <div id="pickModeDropdown" style="display:none;">
           <div class="timer-grid" id="pickModeGrid">
-            <button class="timer-opt active" data-value="auto" onclick="setPickModeOpt(this)">Auto</button>
-            <button class="timer-opt" data-value="manual" onclick="setPickModeOpt(this)">Manual</button>
+            <button class="timer-opt active" data-value="auto" onclick="setPickModeOpt(this)">Auto submit</button>
+            <button class="timer-opt" data-value="manual" onclick="setPickModeOpt(this)">Manual submit</button>
           </div>
           <select id="pickModeType" style="display:none;">
             <option value="auto" selected>Auto submit</option>
@@ -1606,7 +1610,7 @@ select:focus {
           </select>
         </div>
         <div class="bento-tog">
-          <span class="bento-tog-label">Reverse<span class="bento-tog-sub">Type the base number</span></span>
+          <span class="bento-tog-label">Sq/Cube root<span class="bento-tog-sub">Type the base number</span></span>
           <label class="toggle"><input type="checkbox" id="reverseTog"><span class="tslider"></span></label>
         </div>
       </div>
@@ -1637,7 +1641,7 @@ select:focus {
         </div>
         <div class="bento-tog">
           <span class="bento-tog-label">Auto-submit<span class="bento-tog-sub">Submit on digit count</span></span>
-          <label class="toggle"><input type="checkbox" id="autosubTog"><span class="tslider"></span></label>
+          <label class="toggle"><input type="checkbox" id="autosubTog" checked><span class="tslider"></span></label>
         </div>
         <div class="bento-tog">
           <span class="bento-tog-label">Focus mode<span class="bento-tog-sub">Pick specific numbers</span></span>
@@ -1953,7 +1957,7 @@ function setMultType(btn){
   function setDiff(d, e){
     document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('active'));
     e.target.classList.add('active');
-    const map = {easy:[1,10], medium:[1,20], hard:[1,30]};
+    const map = {easy:[1,10], medium:[1,20], hard:[1,50]};
     document.getElementById('rangeFrom').value = map[d][0];
     document.getElementById('rangeTo').value   = map[d][1];
     buildFocusGrid();
