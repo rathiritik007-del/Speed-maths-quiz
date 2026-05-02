@@ -1,0 +1,3295 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Quiz — Squares & Cubes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *:focus { outline: none; }
+    *:focus-visible { outline: 2px solid rgba(127,176,105,0.5); outline-offset: 2px; }
+
+    html, body {
+      height: 100%;
+      min-height: 100%;
+      align-items: flex-start;
+      justify-content: center;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      overflow-y: auto;
+      max-width: 100%;
+    }
+
+    /* ── Page wrapper ── */
+    .page-wrap {
+      background: transparent;
+      min-height: 100dvh;
+      height: auto;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      padding: 0;
+    }
+
+    /* ── Main app card ── */
+    .app {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow:
+    0 25px 80px rgba(0,0,0,0.65),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+  padding: 16px;
+}
+
+.app::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+
+  box-shadow:
+    inset 0 0 30px rgba(127,176,105,0.08);
+
+  pointer-events: none;
+}
+
+.setup-header {
+  border-radius: 20px;
+  margin: 0;
+  width: 100%;
+  padding: clamp(20px, 5vw, 32px);
+
+  background: linear-gradient(
+    135deg,
+    rgba(255,251,189,0.95),
+    rgba(255,251,189,0.75)
+  );
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  box-shadow:
+    0 15px 40px rgba(0,0,0,0.35),
+    inset 0 2px 6px rgba(255,255,255,0.4);
+}
+
+.setup-header::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+
+  background: linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.35),
+    transparent 60%
+  );
+
+  pointer-events: none;
+}
+
+    /* On wider screens: show card with margins */
+    @media (min-width: 600px) {
+      html, body { overflow-y: auto; height: auto; }
+      .page-wrap {
+        background: transparent;
+        height: auto;
+        min-height: 100dvh;
+        padding: 32px 20px;
+        align-items: flex-start;
+      }
+      .app {
+        height: auto;
+        min-height: unset;
+        border-radius: 20px;
+      }
+    }
+
+    @media (min-width: 900px) {
+      .page-wrap { align-items: center; padding: 40px 20px; }
+    }
+
+    .screen {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: 16px; /* 🔥 THIS replaces ALL margins */
+}
+    .screen.active { display: flex; }
+
+    /* ════════════════════════════════════
+       SETUP SCREEN
+    ════════════════════════════════════ */
+    
+    .setup-header h1 {
+      font-size: clamp(22px, 6vw, 34px);
+      font-weight: 700;
+      color: #1C2B1A;
+      margin-bottom: 6px;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+    }
+    .setup-header p {
+      /* golden ratio: title / 1.618 → clamped proportionally */
+      font-size: clamp(13.6px, 3.7vw, 21px);
+      color: rgba(28,43,26,0.6);
+      font-weight: 400;
+    }
+
+    .setup-body {
+  margin: 0;
+  width: 100%;
+  padding: clamp(16px, 4vw, 24px);
+
+  border-radius: 20px;
+  background: rgba(36, 48, 34, 0.9);
+
+  backdrop-filter: blur(12px);
+
+  border: 1px solid rgba(255,251,189,0.1);
+
+  box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+
+  width: 100%;
+}
+    .card {
+      background: #243022;
+      border-radius: clamp(10px, 3vw, 16px);
+      padding: clamp(10px, 3.5vw, 20px);
+      margin-bottom: clamp(8px, 2.5vw, 14px);
+      border: 1px solid rgba(255,251,189,0.12);
+    }
+    .card-title {
+      font-size: clamp(10px, 2.5vw, 11px);
+      font-weight: 600;
+      color: rgba(255,251,189,0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: clamp(8px, 2.5vw, 12px);
+    }
+
+    .field-row {
+      display: flex;
+      align-items: center;
+      gap: clamp(6px, 2vw, 10px);
+      margin-bottom: clamp(6px, 2vw, 12px);
+      flex-wrap: nowrap;
+    }
+    .field-row:last-child { margin-bottom: 0; }
+    .field-label {
+      font-size: clamp(13px, 3.5vw, 15px);
+      color: #FFFBBD;
+      flex: 1;
+      min-width: 100px;
+    }
+
+    .num-inp {
+      width: clamp(64px, 18vw, 80px);
+      padding: clamp(6px, 2vw, 9px) 10px;
+      font-size: clamp(13px, 3.5vw, 15px);
+      border: 1.5px solid rgba(255,251,189,0.25);
+      border-radius: 10px;
+      background: #1C2B1A;
+      color: #FFFBBD;
+      text-align: center;
+      outline: none;
+      font-family: 'Inter', sans-serif;
+      -moz-appearance: textfield;
+    }
+    .num-inp::-webkit-inner-spin-button,
+    .num-inp::-webkit-outer-spin-button { -webkit-appearance: none; }
+    .num-inp:focus { border-color: #FFFBBD; }
+
+    .type-row { display: flex; gap: clamp(6px, 2vw, 8px); }
+    .type-btn {
+      flex: 1;
+      min-width: 0;
+      padding: clamp(9px, 2.5vw, 11px) 4px;
+      border: 1.5px solid rgba(255,251,189,0.2);
+      border-radius: 10px;
+      background: transparent;
+      color: rgba(255,251,189,0.45);
+      font-size: clamp(11px, 2.8vw, 14px);
+      cursor: pointer;
+      transition: all 0.18s;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      overflow: hidden;
+    }
+    .type-btn.active { border-color: #CA3C25; background: rgba(202,60,37,0.15); color: #CA3C25; }
+
+    .tog-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: clamp(7px, 2vw, 12px) 0;
+      border-bottom: 1px solid rgba(255,251,189,0.1);
+    }
+    .tog-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .tog-label {
+      font-size: clamp(13px, 3.5vw, 15px);
+      color: #FFFBBD;
+      flex: 1;
+      font-weight: 400;
+    }
+    .tog-sub {
+      font-size: clamp(10px, 2.5vw, 11px);
+      color: rgba(255,251,189,0.35);
+      display: block;
+      margin-top: 2px;
+    }
+
+    /* Toggle — fixed size, never shrinks */
+    .toggle { position: relative; width: 50px; height: 27px; flex-shrink: 0; cursor: pointer; }
+    .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .tslider {
+      position: absolute; inset: 0;
+      background: rgba(255,251,189,0.12);
+      border-radius: 14px;
+      transition: background 0.2s, border-color 0.2s;
+      border: 1.5px solid rgba(255,251,189,0.25);
+    }
+    .tslider::before {
+      content: '';
+      position: absolute;
+      width: 19px; height: 19px;
+      left: 3px; top: 2px;
+      background: rgba(255,251,189,0.5);
+      border-radius: 50%;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .toggle input:checked + .tslider {
+      background: #CA3C25;
+      border-color: #CA3C25;
+    }
+    .toggle input:checked + .tslider::before {
+      transform: translateX(23px);
+      background: #FFFBBD;
+    }
+    /* Remove orange browser focus outline on all inputs/buttons */
+    input:focus, button:focus, .toggle input:focus + .tslider {
+      outline: none;
+      box-shadow: none;
+    }
+
+    #s-setup .start-btn {
+      margin: 4px clamp(12px, 4vw, 20px) clamp(12px, 4vw, 20px);
+      padding: clamp(12px, 3.2vw, 16px);
+      border: none;
+      border-radius: 14px;
+      background: #CA3C25;
+      color: #FFFBBD;
+      font-size: clamp(14px, 3.8vw, 17px);
+      font-weight: 600;
+      cursor: pointer;
+      width: calc(100% - clamp(24px, 8vw, 40px));
+      letter-spacing: 0.01em;
+      transition: opacity 0.15s;
+      font-family: 'Inter', sans-serif;
+      flex-shrink: 0;
+    }
+    #s-setup .start-btn:hover { opacity: 0.88; }
+
+    /* iPhone safe area — home bar */
+    @supports (padding-bottom: env(safe-area-inset-bottom)) {
+      @media (max-width: 599px) {
+        #s-setup .start-btn {
+          margin-bottom: calc(clamp(12px, 4vw, 20px) + env(safe-area-inset-bottom));
+        }
+      }
+    }
+
+    /* ════════════════════════════════════
+       TEST SCREEN
+    ════════════════════════════════════ */
+    .test-top {
+      background: #FFFBBD;
+  padding: clamp(14px, 4vw, 22px) clamp(14px, 5vw, 24px) clamp(12px, 3.5vw, 18px);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+    }
+    .back-btn {
+      width: clamp(32px, 8vw, 38px);
+      height: clamp(32px, 8vw, 38px);
+      border-radius: 10px;
+      background: #243022;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .back-btn svg {
+      width: clamp(15px, 4vw, 19px);
+      height: clamp(15px, 4vw, 19px);
+      stroke: #FFFBBD; fill: none; stroke-width: 2;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+    .top-meta { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .q-pill {
+      background: #243022;
+      border-radius: 20px;
+      padding: clamp(5px, 1.5vw, 7px) clamp(10px, 3vw, 15px);
+      font-size: clamp(11px, 3vw, 14px);
+      color: rgba(255,251,189,0.55);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .q-pill span { color: #FFFBBD; font-weight: 600; }
+    .score-pill {
+      background: rgba(202,60,37,0.15);
+      border-radius: 20px;
+      padding: clamp(5px, 1.5vw, 7px) clamp(10px, 3vw, 15px);
+      font-size: clamp(11px, 3vw, 14px);
+      color: #CA3C25;
+      font-weight: 600;
+      border: 1px solid rgba(202,60,37,0.3);
+      white-space: nowrap;
+    }
+
+  
+    .prog-bar {
+  height: 4px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 6px;
+  overflow: hidden;
+}
+    .prog-fill { height: 100%; background: #CA3C25; border-radius: 2px; transition: width 0.35s; }
+.prog-wrap {
+  margin-top: 18px;   /* spacing inside header */
+}
+    .timer-bar-wrap {
+display: block;
+  margin: 0 clamp(12px, 4vw, 20px) clamp(10px, 3vw, 16px);
+  padding: 14px 16px;
+  border-radius: 16px;
+
+  background: rgba(36, 48, 34, 0.6);
+  border: 1px solid rgba(255,251,189,0.08);
+
+  backdrop-filter: blur(10px);
+}
+
+.timer-bar-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.timer-left {
+  font-size: 13px;
+  color: rgba(255,251,189,0.4);
+}
+
+.timer-right {
+  font-weight: 600;
+  color: #7FB069;
+}
+
+.timer-bar {
+  height: 6px;
+  background: rgba(255,251,189,0.25);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.timer-bar-fill {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #CA3C25, #7FB069);
+  transition: width 0.1s linear;
+}
+
+.stopwatch-wrap {
+  margin: 0 clamp(12px, 4vw, 20px) clamp(10px, 3vw, 16px);
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(36, 48, 34, 0.6);
+  border: 1px solid rgba(255,251,189,0.08);
+  display: none;
+  justify-content: space-between;
+  align-items: center;
+}
+.stopwatch-label {
+  font-size: 13px;
+  color: rgba(255,251,189,0.4);
+}
+.stopwatch-num {
+  font-size: clamp(20px, 5vw, 26px);
+  font-weight: 700;
+  color: #7FB069;
+  font-variant-numeric: tabular-nums;
+}
+
+    .q-card {
+      margin: 0 clamp(12px, 4vw, 20px) clamp(10px, 3vw, 16px);
+      background: #243022;
+      border-radius: clamp(14px, 4vw, 20px);
+      padding: clamp(16px, 5vw, 24px);
+      border: 1px solid rgba(255,251,189,0.12);
+      flex-shrink: 0;
+    }
+    .q-badge {
+      display: inline-block;
+      font-size: clamp(10px, 2.5vw, 12px);
+      padding: 4px clamp(10px, 3vw, 14px);
+      border-radius: 20px;
+      font-weight: 600;
+      margin-bottom: clamp(8px, 2.5vw, 13px);
+      letter-spacing: 0.03em;
+    }
+    .badge-sq { background: rgba(127,176,105,0.15); color: #7FB069; border: 1px solid rgba(127,176,105,0.35); }
+    .badge-cu { background: rgba(202,60,37,0.15); color: #CA3C25; border: 1px solid rgba(202,60,37,0.35); }
+    .q-number {
+      font-size: clamp(11px, 3vw, 14px);
+      color: rgba(255,251,189,0.35);
+      margin-bottom: 4px;
+      font-weight: 400;
+    }
+    .q-expr {
+      font-size: clamp(24px, 7vw, 32px);
+      font-weight: 700;
+      color: #FFFBBD;
+      text-align: center;
+      margin: clamp(8px, 2.5vw, 12px) 0 clamp(4px, 1.5vw, 8px);
+    }
+    .q-sub {
+      font-size: clamp(11px, 3vw, 14px);
+      color: rgba(255,251,189,0.35);
+      text-align: center;
+      font-weight: 400;
+    }
+
+    .ans-zone {
+      padding: 0 clamp(12px, 4vw, 20px) 0;
+      flex-shrink: 0;
+    }
+    .ans-row {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 8px; /* ADD THIS */
+}
+    .ans-input {
+      flex: 1;
+ min-width: 0; /* 🔥 critical fix */
+      padding: clamp(11px, 3.5vw, 15px);
+      font-size: clamp(17px, 5vw, 22px);
+      font-weight: 600;
+      border: 2px solid rgba(255,251,189,0.2);
+      border-radius: clamp(10px, 3vw, 13px);
+      background: #243022;
+      color: #FFFBBD;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: 'Inter', sans-serif;
+      -moz-appearance: textfield;
+      min-width: 0;
+    }
+    .ans-input::-webkit-inner-spin-button,
+    .ans-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+    .ans-input:focus { border-color: #FFFBBD; }
+    .ans-input.correct { border-color: #FFFBBD; background: rgba(127,176,105,0.12); color: #7FB069; }
+    .ans-input.wrong  { border-color: #CA3C25; background: rgba(202,60,37,0.1); color: #CA3C25; }
+
+    .check-btn {
+      padding: clamp(11px, 3.5vw, 15px) clamp(14px, 4vw, 22px);
+      border: none;
+      border-radius: clamp(10px, 3vw, 13px);
+      background: #CA3C25;
+      color: #FFFBBD;
+      font-size: clamp(13px, 3.5vw, 16px);
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      font-family: 'Inter', sans-serif;
+      flex-shrink: 0;
+    }
+    .check-btn:hover { opacity: 0.88; }
+    .check-btn:disabled { opacity: 0.35; cursor: default; }
+
+    .fb-box {
+      margin: 0 clamp(12px, 4vw, 20px) clamp(8px, 2.5vw, 12px);
+      padding: clamp(10px, 3vw, 13px) clamp(12px, 4vw, 18px);
+      border-radius: 12px;
+      font-size: clamp(12px, 3.2vw, 15px);
+      font-weight: 500;
+      text-align: center;
+      display: none;
+      flex-shrink: 0;
+    }
+    .fb-ok { background: rgba(127,176,105,0.15); color: #7FB069; border: 1px solid rgba(127,176,105,0.3); }
+    .fb-no { background: rgba(202,60,37,0.15); color: #CA3C25; border: 1px solid rgba(202,60,37,0.3); }
+
+    .next-btn {
+      margin: 0 clamp(12px, 4vw, 20px) clamp(14px, 4vw, 20px);
+      padding: clamp(11px, 3.5vw, 15px);
+      border: 1.5px solid rgba(255,251,189,0.2);
+      border-radius: clamp(10px, 3vw, 13px);
+      background: transparent;
+      color: #FFFBBD;
+      font-size: clamp(13px, 3.5vw, 15px);
+      font-weight: 500;
+      cursor: pointer;
+      width: calc(100% - clamp(24px, 8vw, 40px));
+      transition: all 0.15s;
+      display: none;
+      font-family: 'Inter', sans-serif;
+      flex-shrink: 0;
+    }
+    .next-btn:hover { background: #243022; }
+
+    /* ════════════════════════════════════
+       RESULTS SCREEN
+    ════════════════════════════════════ */
+    .res-title {
+      font-size: clamp(15px, 4.5vw, 20px);
+      font-weight: 700;
+      color: #1C2B1A;
+      flex: 1;
+    }
+    .score-circle {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: clamp(20px, 6vw, 32px) 0 clamp(14px, 4vw, 22px);
+      flex-shrink: 0;
+    }
+    .big-pct {
+      font-size: clamp(44px, 13vw, 62px);
+      font-weight: 700;
+      color: #CA3C25;
+      letter-spacing: -1px;
+    }
+    .big-sub {
+      font-size: clamp(12px, 3.2vw, 15px);
+      color: rgba(255,251,189,0.4);
+      margin-top: 4px;
+      font-weight: 400;
+    }
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: clamp(8px, 2.5vw, 12px);
+      margin: 0 clamp(12px, 4vw, 20px) clamp(14px, 4vw, 22px);
+      flex-shrink: 0;
+    }
+    .stat-c {
+      background: #243022;
+      border-radius: 12px;
+      padding: clamp(10px, 3vw, 16px) clamp(8px, 2vw, 14px);
+      text-align: center;
+      border: 1px solid rgba(255,251,189,0.1);
+    }
+    .stat-v { font-size: clamp(18px, 5.5vw, 24px); font-weight: 700; }
+    .stat-l { font-size: clamp(10px, 2.5vw, 12px); color: rgba(237,221,212,0.35); margin-top: 3px; }
+    .sv-ok  { color: #7FB069; }
+    .sv-no  { color: #CA3C25; }
+    .sv-tot { color: rgba(255,251,189,0.6); }
+
+    .review-wrap {
+      margin: 0 clamp(12px, 4vw, 20px) clamp(12px, 3.5vw, 18px);
+      background: #243022;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(255,251,189,0.1);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .review-head {
+      padding: clamp(10px, 3vw, 14px) clamp(12px, 4vw, 18px);
+      font-size: clamp(10px, 2.5vw, 12px);
+      font-weight: 600;
+      color: rgba(255,251,189,0.35);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      border-bottom: 1px solid rgba(255,251,189,0.1);
+      flex-shrink: 0;
+    }
+    .review-scroll { flex: 1; overflow-y: auto; max-height: clamp(160px, 30vw, 260px); }
+    .history-empty {
+      padding: 16px;
+      text-align: center;
+      color: rgba(255,251,189,0.25);
+      font-size: 13px;
+    }
+    .review-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: clamp(8px, 2.5vw, 12px) clamp(12px, 4vw, 18px);
+      border-bottom: 1px solid rgba(255,251,189,0.08);
+    }
+    .review-item:last-child { border-bottom: none; }
+    .ri-q { font-size: clamp(12px, 3.2vw, 15px); color: rgba(255,251,189,0.5); }
+    .ri-a { font-size: clamp(12px, 3.2vw, 15px); font-weight: 600; }
+    .ri-ok { color: #7FB069; }
+    .ri-no { color: #CA3C25; }
+
+    .res-btns {
+      display: flex;
+      gap: clamp(8px, 2.5vw, 12px);
+      padding: 0 clamp(12px, 4vw, 20px) clamp(16px, 5vw, 26px);
+      flex-shrink: 0;
+    }
+    .again-btn {
+      flex: 1;
+      padding: clamp(12px, 3.5vw, 16px);
+      border: none;
+      border-radius: 12px;
+      background: #CA3C25;
+      color: #FFFBBD;
+      font-size: clamp(13px, 3.5vw, 16px);
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: opacity 0.15s;
+    }
+    .again-btn:hover { opacity: 0.88; }
+    .home-btn {
+      padding: clamp(12px, 3.5vw, 16px) clamp(14px, 4vw, 22px);
+      border: 1.5px solid rgba(255,251,189,0.2);
+      border-radius: 12px;
+      background: transparent;
+      color: #FFFBBD;
+      font-size: clamp(13px, 3.5vw, 15px);
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.15s;
+    }
+    .home-btn:hover { background: #243022; }
+
+
+    /* ════════════════════════════════════
+       PICK MODE (multiple choice)
+    ════════════════════════════════════ */
+    .pick-zone {
+  flex: 1;
+  display: flex;
+  align-items: stretch;   /* was center ❌ */
+  justify-content: stretch;
+}
+
+.pick-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+}
+    .pick-btn {
+      padding: clamp(14px, 4vw, 20px) clamp(10px, 3vw, 16px);
+      border: 2px solid rgba(255,251,189,0.18);
+      border-radius: clamp(10px, 3vw, 14px);
+      background: #243022;
+      color: #FFFBBD;
+      font-size: clamp(18px, 5.5vw, 26px);
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+      text-align: center;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+    .pick-btn:hover:not(:disabled) {
+      border-color: rgba(255,251,189,0.4);
+      background: #2d3d2a;
+    }
+    .pick-btn.correct {
+      border-color: #7FB069;
+      background: rgba(127,176,105,0.18);
+      color: #7FB069;
+    }
+    .pick-btn.wrong {
+      border-color: #CA3C25;
+      background: rgba(202,60,37,0.15);
+      color: #CA3C25;
+    }
+    .pick-btn.reveal {
+      border-color: #7FB069;
+      background: rgba(127,176,105,0.1);
+      color: rgba(127,176,105,0.7);
+    }
+    .pick-btn:disabled { cursor: default; }
+    .pick-icon {
+      display: block;
+      font-size: clamp(11px, 3vw, 14px);
+      font-weight: 600;
+      margin-top: 4px;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── Large desktop: comfortable centred card ── */
+    @media (min-width: 900px) {
+      .page-wrap { align-items: center; min-height: 100vh; padding: 40px 20px; }
+      .app { width: 100%;
+  max-width: 900px; min-height: unset; }
+    }
+
+/* ── MAKE APP WIDER (SAFE) ── */
+@media (min-width: 600px) {
+  .app {
+    max-width: 100%;
+    border-radius: 20px;
+    height: auto;
+  }
+
+  html, body {
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: auto;
+  }
+
+  .page-wrap {
+    padding: 32px 20px;
+    align-items: flex-start;
+  }
+}
+
+@media (min-width: 900px) {
+  .app {
+    width: 100%;
+  max-width: 100%; /* main change */
+  }
+
+  .page-wrap {
+    align-items: center;
+    padding: 40px 20px;
+  }
+}
+input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background: #1C2B1A;
+  color: #FFFBBD;
+
+  border: 1px solid rgba(255,251,189,0.2);
+  border-radius: 8px;
+
+  padding: 8px;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ───────── SELECT BASE ───────── */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  width: 100%;
+  padding: 10px 12px;
+
+  border-radius: 12px;
+  border: 1px solid rgba(255,251,189,0.2);
+
+  background: #1C2B1A;
+  color: #FFFBBD;
+
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+
+  cursor: pointer;
+
+  /* subtle glow instead of blue */
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+/* focus state (replaces blue) */
+select:focus {
+  outline: none;
+  border-color: #CA3C25;
+  box-shadow: 0 0 0 2px rgba(202,60,37,0.25);
+}
+
+/* ───────── CUSTOM SELECT ───────── */
+.custom-select {
+  position: relative;
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+}
+
+.select-trigger {
+  padding: 8px 10px;              /* smaller */
+  border-radius: 10px;            /* slightly tighter */
+  border: 1px solid rgba(255,251,189,0.2);
+  background: #1C2B1A;
+  color: #FFFBBD;
+  cursor: pointer;
+  position: relative;
+  font-size: 13px;                /* smaller text */
+  line-height: 1.2;
+}
+
+/* arrow */
+.select-trigger::after {
+  content: "▾";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #FFFBBD;
+}
+
+/* dropdown */
+.select-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+
+  background: #1C2B1A;
+  border-radius: 14px;
+  border: 1px solid rgba(255,251,189,0.15);
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+
+  overflow: hidden;
+
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.custom-select.open .select-menu {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* options */
+.select-option {
+  padding: 10px 12px;
+  color: #FFFBBD;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.select-option:hover {
+  background: #243022;
+}
+
+.select-option.active {
+  background: rgba(202,60,37,0.2);
+  color: #CA3C25;
+}
+
+#s-results
+.setup-body {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.custom-keyboard {
+  margin-top: auto;   /* lock to bottom */
+  display: none;
+  width: 100%;
+}
+.top-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.kb-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.kb-key {
+  padding: 16px;
+  font-size: 20px;
+  font-weight: 600;
+  border-radius: 12px;
+  border: 1px solid rgba(255,251,189,0.2);
+  background: #243022;
+  color: #FFFBBD;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.kb-key:active {
+  transform: scale(0.95);
+  background: #2d3d2a;
+}
+
+.kb-del {
+  color: #CA3C25;
+}
+
+.kb-enter {
+  background: #CA3C25;
+  color: #FFFBBD;
+}
+
+.page-wrap {
+  min-height: 100dvh; /* ADD THIS */
+}
+
+
+
+
+    /* ════════════════════════════════════
+       STREAK
+    ════════════════════════════════════ */
+    .streak-pill {
+      background: rgba(202,60,37,0.15);
+      border: 1px solid rgba(202,60,37,0.3);
+      border-radius: 20px;
+      padding: clamp(5px,1.5vw,7px) clamp(10px,3vw,15px);
+      font-size: clamp(11px,3vw,14px);
+      color: #CA3C25;
+      font-weight: 600;
+      white-space: nowrap;
+      display: none;
+    }
+    .streak-pill.active { display: block; }
+
+    /* ════════════════════════════════════
+       LIVES
+    ════════════════════════════════════ */
+    .lives-pill {
+      background: rgba(202,60,37,0.12);
+      border: 1px solid rgba(202,60,37,0.25);
+      border-radius: 20px;
+      padding: clamp(5px,1.5vw,7px) clamp(10px,3vw,15px);
+      font-size: clamp(11px,3vw,14px);
+      color: #FFFBBD;
+      font-weight: 600;
+      white-space: nowrap;
+      letter-spacing: 0.05em;
+    }
+
+    /* ════════════════════════════════════
+       GAME OVER screen
+    ════════════════════════════════════ */
+    .gameover-body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      flex: 1;
+      padding: 32px 20px;
+    }
+    .gameover-icon { font-size: 64px; line-height: 1; }
+    .gameover-title {
+      font-size: clamp(26px,7vw,36px);
+      font-weight: 700;
+      color: #FFFBBD;
+      letter-spacing: -0.5px;
+    }
+    .gameover-sub {
+      font-size: clamp(13px,3.5vw,16px);
+      color: rgba(255,251,189,0.45);
+      text-align: center;
+    }
+    .gameover-score {
+      font-size: clamp(44px,13vw,62px);
+      font-weight: 700;
+      color: #CA3C25;
+      letter-spacing: -1px;
+    }
+
+    /* range label */
+    .bento-range-lbl {
+      font-size: 13px;
+      color: rgba(255,251,189,0.4);
+      white-space: nowrap;
+    }
+    /* full-width questions input inside bento cell */
+    .bento-q-inp {
+      width: 100% !important;
+      font-size: clamp(22px, 6vw, 28px) !important;
+      font-weight: 700 !important;
+      text-align: center;
+      padding: clamp(10px, 3vw, 14px) !important;
+    }
+
+    /* ════════════════════════════════════
+       DIFFICULTY PRESETS
+    ════════════════════════════════════ */
+    .diff-row { display: flex; gap: clamp(6px,2vw,8px); margin-bottom: clamp(8px,2.5vw,12px); }
+    .diff-btn {
+      flex: 1;
+      min-width: 0;
+      padding: clamp(7px,2vw,10px) 4px;
+      border: 1.5px solid rgba(255,251,189,0.2);
+      border-radius: 10px;
+      background: transparent;
+      color: rgba(255,251,189,0.45);
+      font-size: clamp(11px,2.8vw,13px);
+      cursor: pointer;
+      transition: all 0.18s;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .diff-btn.active { border-color: #7FB069; background: rgba(127,176,105,0.15); color: #7FB069; }
+
+    /* ════════════════════════════════════
+       REVERSE MODE
+    ════════════════════════════════════ */
+    .badge-rev { background: rgba(127,176,105,0.15); color: #7FB069; border: 1px solid rgba(127,176,105,0.35); }
+
+    /* ════════════════════════════════════
+       FOCUS MODE — number chips
+    ════════════════════════════════════ */
+    .focus-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .focus-chip {
+      padding: 5px 11px;
+      border-radius: 8px;
+      border: 1.5px solid rgba(255,251,189,0.2);
+      background: transparent;
+      color: rgba(255,251,189,0.5);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Inter', sans-serif;
+    }
+    .focus-chip.selected {
+      border-color: #7FB069;
+      background: rgba(127,176,105,0.18);
+      color: #7FB069;
+    }
+    .focus-all-btn {
+      padding: 5px 11px;
+      border-radius: 8px;
+      border: 1.5px solid rgba(255,251,189,0.15);
+      background: transparent;
+      color: rgba(255,251,189,0.3);
+      font-size: 12px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+    }
+    .focus-all-btn:hover { border-color: rgba(255,251,189,0.3); color: rgba(255,251,189,0.5); }
+
+    /* ════════════════════════════════════
+       RESULTS — personal bests + chart
+    ════════════════════════════════════ */
+    .pb-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(8px,2.5vw,12px);
+      margin: 0 clamp(12px,4vw,20px) clamp(10px,3vw,14px);
+      flex-shrink: 0;
+    }
+    .pb-c {
+      background: #243022;
+      border-radius: 12px;
+      padding: clamp(10px,3vw,14px);
+      text-align: center;
+      border: 1px solid rgba(255,251,189,0.1);
+    }
+    .pb-v { font-size: clamp(16px,4.5vw,20px); font-weight: 700; color: #FFFBBD; }
+    .pb-l { font-size: clamp(10px,2.5vw,11px); color: rgba(255,251,189,0.35); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .pb-new { color: #7FB069; }
+
+    .chart-wrap {
+      margin: 0 clamp(12px,4vw,20px) clamp(10px,3vw,14px);
+      background: #243022;
+      border-radius: 16px;
+      padding: clamp(12px,3.5vw,18px);
+      border: 1px solid rgba(255,251,189,0.1);
+      flex-shrink: 0;
+    }
+    .chart-title {
+      font-size: clamp(10px,2.5vw,11px);
+      font-weight: 600;
+      color: rgba(255,251,189,0.35);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 12px;
+    }
+    /* chart-vals: value labels in their own row ABOVE bars */
+    .chart-vals {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .chart-vals .chart-val {
+      flex: 1;
+      text-align: center;
+    }
+    .chart-bars { display: flex; gap: 8px; align-items: flex-end; height: 80px; }
+    .chart-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; justify-content: flex-end; }
+    .chart-bar {
+      width: 100%;
+      border-radius: 4px 4px 0 0;
+      transition: height 0.4s ease;
+      min-height: 3px;
+    }
+    .chart-bar-sq { background: rgba(127,176,105,0.7); }
+    .chart-bar-cu { background: rgba(202,60,37,0.7); }
+    .chart-lbl { font-size: 11px; color: rgba(255,251,189,0.4); }
+    .chart-val { font-size: 12px; font-weight: 600; color: #FFFBBD; }
+
+    /* ════════════════════════════════════
+       WEAKNESS SECTION
+    ════════════════════════════════════ */
+    .weakness-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: clamp(8px,2.5vw,11px) clamp(12px,4vw,18px);
+      border-bottom: 1px solid rgba(255,251,189,0.08);
+    }
+    .weakness-item:last-child { border-bottom: none; }
+    .wi-n { font-size: clamp(12px,3.2vw,15px); color: rgba(255,251,189,0.5); }
+    .wi-bar-wrap { flex: 1; margin: 0 12px; height: 6px; background: rgba(255,251,189,0.1); border-radius: 3px; overflow: hidden; }
+    .wi-bar { height: 100%; background: #CA3C25; border-radius: 3px; transition: width 0.4s; }
+    .wi-pct { font-size: clamp(11px,2.8vw,13px); font-weight: 600; color: #CA3C25; min-width: 80px; text-align: right; }
+
+    /* ════════════════════════════════════
+       CONFETTI
+    ════════════════════════════════════ */
+    .confetti-piece {
+      position: fixed;
+      width: 8px; height: 8px;
+      border-radius: 2px;
+      pointer-events: none;
+      z-index: 9999;
+      animation: confettiFall linear forwards;
+    }
+    @keyframes confettiFall {
+      0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+
+    /* ════════════════════════════════════
+       KEYBOARD HINTS
+    ════════════════════════════════════ */
+    .kb-hint {
+      font-size: 11px;
+      color: rgba(255,251,189,0.2);
+      text-align: center;
+      padding: 4px 0 2px;
+    }
+
+    /* ════════════════════════════════════
+       SPACED REPETITION badge
+    ════════════════════════════════════ */
+    .retry-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(202,60,37,0.2);
+      color: #CA3C25;
+      border: 1px solid rgba(202,60,37,0.35);
+      margin-left: 6px;
+      vertical-align: middle;
+      letter-spacing: 0.04em;
+    }
+
+    /* ════════════════════════════════════
+       BENTO GRID LAYOUT
+    ════════════════════════════════════ */
+    .bento-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto;
+      gap: 10px;
+      padding: clamp(10px,3vw,16px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    /* full-width cells */
+    .bento-cell { 
+      background: #243022;
+      border-radius: 16px;
+      border: 1px solid rgba(255,251,189,0.1);
+      padding: clamp(12px,3.5vw,18px);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 0;
+      overflow: visible;
+    }
+    .bento-cell.wide { grid-column: 1 / -1; }
+    .bento-cell.accent {
+      background: rgba(202,60,37,0.12);
+      border-color: rgba(202,60,37,0.25);
+    }
+    .bento-cell.green {
+      background: rgba(127,176,105,0.1);
+      border-color: rgba(127,176,105,0.2);
+    }
+
+    .bento-label {
+      font-size: clamp(9px,2.2vw,10px);
+      font-weight: 700;
+      color: rgba(255,251,189,0.35);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* range row inside bento */
+    .bento-range-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .bento-range-row .num-inp { flex: 1; width: auto; min-width: 0; }
+    .bento-range-sep {
+      color: rgba(255,251,189,0.3);
+      font-size: 13px;
+    }
+
+    /* toggle row inside bento — compact */
+    .bento-tog {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .bento-tog-label {
+      font-size: clamp(12px,3.2vw,14px);
+      color: #FFFBBD;
+      font-weight: 400;
+      flex: 1;
+    }
+    .bento-tog-sub {
+      font-size: 10px;
+      color: rgba(255,251,189,0.3);
+      display: block;
+      margin-top: 1px;
+    }
+
+    /* start button full width at bottom */
+    .bento-start {
+      margin: 0 clamp(10px,3vw,16px) clamp(10px,3vw,16px);
+      padding: clamp(14px,3.5vw,18px);
+      border: none;
+      border-radius: 16px;
+      background: #CA3C25;
+      color: #FFFBBD;
+      font-size: clamp(15px,4vw,18px);
+      font-weight: 700;
+      cursor: pointer;
+      width: calc(100% - clamp(20px,6vw,32px));
+      letter-spacing: 0.01em;
+      transition: opacity 0.15s, transform 0.1s;
+      font-family: 'Inter', sans-serif;
+      flex-shrink: 0;
+    }
+    .bento-start:hover { opacity: 0.88; }
+    .bento-start:active { transform: scale(0.98); }
+
+    @supports (padding-bottom: env(safe-area-inset-bottom)) {
+      @media (max-width: 599px) {
+        .bento-start {
+          margin-bottom: calc(clamp(10px,3vw,16px) + env(safe-area-inset-bottom));
+        }
+      }
+    }
+
+    /* ── Timer mini grid ── */
+    .timer-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .timer-opt {
+      padding: 8px 4px;
+      border-radius: 10px;
+      border: 1.5px solid rgba(255,251,189,0.15);
+      background: #1C2B1A;
+      color: rgba(255,251,189,0.5);
+      font-size: clamp(11px,2.8vw,12px);
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+      text-align: center;
+      min-width: 0;
+      overflow: hidden;
+    }
+    .timer-opt:hover { border-color: rgba(255,251,189,0.3); color: rgba(255,251,189,0.7); }
+    .timer-opt.active { border-color: #CA3C25; background: rgba(202,60,37,0.15); color: #CA3C25; }
+
+    /* ════════════════════════════════════
+       MOBILE FIXES
+    ════════════════════════════════════ */
+    @media (max-width: 480px) {
+      .bento-grid {
+        grid-template-columns: 1fr;
+      }
+      .bento-cell.wide {
+        grid-column: 1;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .q-pill, .score-pill, .streak-pill, .lives-pill {
+        font-size: 10px;
+        padding: 4px 8px;
+      }
+      .custom-keyboard {
+        padding-bottom: env(safe-area-inset-bottom, 8px);
+      }
+      .kb-key {
+        padding: 12px;
+        font-size: 17px;
+      }
+    }
+
+    /* ════════════════════════════════════
+       THEME SYSTEM — dark (default) + light
+    ════════════════════════════════════ */
+    :root, html[data-theme="dark"] {
+      --bg-grad-a: #122312;
+      --bg-grad-b: #0d160c;
+      --bg-radial-a: #3a6b35;
+      --bg-radial-b: #244a22;
+      --app-bg-a: rgba(58,107,53,0.25);
+      --app-bg-b: rgba(13,22,12,0.55);
+      --card-bg: rgba(36,48,34,0.9);
+      --cell-bg: #243022;
+      --cell-bg-hover: #2d3d2a;
+      --cell-border: rgba(255,251,189,0.1);
+      --text-primary: #FFFBBD;
+      --text-muted: rgba(255,251,189,0.4);
+      --text-subtle: rgba(255,251,189,0.25);
+      --accent-red: #CA3C25;
+      --accent-green: #7FB069;
+      --header-bg-a: rgba(255,251,189,0.95);
+      --header-bg-b: rgba(255,251,189,0.75);
+      --header-text: #1C2B1A;
+      --input-bg: #1C2B1A;
+      --pill-bg: #243022;
+      --timer-bar-bg: rgba(36,48,34,0.6);
+      --pick-bg: #243022;
+      --kb-key-bg: #243022;
+      --ri-q-color: rgba(255,251,189,0.55);
+      --fb-ok-bg: rgba(127,176,105,0.15);
+      --fb-ok-color: #7FB069;
+      --fb-no-bg: rgba(202,60,37,0.15);
+      --fb-no-color: #CA3C25;
+    }
+
+    html[data-theme="light"] {
+      --bg-grad-a: #e8f4e4;
+      --bg-grad-b: #d0e8c8;
+      --bg-radial-a: #a8d4a0;
+      --bg-radial-b: #8cc084;
+      --app-bg-a: rgba(255,255,255,0.88);
+      --app-bg-b: rgba(240,250,238,0.92);
+      --card-bg: rgba(255,255,255,0.97);
+      --cell-bg: #f4f9f2;
+      --cell-bg-hover: #e8f2e4;
+      --cell-border: rgba(28,60,26,0.12);
+      --text-primary: #1a2e18;
+      --text-muted: rgba(28,55,26,0.55);
+      --text-subtle: rgba(28,55,26,0.3);
+      --accent-red: #b8341c;
+      --accent-green: #2d6e20;
+      --header-bg-a: #2d5a24;
+      --header-bg-b: #1e3f18;
+      --header-text: #f0fbe8;
+      --input-bg: #eaf3e6;
+      --pill-bg: #dff0d8;
+      --timer-bar-bg: rgba(220,240,215,0.85);
+      --pick-bg: #eaf3e6;
+      --kb-key-bg: #e4eedf;
+      --ri-q-color: rgba(28,55,26,0.65);
+      --fb-ok-bg: rgba(45,110,32,0.1);
+      --fb-ok-color: #1e5c14;
+      --fb-no-bg: rgba(184,52,28,0.09);
+      --fb-no-color: #9e2a14;
+      --stat-bg: #f0f8ec;
+      --review-bg: #f7fbf5;
+      --score-color: #b8341c;
+    }
+
+    /* Apply variables throughout */
+    html, body {
+      background:
+        linear-gradient(135deg, var(--bg-grad-a), var(--bg-grad-b)),
+        radial-gradient(circle at 20% 20%, var(--bg-radial-a) 0%, transparent 70%),
+        radial-gradient(circle at 80% 80%, var(--bg-radial-b) 0%, transparent 80%);
+      background-attachment: fixed;
+      transition: background 0.3s;
+    }
+    .app {
+      background: linear-gradient(135deg, var(--app-bg-a), var(--app-bg-b)) !important;
+      transition: background 0.3s;
+    }
+    .setup-body, .stat-c, .review-wrap, .chart-wrap, .pb-c, .q-card,
+    .card, .timer-bar-wrap, .stopwatch-wrap {
+      background: var(--card-bg) !important;
+      border-color: var(--cell-border) !important;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .bento-cell {
+      background: var(--cell-bg) !important;
+      border-color: var(--cell-border) !important;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .bento-label, .bento-tog-sub, .bento-range-lbl,
+    .chart-lbl, .chart-title, .pb-l, .stat-l, .review-head,
+    .tog-sub, .card-title, .q-number, .q-sub,
+    .timer-left, .stopwatch-label, .kb-hint, .big-sub { color: var(--text-muted) !important; }
+    .bento-tog-label, .pb-v, .stat-v, .wi-n, .chart-val,
+    .bento-range-sep, .q-expr, .tog-label, .field-label,
+    .q-pill span, .timer-right, .stopwatch-num { color: var(--text-primary) !important; }
+    .big-pct { color: var(--accent-red) !important; }
+    .ri-q { color: var(--ri-q-color) !important; }
+    .num-inp, .select-trigger, .select-option, .custom-select .select-menu {
+      background: var(--input-bg) !important;
+      color: var(--text-primary) !important;
+      border-color: var(--cell-border) !important;
+    }
+    .diff-btn, .type-btn, .timer-opt {
+      background: var(--cell-bg) !important;
+      color: var(--text-muted) !important;
+      border-color: var(--cell-border) !important;
+    }
+    .kb-key {
+      background: var(--kb-key-bg) !important;
+      color: var(--text-primary) !important;
+      border-color: var(--cell-border) !important;
+    }
+    .kb-del { color: var(--accent-red) !important; }
+    .kb-enter { background: var(--accent-red) !important; color: #fff !important; }
+    .diff-btn.active { background: var(--accent-green) !important; color: #fff !important; border-color: var(--accent-green) !important; }
+    .type-btn.active { background: var(--accent-red) !important; color: #fff !important; border-color: var(--accent-red) !important; }
+    .timer-opt.active { background: rgba(184,52,28,0.12) !important; border-color: var(--accent-red) !important; color: var(--accent-red) !important; }
+    .ans-input { background: var(--input-bg) !important; color: var(--text-primary) !important; border-color: var(--cell-border) !important; }
+    .ans-input:focus { border-color: var(--text-primary) !important; }
+    .q-pill { background: var(--pill-bg) !important; color: var(--ri-q-color) !important; }
+    .score-pill { background: rgba(184,52,28,0.1) !important; color: var(--accent-red) !important; border-color: rgba(184,52,28,0.2) !important; }
+    .setup-header { background: linear-gradient(135deg, var(--header-bg-a), var(--header-bg-b)) !important; transition: background 0.3s; }
+    .setup-header h1, .setup-header p, .res-title { color: var(--header-text) !important; }
+    .back-btn { background: #1C2B1A !important; }
+    .back-btn svg { stroke: #FFFBBD !important; }
+    html[data-theme="light"] .back-btn { background: #1C2B1A !important; }
+    html[data-theme="light"] .back-btn svg { stroke: #FFFBBD !important; }
+    .review-item { border-color: var(--cell-border) !important; }
+    .history-empty { color: var(--text-muted) !important; }
+    .pick-btn { background: var(--pick-bg) !important; color: var(--text-primary) !important; border-color: var(--cell-border) !important; }
+    .fb-ok { background: var(--fb-ok-bg) !important; color: var(--fb-ok-color) !important; border-color: var(--fb-ok-color) !important; }
+    .fb-no { background: var(--fb-no-bg) !important; color: var(--fb-no-color) !important; border-color: rgba(184,52,28,0.3) !important; }
+    .next-btn { color: var(--text-primary) !important; border-color: var(--cell-border) !important; }
+    .next-btn:hover { background: var(--cell-bg) !important; }
+    .hint-btn { color: var(--text-muted) !important; border-color: var(--cell-border) !important; }
+    .theme-btn { color: var(--text-primary) !important; background: rgba(255,255,255,0.15) !important; border-color: var(--cell-border) !important; }
+    .bento-start, .check-btn, .again-btn { background: var(--accent-red) !important; color: #fff !important; }
+    .home-btn { color: var(--text-primary) !important; border-color: var(--cell-border) !important; }
+    .home-btn:hover { background: var(--cell-bg) !important; }
+    .focus-chip { background: var(--cell-bg) !important; color: var(--text-muted) !important; border-color: var(--cell-border) !important; }
+    .focus-chip.selected { background: rgba(45,110,32,0.12) !important; color: var(--accent-green) !important; border-color: var(--accent-green) !important; }
+    .streak-pill { background: rgba(184,52,28,0.1) !important; border-color: rgba(184,52,28,0.2) !important; color: var(--accent-red) !important; }
+    .lives-pill { background: rgba(184,52,28,0.08) !important; border-color: rgba(184,52,28,0.15) !important; color: var(--text-primary) !important; }
+    html[data-theme="light"] .prog-bar { background: rgba(0,0,0,0.1) !important; }
+    html[data-theme="light"] .timer-bar { background: rgba(0,0,0,0.1) !important; }
+    html[data-theme="light"] .chart-bar-sq { background: rgba(45,110,32,0.65) !important; }
+    html[data-theme="light"] .chart-bar-cu { background: rgba(184,52,28,0.65) !important; }
+    html[data-theme="light"] .gameover-title { color: var(--text-primary) !important; }
+    html[data-theme="light"] .gameover-sub { color: var(--text-muted) !important; }
+    html[data-theme="light"] .big-sub { color: var(--text-muted) !important; }
+    html[data-theme="light"] .ri-ok { color: var(--accent-green) !important; }
+    html[data-theme="light"] .ri-no { color: var(--accent-red) !important; }
+    html[data-theme="light"] .sv-ok { color: var(--accent-green) !important; }
+    html[data-theme="light"] .sv-no { color: var(--accent-red) !important; }
+    html[data-theme="light"] .badge-sq { background: rgba(45,110,32,0.1) !important; color: var(--accent-green) !important; border-color: rgba(45,110,32,0.3) !important; }
+    html[data-theme="light"] .badge-cu { background: rgba(184,52,28,0.1) !important; color: var(--accent-red) !important; border-color: rgba(184,52,28,0.3) !important; }
+    html[data-theme="light"] .pick-btn.correct { background: rgba(45,110,32,0.12) !important; color: var(--accent-green) !important; border-color: var(--accent-green) !important; }
+    html[data-theme="light"] .pick-btn.wrong { background: rgba(184,52,28,0.1) !important; color: var(--accent-red) !important; border-color: var(--accent-red) !important; }
+    html[data-theme="light"] .ans-input.correct { background: rgba(45,110,32,0.08) !important; color: var(--accent-green) !important; border-color: var(--accent-green) !important; }
+    html[data-theme="light"] .ans-input.wrong { background: rgba(184,52,28,0.08) !important; color: var(--accent-red) !important; border-color: var(--accent-red) !important; }
+    html[data-theme="light"] #kbHint { color: rgba(28,55,26,0.35) !important; }
+    html[data-theme="light"] .wi-bar { background: var(--accent-red) !important; }
+    html[data-theme="light"] .wi-bar-wrap { background: rgba(28,55,26,0.1) !important; }
+    html[data-theme="light"] .wi-pct { color: var(--accent-red) !important; }
+    .score-circle { border-color: var(--cell-border) !important; }
+    /* Toggle: dark theme off/on */
+    html[data-theme="dark"] .tslider { background: rgba(255,251,189,0.1); border-color: rgba(255,251,189,0.2); }
+    html[data-theme="dark"] .tslider::before { background: rgba(255,251,189,0.45); }
+    html[data-theme="dark"] .toggle input:checked + .tslider { background: #CA3C25 !important; border-color: #CA3C25 !important; }
+    html[data-theme="dark"] .toggle input:checked + .tslider::before { background: #FFFBBD !important; }
+    /* Toggle: light theme off/on */
+    html[data-theme="light"] .tslider { background: rgba(28,43,26,0.1); border-color: rgba(28,43,26,0.2); }
+    html[data-theme="light"] .tslider::before { background: rgba(28,43,26,0.35); }
+    html[data-theme="light"] .toggle input:checked + .tslider { background: #3a7d2c !important; border-color: #3a7d2c !important; }
+    html[data-theme="light"] .toggle input:checked + .tslider::before { background: #fff !important; }
+
+    /* ── THEME TOGGLE BUTTON ── */
+    .theme-btn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 18px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+    .theme-btn:hover { background: rgba(255,255,255,0.2); }
+
+    /* ── RANGE COL (From/To label above input) ── */
+    .bento-range-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+    }
+    .bento-range-col .num-inp { width: 100%; text-align: center; }
+
+    /* ── HINT BUTTON ── */
+    .hint-btn {
+      display: block;
+      width: 100%;
+      margin-top: 8px;
+      padding: 9px;
+      border: 1.5px dashed rgba(255,251,189,0.25);
+      border-radius: 10px;
+      background: transparent;
+      color: rgba(255,251,189,0.5);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+    }
+    .hint-btn:hover { border-color: rgba(255,251,189,0.5); color: rgba(255,251,189,0.8); }
+    .hint-btn:disabled { opacity: 0.3; cursor: default; }
+    .hint-btn.used { border-color: #CA3C25; color: #CA3C25; }
+
+    /* ── EXPORT BUTTON ── */
+    .export-btn {
+      padding: clamp(12px,3vw,15px) clamp(16px,4vw,22px);
+      border: 1.5px solid rgba(255,251,189,0.25);
+      border-radius: 14px;
+      background: transparent;
+      color: rgba(255,251,189,0.7);
+      font-size: clamp(13px,3.5vw,15px);
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+    }
+    .export-btn:hover { border-color: rgba(255,251,189,0.5); color: #FFFBBD; }
+
+    /* ── SPEED GRAPH ── */
+    .speed-graph-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+    #speedCanvas { width: 100%; display: block; }
+
+    /* ── EXAM MODE dimming of conflicting options ── */
+    .exam-disabled {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    /* ── ADAPTIVE DIFFICULTY badge ── */
+    .adaptive-badge {
+      display: inline-block;
+      font-size: 11px;
+      background: rgba(127,176,105,0.2);
+      border: 1px solid rgba(127,176,105,0.35);
+      color: #7FB069;
+      border-radius: 6px;
+      padding: 2px 7px;
+      margin-left: 6px;
+      font-weight: 600;
+    }
+
+    .review-wrap { overflow-y: auto; }
+    .setup-header h1, .setup-header p, .res-title {
+      position: relative; z-index: 1;
+    }
+
+    /* ── Collapsible history ── */
+    .history-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: clamp(10px,3vw,14px) clamp(12px,4vw,18px);
+      cursor: pointer;
+      user-select: none;
+    }
+    .history-toggle-label {
+      font-size: clamp(10px,2.5vw,12px);
+      font-weight: 600;
+      color: rgba(255,251,189,0.35);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+    .history-toggle-arrow {
+      font-size: 12px;
+      color: rgba(255,251,189,0.35);
+      transition: transform 0.25s;
+    }
+    .history-toggle-arrow.open { transform: rotate(180deg); }
+    .history-collapsible {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    .history-collapsible.open { max-height: 400px; }
+    html[data-theme="light"] .history-toggle-label,
+    html[data-theme="light"] .history-toggle-arrow { color: var(--text-muted) !important; }
+
+    /* ── Export button ── */
+    .export-btn {
+      padding: clamp(12px,3.5vw,16px) clamp(10px,3vw,16px);
+      border: 1.5px solid rgba(255,251,189,0.2);
+      border-radius: 12px;
+      background: transparent;
+      color: #FFFBBD;
+      font-size: clamp(12px,3vw,14px);
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .export-btn:hover { background: rgba(255,251,189,0.08); }
+    html[data-theme="light"] .export-btn { color: var(--text-primary) !important; border-color: var(--cell-border) !important; }
+
+    /* ── Tables mode specific UI ── */
+    .tables-chips-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .table-chip {
+      padding: 5px 11px;
+      border-radius: 8px;
+      border: 1.5px solid rgba(255,251,189,0.2);
+      background: transparent;
+      color: rgba(255,251,189,0.5);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Inter', sans-serif;
+    }
+    .table-chip.selected {
+      border-color: #CA3C25;
+      background: rgba(202,60,37,0.15);
+      color: #CA3C25;
+    }
+    html[data-theme="light"] .table-chip { background: var(--cell-bg) !important; color: var(--text-muted) !important; border-color: var(--cell-border) !important; }
+    html[data-theme="light"] .table-chip.selected { background: rgba(184,52,28,0.12) !important; color: var(--accent-red) !important; border-color: var(--accent-red) !important; }
+    .tables-mult-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-top: 4px;
+      border-top: 1px solid rgba(255,251,189,0.1);
+      margin-top: 2px;
+    }
+    .tables-mult-lbl { font-size: 12px; color: rgba(255,251,189,0.5); white-space: nowrap; flex-shrink: 0; }
+    html[data-theme="light"] .tables-mult-lbl { color: var(--text-muted) !important; }
+    html[data-theme="light"] .tables-mult-row { border-color: var(--cell-border) !important; }
+    .tables-select-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+    .tables-select-btn {
+      padding: 3px 9px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,251,189,0.18);
+      background: transparent;
+      color: rgba(255,251,189,0.4);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+    }
+    .tables-select-btn:hover { border-color: rgba(255,251,189,0.35); color: rgba(255,251,189,0.7); }
+    html[data-theme="light"] .tables-select-btn { color: var(--text-muted) !important; border-color: var(--cell-border) !important; }
+
+    .exam-disabled { opacity: 0.35; pointer-events: none; }
+    /* disabled toggle styling */
+    .bento-tog.tog-disabled { opacity: 0.35; pointer-events: none; }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+<div class="app">
+
+  <!-- SETUP SCREEN -->
+  <div class="screen active" id="s-setup">
+    <div class="setup-header">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <h1>Quiz — Squares &amp; Cubes</h1>
+          <p>Configure your test below</p>
+        </div>
+        <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+      </div>
+    </div>
+
+    <div class="bento-grid">
+
+      <!-- RANGE / LEVEL — left cell (squares/cubes mode) -->
+      <div class="bento-cell" id="rangeCell">
+        <div class="bento-label">🎯 Level</div>
+        <div class="diff-row">
+          <button class="diff-btn" onclick="setDiff('easy',event)">Easy</button>
+          <button class="diff-btn active" onclick="setDiff('medium',event)">Medium</button>
+          <button class="diff-btn" onclick="setDiff('hard',event)">Hard</button>
+        </div>
+        <div class="bento-range-row">
+          <div class="bento-range-col">
+            <span class="bento-range-lbl">From</span>
+            <input type="number" class="num-inp" id="rangeFrom" value="1" min="1">
+          </div>
+          <span class="bento-range-sep">→</span>
+          <div class="bento-range-col">
+            <span class="bento-range-lbl">To</span>
+            <input type="number" class="num-inp" id="rangeTo" value="20" min="2">
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLES CONFIG — left cell (tables mode, hidden by default) -->
+      <div class="bento-cell" id="tablesCell" style="display:none;">
+        <div class="bento-label">✖️ Tables</div>
+
+        <!-- Which tables (range of table numbers) -->
+        <div class="bento-range-row">
+          <div class="bento-range-col">
+            <span class="bento-range-lbl">From</span>
+            <input type="number" class="num-inp" id="tablesFrom" value="2" min="1" onchange="onTablesRangeChange()">
+          </div>
+          <span class="bento-range-sep">→</span>
+          <div class="bento-range-col">
+            <span class="bento-range-lbl">To</span>
+            <input type="number" class="num-inp" id="tablesTo" value="12" min="1" onchange="onTablesRangeChange()">
+          </div>
+        </div>
+
+        <!-- Multiply up to: Standard vs Extended -->
+        <div class="bento-label" style="margin-top:4px;">Multiply up to</div>
+        <div class="timer-grid" id="multModeGrid">
+          <button class="timer-opt active" data-mult="10" onclick="setMultMode(this)">×10 Standard</button>
+          <button class="timer-opt" data-mult="20" onclick="setMultMode(this)">×20 Extended</button>
+        </div>
+      </div>
+
+      <!-- QUESTIONS + TYPE — right cell -->
+      <div class="bento-cell">
+        <div class="bento-label">❓ Questions</div>
+        <input type="number" class="num-inp bento-q-inp" id="qCount" value="10" min="1">
+        <div class="bento-label" style="margin-top:12px;">🔢 Type</div>
+        <div class="type-row">
+          <button class="type-btn" id="btn-squares" onclick="setType('squares')">x²</button>
+          <button class="type-btn" id="btn-cubes" onclick="setType('cubes')">x³</button>
+          <button class="type-btn active" id="btn-both" onclick="setType('both')">Both</button>
+          <button class="type-btn" id="btn-tables" onclick="setType('tables')">Tables</button>
+        </div>
+      </div>
+
+      <!-- TIMER — left cell -->
+      <div class="bento-cell">
+        <div class="bento-label">⏱ Timer</div>
+
+        <!-- FALLBACK dropdown (kept for reference, disabled):
+        <div class="custom-select" id="timerDropdown">
+          <div class="select-trigger" id="timerTrigger">7s timer</div>
+          <div class="select-menu" id="timerMenu">
+            <div class="select-option" data-value="off">Off</div>
+            <div class="select-option active" data-value="fixed">7s timer</div>
+            <div class="select-option" data-value="custom">Custom</div>
+            <div class="select-option" data-value="stopwatch">Stopwatch</div>
+          </div>
+        </div>
+        -->
+
+        <!-- MINI GRID TIMER SELECTOR -->
+        <div class="timer-grid" id="timerGrid">
+          <button class="timer-opt" data-value="off" onclick="setTimerOpt(this)">Off</button>
+          <button class="timer-opt active" data-value="fixed" onclick="setTimerOpt(this)">7s</button>
+          <button class="timer-opt" data-value="custom" onclick="setTimerOpt(this)">Custom</button>
+          <button class="timer-opt" data-value="stopwatch" onclick="setTimerOpt(this)">⏱ Watch</button>
+        </div>
+        <input type="number" id="customTimerInput" placeholder="Seconds (e.g. 10)" style="display:none;width:100%;padding:8px;border-radius:8px;background:#1C2B1A;color:#FFFBBD;border:1px solid rgba(255,251,189,0.2);font-family:'Inter',sans-serif;margin-top:4px;">
+      </div>
+
+      <!-- INPUT MODE — right cell -->
+      <div class="bento-cell">
+        <div class="bento-label">✏️ Input mode</div>
+        <div class="bento-tog">
+          <span class="bento-tog-label">Pick mode<span class="bento-tog-sub">Choose options</span></span>
+          <label class="toggle"><input type="checkbox" id="pickModeTog"><span class="tslider"></span></label>
+        </div>
+        <div id="pickModeDropdown" style="display:none;">
+          <div class="timer-grid" id="pickModeGrid">
+            <button class="timer-opt active" data-value="auto" onclick="setPickModeOpt(this)">Auto Submit</button>
+            <button class="timer-opt" data-value="manual" onclick="setPickModeOpt(this)">Manual Submit</button>
+          </div>
+          <select id="pickModeType" style="display:none;">
+            <option value="auto" selected>Auto submit</option>
+            <option value="manual">Manual submit</option>
+          </select>
+        </div>
+        <div class="bento-tog">
+          <span class="bento-tog-label">Reverse<span class="bento-tog-sub">Type the base number</span></span>
+          <label class="toggle"><input type="checkbox" id="reverseTog"><span class="tslider"></span></label>
+        </div>
+      </div>
+
+      <!-- GAMEPLAY — left cell -->
+      <div class="bento-cell">
+        <div class="bento-label">🎮 Gameplay</div>
+        <div class="bento-tog">
+          <span class="bento-tog-label">Lives<span class="bento-tog-sub">3 lives mode</span></span>
+          <label class="toggle"><input type="checkbox" id="livesTog"><span class="tslider"></span></label>
+        </div>
+        <div class="bento-tog">
+          <span class="bento-tog-label">Spaced rep<span class="bento-tog-sub">Retry wrong answers</span></span>
+          <label class="toggle"><input type="checkbox" id="spacedTog"><span class="tslider"></span></label>
+        </div>
+        <div class="bento-tog">
+          <span class="bento-tog-label">Shuffle<span class="bento-tog-sub">Randomise order</span></span>
+          <label class="toggle"><input type="checkbox" id="shuffleTog" checked><span class="tslider"></span></label>
+        </div>
+        <div class="bento-tog">
+          <span class="bento-tog-label">Exam mode<span class="bento-tog-sub">No feedback until end</span></span>
+          <label class="toggle"><input type="checkbox" id="examTog" onchange="onExamToggle()"><span class="tslider"></span></label>
+        </div>
+      </div>
+
+      <!-- FEEDBACK + FOCUS — right cell -->
+      <div class="bento-cell">
+        <div class="bento-label">💬 Feedback</div>
+        <div class="bento-tog">
+          <span class="bento-tog-label">Instant<span class="bento-tog-sub">Show result immediately</span></span>
+          <label class="toggle"><input type="checkbox" id="feedbackTog" checked><span class="tslider"></span></label>
+        </div>
+        <div class="bento-tog">
+          <span class="bento-tog-label">Auto-submit<span class="bento-tog-sub">Submit on digit count</span></span>
+          <label class="toggle"><input type="checkbox" id="autosubTog"><span class="tslider"></span></label>
+        </div>
+        <div class="bento-tog">
+          <span class="bento-tog-label">Focus mode<span class="bento-tog-sub" id="focusTogSub">Pick specific numbers</span></span>
+          <label class="toggle"><input type="checkbox" id="focusTog" onchange="toggleFocusGrid()"><span class="tslider"></span></label>
+        </div>
+      </div>
+
+      <!-- FOCUS GRID — full width, hidden by default -->
+      <div class="bento-cell wide green" id="focusGridCell" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+          <div class="bento-label" id="focusGridLabel">🎯 Focus numbers</div>
+          <div class="tables-select-row" style="margin:0;">
+            <button class="tables-select-btn" onclick="focusSelectAll()">All</button>
+            <button class="tables-select-btn" onclick="focusClearAll()">None</button>
+          </div>
+        </div>
+        <div class="focus-grid" id="focusChips"></div>
+      </div>
+
+    </div><!-- .bento-grid -->
+
+    <button class="bento-start" onclick="startTest()">Start test →</button>
+  </div>
+
+  <!-- TEST SCREEN -->
+  <div class="screen" id="s-test">
+    <div class="setup-header">
+
+  <div style="display:flex;align-items:center;gap:12px;">
+    <button class="back-btn" onclick="goHome()">
+      <svg viewBox="0 0 24 24">
+        <polyline points="15,18 9,12 15,6"/>
+      </svg>
+    </button>
+
+    <div class="top-meta">
+      <div class="q-pill">
+        Q <span id="qNum">01</span> of <span id="qTotal">10</span>
+      </div>
+      <div class="score-pill" id="scorePill">Score: 0</div>
+      <div class="streak-pill" id="streakPill">🔥 1</div>
+      <div class="lives-pill" id="livesPill" style="display:none;">❤️❤️❤️</div>
+    </div>
+  </div>
+<div class="prog-wrap">
+      <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    </div>
+</div>
+<div class="setup-body">
+<div class="top-content">
+
+    <div class="q-card">
+      <div id="qBadge" class="q-badge badge-sq">Square</div>
+      <div class="q-number" id="qLabel">Question 01</div>
+      <div class="q-expr"   id="qExpr">5²</div>
+      <div class="q-sub"    id="qSub">What is the answer?</div>
+    </div>
+
+<div class="timer-bar-wrap" id="timerZone">
+  <div class="timer-bar-inner">
+    <div class="timer-left">
+      ⏱ <span>Time left</span>
+    </div>
+    <div class="timer-right" id="timerNum">7s</div>
+  </div>
+
+  <div class="timer-bar">
+    <div class="timer-bar-fill" id="timerFill"></div>
+  </div>
+</div>
+
+<div class="stopwatch-wrap" id="stopwatchZone">
+  <div class="stopwatch-label">⏱ Stopwatch</div>
+  <div class="stopwatch-num" id="stopwatchNum">0.0s</div>
+</div>
+
+    <!-- TYPE mode -->
+    <div class="ans-zone" id="typeZone">
+      <div class="ans-row">
+        <input 
+  type="text"
+  class="ans-input"
+  id="ansInput"
+  placeholder="?"
+>
+        <button class="check-btn" id="checkBtn" onclick="checkAnswer()">Check</button>
+      </div>
+      <button class="hint-btn" id="hintBtn" onclick="useHint()">💡 Hint</button>
+    </div>
+
+    <!-- PICK mode -->
+    <div class="pick-zone" id="pickZone" style="display:none;">
+      <div class="pick-grid" id="pickGrid"></div>
+    </div>
+
+    <div class="fb-box" id="fbBox"></div>
+    <button class="next-btn" id="nextBtn" onclick="nextQ()">Next question →</button>
+</div>
+
+<div class="custom-keyboard" id="keyboard">
+  <div class="kb-grid">
+    <button class="kb-key">1</button>
+    <button class="kb-key">2</button>
+    <button class="kb-key">3</button>
+
+    <button class="kb-key">4</button>
+    <button class="kb-key">5</button>
+    <button class="kb-key">6</button>
+
+    <button class="kb-key">7</button>
+    <button class="kb-key">8</button>
+    <button class="kb-key">9</button>
+
+    <button class="kb-key kb-del">⌫</button>
+    <button class="kb-key">0</button>
+    <button class="kb-key kb-enter">✓</button>
+  </div>
+</div>
+<div class="kb-hint" id="kbHint">Enter to check · Backspace to delete</div>
+  </div>
+  </div>
+
+  <!-- GAME OVER SCREEN -->
+  <div class="screen" id="s-gameover">
+    <div class="setup-header">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="back-btn" onclick="goHome()">
+          <svg viewBox="0 0 24 24"><polyline points="15,18 9,12 15,6"/></svg>
+        </button>
+        <div class="res-title">Game Over</div>
+      </div>
+    </div>
+    <div class="setup-body">
+      <div class="gameover-body">
+        <div class="gameover-icon">💀</div>
+        <div class="gameover-title">Out of lives!</div>
+        <div class="gameover-score" id="goScore">0</div>
+        <div class="gameover-sub" id="goSub">0 correct before running out</div>
+        <div class="res-btns" style="width:100%;">
+          <button class="home-btn" onclick="goHome()">Setup</button>
+          <button class="again-btn" onclick="startTest()">Try again</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div class="screen" id="s-results">
+
+  <!-- SAME HEADER STYLE -->
+  <div class="setup-header">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="back-btn" onclick="goHome()">
+        <svg viewBox="0 0 24 24">
+          <polyline points="15,18 9,12 15,6"/>
+        </svg>
+      </button>
+
+      <div class="res-title">Test complete</div>
+    </div>
+  </div>
+
+  <!-- SAME BODY STYLE -->
+  <div class="setup-body">
+
+    <!-- SCORE + PB -->
+    <div class="score-circle">
+      <div class="big-pct" id="resPct">0%</div>
+      <div class="big-sub" id="resSub">0 of 0 correct</div>
+    </div>
+
+    <div class="pb-row">
+      <div class="pb-c"><div class="pb-v" id="pbBest">—</div><div class="pb-l">Best %</div></div>
+      <div class="pb-c"><div class="pb-v" id="pbStreak">—</div><div class="pb-l">Best Streak</div></div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stat-row">
+      <div class="stat-c"><div class="stat-v sv-ok" id="sCorrect">0</div><div class="stat-l">Correct</div></div>
+      <div class="stat-c"><div class="stat-v sv-no" id="sWrong">0</div><div class="stat-l">Wrong</div></div>
+      <div class="stat-c"><div class="stat-v sv-tot" id="sTotal">0</div><div class="stat-l">Total</div></div>
+    </div>
+
+    <!-- ACCURACY CHART -->
+    <div class="chart-wrap" id="chartWrap" style="display:none;">
+      <div class="chart-title">Accuracy — Squares vs Cubes</div>
+      <div class="chart-vals">
+        <div class="chart-val" id="chartSqVal">—</div>
+        <div class="chart-val" id="chartCuVal">—</div>
+      </div>
+      <div class="chart-bars">
+        <div class="chart-col">
+          <div class="chart-bar chart-bar-sq" id="chartSqBar" style="height:0px"></div>
+          <div class="chart-lbl">Squares</div>
+        </div>
+        <div class="chart-col">
+          <div class="chart-bar chart-bar-cu" id="chartCuBar" style="height:0px"></div>
+          <div class="chart-lbl">Cubes</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SPEED GRAPH -->
+    <div class="chart-wrap" id="speedGraphWrap" style="display:none;">
+      <div class="chart-title">⚡ Response time per question</div>
+      <div class="speed-graph-container">
+        <canvas id="speedCanvas" height="100"></canvas>
+      </div>
+    </div>
+
+    <!-- WEAKNESS -->
+    <div class="review-wrap" id="weaknessWrap" style="display:none;">
+      <div class="review-head">⚠️ Struggled with these</div>
+      <div class="review-scroll" id="weaknessList"></div>
+    </div>
+
+    <!-- ANSWER REVIEW -->
+    <div class="review-wrap">
+      <div class="review-head">Answer review</div>
+      <div class="review-scroll" id="reviewList"></div>
+    </div>
+
+    <!-- COLLAPSIBLE HISTORY -->
+    <div class="review-wrap" id="historyWrap">
+      <div class="history-toggle" onclick="toggleHistory()">
+        <span class="history-toggle-label">📋 Result history</span>
+        <span class="history-toggle-arrow" id="historyArrow">▼</span>
+      </div>
+      <div class="history-collapsible" id="historyCollapsible">
+        <div style="border-top:1px solid rgba(255,251,189,0.1);">
+          <div class="review-scroll" id="historyList"><div class="history-empty">No history yet</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="res-btns">
+      <button class="home-btn" onclick="goHome()">Setup</button>
+      <button class="again-btn" onclick="startTest()">Try again</button>
+      <button class="export-btn" onclick="exportResults()">⬇ Export</button>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- .app -->
+</div><!-- .page-wrap -->
+
+<script>
+const isMobile = window.matchMedia("(pointer: coarse)").matches;
+
+  let qs=[], cur=0, score=0, results=[], qType='both';
+let instant=true, autoSub=false, answered=false, pickMode=false;
+let examMode=false;
+let hintUsed=false;
+let questionTimes=[]; // ms per question
+let qStartTime=null;
+
+let timerInterval=null;
+let stopwatchInterval=null;
+let stopwatchStart=null;
+
+let timerMode = 'fixed';
+let duration = 7;
+const CIRC=188.5;
+
+// ── Adaptive difficulty state ──
+const ADAPTIVE_KEY = 'quiz_adaptive';
+let adaptiveData = {};  // key: "n_type" → { correct, total }
+
+// ── new feature state ──
+let streak = 0, bestStreak = 0;
+let lives = 3, livesMode = false;
+let reverseMode = false, spacedMode = false, focusMode = false;
+let focusNums = new Set();
+let wrongQueue = [];   // spaced repetition re-queue
+let retrySet = new Set();
+const PB_KEY = 'quiz_pb';
+
+  function show(id){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+  let tablesScope = 'custom'; // kept for legacy, unused
+  let selectedTables = new Set(); // focus-mode selected table numbers
+  let multUpTo = 10; // Standard=10, Extended=20
+
+  function setMultMode(btn){
+    document.querySelectorAll('#multModeGrid .timer-opt').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    multUpTo = parseInt(btn.dataset.mult);
+  }
+
+  function getTablesRange(){
+    const f = parseInt(document.getElementById('tablesFrom').value) || 2;
+    const t = parseInt(document.getElementById('tablesTo').value) || 12;
+    return { from: Math.min(f,t), to: Math.max(f,t) };
+  }
+
+  function onTablesRangeChange(){
+    // If focus grid is open, rebuild it to match new range
+    const focusOn = document.getElementById('focusTog').checked;
+    if(focusOn && qType === 'tables') {
+      selectedTables.clear();
+      buildFocusGrid();
+    }
+  }
+
+  function buildTablesChips(){ /* no longer used — chips live in focus grid */ }
+  function selectTableRange(){ }
+  function selectAllTables(){ }
+  function clearAllTables(){ }
+  function getTablesNSet(){
+    const {from, to} = getTablesRange();
+    return Array.from({length: to - from + 1}, (_, i) => from + i);
+  }
+
+  function setType(t){
+    qType=t;
+    ['squares','cubes','both','tables'].forEach(x=>{
+      const btn=document.getElementById('btn-'+x);
+      if(btn) btn.classList.toggle('active',x===t);
+    });
+    const isTable = t==='tables';
+    document.getElementById('rangeCell').style.display = isTable ? 'none' : '';
+    document.getElementById('tablesCell').style.display = isTable ? '' : 'none';
+    const revTog = document.getElementById('reverseTog');
+    const revRow = revTog ? revTog.closest('.bento-tog') : null;
+    if(revRow){
+      revRow.classList.toggle('tog-disabled', isTable);
+      if(isTable){ revTog.checked=false; }
+    }
+    const focusSubEl = document.getElementById('focusTogSub');
+    if(focusSubEl) focusSubEl.textContent = isTable ? 'Pick specific tables' : 'Pick specific numbers';
+    const focusOn = document.getElementById('focusTog').checked;
+    if(focusOn) buildFocusGrid();
+  }
+
+  function goHome(){ clearTimer(); clearStopwatch(); show('s-setup'); }
+
+  function setDiff(d, e){
+    document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('active'));
+    e.target.classList.add('active');
+    const map = {easy:[1,10], medium:[1,20], hard:[1,30]};
+    document.getElementById('rangeFrom').value = map[d][0];
+    document.getElementById('rangeTo').value   = map[d][1];
+    buildFocusGrid();
+  }
+
+  function buildFocusGrid(){
+    const isTable = qType === 'tables';
+    const grid = document.getElementById('focusChips');
+    const label = document.getElementById('focusGridLabel');
+    grid.innerHTML = '';
+
+    if(isTable){
+      if(label) label.textContent = '🎯 Focus tables';
+      const {from, to} = getTablesRange();
+      for(let n=from; n<=to; n++){
+        const chip = document.createElement('button');
+        chip.className = 'focus-chip' + (selectedTables.has(n) ? ' selected' : '');
+        chip.textContent = n + '×';
+        chip.onclick = () => {
+          if(selectedTables.has(n)){ selectedTables.delete(n); chip.classList.remove('selected'); }
+          else { selectedTables.add(n); chip.classList.add('selected'); }
+        };
+        grid.appendChild(chip);
+      }
+    } else {
+      if(label) label.textContent = '🎯 Focus numbers';
+      const from = parseInt(document.getElementById('rangeFrom').value)||1;
+      const to   = parseInt(document.getElementById('rangeTo').value)||20;
+      for(let n=from; n<=to; n++){
+        const chip = document.createElement('button');
+        chip.className = 'focus-chip' + (focusNums.has(n) ? ' selected' : '');
+        chip.textContent = n;
+        chip.onclick = () => {
+          if(focusNums.has(n)){ focusNums.delete(n); chip.classList.remove('selected'); }
+          else { focusNums.add(n); chip.classList.add('selected'); }
+        };
+        grid.appendChild(chip);
+      }
+    }
+  }
+
+  function toggleFocusGrid(){
+    const on = document.getElementById('focusTog').checked;
+    const cell = document.getElementById('focusGridCell');
+    if(cell) cell.style.display = on ? 'flex' : 'none';
+    if(on) buildFocusGrid();
+  }
+
+  function focusSelectAll(){
+    const isTable = qType === 'tables';
+    if(isTable){
+      const {from, to} = getTablesRange();
+      for(let n=from;n<=to;n++) selectedTables.add(n);
+    } else {
+      const from = parseInt(document.getElementById('rangeFrom').value)||1;
+      const to   = parseInt(document.getElementById('rangeTo').value)||20;
+      for(let n=from;n<=to;n++) focusNums.add(n);
+    }
+    buildFocusGrid();
+  }
+
+  function focusClearAll(){
+    const isTable = qType === 'tables';
+    if(isTable){ selectedTables.clear(); }
+    else { focusNums.clear(); }
+    buildFocusGrid();
+  }
+
+  // Legacy alias
+  function toggleAllChips(){ focusSelectAll(); }
+
+  function genQs(){
+    const from=parseInt(document.getElementById('rangeFrom').value)||1;
+    const to=parseInt(document.getElementById('rangeTo').value)||20;
+    const count=parseInt(document.getElementById('qCount').value)||10;
+    const shuffle=document.getElementById('shuffleTog').checked;
+    const pool=[];
+
+    if(qType === 'tables'){
+      const {from: tFrom, to: tTo} = getTablesRange();
+      // If focus mode on and user has selected specific tables, use those; else all in range
+      let nSet;
+      if(focusMode && selectedTables.size > 0){
+        nSet = [...selectedTables].filter(n => n >= tFrom && n <= tTo).sort((a,b)=>a-b);
+        if(!nSet.length) nSet = Array.from({length: tTo-tFrom+1}, (_,i)=>tFrom+i);
+      } else {
+        nSet = Array.from({length: tTo-tFrom+1}, (_,i)=>tFrom+i);
+      }
+      for(const n of nSet){
+        for(let m=1; m<=multUpTo; m++){
+          pool.push({n, m, type:'table', answer:n*m, reverse:false});
+        }
+      }
+    } else {
+      for(let n=from;n<=to;n++){
+        if(focusMode && focusNums.size > 0 && !focusNums.has(n)) continue;
+        if(qType==='squares'||qType==='both') pool.push({n,type:'square',answer:n*n,reverse:reverseMode});
+        if(qType==='cubes'  ||qType==='both') pool.push({n,type:'cube',  answer:n*n*n,reverse:reverseMode});
+      }
+    }
+
+    if(!pool.length) return [];
+
+    // Adaptive: bias shuffle toward weak questions
+    loadAdaptive();
+    const weighted = pool.map(q => {
+      const key = q.type==='table' ? `${q.n}x${q.m}` : `${q.n}_${q.type}`;
+      const d = adaptiveData[key];
+      const errorRate = d ? (d.total - d.correct) / d.total : 0.5;
+      return { q, weight: 1 + errorRate * 2 };
+    });
+
+    if(shuffle){
+      // Weighted shuffle
+      weighted.sort(() => Math.random() - 0.5);
+      weighted.sort((a,b) => b.weight - a.weight + (Math.random()-0.5)*0.8);
+    }
+    return weighted.map(w=>w.q).slice(0,count);
+  }
+
+  function startTest(){
+reverseMode = document.getElementById('reverseTog').checked;
+  qs=genQs();
+  if(!qs.length){ alert('No questions — check your range!'); return; }
+
+  cur=0; score=0; results=[]; questionTimes=[];
+  streak=0; wrongQueue=[];retrySet=new Set();
+  instant    = document.getElementById('feedbackTog').checked;
+  autoSub    = document.getElementById('autosubTog').checked;
+  pickMode   = document.getElementById('pickModeTog').checked;
+  reverseMode= document.getElementById('reverseTog').checked;
+  livesMode  = document.getElementById('livesTog').checked;
+  spacedMode = document.getElementById('spacedTog').checked;
+  focusMode  = document.getElementById('focusTog').checked;
+  examMode   = document.getElementById('examTog').checked;
+
+  // Exam mode forces no feedback, no auto-submit
+  if(examMode){ instant=false; autoSub=false; }
+
+  lives = 3;
+  hintUsed = false;
+  document.getElementById('livesPill').style.display = livesMode ? 'block' : 'none';
+  updateLivesPill();
+  document.getElementById('streakPill').classList.remove('active');
+
+  // ✅ NEW TIMER LOGIC
+  const mode = timerMode;
+  const custom = parseInt(document.getElementById('customTimerInput').value);
+
+  timerMode = mode;
+
+  if(mode === 'fixed') duration = 7;
+  else if(mode === 'custom') duration = isNaN(custom) ? 7 : custom;
+
+  show('s-test');
+  loadQ();
+}
+
+  /* ── Generate 4 plausible wrong answers ── */
+  function genOptions(correct, qObj){
+    const opts = new Set([correct]);
+    const candidates = [];
+
+    if(qObj.type === 'table'){
+      // For tables: nearby multiples of n, and nearby products
+      const n = qObj.n, m = qObj.m;
+      for(let d=1; d<=6; d++){
+        candidates.push(n*(m+d));
+        if(m-d>0) candidates.push(n*(m-d));
+        candidates.push((n+1)*m, (n-1>0?(n-1)*m:n*m+1));
+        candidates.push(correct+d, correct-d>0?correct-d:correct+d+1);
+      }
+    } else {
+      const isSquare = qObj.type === 'square';
+      const n = qObj.n;
+      for(let delta = 1; delta <= 10; delta++){
+        if(isSquare){
+          candidates.push((n+delta)*(n+delta));
+          candidates.push((n-delta)*(n-delta));
+        } else {
+          candidates.push((n+delta)*(n+delta)*(n+delta));
+          if(n-delta > 0) candidates.push((n-delta)*(n-delta)*(n-delta));
+        }
+        if(correct - delta > 0) candidates.push(correct - delta);
+        candidates.push(correct + delta);
+      }
+    }
+
+    for(let i=candidates.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [candidates[i],candidates[j]]=[candidates[j],candidates[i]];
+    }
+    for(const c of candidates){
+      if(c !== correct && c > 0 && !opts.has(c)){
+        opts.add(c);
+        if(opts.size === 4) break;
+      }
+    }
+    let fallback = 1;
+    while(opts.size < 4){
+      if(!opts.has(fallback)) opts.add(fallback);
+      fallback++;
+    }
+    const arr = [...opts];
+    for(let i=arr.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [arr[i],arr[j]]=[arr[j],arr[i]];
+    }
+    return arr;
+  }
+
+  function loadQ(){
+    clearTimer(); answered=false; hintUsed=false;
+    qStartTime = performance.now();
+    const q=qs[cur], total=qs.length;
+    const sym=q.type==='square'?'²':'³';
+    document.getElementById('qNum').textContent   = String(cur+1).padStart(2,'0');
+    document.getElementById('qTotal').textContent = total;
+    document.getElementById('scorePill').textContent = `Score: ${score}`;
+    document.getElementById('progFill').style.width  = `${(cur/total)*100}%`;
+    const badge=document.getElementById('qBadge');
+
+    if(q.type==='table'){
+      badge.textContent = 'Tables';
+      badge.className = 'q-badge badge-sq';
+    } else {
+      badge.textContent = q.type==='square'?'Square':'Cube';
+      badge.className   = 'q-badge '+(q.type==='square'?'badge-sq':'badge-cu');
+    }
+
+    const isRetry = retrySet.has(cur);
+    const adaptBadge = getAdaptiveBadge(q);
+    document.getElementById('qLabel').innerHTML = `Question ${String(cur+1).padStart(2,'0')}` + (isRetry ? '<span class="retry-badge">RETRY</span>' : '') + adaptBadge;
+
+    if(q.type==='table'){
+      document.getElementById('qExpr').textContent = `${q.n} × ${q.m}`;
+      document.getElementById('qSub').textContent = 'What is the answer?';
+    } else if(q.reverse){
+      document.getElementById('qExpr').textContent = q.answer.toLocaleString();
+      document.getElementById('qSub').textContent  = q.type==='square' ? 'What number squared gives this?' : 'What number cubed gives this?';
+      badge.textContent = q.type==='square' ? '² Reverse Square' : '³ Reverse Cube';
+      badge.className = 'q-badge badge-rev';
+    } else {
+      document.getElementById('qExpr').textContent = `${q.n}${sym}`;
+    }
+
+    document.getElementById('fbBox').style.display   = 'none';
+    document.getElementById('nextBtn').style.display = 'none';
+    document.getElementById('timerZone').style.display = (timerMode === 'fixed' || timerMode === 'custom') ? 'block' : 'none';
+    document.getElementById('stopwatchZone').style.display = timerMode === 'stopwatch' ? 'flex' : 'none';
+
+    // hint btn — hide in exam mode or pick mode
+    const hb = document.getElementById('hintBtn');
+    if(hb) { hb.style.display = (examMode || pickMode) ? 'none' : 'block'; hb.disabled=false; hb.classList.remove('used'); hb.textContent='💡 Hint'; }
+
+    if(pickMode){
+      document.getElementById('typeZone').style.display = 'none';
+      document.getElementById('pickZone').style.display = 'block';
+      document.getElementById('keyboard').style.display = 'none';
+      document.getElementById('qSub').textContent = 'Choose the correct answer';
+      buildPickGrid(q);
+    } else {
+      document.getElementById('typeZone').style.display = 'block';
+      document.getElementById('pickZone').style.display = 'none';
+      const digits = q.reverse ? String(q.n).length : String(q.answer).length;
+      if(q.type !== 'table' && !q.reverse){
+        document.getElementById('qSub').textContent = autoSub?`Answer has ${digits} digit${digits>1?'s':''}`:'What is the answer?';
+      }
+      const inp=document.getElementById('ansInput');
+      const keyboard = document.getElementById('keyboard');
+
+      if (isMobile) {
+        inp.setAttribute('readonly', true);
+        inp.setAttribute('inputmode', 'none');
+        keyboard.style.display = 'block';
+        const hint = document.getElementById('kbHint');
+        if(hint) hint.style.display = 'none';
+      } else {
+        inp.removeAttribute('readonly');
+        inp.setAttribute('inputmode', 'numeric');
+        keyboard.style.display = 'none';
+        const hint = document.getElementById('kbHint');
+        if(hint) hint.style.display = 'block';
+      }
+      inp.value=''; inp.className='ans-input'; inp.disabled=false;
+      document.getElementById('checkBtn').disabled = false;
+      const checkBtn = document.getElementById('checkBtn');
+
+      if (autoSub) {
+        checkBtn.style.display = 'none';
+      } else {
+        checkBtn.style.display = 'inline-block';
+        checkBtn.textContent = instant ? 'Check' : 'Next';
+      }
+      if (!isMobile) { inp.focus(); }
+    }
+
+    if(timerMode === 'fixed' || timerMode === 'custom'){ startTimer(); }
+    if(timerMode === 'stopwatch'){ startStopwatch(); }
+  }
+
+  function buildPickGrid(q){
+    let options, correctPick;
+    if(q.type === 'table'){
+      correctPick = q.answer;
+      options = genOptions(q.answer, q);
+    } else if(q.reverse){
+      correctPick = q.n;
+      options = genBaseOptions(q.n);
+    } else {
+      correctPick = q.answer;
+      options = genOptions(q.answer, q);
+    }
+    const grid = document.getElementById('pickGrid');
+    grid.innerHTML = '';
+    options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'pick-btn';
+      btn.innerHTML = `${opt.toLocaleString()}<span class="pick-icon"></span>`;
+      btn.onclick = () => pickAnswer(opt, correctPick);
+      grid.appendChild(btn);
+    });
+  }
+
+  function genBaseOptions(n){
+    // Generate 4 plausible base numbers near n
+    const opts = new Set([n]);
+    for(let d=1; opts.size<4; d++){
+      if(n+d>0) opts.add(n+d);
+      if(opts.size<4 && n-d>0) opts.add(n-d);
+    }
+    const arr=[...opts];
+    for(let i=arr.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [arr[i],arr[j]]=[arr[j],arr[i]];
+    }
+    return arr;
+  }
+
+  function pickAnswer(chosen, correct){
+  if(answered) return;
+  clearTimer(); clearStopwatch();
+  answered = true;
+
+  const isCorrect = chosen === correct;
+  const elapsed = qStartTime ? Math.round(performance.now() - qStartTime) : 0;
+  questionTimes.push(elapsed);
+  if(isCorrect){ score++; streak++; if(streak>bestStreak) bestStreak=streak; }
+  else { streak=0; if(spacedMode) wrongQueue.push(cur); }
+  updateStreakPill();
+  updateAdaptive(qs[cur], isCorrect);
+  results.push({q:qs[cur], userAnswer:chosen, correct:isCorrect, timedOut:false, elapsed});
+
+  const btns = document.querySelectorAll('.pick-btn');
+  btns.forEach(btn => {
+    btn.disabled = true;
+    const val = parseInt(btn.textContent.replace(/,/g, ''));
+    if(val === correct){
+      btn.classList.add(isCorrect ? 'correct' : 'reveal');
+      btn.querySelector('.pick-icon').textContent = '✓ correct';
+    } else if(val === chosen && !isCorrect){
+      btn.classList.add('wrong');
+    }
+  });
+
+  document.getElementById('scorePill').textContent = `Score: ${score}`;
+
+  // Show feedback box
+  if(instant){
+    const fb = document.getElementById('fbBox');
+    const q = qs[cur];
+    const sym = q.type==='square'?'²':'³';
+    fb.style.display = 'block';
+    if(q.type==='table'){
+      fb.textContent = isCorrect ? `Correct! ${q.n} × ${q.m} = ${q.answer}` : `Not quite — ${q.n} × ${q.m} = ${q.answer}`;
+    } else {
+      fb.textContent = isCorrect
+        ? `Correct! ${q.n}${sym} = ${q.answer}`
+        : `Not quite — ${q.n}${sym} = ${q.answer}`;
+    }
+    fb.className = 'fb-box ' + (isCorrect ? 'fb-ok' : 'fb-no');
+  }
+
+  if(!isCorrect && livesMode){
+    lives--; updateLivesPill();
+    if(lives <= 0){ setTimeout(()=>gameOver(), 900); return; }
+  }
+
+  const pickType = document.getElementById('pickModeType')?.value || 'auto';
+  const nb = document.getElementById('nextBtn');
+  if(pickType === 'manual'){
+    nb.style.display = 'block';
+    nb.textContent = cur < qs.length-1 ? 'Next question →' : 'See results →';
+  } else {
+    nb.style.display = 'none';
+    setTimeout(() => nextQ(), 900);
+  }
+}
+
+  function clearTimer(){
+  if(timerInterval){
+    cancelAnimationFrame(timerInterval);
+    timerInterval = null;
+  }
+}
+
+function startTimer(){
+
+  function timeUp(){
+    answered = true;
+    const q = qs[cur];
+    const elapsed = qStartTime ? Math.round(performance.now() - qStartTime) : 0;
+    questionTimes.push(elapsed);
+
+    if(pickMode){
+      const btns = document.querySelectorAll('.pick-btn');
+      const correctPick = q.reverse ? q.n : q.answer;
+      btns.forEach(btn => {
+        btn.disabled = true;
+        if(parseInt(btn.textContent.replace(/,/g, '')) === correctPick){
+          btn.classList.add('reveal');
+          btn.querySelector('.pick-icon').textContent = '✓ correct';
+        }
+      });
+      streak=0; updateStreakPill();
+      if(spacedMode) wrongQueue.push(cur);
+      if(livesMode){ lives--; updateLivesPill(); }
+      updateAdaptive(q, false);
+      results.push({q, userAnswer:'—', correct:false, timedOut:true, elapsed});
+    } else {
+      const val = parseInt(document.getElementById('ansInput').value);
+      const correctVal2 = q.type==='table' ? q.answer : (q.reverse ? q.n : q.answer);
+      const correct = !isNaN(val) && val === correctVal2;
+
+      if(correct){ score++; streak++; if(streak>bestStreak)bestStreak=streak; }
+      else { streak=0; if(spacedMode) wrongQueue.push(cur); }
+      updateStreakPill();
+      updateAdaptive(q, correct);
+      results.push({q, userAnswer:isNaN(val)?'—':val, correct, timedOut:true, elapsed});
+
+      document.getElementById('ansInput').disabled = true;
+      document.getElementById('checkBtn').disabled = true;
+      if(!correct && livesMode){ lives--; updateLivesPill(); }
+      if(lives <= 0 && livesMode){ setTimeout(()=>gameOver(), 1300); return; }
+    }
+
+    document.getElementById('scorePill').textContent = `Score: ${score}`;
+    setTimeout(() => nextQ(), 1300);
+  }
+
+  const start = performance.now();
+
+  function animate(now){
+    const elapsed = (now - start) / 1000;
+    const remaining = Math.max(0, duration - elapsed);
+
+    const percent = (remaining / duration) * 100;
+
+    const fill = document.getElementById('timerFill');
+    const num  = document.getElementById('timerNum');
+
+    fill.style.width = percent + '%';
+    num.textContent = Math.ceil(remaining) + 's';
+
+    if (remaining <= 2) {
+      fill.style.background = '#CA3C25';
+      num.style.color = '#CA3C25';
+    } else {
+      fill.style.background = 'linear-gradient(90deg, #CA3C25, #7FB069)';
+      num.style.color = '#7FB069';
+    }
+
+    if (remaining > 0){
+      timerInterval = requestAnimationFrame(animate);
+    } else {
+      if (!answered) timeUp();
+    }
+  }
+
+  timerInterval = requestAnimationFrame(animate);
+}
+  function checkAnswer(){
+  const btn = document.getElementById('checkBtn');
+
+  if(answered){
+    nextQ();
+    return;
+  }
+
+  const q = qs[cur];
+  const val = parseInt(document.getElementById('ansInput').value);
+  if(isNaN(val)) return;
+
+  clearTimer();
+  answered = true;
+
+  // Record time
+  const elapsed = qStartTime ? Math.round(performance.now() - qStartTime) : 0;
+  questionTimes.push(elapsed);
+
+  const correctVal = q.type==='table' ? q.answer : (q.reverse ? q.n : q.answer);
+  const correct = val === correctVal;
+  if(correct){ score++; streak++; if(streak>bestStreak) bestStreak=streak; }
+  else { streak=0; if(spacedMode) wrongQueue.push(cur); }
+
+  updateStreakPill();
+  updateAdaptive(q, correct);
+  results.push({q, userAnswer:val, correct, timedOut:false, elapsed, hintUsed});
+
+  const input = document.getElementById('ansInput');
+  input.disabled = true;
+  input.className = 'ans-input ' + (correct ? 'correct' : 'wrong');
+
+  document.getElementById('scorePill').textContent = `Score: ${score}`;
+
+  if(!correct && livesMode){
+    lives--;
+    updateLivesPill();
+    if(lives <= 0){
+      setTimeout(()=>gameOver(), instant ? 1200 : 400);
+      const nb = document.getElementById('nextBtn');
+      nb.style.display='block';
+      nb.textContent='Game Over';
+    }
+  }
+
+  const nb = document.getElementById('nextBtn');
+
+  if(instant){
+    nb.style.display = 'block';
+    nb.textContent = cur < qs.length-1 ? 'Next question →' : 'See results →';
+
+    const fb = document.getElementById('fbBox');
+    const sym = q.type==='square'?'²':'³';
+    fb.style.display='block';
+    if(q.type==='table'){
+      fb.textContent = correct ? `Correct! ${q.n} × ${q.m} = ${q.answer}` : `Not quite — ${q.n} × ${q.m} = ${q.answer}. You said ${val}.`;
+    } else {
+      fb.textContent = correct
+        ? (q.reverse ? `Correct! ${q.answer}${sym} → base is ${q.n}` : `Correct! ${q.n}${sym} = ${q.answer}`)
+        : (q.reverse ? `Not quite — the answer is ${q.n}. You said ${val}.` : `Not quite — ${q.n}${sym} = ${q.answer}. You said ${val}.`);
+    }
+    fb.className='fb-box '+(correct?'fb-ok':'fb-no');
+  } else {
+    btn.textContent = 'Next';
+  }
+
+  if(autoSub){
+    setTimeout(() => {
+      if(answered) nextQ();
+    }, instant ? 900 : 0);
+  }
+}  function nextQ(){
+    clearTimer();
+    if(lives <= 0 && livesMode){ gameOver(); return; }
+    if(cur < qs.length-1){
+      cur++; loadQ();
+    } else if(spacedMode && wrongQueue.length > 0){
+      // re-queue wrong answers once
+      const requeue = [...wrongQueue];
+      wrongQueue = [];
+      requeue.forEach(idx => {
+        qs.push({...qs[idx], _retry:true});
+        retrySet.add(qs.length-1);
+      });
+      cur++; loadQ();
+    } else {
+      showResults();
+    }
+  }
+
+  function gameOver(){
+    clearTimer(); clearStopwatch();
+    show('s-gameover');
+    document.getElementById('goScore').textContent = score;
+    document.getElementById('goSub').textContent = `${score} correct before running out of lives`;
+  }
+
+  function updateStreakPill(){
+    const pill = document.getElementById('streakPill');
+    if(streak >= 2){ pill.textContent = `🔥 ${streak}`; pill.classList.add('active'); }
+    else { pill.classList.remove('active'); }
+  }
+
+  function updateLivesPill(){
+    const full='❤️', empty='🖤';
+    document.getElementById('livesPill').textContent = full.repeat(Math.max(0,lives)) + empty.repeat(Math.max(0,3-lives));
+  }
+
+  function showResults(){
+    clearTimer(); clearStopwatch(); show('s-results');
+    const total=results.length, wrong=total-score, pct=Math.round((score/total)*100);
+    document.getElementById('resPct').textContent = pct+'%';
+    document.getElementById('resSub').textContent = `${score} of ${total} correct`;
+    document.getElementById('sCorrect').textContent = score;
+    document.getElementById('sWrong').textContent   = wrong;
+    document.getElementById('sTotal').textContent   = total;
+
+    // answer review
+    document.getElementById('reviewList').innerHTML = results.map(r=>{
+      const sym=r.q.type==='square'?'²':r.q.type==='cube'?'³':'';
+      const cls=r.correct?'ri-ok':'ri-no', mark=r.correct?'✓':'✗';
+      const disp = r.q.type==='table' ? `${r.q.n}×${r.q.m}` : (r.q.reverse ? r.q.answer.toLocaleString() : `${r.q.n}${sym}`);
+      const correctAns = r.q.type==='table' ? r.q.answer : (r.q.reverse ? r.q.n : r.q.answer);
+      const hintMark = r.hintUsed ? ' 💡' : '';
+      const note=r.correct?`${correctAns}${hintMark}`:r.timedOut?`${correctAns} (time's up)`:`${correctAns} (you: ${r.userAnswer})`;
+      const timeStr = r.elapsed ? ` · ${(r.elapsed/1000).toFixed(1)}s` : '';
+      return `<div class="review-item"><span class="ri-q">${disp}${timeStr}</span><span class="ri-a ${cls}">${mark} ${note}</span></div>`;
+    }).join('');
+
+    // squares vs cubes chart
+    const sqR = results.filter(r=>r.q.type==='square');
+    const cuR = results.filter(r=>r.q.type==='cube');
+    const sqPct = sqR.length ? Math.round(sqR.filter(r=>r.correct).length/sqR.length*100) : null;
+    const cuPct = cuR.length ? Math.round(cuR.filter(r=>r.correct).length/cuR.length*100) : null;
+    document.getElementById('chartWrap').style.display = (sqR.length&&cuR.length) ? 'block' : 'none';
+    if(sqR.length&&cuR.length){
+      document.getElementById('chartSqVal').textContent = sqPct+'%';
+      document.getElementById('chartCuVal').textContent = cuPct+'%';
+      setTimeout(()=>{
+        document.getElementById('chartSqBar').style.height = sqPct+'%';
+        document.getElementById('chartCuBar').style.height = cuPct+'%';
+      },50);
+    }
+
+    // weakness: numbers wrong >50% of attempts this session
+    const wrongMap = {};
+    results.forEach(r=>{
+      const key = r.q.n+'_'+r.q.type;
+      if(!wrongMap[key]) wrongMap[key]={n:r.q.n,type:r.q.type,wrong:0,total:0};
+      wrongMap[key].total++;
+      if(!r.correct) wrongMap[key].wrong++;
+    });
+    const weak = Object.values(wrongMap).filter(w=>w.wrong/w.total>0.5).sort((a,b)=>b.wrong/b.total-a.wrong/a.total).slice(0,5);
+    const wWrap = document.getElementById('weaknessWrap');
+    if(weak.length){
+      wWrap.style.display='flex';
+      document.getElementById('weaknessList').innerHTML = weak.map(w=>{
+        const sym=w.type==='square'?'²':'³';
+        const pctW=Math.round(w.wrong/w.total*100);
+        return `<div class="weakness-item"><span class="wi-n">${w.n}${sym}</span><div class="wi-bar-wrap"><div class="wi-bar" style="width:${pctW}%"></div></div><span class="wi-pct">${w.wrong}/${w.total} wrong</span></div>`;
+      }).join('');
+    } else { wWrap.style.display='none'; }
+
+    // personal bests
+    const pb = getPB();
+    const isNewBest = pct > (pb.bestPct||0);
+    const isNewStreak = bestStreak > (pb.bestStreak||0);
+    if(isNewBest) pb.bestPct = pct;
+    if(isNewStreak) pb.bestStreak = bestStreak;
+    savePB(pb);
+    document.getElementById('pbBest').textContent = (pb.bestPct||0)+'%';
+    document.getElementById('pbBest').className = 'pb-v' + (isNewBest?' pb-new':'');
+    document.getElementById('pbStreak').textContent = pb.bestStreak||0;
+    document.getElementById('pbStreak').className = 'pb-v' + (isNewStreak?' pb-new':'');
+
+    // confetti on 100%
+    if(pct===100) launchConfetti();
+
+    saveHistory(score, total, pct);
+    renderHistory();
+    renderSpeedGraph();
+  }
+
+  document.getElementById('ansInput').addEventListener('input',()=>{
+    if(!autoSub||answered) return;
+    const q=qs[cur], val=document.getElementById('ansInput').value;
+    if(val===''||val==='-') return;
+    const targetLen = q.reverse ? String(q.n).length : String(q.answer).length;
+    if(val.replace('-','').length>=targetLen) setTimeout(()=>checkAnswer(),120);
+  });
+  document.getElementById('ansInput').addEventListener('keydown',e=>{
+    if(e.key==='Enter'){ answered?nextQ():checkAnswer(); }
+  });
+const pickTog = document.getElementById('pickModeTog');
+const autoTog = document.getElementById('autosubTog');
+const feedbackTog = document.getElementById('feedbackTog');
+const pickDropdown = document.getElementById('pickModeDropdown');
+
+pickTog.addEventListener('change', () => {
+  if (pickTog.checked) {
+    autoTog.checked = false;
+    feedbackTog.checked = false;
+
+    autoTog.disabled = true;
+    feedbackTog.disabled = true;
+
+    pickDropdown.style.display = 'block';
+  } else {
+    autoTog.disabled = false;
+    feedbackTog.disabled = false;
+
+    pickDropdown.style.display = 'none';
+  }
+});
+
+// ───────── TIMER MINI GRID ─────────
+function setTimerOpt(el){
+  document.querySelectorAll('#timerGrid .timer-opt').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  timerMode = el.dataset.value;
+  const ci = document.getElementById('customTimerInput');
+  ci.style.display = timerMode === 'custom' ? 'block' : 'none';
+}
+
+// ───────── TIMER DROPDOWN (kept, disabled in HTML — guarded) ─────────
+const dropdown = document.getElementById('timerDropdown');
+const trigger = document.getElementById('timerTrigger');
+const options = document.querySelectorAll('#timerMenu .select-option');
+const customInput = document.getElementById('customTimerInput');
+
+if(trigger){
+  trigger.onclick = () => { dropdown.classList.toggle('open'); };
+  options.forEach(opt => {
+    opt.onclick = () => {
+      options.forEach(o => o.classList.remove('active'));
+      opt.classList.add('active');
+      timerMode = opt.dataset.value;
+      trigger.textContent = opt.textContent;
+      dropdown.classList.remove('open');
+      customInput.style.display = timerMode === 'custom' ? 'block' : 'none';
+    };
+  });
+  document.addEventListener('click', (e) => {
+    if(dropdown && !dropdown.contains(e.target)) dropdown.classList.remove('open');
+  });
+}
+
+// ───────── PICK MODE INLINE BUTTONS ─────────
+function setPickModeOpt(el) {
+  document.querySelectorAll('#pickModeGrid .timer-opt').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  const pickRealSel = document.getElementById('pickModeType');
+  if (pickRealSel) pickRealSel.value = el.dataset.value;
+}
+
+const input = document.getElementById('ansInput');
+const keys = document.querySelectorAll('.kb-key');
+
+keys.forEach(key => {
+  key.addEventListener('click', () => {
+    if (input.disabled) return;
+
+    if (key.classList.contains('kb-del')) {
+      input.value = input.value.slice(0, -1);
+      return;
+    }
+
+    if (key.classList.contains('kb-enter')) {
+      checkAnswer();
+      return;
+    }
+
+    input.value += key.textContent;
+
+    // auto submit logic still works
+    if (autoSub) {
+      const q = qs[cur];
+      const targetLen = q.reverse ? String(q.n).length : String(q.answer).length;
+      if (input.value.length >= targetLen) {
+        setTimeout(() => checkAnswer(), 100);
+      }
+    }
+  });
+});
+document.getElementById('ansInput').addEventListener('focus', (e) => {
+  if (isMobile) e.target.blur();
+});
+
+if (isMobile) {
+  document.getElementById('keyboard').style.display = 'block';
+}
+
+// ───────── PERSONAL BESTS ─────────
+function getPB(){
+  try { return JSON.parse(localStorage.getItem(PB_KEY)) || {}; } catch(e){ return {}; }
+}
+function savePB(pb){
+  try { localStorage.setItem(PB_KEY, JSON.stringify(pb)); } catch(e){}
+}
+
+// ───────── CONFETTI ─────────
+function launchConfetti(){
+  const colors=['#CA3C25','#7FB069','#FFFBBD','#3a6b35','#fff'];
+  for(let i=0;i<80;i++){
+    setTimeout(()=>{
+      const el=document.createElement('div');
+      el.className='confetti-piece';
+      el.style.cssText=`left:${Math.random()*100}vw;background:${colors[Math.floor(Math.random()*colors.length)]};animation-duration:${0.8+Math.random()*1.5}s;animation-delay:${Math.random()*0.5}s;transform:rotate(${Math.random()*360}deg);`;
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(), 2500);
+    }, i*18);
+  }
+}
+
+// init focus grid on range input change
+document.getElementById('rangeFrom').addEventListener('change', buildFocusGrid);
+document.getElementById('rangeTo').addEventListener('change', buildFocusGrid);
+buildFocusGrid();
+
+// ───────── STOPWATCH ─────────
+// (vars declared at top of script)
+stopwatchInterval = null;
+stopwatchStart = null;
+
+function startStopwatch() {
+  clearStopwatch();
+  stopwatchStart = performance.now();
+  function tick(now) {
+    const elapsed = (now - stopwatchStart) / 1000;
+    document.getElementById('stopwatchNum').textContent = elapsed.toFixed(1) + 's';
+    stopwatchInterval = requestAnimationFrame(tick);
+  }
+  stopwatchInterval = requestAnimationFrame(tick);
+}
+
+function clearStopwatch() {
+  if (stopwatchInterval) {
+    cancelAnimationFrame(stopwatchInterval);
+    stopwatchInterval = null;
+  }
+}
+
+// ───────── HISTORY ─────────
+const HISTORY_KEY = 'quiz_history';
+const MAX_HISTORY = 20;
+
+function saveHistory(score, total, pct) {
+  let history = [];
+  try { history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch(e) {}
+  history.unshift({ score, total, pct, date: new Date().toISOString() });
+  history = history.slice(0, MAX_HISTORY);
+  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); } catch(e) {}
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  if (!list) return;
+  let history = [];
+  try { history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch(e) {}
+  if (!history.length) {
+    list.innerHTML = '<div class="history-empty">No history yet</div>';
+    return;
+  }
+  list.innerHTML = history.map(h => `
+    <div class="review-item">
+      <span class="ri-q">${new Date(h.date).toLocaleDateString(undefined, {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</span>
+      <span class="ri-a ${h.pct >= 70 ? 'ri-ok' : 'ri-no'}">${h.pct}% (${h.score}/${h.total})</span>
+    </div>
+  `).join('');
+}
+
+// ───────── HINT ─────────
+function useHint(){
+  if(answered || hintUsed) return;
+  const q = qs[cur];
+  const hb = document.getElementById('hintBtn');
+  hb.disabled = true; hb.classList.add('used');
+  hintUsed = true;
+  let hint = '';
+  if(q.type==='table'){
+    hint = `💡 ${q.n} × ${q.m}: think ${q.n} × ${Math.floor(q.m/2)} = ${q.n*Math.floor(q.m/2)}, then add ${q.n * (q.m - Math.floor(q.m/2))}`;
+  } else if(q.type==='square'){
+    const prev = q.n - 1;
+    hint = `💡 ${q.n}² = ${prev}² + ${prev} + ${q.n} = ${prev*prev} + ${prev+q.n}`;
+  } else {
+    hint = `💡 ${q.n}³ = ${q.n} × ${q.n}² = ${q.n} × ${q.n*q.n}`;
+  }
+  hb.textContent = hint;
+  hb.style.fontSize = '12px';
+}
+
+// ───────── EXAM MODE TOGGLE ─────────
+function onExamToggle(){
+  const on = document.getElementById('examTog').checked;
+  const toDisable = ['feedbackTog','autosubTog','livesTog','spacedTog'];
+  toDisable.forEach(id => {
+    const el = document.getElementById(id);
+    const row = el ? el.closest('.bento-tog') : null;
+    if(on){
+      if(el){ el.checked=false; el.disabled=true; }
+      if(row) row.classList.add('exam-disabled');
+    } else {
+      if(el) el.disabled=false;
+      if(row) row.classList.remove('exam-disabled');
+    }
+  });
+}
+
+// ───────── ADAPTIVE DIFFICULTY ─────────
+function loadAdaptive(){
+  try { adaptiveData = JSON.parse(localStorage.getItem(ADAPTIVE_KEY)) || {}; } catch(e){ adaptiveData={}; }
+}
+function saveAdaptive(){
+  try { localStorage.setItem(ADAPTIVE_KEY, JSON.stringify(adaptiveData)); } catch(e){}
+}
+function updateAdaptive(q, correct){
+  const key = q.type==='table' ? `${q.n}x${q.m}` : `${q.n}_${q.type}`;
+  if(!adaptiveData[key]) adaptiveData[key]={correct:0,total:0};
+  adaptiveData[key].total++;
+  if(correct) adaptiveData[key].correct++;
+  saveAdaptive();
+}
+function getAdaptiveBadge(q){
+  loadAdaptive();
+  const key = q.type==='table' ? `${q.n}x${q.m}` : `${q.n}_${q.type}`;
+  const d = adaptiveData[key];
+  if(!d || d.total < 2) return '';
+  const rate = d.correct / d.total;
+  if(rate < 0.5) return '<span class="adaptive-badge">⚠ Weak</span>';
+  if(rate >= 0.9 && d.total >= 4) return '<span class="adaptive-badge" style="color:#7FB069;border-color:rgba(127,176,105,0.35);">✓ Strong</span>';
+  return '';
+}
+
+// ───────── SPEED GRAPH ─────────
+function renderSpeedGraph(){
+  const wrap = document.getElementById('speedGraphWrap');
+  if(!questionTimes.length || !results.length){ wrap.style.display='none'; return; }
+  wrap.style.display = 'block';
+
+  const canvas = document.getElementById('speedCanvas');
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.parentElement.offsetWidth || 300;
+  const H = 100;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const times = questionTimes;
+  const maxT = Math.max(...times, 1000);
+  const n = times.length;
+  const padL=30, padR=10, padT=10, padB=20;
+  const gW = W - padL - padR;
+  const gH = H - padT - padB;
+
+  ctx.clearRect(0,0,W,H);
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(255,251,189,0.08)';
+  ctx.lineWidth = 1;
+  [0.25,0.5,0.75,1].forEach(frac=>{
+    const y = padT + gH*(1-frac);
+    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
+    ctx.fillStyle='rgba(255,251,189,0.25)';
+    ctx.font='9px Inter,sans-serif';
+    ctx.fillText(Math.round(maxT*frac/1000)+'s', 2, y+3);
+  });
+
+  // Line
+  ctx.beginPath();
+  times.forEach((t,i)=>{
+    const x = padL + (i/(Math.max(n-1,1)))*gW;
+    const y = padT + gH*(1 - t/maxT);
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle='rgba(127,176,105,0.7)'; ctx.lineWidth=2; ctx.stroke();
+
+  // Dots
+  times.forEach((t,i)=>{
+    const x = padL + (i/(Math.max(n-1,1)))*gW;
+    const y = padT + gH*(1 - t/maxT);
+    ctx.beginPath(); ctx.arc(x,y,3.5,0,Math.PI*2);
+    ctx.fillStyle = results[i]?.correct ? '#7FB069' : '#CA3C25';
+    ctx.fill();
+  });
+}
+
+// ───────── HISTORY TOGGLE ─────────
+function toggleHistory(){
+  const col = document.getElementById('historyCollapsible');
+  const arrow = document.getElementById('historyArrow');
+  const isOpen = col.classList.contains('open');
+  col.classList.toggle('open', !isOpen);
+  arrow.classList.toggle('open', !isOpen);
+}
+
+// ───────── EXPORT ─────────
+function exportResults(){
+  const lines = ['Question,Type,Your Answer,Correct Answer,Result,Time(ms)'];
+  results.forEach(r=>{
+    const q = r.q;
+    const sym = q.type==='square'?'²':q.type==='cube'?'³':'×';
+    const qStr = q.type==='table' ? `${q.n}×${q.m}` : `${q.n}${sym}`;
+    const correctAns = q.type==='table' ? q.answer : (q.reverse ? q.n : q.answer);
+    lines.push(`"${qStr}","${q.type}","${r.userAnswer}","${correctAns}","${r.correct?'Correct':'Wrong'}","${r.elapsed||''}"`);
+  });
+  const blob = new Blob([lines.join('\n')], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `quiz_results_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+// ───────── THEME ─────────
+function toggleTheme(){
+  const html = document.documentElement;
+  const isLight = html.getAttribute('data-theme') === 'light';
+  const next = isLight ? 'dark' : 'light';
+  html.setAttribute('data-theme', next);
+  document.getElementById('themeBtn').textContent = next === 'light' ? '☀️' : '🌙';
+  try { localStorage.setItem('quiz_theme', next); } catch(e){}
+}
+// Restore saved theme on load
+(function(){
+  try {
+    const saved = localStorage.getItem('quiz_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+    const btn = document.getElementById('themeBtn');
+    if(btn) btn.textContent = saved === 'light' ? '☀️' : '🌙';
+  } catch(e){
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+})();
+
+</script>
+</body>
+</html>
