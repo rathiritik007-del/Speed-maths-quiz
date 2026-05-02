@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -8,14 +8,12 @@
   <style>
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *:focus { outline: none; }
+    *:focus-visible { outline: 2px solid rgba(127,176,105,0.5); outline-offset: 2px; }
 
     html, body {
       height: 100%;
       min-height: 100%;
-      background:
-        linear-gradient(135deg, #122312, #0d160c),
-        radial-gradient(circle at 20% 20%, #3a6b35 0%, transparent 70%),
-        radial-gradient(circle at 80% 80%, #244a22 0%, transparent 80%);
       align-items: flex-start;
       justify-content: center;
       font-family: 'Inter', sans-serif;
@@ -41,29 +39,18 @@
     /* ── Main app card ── */
     .app {
   width: 100%;
-  max-width: 900px;     /* control width */
-  margin: 0 auto;       /* center horizontally */
-
+  max-width: 900px;
+  margin: 0 auto;
   border-radius: 20px;
   position: relative;
-  overflow: hidden;     /* 🔥 prevents glass bleed */
-
+  overflow: hidden;
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-
-  background: linear-gradient(
-    135deg,
-    rgba(58, 107, 53, 0.25),
-    rgba(13, 22, 12, 0.55)
-  );
-
   border: 1px solid rgba(255,255,255,0.12);
-
   box-shadow:
     0 25px 80px rgba(0,0,0,0.65),
     inset 0 1px 0 rgba(255,255,255,0.05);
-
-  padding: 16px;  /* 🔥 replaces ALL inner margins */
+  padding: 16px;
 }
 
 .app::after {
@@ -275,9 +262,9 @@
     .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
     .tslider {
       position: absolute; inset: 0;
-      background: #1C2B1A;
+      background: rgba(255,251,189,0.12);
       border-radius: 14px;
-      transition: background 0.2s;
+      transition: background 0.2s, border-color 0.2s;
       border: 1.5px solid rgba(255,251,189,0.25);
     }
     .tslider::before {
@@ -285,12 +272,23 @@
       position: absolute;
       width: 19px; height: 19px;
       left: 3px; top: 2px;
-      background: #FFFBBD;
+      background: rgba(255,251,189,0.5);
       border-radius: 50%;
       transition: transform 0.2s, background 0.2s;
     }
-    .toggle input:checked + .tslider { background: #CA3C25; border-color: #CA3C25; }
-    .toggle input:checked + .tslider::before { transform: translateX(23px); background: #FFFBBD; }
+    .toggle input:checked + .tslider {
+      background: #CA3C25;
+      border-color: #CA3C25;
+    }
+    .toggle input:checked + .tslider::before {
+      transform: translateX(23px);
+      background: #FFFBBD;
+    }
+    /* Remove orange browser focus outline on all inputs/buttons */
+    input:focus, button:focus, .toggle input:focus + .tslider {
+      outline: none;
+      box-shadow: none;
+    }
 
     #s-setup .start-btn {
       margin: 4px clamp(12px, 4vw, 20px) clamp(12px, 4vw, 20px);
@@ -1192,8 +1190,8 @@ select:focus {
     }
     .weakness-item:last-child { border-bottom: none; }
     .wi-n { font-size: clamp(12px,3.2vw,15px); color: rgba(255,251,189,0.5); }
-    .wi-bar-wrap { display: none; }
-    .wi-bar { display: none; }
+    .wi-bar-wrap { flex: 1; margin: 0 12px; height: 6px; background: rgba(255,251,189,0.1); border-radius: 3px; overflow: hidden; }
+    .wi-bar { height: 100%; background: #CA3C25; border-radius: 3px; transition: width 0.4s; }
     .wi-pct { font-size: clamp(11px,2.8vw,13px); font-weight: 600; color: #CA3C25; min-width: 80px; text-align: right; }
 
     /* ════════════════════════════════════
@@ -1396,16 +1394,382 @@ select:focus {
       }
     }
 
-    .review-wrap {
-      overflow-y: auto;
+    /* ════════════════════════════════════
+       THEME SYSTEM — dark (default) + light
+    ════════════════════════════════════ */
+    :root, html[data-theme="dark"] {
+      --bg-grad-a: #122312;
+      --bg-grad-b: #0d160c;
+      --bg-radial-a: #3a6b35;
+      --bg-radial-b: #244a22;
+      --app-bg-a: rgba(58,107,53,0.25);
+      --app-bg-b: rgba(13,22,12,0.55);
+      --card-bg: rgba(36,48,34,0.9);
+      --cell-bg: #243022;
+      --cell-bg-hover: #2d3d2a;
+      --cell-border: rgba(255,251,189,0.1);
+      --text-primary: #FFFBBD;
+      --text-muted: rgba(255,251,189,0.4);
+      --text-subtle: rgba(255,251,189,0.25);
+      --accent-red: #CA3C25;
+      --accent-green: #7FB069;
+      --header-bg-a: rgba(255,251,189,0.95);
+      --header-bg-b: rgba(255,251,189,0.75);
+      --header-text: #1C2B1A;
+      --input-bg: #1C2B1A;
+      --pill-bg: #243022;
+      --timer-bar-bg: rgba(36,48,34,0.6);
+      --pick-bg: #243022;
+      --kb-key-bg: #243022;
+      --ri-q-color: rgba(255,251,189,0.55);
+      --fb-ok-bg: rgba(127,176,105,0.15);
+      --fb-ok-color: #7FB069;
+      --fb-no-bg: rgba(202,60,37,0.15);
+      --fb-no-color: #CA3C25;
     }
 
-    .setup-header h1,
-    .setup-header p,
-    .res-title {
-      position: relative;
-      z-index: 1;
+    html[data-theme="light"] {
+      --bg-grad-a: #e8f4e4;
+      --bg-grad-b: #d0e8c8;
+      --bg-radial-a: #a8d4a0;
+      --bg-radial-b: #8cc084;
+      --app-bg-a: rgba(255,255,255,0.88);
+      --app-bg-b: rgba(240,250,238,0.92);
+      --card-bg: rgba(255,255,255,0.97);
+      --cell-bg: #f4f9f2;
+      --cell-bg-hover: #e8f2e4;
+      --cell-border: rgba(28,60,26,0.12);
+      --text-primary: #1a2e18;
+      --text-muted: rgba(28,55,26,0.55);
+      --text-subtle: rgba(28,55,26,0.3);
+      --accent-red: #b8341c;
+      --accent-green: #2d6e20;
+      --header-bg-a: #2d5a24;
+      --header-bg-b: #1e3f18;
+      --header-text: #f0fbe8;
+      --input-bg: #eaf3e6;
+      --pill-bg: #dff0d8;
+      --timer-bar-bg: rgba(220,240,215,0.85);
+      --pick-bg: #eaf3e6;
+      --kb-key-bg: #e4eedf;
+      --ri-q-color: rgba(28,55,26,0.65);
+      --fb-ok-bg: rgba(45,110,32,0.1);
+      --fb-ok-color: #1e5c14;
+      --fb-no-bg: rgba(184,52,28,0.09);
+      --fb-no-color: #9e2a14;
+      --stat-bg: #f0f8ec;
+      --review-bg: #f7fbf5;
+      --score-color: #b8341c;
     }
+
+    /* Apply variables throughout */
+    html, body {
+      background:
+        linear-gradient(135deg, var(--bg-grad-a), var(--bg-grad-b)),
+        radial-gradient(circle at 20% 20%, var(--bg-radial-a) 0%, transparent 70%),
+        radial-gradient(circle at 80% 80%, var(--bg-radial-b) 0%, transparent 80%);
+      background-attachment: fixed;
+      transition: background 0.3s;
+    }
+    .app {
+      background: linear-gradient(135deg, var(--app-bg-a), var(--app-bg-b)) !important;
+      transition: background 0.3s;
+    }
+    .setup-body, .stat-c, .review-wrap, .chart-wrap, .pb-c, .q-card,
+    .card, .timer-bar-wrap, .stopwatch-wrap {
+      background: var(--card-bg) !important;
+      border-color: var(--cell-border) !important;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .bento-cell {
+      background: var(--cell-bg) !important;
+      border-color: var(--cell-border) !important;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .bento-label, .bento-tog-sub, .bento-range-lbl,
+    .chart-lbl, .chart-title, .pb-l, .stat-l, .review-head,
+    .tog-sub, .card-title, .q-number, .q-sub,
+    .timer-left, .stopwatch-label, .kb-hint, .big-sub { color: var(--text-muted) !important; }
+    .bento-tog-label, .pb-v, .stat-v, .wi-n, .chart-val,
+    .bento-range-sep, .q-expr, .tog-label, .field-label,
+    .q-pill span, .timer-right, .stopwatch-num { color: var(--text-primary) !important; }
+    .big-pct { color: var(--accent-red) !important; }
+    .ri-q { color: var(--ri-q-color) !important; }
+    .num-inp, .select-trigger, .select-option, .custom-select .select-menu {
+      background: var(--input-bg) !important;
+      color: var(--text-primary) !important;
+      border-color: var(--cell-border) !important;
+    }
+    .diff-btn, .type-btn, .timer-opt {
+      background: var(--cell-bg) !important;
+      color: var(--text-muted) !important;
+      border-color: var(--cell-border) !important;
+    }
+    .kb-key {
+      background: var(--kb-key-bg) !important;
+      color: var(--text-primary) !important;
+      border-color: var(--cell-border) !important;
+    }
+    .kb-del { color: var(--accent-red) !important; }
+    .kb-enter { background: var(--accent-red) !important; color: #fff !important; }
+    .diff-btn.active { background: var(--accent-green) !important; color: #fff !important; border-color: var(--accent-green) !important; }
+    .type-btn.active { background: var(--accent-red) !important; color: #fff !important; border-color: var(--accent-red) !important; }
+    .timer-opt.active { background: rgba(184,52,28,0.12) !important; border-color: var(--accent-red) !important; color: var(--accent-red) !important; }
+    .ans-input { background: var(--input-bg) !important; color: var(--text-primary) !important; border-color: var(--cell-border) !important; }
+    .ans-input:focus { border-color: var(--text-primary) !important; }
+    .q-pill { background: var(--pill-bg) !important; color: var(--ri-q-color) !important; }
+    .score-pill { background: rgba(184,52,28,0.1) !important; color: var(--accent-red) !important; border-color: rgba(184,52,28,0.2) !important; }
+    .setup-header { background: linear-gradient(135deg, var(--header-bg-a), var(--header-bg-b)) !important; transition: background 0.3s; }
+    .setup-header h1, .setup-header p, .res-title { color: var(--header-text) !important; }
+    .back-btn { background: #1C2B1A !important; }
+    .back-btn svg { stroke: #FFFBBD !important; }
+    html[data-theme="light"] .back-btn { background: #1C2B1A !important; }
+    html[data-theme="light"] .back-btn svg { stroke: #FFFBBD !important; }
+    .review-item { border-color: var(--cell-border) !important; }
+    .history-empty { color: var(--text-muted) !important; }
+    .pick-btn { background: var(--pick-bg) !important; color: var(--text-primary) !important; border-color: var(--cell-border) !important; }
+    .fb-ok { background: var(--fb-ok-bg) !important; color: var(--fb-ok-color) !important; border-color: var(--fb-ok-color) !important; }
+    .fb-no { background: var(--fb-no-bg) !important; color: var(--fb-no-color) !important; border-color: rgba(184,52,28,0.3) !important; }
+    .next-btn { color: var(--text-primary) !important; border-color: var(--cell-border) !important; }
+    .next-btn:hover { background: var(--cell-bg) !important; }
+    .hint-btn { color: var(--text-muted) !important; border-color: var(--cell-border) !important; }
+    .theme-btn { color: var(--text-primary) !important; background: rgba(255,255,255,0.15) !important; border-color: var(--cell-border) !important; }
+    .bento-start, .check-btn, .again-btn { background: var(--accent-red) !important; color: #fff !important; }
+    .home-btn { color: var(--text-primary) !important; border-color: var(--cell-border) !important; }
+    .home-btn:hover { background: var(--cell-bg) !important; }
+    .focus-chip { background: var(--cell-bg) !important; color: var(--text-muted) !important; border-color: var(--cell-border) !important; }
+    .focus-chip.selected { background: rgba(45,110,32,0.12) !important; color: var(--accent-green) !important; border-color: var(--accent-green) !important; }
+    .streak-pill { background: rgba(184,52,28,0.1) !important; border-color: rgba(184,52,28,0.2) !important; color: var(--accent-red) !important; }
+    .lives-pill { background: rgba(184,52,28,0.08) !important; border-color: rgba(184,52,28,0.15) !important; color: var(--text-primary) !important; }
+    html[data-theme="light"] .prog-bar { background: rgba(0,0,0,0.1) !important; }
+    html[data-theme="light"] .timer-bar { background: rgba(0,0,0,0.1) !important; }
+    html[data-theme="light"] .chart-bar-sq { background: rgba(45,110,32,0.65) !important; }
+    html[data-theme="light"] .chart-bar-cu { background: rgba(184,52,28,0.65) !important; }
+    html[data-theme="light"] .gameover-title { color: var(--text-primary) !important; }
+    html[data-theme="light"] .gameover-sub { color: var(--text-muted) !important; }
+    html[data-theme="light"] .big-sub { color: var(--text-muted) !important; }
+    html[data-theme="light"] .ri-ok { color: var(--accent-green) !important; }
+    html[data-theme="light"] .ri-no { color: var(--accent-red) !important; }
+    html[data-theme="light"] .sv-ok { color: var(--accent-green) !important; }
+    html[data-theme="light"] .sv-no { color: var(--accent-red) !important; }
+    html[data-theme="light"] .badge-sq { background: rgba(45,110,32,0.1) !important; color: var(--accent-green) !important; border-color: rgba(45,110,32,0.3) !important; }
+    html[data-theme="light"] .badge-cu { background: rgba(184,52,28,0.1) !important; color: var(--accent-red) !important; border-color: rgba(184,52,28,0.3) !important; }
+    html[data-theme="light"] .pick-btn.correct { background: rgba(45,110,32,0.12) !important; color: var(--accent-green) !important; border-color: var(--accent-green) !important; }
+    html[data-theme="light"] .pick-btn.wrong { background: rgba(184,52,28,0.1) !important; color: var(--accent-red) !important; border-color: var(--accent-red) !important; }
+    html[data-theme="light"] .ans-input.correct { background: rgba(45,110,32,0.08) !important; color: var(--accent-green) !important; border-color: var(--accent-green) !important; }
+    html[data-theme="light"] .ans-input.wrong { background: rgba(184,52,28,0.08) !important; color: var(--accent-red) !important; border-color: var(--accent-red) !important; }
+    html[data-theme="light"] #kbHint { color: rgba(28,55,26,0.35) !important; }
+    html[data-theme="light"] .wi-bar { background: var(--accent-red) !important; }
+    html[data-theme="light"] .wi-bar-wrap { background: rgba(28,55,26,0.1) !important; }
+    html[data-theme="light"] .wi-pct { color: var(--accent-red) !important; }
+    .score-circle { border-color: var(--cell-border) !important; }
+    /* Toggle: dark theme off/on */
+    html[data-theme="dark"] .tslider { background: rgba(255,251,189,0.1); border-color: rgba(255,251,189,0.2); }
+    html[data-theme="dark"] .tslider::before { background: rgba(255,251,189,0.45); }
+    html[data-theme="dark"] .toggle input:checked + .tslider { background: #CA3C25 !important; border-color: #CA3C25 !important; }
+    html[data-theme="dark"] .toggle input:checked + .tslider::before { background: #FFFBBD !important; }
+    /* Toggle: light theme off/on */
+    html[data-theme="light"] .tslider { background: rgba(28,43,26,0.1); border-color: rgba(28,43,26,0.2); }
+    html[data-theme="light"] .tslider::before { background: rgba(28,43,26,0.35); }
+    html[data-theme="light"] .toggle input:checked + .tslider { background: #3a7d2c !important; border-color: #3a7d2c !important; }
+    html[data-theme="light"] .toggle input:checked + .tslider::before { background: #fff !important; }
+
+    /* ── THEME TOGGLE BUTTON ── */
+    .theme-btn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 18px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+    .theme-btn:hover { background: rgba(255,255,255,0.2); }
+
+    /* ── RANGE COL (From/To label above input) ── */
+    .bento-range-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+    }
+    .bento-range-col .num-inp { width: 100%; text-align: center; }
+
+    /* ── HINT BUTTON ── */
+    .hint-btn {
+      display: block;
+      width: 100%;
+      margin-top: 8px;
+      padding: 9px;
+      border: 1.5px dashed rgba(255,251,189,0.25);
+      border-radius: 10px;
+      background: transparent;
+      color: rgba(255,251,189,0.5);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+    }
+    .hint-btn:hover { border-color: rgba(255,251,189,0.5); color: rgba(255,251,189,0.8); }
+    .hint-btn:disabled { opacity: 0.3; cursor: default; }
+    .hint-btn.used { border-color: #CA3C25; color: #CA3C25; }
+
+    /* ── EXPORT BUTTON ── */
+    .export-btn {
+      padding: clamp(12px,3vw,15px) clamp(16px,4vw,22px);
+      border: 1.5px solid rgba(255,251,189,0.25);
+      border-radius: 14px;
+      background: transparent;
+      color: rgba(255,251,189,0.7);
+      font-size: clamp(13px,3.5vw,15px);
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+    }
+    .export-btn:hover { border-color: rgba(255,251,189,0.5); color: #FFFBBD; }
+
+    /* ── SPEED GRAPH ── */
+    .speed-graph-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+    #speedCanvas { width: 100%; display: block; }
+
+    /* ── EXAM MODE dimming of conflicting options ── */
+    .exam-disabled {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    /* ── ADAPTIVE DIFFICULTY badge ── */
+    .adaptive-badge {
+      display: inline-block;
+      font-size: 11px;
+      background: rgba(127,176,105,0.2);
+      border: 1px solid rgba(127,176,105,0.35);
+      color: #7FB069;
+      border-radius: 6px;
+      padding: 2px 7px;
+      margin-left: 6px;
+      font-weight: 600;
+    }
+
+    .review-wrap { overflow-y: auto; }
+    .setup-header h1, .setup-header p, .res-title {
+      position: relative; z-index: 1;
+    }
+
+    /* ── Collapsible history ── */
+    .history-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: clamp(10px,3vw,14px) clamp(12px,4vw,18px);
+      cursor: pointer;
+      user-select: none;
+    }
+    .history-toggle-label {
+      font-size: clamp(10px,2.5vw,12px);
+      font-weight: 600;
+      color: rgba(255,251,189,0.35);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+    .history-toggle-arrow {
+      font-size: 12px;
+      color: rgba(255,251,189,0.35);
+      transition: transform 0.25s;
+    }
+    .history-toggle-arrow.open { transform: rotate(180deg); }
+    .history-collapsible {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    .history-collapsible.open { max-height: 400px; }
+    html[data-theme="light"] .history-toggle-label,
+    html[data-theme="light"] .history-toggle-arrow { color: var(--text-muted) !important; }
+
+    /* ── Export button ── */
+    .export-btn {
+      padding: clamp(12px,3.5vw,16px) clamp(10px,3vw,16px);
+      border: 1.5px solid rgba(255,251,189,0.2);
+      border-radius: 12px;
+      background: transparent;
+      color: #FFFBBD;
+      font-size: clamp(12px,3vw,14px);
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .export-btn:hover { background: rgba(255,251,189,0.08); }
+    html[data-theme="light"] .export-btn { color: var(--text-primary) !important; border-color: var(--cell-border) !important; }
+
+    /* ── Tables mode specific UI ── */
+    .tables-chips-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .table-chip {
+      padding: 5px 11px;
+      border-radius: 8px;
+      border: 1.5px solid rgba(255,251,189,0.2);
+      background: transparent;
+      color: rgba(255,251,189,0.5);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Inter', sans-serif;
+    }
+    .table-chip.selected {
+      border-color: #CA3C25;
+      background: rgba(202,60,37,0.15);
+      color: #CA3C25;
+    }
+    html[data-theme="light"] .table-chip { background: var(--cell-bg) !important; color: var(--text-muted) !important; border-color: var(--cell-border) !important; }
+    html[data-theme="light"] .table-chip.selected { background: rgba(184,52,28,0.12) !important; color: var(--accent-red) !important; border-color: var(--accent-red) !important; }
+    .tables-mult-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-top: 4px;
+      border-top: 1px solid rgba(255,251,189,0.1);
+      margin-top: 2px;
+    }
+    .tables-mult-lbl { font-size: 12px; color: rgba(255,251,189,0.5); white-space: nowrap; flex-shrink: 0; }
+    html[data-theme="light"] .tables-mult-lbl { color: var(--text-muted) !important; }
+    html[data-theme="light"] .tables-mult-row { border-color: var(--cell-border) !important; }
+    .tables-select-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+    .tables-select-btn {
+      padding: 3px 9px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,251,189,0.18);
+      background: transparent;
+      color: rgba(255,251,189,0.4);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+    }
+    .tables-select-btn:hover { border-color: rgba(255,251,189,0.35); color: rgba(255,251,189,0.7); }
+    html[data-theme="light"] .tables-select-btn { color: var(--text-muted) !important; border-color: var(--cell-border) !important; }
+
+    .exam-disabled { opacity: 0.35; pointer-events: none; }
+    /* disabled toggle styling */
+    .bento-tog.tog-disabled { opacity: 0.35; pointer-events: none; }
   </style>
 </head>
 <body>
@@ -1415,25 +1779,60 @@ select:focus {
   <!-- SETUP SCREEN -->
   <div class="screen active" id="s-setup">
     <div class="setup-header">
-      <h1>Quiz — Squares &amp; Cubes</h1>
-      <p>Configure your test below</p>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <h1>Quiz — Squares &amp; Cubes</h1>
+          <p>Configure your test below</p>
+        </div>
+        <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+      </div>
     </div>
 
     <div class="bento-grid">
 
-      <!-- RANGE — left cell -->
-      <div class="bento-cell">
-        <div class="bento-label">📐 Number range</div>
+      <!-- RANGE / LEVEL — left cell (squares/cubes mode) -->
+      <div class="bento-cell" id="rangeCell">
+        <div class="bento-label">🎯 Level</div>
         <div class="diff-row">
-          <button class="diff-btn" onclick="setDiff('easy',event)">1–10</button>
-          <button class="diff-btn active" onclick="setDiff('medium',event)">1–20</button>
-          <button class="diff-btn" onclick="setDiff('hard',event)">1–30</button>
+          <button class="diff-btn" onclick="setDiff('easy',event)">Easy</button>
+          <button class="diff-btn active" onclick="setDiff('medium',event)">Medium</button>
+          <button class="diff-btn" onclick="setDiff('hard',event)">Hard</button>
         </div>
         <div class="bento-range-row">
-          <span class="bento-range-lbl">From</span>
-          <input type="number" class="num-inp" id="rangeFrom" value="1" min="1">
+          <div class="bento-range-col">
+            <span class="bento-range-lbl">From</span>
+            <input type="number" class="num-inp" id="rangeFrom" value="1" min="1">
+          </div>
           <span class="bento-range-sep">→</span>
-          <input type="number" class="num-inp" id="rangeTo" value="20" min="2">
+          <div class="bento-range-col">
+            <span class="bento-range-lbl">To</span>
+            <input type="number" class="num-inp" id="rangeTo" value="20" min="2">
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLES CONFIG — left cell (tables mode, hidden by default) -->
+      <div class="bento-cell" id="tablesCell" style="display:none;">
+        <div class="bento-label">✖️ Tables</div>
+
+        <!-- Which tables (range of table numbers) -->
+        <div class="bento-range-row">
+          <div class="bento-range-col">
+            <span class="bento-range-lbl">From</span>
+            <input type="number" class="num-inp" id="tablesFrom" value="2" min="1" onchange="onTablesRangeChange()">
+          </div>
+          <span class="bento-range-sep">→</span>
+          <div class="bento-range-col">
+            <span class="bento-range-lbl">To</span>
+            <input type="number" class="num-inp" id="tablesTo" value="12" min="1" onchange="onTablesRangeChange()">
+          </div>
+        </div>
+
+        <!-- Multiply up to: Standard vs Extended -->
+        <div class="bento-label" style="margin-top:4px;">Multiply up to</div>
+        <div class="timer-grid" id="multModeGrid">
+          <button class="timer-opt active" data-mult="10" onclick="setMultMode(this)">×10 Standard</button>
+          <button class="timer-opt" data-mult="20" onclick="setMultMode(this)">×20 Extended</button>
         </div>
       </div>
 
@@ -1446,6 +1845,7 @@ select:focus {
           <button class="type-btn" id="btn-squares" onclick="setType('squares')">x²</button>
           <button class="type-btn" id="btn-cubes" onclick="setType('cubes')">x³</button>
           <button class="type-btn active" id="btn-both" onclick="setType('both')">Both</button>
+          <button class="type-btn" id="btn-tables" onclick="setType('tables')">Tables</button>
         </div>
       </div>
 
@@ -1513,6 +1913,10 @@ select:focus {
           <span class="bento-tog-label">Shuffle<span class="bento-tog-sub">Randomise order</span></span>
           <label class="toggle"><input type="checkbox" id="shuffleTog" checked><span class="tslider"></span></label>
         </div>
+        <div class="bento-tog">
+          <span class="bento-tog-label">Exam mode<span class="bento-tog-sub">No feedback until end</span></span>
+          <label class="toggle"><input type="checkbox" id="examTog" onchange="onExamToggle()"><span class="tslider"></span></label>
+        </div>
       </div>
 
       <!-- FEEDBACK + FOCUS — right cell -->
@@ -1527,16 +1931,21 @@ select:focus {
           <label class="toggle"><input type="checkbox" id="autosubTog"><span class="tslider"></span></label>
         </div>
         <div class="bento-tog">
-          <span class="bento-tog-label">Focus mode<span class="bento-tog-sub">Pick specific numbers</span></span>
+          <span class="bento-tog-label">Focus mode<span class="bento-tog-sub" id="focusTogSub">Pick specific numbers</span></span>
           <label class="toggle"><input type="checkbox" id="focusTog" onchange="toggleFocusGrid()"><span class="tslider"></span></label>
         </div>
       </div>
 
       <!-- FOCUS GRID — full width, hidden by default -->
       <div class="bento-cell wide green" id="focusGridCell" style="display:none;">
-        <div class="bento-label">🎯 Focus numbers</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+          <div class="bento-label" id="focusGridLabel">🎯 Focus numbers</div>
+          <div class="tables-select-row" style="margin:0;">
+            <button class="tables-select-btn" onclick="focusSelectAll()">All</button>
+            <button class="tables-select-btn" onclick="focusClearAll()">None</button>
+          </div>
+        </div>
         <div class="focus-grid" id="focusChips"></div>
-        <button class="focus-all-btn" onclick="toggleAllChips()">Toggle all</button>
       </div>
 
     </div><!-- .bento-grid -->
@@ -1607,6 +2016,7 @@ select:focus {
 >
         <button class="check-btn" id="checkBtn" onclick="checkAnswer()">Check</button>
       </div>
+      <button class="hint-btn" id="hintBtn" onclick="useHint()">💡 Hint</button>
     </div>
 
     <!-- PICK mode -->
@@ -1684,6 +2094,7 @@ select:focus {
   <!-- SAME BODY STYLE -->
   <div class="setup-body">
 
+    <!-- SCORE + PB -->
     <div class="score-circle">
       <div class="big-pct" id="resPct">0%</div>
       <div class="big-sub" id="resSub">0 of 0 correct</div>
@@ -1694,7 +2105,15 @@ select:focus {
       <div class="pb-c"><div class="pb-v" id="pbStreak">—</div><div class="pb-l">Best Streak</div></div>
     </div>
 
-    <div class="chart-wrap" id="chartWrap">
+    <!-- STATS -->
+    <div class="stat-row">
+      <div class="stat-c"><div class="stat-v sv-ok" id="sCorrect">0</div><div class="stat-l">Correct</div></div>
+      <div class="stat-c"><div class="stat-v sv-no" id="sWrong">0</div><div class="stat-l">Wrong</div></div>
+      <div class="stat-c"><div class="stat-v sv-tot" id="sTotal">0</div><div class="stat-l">Total</div></div>
+    </div>
+
+    <!-- ACCURACY CHART -->
+    <div class="chart-wrap" id="chartWrap" style="display:none;">
       <div class="chart-title">Accuracy — Squares vs Cubes</div>
       <div class="chart-vals">
         <div class="chart-val" id="chartSqVal">—</div>
@@ -1712,39 +2131,43 @@ select:focus {
       </div>
     </div>
 
-    <div class="stat-row">
-      <div class="stat-c">
-        <div class="stat-v sv-ok" id="sCorrect">0</div>
-        <div class="stat-l">Correct</div>
-      </div>
-      <div class="stat-c">
-        <div class="stat-v sv-no" id="sWrong">0</div>
-        <div class="stat-l">Wrong</div>
-      </div>
-      <div class="stat-c">
-        <div class="stat-v sv-tot" id="sTotal">0</div>
-        <div class="stat-l">Total</div>
+    <!-- SPEED GRAPH -->
+    <div class="chart-wrap" id="speedGraphWrap" style="display:none;">
+      <div class="chart-title">⚡ Response time per question</div>
+      <div class="speed-graph-container">
+        <canvas id="speedCanvas" height="100"></canvas>
       </div>
     </div>
 
+    <!-- WEAKNESS -->
     <div class="review-wrap" id="weaknessWrap" style="display:none;">
       <div class="review-head">⚠️ Struggled with these</div>
       <div class="review-scroll" id="weaknessList"></div>
     </div>
 
-    <div class="review-wrap">
-      <div class="review-head">History</div>
-      <div class="review-scroll" id="historyList"><div class="history-empty">No history yet</div></div>
-    </div>
-
+    <!-- ANSWER REVIEW -->
     <div class="review-wrap">
       <div class="review-head">Answer review</div>
       <div class="review-scroll" id="reviewList"></div>
     </div>
 
+    <!-- COLLAPSIBLE HISTORY -->
+    <div class="review-wrap" id="historyWrap">
+      <div class="history-toggle" onclick="toggleHistory()">
+        <span class="history-toggle-label">📋 Result history</span>
+        <span class="history-toggle-arrow" id="historyArrow">▼</span>
+      </div>
+      <div class="history-collapsible" id="historyCollapsible">
+        <div style="border-top:1px solid rgba(255,251,189,0.1);">
+          <div class="review-scroll" id="historyList"><div class="history-empty">No history yet</div></div>
+        </div>
+      </div>
+    </div>
+
     <div class="res-btns">
       <button class="home-btn" onclick="goHome()">Setup</button>
       <button class="again-btn" onclick="startTest()">Try again</button>
+      <button class="export-btn" onclick="exportResults()">⬇ Export</button>
     </div>
 
   </div>
@@ -1758,6 +2181,10 @@ const isMobile = window.matchMedia("(pointer: coarse)").matches;
 
   let qs=[], cur=0, score=0, results=[], qType='both';
 let instant=true, autoSub=false, answered=false, pickMode=false;
+let examMode=false;
+let hintUsed=false;
+let questionTimes=[]; // ms per question
+let qStartTime=null;
 
 let timerInterval=null;
 let stopwatchInterval=null;
@@ -1766,6 +2193,10 @@ let stopwatchStart=null;
 let timerMode = 'fixed';
 let duration = 7;
 const CIRC=188.5;
+
+// ── Adaptive difficulty state ──
+const ADAPTIVE_KEY = 'quiz_adaptive';
+let adaptiveData = {};  // key: "n_type" → { correct, total }
 
 // ── new feature state ──
 let streak = 0, bestStreak = 0;
@@ -1780,10 +2211,61 @@ const PB_KEY = 'quiz_pb';
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
   }
+  let tablesScope = 'custom'; // kept for legacy, unused
+  let selectedTables = new Set(); // focus-mode selected table numbers
+  let multUpTo = 10; // Standard=10, Extended=20
+
+  function setMultMode(btn){
+    document.querySelectorAll('#multModeGrid .timer-opt').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    multUpTo = parseInt(btn.dataset.mult);
+  }
+
+  function getTablesRange(){
+    const f = parseInt(document.getElementById('tablesFrom').value) || 2;
+    const t = parseInt(document.getElementById('tablesTo').value) || 12;
+    return { from: Math.min(f,t), to: Math.max(f,t) };
+  }
+
+  function onTablesRangeChange(){
+    // If focus grid is open, rebuild it to match new range
+    const focusOn = document.getElementById('focusTog').checked;
+    if(focusOn && qType === 'tables') {
+      selectedTables.clear();
+      buildFocusGrid();
+    }
+  }
+
+  function buildTablesChips(){ /* no longer used — chips live in focus grid */ }
+  function selectTableRange(){ }
+  function selectAllTables(){ }
+  function clearAllTables(){ }
+  function getTablesNSet(){
+    const {from, to} = getTablesRange();
+    return Array.from({length: to - from + 1}, (_, i) => from + i);
+  }
+
   function setType(t){
     qType=t;
-    ['squares','cubes','both'].forEach(x=>document.getElementById('btn-'+x).classList.toggle('active',x===t));
+    ['squares','cubes','both','tables'].forEach(x=>{
+      const btn=document.getElementById('btn-'+x);
+      if(btn) btn.classList.toggle('active',x===t);
+    });
+    const isTable = t==='tables';
+    document.getElementById('rangeCell').style.display = isTable ? 'none' : '';
+    document.getElementById('tablesCell').style.display = isTable ? '' : 'none';
+    const revTog = document.getElementById('reverseTog');
+    const revRow = revTog ? revTog.closest('.bento-tog') : null;
+    if(revRow){
+      revRow.classList.toggle('tog-disabled', isTable);
+      if(isTable){ revTog.checked=false; }
+    }
+    const focusSubEl = document.getElementById('focusTogSub');
+    if(focusSubEl) focusSubEl.textContent = isTable ? 'Pick specific tables' : 'Pick specific numbers';
+    const focusOn = document.getElementById('focusTog').checked;
+    if(focusOn) buildFocusGrid();
   }
+
   function goHome(){ clearTimer(); clearStopwatch(); show('s-setup'); }
 
   function setDiff(d, e){
@@ -1796,19 +2278,38 @@ const PB_KEY = 'quiz_pb';
   }
 
   function buildFocusGrid(){
-    const from = parseInt(document.getElementById('rangeFrom').value)||1;
-    const to   = parseInt(document.getElementById('rangeTo').value)||20;
+    const isTable = qType === 'tables';
     const grid = document.getElementById('focusChips');
+    const label = document.getElementById('focusGridLabel');
     grid.innerHTML = '';
-    for(let n=from; n<=to; n++){
-      const chip = document.createElement('button');
-      chip.className = 'focus-chip' + (focusNums.has(n) ? ' selected' : '');
-      chip.textContent = n;
-      chip.onclick = () => {
-        if(focusNums.has(n)){ focusNums.delete(n); chip.classList.remove('selected'); }
-        else { focusNums.add(n); chip.classList.add('selected'); }
-      };
-      grid.appendChild(chip);
+
+    if(isTable){
+      if(label) label.textContent = '🎯 Focus tables';
+      const {from, to} = getTablesRange();
+      for(let n=from; n<=to; n++){
+        const chip = document.createElement('button');
+        chip.className = 'focus-chip' + (selectedTables.has(n) ? ' selected' : '');
+        chip.textContent = n + '×';
+        chip.onclick = () => {
+          if(selectedTables.has(n)){ selectedTables.delete(n); chip.classList.remove('selected'); }
+          else { selectedTables.add(n); chip.classList.add('selected'); }
+        };
+        grid.appendChild(chip);
+      }
+    } else {
+      if(label) label.textContent = '🎯 Focus numbers';
+      const from = parseInt(document.getElementById('rangeFrom').value)||1;
+      const to   = parseInt(document.getElementById('rangeTo').value)||20;
+      for(let n=from; n<=to; n++){
+        const chip = document.createElement('button');
+        chip.className = 'focus-chip' + (focusNums.has(n) ? ' selected' : '');
+        chip.textContent = n;
+        chip.onclick = () => {
+          if(focusNums.has(n)){ focusNums.delete(n); chip.classList.remove('selected'); }
+          else { focusNums.add(n); chip.classList.add('selected'); }
+        };
+        grid.appendChild(chip);
+      }
     }
   }
 
@@ -1819,17 +2320,28 @@ const PB_KEY = 'quiz_pb';
     if(on) buildFocusGrid();
   }
 
-  function toggleAllChips(){
-    const chips = document.querySelectorAll('.focus-chip');
-    const allSelected = [...chips].every(c=>c.classList.contains('selected'));
-    const from = parseInt(document.getElementById('rangeFrom').value)||1;
-    const to   = parseInt(document.getElementById('rangeTo').value)||20;
-    focusNums.clear();
-    chips.forEach((chip,i)=>{
-      if(!allSelected){ focusNums.add(from+i); chip.classList.add('selected'); }
-      else { chip.classList.remove('selected'); }
-    });
+  function focusSelectAll(){
+    const isTable = qType === 'tables';
+    if(isTable){
+      const {from, to} = getTablesRange();
+      for(let n=from;n<=to;n++) selectedTables.add(n);
+    } else {
+      const from = parseInt(document.getElementById('rangeFrom').value)||1;
+      const to   = parseInt(document.getElementById('rangeTo').value)||20;
+      for(let n=from;n<=to;n++) focusNums.add(n);
+    }
+    buildFocusGrid();
   }
+
+  function focusClearAll(){
+    const isTable = qType === 'tables';
+    if(isTable){ selectedTables.clear(); }
+    else { focusNums.clear(); }
+    buildFocusGrid();
+  }
+
+  // Legacy alias
+  function toggleAllChips(){ focusSelectAll(); }
 
   function genQs(){
     const from=parseInt(document.getElementById('rangeFrom').value)||1;
@@ -1837,17 +2349,47 @@ const PB_KEY = 'quiz_pb';
     const count=parseInt(document.getElementById('qCount').value)||10;
     const shuffle=document.getElementById('shuffleTog').checked;
     const pool=[];
-    for(let n=from;n<=to;n++){
-      if(focusMode && focusNums.size > 0 && !focusNums.has(n)) continue;
-      if(qType==='squares'||qType==='both') pool.push({n,type:'square',answer:n*n,reverse:reverseMode});
-      if(qType==='cubes'  ||qType==='both') pool.push({n,type:'cube',  answer:n*n*n,reverse:reverseMode});
+
+    if(qType === 'tables'){
+      const {from: tFrom, to: tTo} = getTablesRange();
+      // If focus mode on and user has selected specific tables, use those; else all in range
+      let nSet;
+      if(focusMode && selectedTables.size > 0){
+        nSet = [...selectedTables].filter(n => n >= tFrom && n <= tTo).sort((a,b)=>a-b);
+        if(!nSet.length) nSet = Array.from({length: tTo-tFrom+1}, (_,i)=>tFrom+i);
+      } else {
+        nSet = Array.from({length: tTo-tFrom+1}, (_,i)=>tFrom+i);
+      }
+      for(const n of nSet){
+        for(let m=1; m<=multUpTo; m++){
+          pool.push({n, m, type:'table', answer:n*m, reverse:false});
+        }
+      }
+    } else {
+      for(let n=from;n<=to;n++){
+        if(focusMode && focusNums.size > 0 && !focusNums.has(n)) continue;
+        if(qType==='squares'||qType==='both') pool.push({n,type:'square',answer:n*n,reverse:reverseMode});
+        if(qType==='cubes'  ||qType==='both') pool.push({n,type:'cube',  answer:n*n*n,reverse:reverseMode});
+      }
     }
+
     if(!pool.length) return [];
-    if(shuffle) for(let i=pool.length-1;i>0;i--){
-      const j=Math.floor(Math.random()*(i+1));
-      [pool[i],pool[j]]=[pool[j],pool[i]];
+
+    // Adaptive: bias shuffle toward weak questions
+    loadAdaptive();
+    const weighted = pool.map(q => {
+      const key = q.type==='table' ? `${q.n}x${q.m}` : `${q.n}_${q.type}`;
+      const d = adaptiveData[key];
+      const errorRate = d ? (d.total - d.correct) / d.total : 0.5;
+      return { q, weight: 1 + errorRate * 2 };
+    });
+
+    if(shuffle){
+      // Weighted shuffle
+      weighted.sort(() => Math.random() - 0.5);
+      weighted.sort((a,b) => b.weight - a.weight + (Math.random()-0.5)*0.8);
     }
-    return pool.slice(0,count);
+    return weighted.map(w=>w.q).slice(0,count);
   }
 
   function startTest(){
@@ -1855,7 +2397,7 @@ reverseMode = document.getElementById('reverseTog').checked;
   qs=genQs();
   if(!qs.length){ alert('No questions — check your range!'); return; }
 
-  cur=0; score=0; results=[];
+  cur=0; score=0; results=[]; questionTimes=[];
   streak=0; wrongQueue=[];retrySet=new Set();
   instant    = document.getElementById('feedbackTog').checked;
   autoSub    = document.getElementById('autosubTog').checked;
@@ -1864,7 +2406,13 @@ reverseMode = document.getElementById('reverseTog').checked;
   livesMode  = document.getElementById('livesTog').checked;
   spacedMode = document.getElementById('spacedTog').checked;
   focusMode  = document.getElementById('focusTog').checked;
+  examMode   = document.getElementById('examTog').checked;
+
+  // Exam mode forces no feedback, no auto-submit
+  if(examMode){ instant=false; autoSub=false; }
+
   lives = 3;
+  hintUsed = false;
   document.getElementById('livesPill').style.display = livesMode ? 'block' : 'none';
   updateLivesPill();
   document.getElementById('streakPill').classList.remove('active');
@@ -1885,25 +2433,33 @@ reverseMode = document.getElementById('reverseTog').checked;
   /* ── Generate 4 plausible wrong answers ── */
   function genOptions(correct, qObj){
     const opts = new Set([correct]);
-    const isSquare = qObj.type === 'square';
-    const n = qObj.n;
-
-    // Strategy: nearby numbers squared/cubed, ±small deltas, scaled noise
     const candidates = [];
-    for(let delta = 1; delta <= 10; delta++){
-      if(isSquare){
-        candidates.push((n+delta)*(n+delta));
-        candidates.push((n-delta)*(n-delta));
-      } else {
-        candidates.push((n+delta)*(n+delta)*(n+delta));
-        if(n-delta > 0) candidates.push((n-delta)*(n-delta)*(n-delta));
+
+    if(qObj.type === 'table'){
+      // For tables: nearby multiples of n, and nearby products
+      const n = qObj.n, m = qObj.m;
+      for(let d=1; d<=6; d++){
+        candidates.push(n*(m+d));
+        if(m-d>0) candidates.push(n*(m-d));
+        candidates.push((n+1)*m, (n-1>0?(n-1)*m:n*m+1));
+        candidates.push(correct+d, correct-d>0?correct-d:correct+d+1);
       }
-      // ±small value around the correct answer
-      if(correct - delta > 0) candidates.push(correct - delta);
-      candidates.push(correct + delta);
+    } else {
+      const isSquare = qObj.type === 'square';
+      const n = qObj.n;
+      for(let delta = 1; delta <= 10; delta++){
+        if(isSquare){
+          candidates.push((n+delta)*(n+delta));
+          candidates.push((n-delta)*(n-delta));
+        } else {
+          candidates.push((n+delta)*(n+delta)*(n+delta));
+          if(n-delta > 0) candidates.push((n-delta)*(n-delta)*(n-delta));
+        }
+        if(correct - delta > 0) candidates.push(correct - delta);
+        candidates.push(correct + delta);
+      }
     }
 
-    // Shuffle candidates and pick unique ones
     for(let i=candidates.length-1;i>0;i--){
       const j=Math.floor(Math.random()*(i+1));
       [candidates[i],candidates[j]]=[candidates[j],candidates[i]];
@@ -1914,14 +2470,11 @@ reverseMode = document.getElementById('reverseTog').checked;
         if(opts.size === 4) break;
       }
     }
-    // Fallback if not enough
     let fallback = 1;
     while(opts.size < 4){
       if(!opts.has(fallback)) opts.add(fallback);
       fallback++;
     }
-
-    // Shuffle final 4
     const arr = [...opts];
     for(let i=arr.length-1;i>0;i--){
       const j=Math.floor(Math.random()*(i+1));
@@ -1931,19 +2484,32 @@ reverseMode = document.getElementById('reverseTog').checked;
   }
 
   function loadQ(){
-    clearTimer(); answered=false;
-    const q=qs[cur], total=qs.length, sym=q.type==='square'?'²':'³';
+    clearTimer(); answered=false; hintUsed=false;
+    qStartTime = performance.now();
+    const q=qs[cur], total=qs.length;
+    const sym=q.type==='square'?'²':'³';
     document.getElementById('qNum').textContent   = String(cur+1).padStart(2,'0');
     document.getElementById('qTotal').textContent = total;
     document.getElementById('scorePill').textContent = `Score: ${score}`;
     document.getElementById('progFill').style.width  = `${(cur/total)*100}%`;
     const badge=document.getElementById('qBadge');
-    badge.textContent = q.type==='square'?'Square':'Cube';
-    badge.className   = 'q-badge '+(q.type==='square'?'badge-sq':'badge-cu');
+
+    if(q.type==='table'){
+      badge.textContent = 'Tables';
+      badge.className = 'q-badge badge-sq';
+    } else {
+      badge.textContent = q.type==='square'?'Square':'Cube';
+      badge.className   = 'q-badge '+(q.type==='square'?'badge-sq':'badge-cu');
+    }
+
     const isRetry = retrySet.has(cur);
-    document.getElementById('qLabel').innerHTML = `Question ${String(cur+1).padStart(2,'0')}` + (isRetry ? '<span class="retry-badge">RETRY</span>' : '');
-    // reverse mode: show answer, ask for base
-    if(q.reverse){
+    const adaptBadge = getAdaptiveBadge(q);
+    document.getElementById('qLabel').innerHTML = `Question ${String(cur+1).padStart(2,'0')}` + (isRetry ? '<span class="retry-badge">RETRY</span>' : '') + adaptBadge;
+
+    if(q.type==='table'){
+      document.getElementById('qExpr').textContent = `${q.n} × ${q.m}`;
+      document.getElementById('qSub').textContent = 'What is the answer?';
+    } else if(q.reverse){
       document.getElementById('qExpr').textContent = q.answer.toLocaleString();
       document.getElementById('qSub').textContent  = q.type==='square' ? 'What number squared gives this?' : 'What number cubed gives this?';
       badge.textContent = q.type==='square' ? '² Reverse Square' : '³ Reverse Cube';
@@ -1951,71 +2517,68 @@ reverseMode = document.getElementById('reverseTog').checked;
     } else {
       document.getElementById('qExpr').textContent = `${q.n}${sym}`;
     }
+
     document.getElementById('fbBox').style.display   = 'none';
     document.getElementById('nextBtn').style.display = 'none';
     document.getElementById('timerZone').style.display = (timerMode === 'fixed' || timerMode === 'custom') ? 'block' : 'none';
     document.getElementById('stopwatchZone').style.display = timerMode === 'stopwatch' ? 'flex' : 'none';
 
+    // hint btn — hide in exam mode or pick mode
+    const hb = document.getElementById('hintBtn');
+    if(hb) { hb.style.display = (examMode || pickMode) ? 'none' : 'block'; hb.disabled=false; hb.classList.remove('used'); hb.textContent='💡 Hint'; }
+
     if(pickMode){
-      // PICK MODE
       document.getElementById('typeZone').style.display = 'none';
       document.getElementById('pickZone').style.display = 'block';
       document.getElementById('keyboard').style.display = 'none';
       document.getElementById('qSub').textContent = 'Choose the correct answer';
       buildPickGrid(q);
     } else {
-      // TYPE MODE
       document.getElementById('typeZone').style.display = 'block';
       document.getElementById('pickZone').style.display = 'none';
       const digits = q.reverse ? String(q.n).length : String(q.answer).length;
-      if(!q.reverse){
+      if(q.type !== 'table' && !q.reverse){
         document.getElementById('qSub').textContent = autoSub?`Answer has ${digits} digit${digits>1?'s':''}`:'What is the answer?';
       }
       const inp=document.getElementById('ansInput');
-const keyboard = document.getElementById('keyboard');
+      const keyboard = document.getElementById('keyboard');
 
-if (isMobile) {
-  inp.setAttribute('readonly', true);
-  inp.setAttribute('inputmode', 'none');
-  keyboard.style.display = 'block';
-  const hint = document.getElementById('kbHint');
-  if(hint) hint.style.display = 'none';
-} else {
-  inp.removeAttribute('readonly');
-  inp.setAttribute('inputmode', 'numeric');
-  keyboard.style.display = 'none';
-  const hint = document.getElementById('kbHint');
-  if(hint) hint.style.display = 'block';
-}
+      if (isMobile) {
+        inp.setAttribute('readonly', true);
+        inp.setAttribute('inputmode', 'none');
+        keyboard.style.display = 'block';
+        const hint = document.getElementById('kbHint');
+        if(hint) hint.style.display = 'none';
+      } else {
+        inp.removeAttribute('readonly');
+        inp.setAttribute('inputmode', 'numeric');
+        keyboard.style.display = 'none';
+        const hint = document.getElementById('kbHint');
+        if(hint) hint.style.display = 'block';
+      }
       inp.value=''; inp.className='ans-input'; inp.disabled=false;
-      document.getElementById('checkBtn').disabled     = false;
+      document.getElementById('checkBtn').disabled = false;
       const checkBtn = document.getElementById('checkBtn');
 
-if (autoSub) {
-  checkBtn.style.display = 'none';
-} else {
-  checkBtn.style.display = 'inline-block';
-  checkBtn.textContent = instant ? 'Check' : 'Next';
-}
-      if (!isMobile) {
-  inp.focus();
-}
+      if (autoSub) {
+        checkBtn.style.display = 'none';
+      } else {
+        checkBtn.style.display = 'inline-block';
+        checkBtn.textContent = instant ? 'Check' : 'Next';
+      }
+      if (!isMobile) { inp.focus(); }
     }
 
-    if(timerMode === 'fixed' || timerMode === 'custom'){
-  startTimer();
-}
-
-if(timerMode === 'stopwatch'){
-  startStopwatch();
-}
+    if(timerMode === 'fixed' || timerMode === 'custom'){ startTimer(); }
+    if(timerMode === 'stopwatch'){ startStopwatch(); }
   }
 
   function buildPickGrid(q){
-    // In reverse mode, the correct "answer" to pick is q.n (the base number)
-    // Options should be nearby base numbers, not square/cube values
     let options, correctPick;
-    if(q.reverse){
+    if(q.type === 'table'){
+      correctPick = q.answer;
+      options = genOptions(q.answer, q);
+    } else if(q.reverse){
       correctPick = q.n;
       options = genBaseOptions(q.n);
     } else {
@@ -2054,11 +2617,13 @@ if(timerMode === 'stopwatch'){
   answered = true;
 
   const isCorrect = chosen === correct;
+  const elapsed = qStartTime ? Math.round(performance.now() - qStartTime) : 0;
+  questionTimes.push(elapsed);
   if(isCorrect){ score++; streak++; if(streak>bestStreak) bestStreak=streak; }
   else { streak=0; if(spacedMode) wrongQueue.push(cur); }
   updateStreakPill();
-
-  results.push({q:qs[cur], userAnswer:chosen, correct:isCorrect, timedOut:false});
+  updateAdaptive(qs[cur], isCorrect);
+  results.push({q:qs[cur], userAnswer:chosen, correct:isCorrect, timedOut:false, elapsed});
 
   const btns = document.querySelectorAll('.pick-btn');
   btns.forEach(btn => {
@@ -2073,6 +2638,22 @@ if(timerMode === 'stopwatch'){
   });
 
   document.getElementById('scorePill').textContent = `Score: ${score}`;
+
+  // Show feedback box
+  if(instant){
+    const fb = document.getElementById('fbBox');
+    const q = qs[cur];
+    const sym = q.type==='square'?'²':'³';
+    fb.style.display = 'block';
+    if(q.type==='table'){
+      fb.textContent = isCorrect ? `Correct! ${q.n} × ${q.m} = ${q.answer}` : `Not quite — ${q.n} × ${q.m} = ${q.answer}`;
+    } else {
+      fb.textContent = isCorrect
+        ? `Correct! ${q.n}${sym} = ${q.answer}`
+        : `Not quite — ${q.n}${sym} = ${q.answer}`;
+    }
+    fb.className = 'fb-box ' + (isCorrect ? 'fb-ok' : 'fb-no');
+  }
 
   if(!isCorrect && livesMode){
     lives--; updateLivesPill();
@@ -2102,6 +2683,8 @@ function startTimer(){
   function timeUp(){
     answered = true;
     const q = qs[cur];
+    const elapsed = qStartTime ? Math.round(performance.now() - qStartTime) : 0;
+    questionTimes.push(elapsed);
 
     if(pickMode){
       const btns = document.querySelectorAll('.pick-btn');
@@ -2110,26 +2693,29 @@ function startTimer(){
         btn.disabled = true;
         if(parseInt(btn.textContent.replace(/,/g, '')) === correctPick){
           btn.classList.add('reveal');
+          btn.querySelector('.pick-icon').textContent = '✓ correct';
         }
       });
       streak=0; updateStreakPill();
       if(spacedMode) wrongQueue.push(cur);
       if(livesMode){ lives--; updateLivesPill(); }
-      results.push({q, userAnswer:'—', correct:false, timedOut:true});
+      updateAdaptive(q, false);
+      results.push({q, userAnswer:'—', correct:false, timedOut:true, elapsed});
     } else {
       const val = parseInt(document.getElementById('ansInput').value);
-      const correctVal2 = q.reverse ? q.n : q.answer;
+      const correctVal2 = q.type==='table' ? q.answer : (q.reverse ? q.n : q.answer);
       const correct = !isNaN(val) && val === correctVal2;
 
       if(correct){ score++; streak++; if(streak>bestStreak)bestStreak=streak; }
       else { streak=0; if(spacedMode) wrongQueue.push(cur); }
       updateStreakPill();
-
-      results.push({q, userAnswer:isNaN(val)?'—':val, correct, timedOut:true});
+      updateAdaptive(q, correct);
+      results.push({q, userAnswer:isNaN(val)?'—':val, correct, timedOut:true, elapsed});
 
       document.getElementById('ansInput').disabled = true;
       document.getElementById('checkBtn').disabled = true;
       if(!correct && livesMode){ lives--; updateLivesPill(); }
+      if(lives <= 0 && livesMode){ setTimeout(()=>gameOver(), 1300); return; }
     }
 
     document.getElementById('scorePill').textContent = `Score: ${score}`;
@@ -2182,14 +2768,18 @@ function startTimer(){
   clearTimer();
   answered = true;
 
-  // reverse mode: correct answer is the base number n
-  const correctVal = q.reverse ? q.n : q.answer;
+  // Record time
+  const elapsed = qStartTime ? Math.round(performance.now() - qStartTime) : 0;
+  questionTimes.push(elapsed);
+
+  const correctVal = q.type==='table' ? q.answer : (q.reverse ? q.n : q.answer);
   const correct = val === correctVal;
   if(correct){ score++; streak++; if(streak>bestStreak) bestStreak=streak; }
   else { streak=0; if(spacedMode) wrongQueue.push(cur); }
 
   updateStreakPill();
-  results.push({q,userAnswer:val,correct,timedOut:false});
+  updateAdaptive(q, correct);
+  results.push({q, userAnswer:val, correct, timedOut:false, elapsed, hintUsed});
 
   const input = document.getElementById('ansInput');
   input.disabled = true;
@@ -2217,15 +2807,18 @@ function startTimer(){
     const fb = document.getElementById('fbBox');
     const sym = q.type==='square'?'²':'³';
     fb.style.display='block';
-    fb.textContent = correct
-      ? (q.reverse ? `Correct! ${q.answer}${sym} → base is ${q.n}` : `Correct! ${q.n}${sym} = ${q.answer}`)
-      : (q.reverse ? `Not quite — the answer is ${q.n}. You said ${val}.` : `Not quite — ${q.n}${sym} = ${q.answer}. You said ${val}.`);
+    if(q.type==='table'){
+      fb.textContent = correct ? `Correct! ${q.n} × ${q.m} = ${q.answer}` : `Not quite — ${q.n} × ${q.m} = ${q.answer}. You said ${val}.`;
+    } else {
+      fb.textContent = correct
+        ? (q.reverse ? `Correct! ${q.answer}${sym} → base is ${q.n}` : `Correct! ${q.n}${sym} = ${q.answer}`)
+        : (q.reverse ? `Not quite — the answer is ${q.n}. You said ${val}.` : `Not quite — ${q.n}${sym} = ${q.answer}. You said ${val}.`);
+    }
     fb.className='fb-box '+(correct?'fb-ok':'fb-no');
   } else {
     btn.textContent = 'Next';
   }
 
-  // ✅ FIXED: independent auto submit
   if(autoSub){
     setTimeout(() => {
       if(answered) nextQ();
@@ -2279,12 +2872,14 @@ function startTimer(){
 
     // answer review
     document.getElementById('reviewList').innerHTML = results.map(r=>{
-      const sym=r.q.type==='square'?'²':'³';
+      const sym=r.q.type==='square'?'²':r.q.type==='cube'?'³':'';
       const cls=r.correct?'ri-ok':'ri-no', mark=r.correct?'✓':'✗';
-      const disp = r.q.reverse ? r.q.answer.toLocaleString() : `${r.q.n}${sym}`;
-      const correctAns = r.q.reverse ? r.q.n : r.q.answer;
-      const note=r.correct?`${correctAns}`:r.timedOut?`${correctAns} (time's up)`:`${correctAns} (you: ${r.userAnswer})`;
-      return `<div class="review-item"><span class="ri-q">${disp}</span><span class="ri-a ${cls}">${mark} ${note}</span></div>`;
+      const disp = r.q.type==='table' ? `${r.q.n}×${r.q.m}` : (r.q.reverse ? r.q.answer.toLocaleString() : `${r.q.n}${sym}`);
+      const correctAns = r.q.type==='table' ? r.q.answer : (r.q.reverse ? r.q.n : r.q.answer);
+      const hintMark = r.hintUsed ? ' 💡' : '';
+      const note=r.correct?`${correctAns}${hintMark}`:r.timedOut?`${correctAns} (time's up)`:`${correctAns} (you: ${r.userAnswer})`;
+      const timeStr = r.elapsed ? ` · ${(r.elapsed/1000).toFixed(1)}s` : '';
+      return `<div class="review-item"><span class="ri-q">${disp}${timeStr}</span><span class="ri-a ${cls}">${mark} ${note}</span></div>`;
     }).join('');
 
     // squares vs cubes chart
@@ -2297,8 +2892,8 @@ function startTimer(){
       document.getElementById('chartSqVal').textContent = sqPct+'%';
       document.getElementById('chartCuVal').textContent = cuPct+'%';
       setTimeout(()=>{
-        document.getElementById('chartSqBar').style.height = (sqPct*0.70)+'px';
-        document.getElementById('chartCuBar').style.height = (cuPct*0.70)+'px';
+        document.getElementById('chartSqBar').style.height = sqPct+'%';
+        document.getElementById('chartCuBar').style.height = cuPct+'%';
       },50);
     }
 
@@ -2338,6 +2933,7 @@ function startTimer(){
 
     saveHistory(score, total, pct);
     renderHistory();
+    renderSpeedGraph();
   }
 
   document.getElementById('ansInput').addEventListener('input',()=>{
@@ -2374,7 +2970,7 @@ pickTog.addEventListener('change', () => {
 
 // ───────── TIMER MINI GRID ─────────
 function setTimerOpt(el){
-  document.querySelectorAll('.timer-opt').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('#timerGrid .timer-opt').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
   timerMode = el.dataset.value;
   const ci = document.getElementById('customTimerInput');
@@ -2527,6 +3123,173 @@ function renderHistory() {
     </div>
   `).join('');
 }
+
+// ───────── HINT ─────────
+function useHint(){
+  if(answered || hintUsed) return;
+  const q = qs[cur];
+  const hb = document.getElementById('hintBtn');
+  hb.disabled = true; hb.classList.add('used');
+  hintUsed = true;
+  let hint = '';
+  if(q.type==='table'){
+    hint = `💡 ${q.n} × ${q.m}: think ${q.n} × ${Math.floor(q.m/2)} = ${q.n*Math.floor(q.m/2)}, then add ${q.n * (q.m - Math.floor(q.m/2))}`;
+  } else if(q.type==='square'){
+    const prev = q.n - 1;
+    hint = `💡 ${q.n}² = ${prev}² + ${prev} + ${q.n} = ${prev*prev} + ${prev+q.n}`;
+  } else {
+    hint = `💡 ${q.n}³ = ${q.n} × ${q.n}² = ${q.n} × ${q.n*q.n}`;
+  }
+  hb.textContent = hint;
+  hb.style.fontSize = '12px';
+}
+
+// ───────── EXAM MODE TOGGLE ─────────
+function onExamToggle(){
+  const on = document.getElementById('examTog').checked;
+  const toDisable = ['feedbackTog','autosubTog','livesTog','spacedTog'];
+  toDisable.forEach(id => {
+    const el = document.getElementById(id);
+    const row = el ? el.closest('.bento-tog') : null;
+    if(on){
+      if(el){ el.checked=false; el.disabled=true; }
+      if(row) row.classList.add('exam-disabled');
+    } else {
+      if(el) el.disabled=false;
+      if(row) row.classList.remove('exam-disabled');
+    }
+  });
+}
+
+// ───────── ADAPTIVE DIFFICULTY ─────────
+function loadAdaptive(){
+  try { adaptiveData = JSON.parse(localStorage.getItem(ADAPTIVE_KEY)) || {}; } catch(e){ adaptiveData={}; }
+}
+function saveAdaptive(){
+  try { localStorage.setItem(ADAPTIVE_KEY, JSON.stringify(adaptiveData)); } catch(e){}
+}
+function updateAdaptive(q, correct){
+  const key = q.type==='table' ? `${q.n}x${q.m}` : `${q.n}_${q.type}`;
+  if(!adaptiveData[key]) adaptiveData[key]={correct:0,total:0};
+  adaptiveData[key].total++;
+  if(correct) adaptiveData[key].correct++;
+  saveAdaptive();
+}
+function getAdaptiveBadge(q){
+  loadAdaptive();
+  const key = q.type==='table' ? `${q.n}x${q.m}` : `${q.n}_${q.type}`;
+  const d = adaptiveData[key];
+  if(!d || d.total < 2) return '';
+  const rate = d.correct / d.total;
+  if(rate < 0.5) return '<span class="adaptive-badge">⚠ Weak</span>';
+  if(rate >= 0.9 && d.total >= 4) return '<span class="adaptive-badge" style="color:#7FB069;border-color:rgba(127,176,105,0.35);">✓ Strong</span>';
+  return '';
+}
+
+// ───────── SPEED GRAPH ─────────
+function renderSpeedGraph(){
+  const wrap = document.getElementById('speedGraphWrap');
+  if(!questionTimes.length || !results.length){ wrap.style.display='none'; return; }
+  wrap.style.display = 'block';
+
+  const canvas = document.getElementById('speedCanvas');
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.parentElement.offsetWidth || 300;
+  const H = 100;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const times = questionTimes;
+  const maxT = Math.max(...times, 1000);
+  const n = times.length;
+  const padL=30, padR=10, padT=10, padB=20;
+  const gW = W - padL - padR;
+  const gH = H - padT - padB;
+
+  ctx.clearRect(0,0,W,H);
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(255,251,189,0.08)';
+  ctx.lineWidth = 1;
+  [0.25,0.5,0.75,1].forEach(frac=>{
+    const y = padT + gH*(1-frac);
+    ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
+    ctx.fillStyle='rgba(255,251,189,0.25)';
+    ctx.font='9px Inter,sans-serif';
+    ctx.fillText(Math.round(maxT*frac/1000)+'s', 2, y+3);
+  });
+
+  // Line
+  ctx.beginPath();
+  times.forEach((t,i)=>{
+    const x = padL + (i/(Math.max(n-1,1)))*gW;
+    const y = padT + gH*(1 - t/maxT);
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle='rgba(127,176,105,0.7)'; ctx.lineWidth=2; ctx.stroke();
+
+  // Dots
+  times.forEach((t,i)=>{
+    const x = padL + (i/(Math.max(n-1,1)))*gW;
+    const y = padT + gH*(1 - t/maxT);
+    ctx.beginPath(); ctx.arc(x,y,3.5,0,Math.PI*2);
+    ctx.fillStyle = results[i]?.correct ? '#7FB069' : '#CA3C25';
+    ctx.fill();
+  });
+}
+
+// ───────── HISTORY TOGGLE ─────────
+function toggleHistory(){
+  const col = document.getElementById('historyCollapsible');
+  const arrow = document.getElementById('historyArrow');
+  const isOpen = col.classList.contains('open');
+  col.classList.toggle('open', !isOpen);
+  arrow.classList.toggle('open', !isOpen);
+}
+
+// ───────── EXPORT ─────────
+function exportResults(){
+  const lines = ['Question,Type,Your Answer,Correct Answer,Result,Time(ms)'];
+  results.forEach(r=>{
+    const q = r.q;
+    const sym = q.type==='square'?'²':q.type==='cube'?'³':'×';
+    const qStr = q.type==='table' ? `${q.n}×${q.m}` : `${q.n}${sym}`;
+    const correctAns = q.type==='table' ? q.answer : (q.reverse ? q.n : q.answer);
+    lines.push(`"${qStr}","${q.type}","${r.userAnswer}","${correctAns}","${r.correct?'Correct':'Wrong'}","${r.elapsed||''}"`);
+  });
+  const blob = new Blob([lines.join('\n')], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `quiz_results_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+// ───────── THEME ─────────
+function toggleTheme(){
+  const html = document.documentElement;
+  const isLight = html.getAttribute('data-theme') === 'light';
+  const next = isLight ? 'dark' : 'light';
+  html.setAttribute('data-theme', next);
+  document.getElementById('themeBtn').textContent = next === 'light' ? '☀️' : '🌙';
+  try { localStorage.setItem('quiz_theme', next); } catch(e){}
+}
+// Restore saved theme on load
+(function(){
+  try {
+    const saved = localStorage.getItem('quiz_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+    const btn = document.getElementById('themeBtn');
+    if(btn) btn.textContent = saved === 'light' ? '☀️' : '🌙';
+  } catch(e){
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+})();
+
 </script>
 </body>
 </html>
