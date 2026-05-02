@@ -635,10 +635,11 @@
       flex-shrink: 0;
     }
     .back-btn svg {
-      width: clamp(15px, 4vw, 19px);
-      height: clamp(15px, 4vw, 19px);
-      stroke: #eff8e2; fill: none; stroke-width: 2;
-      stroke-linecap: round; stroke-linejoin: round;
+      width: clamp(16px, 4vw, 20px);
+      height: clamp(16px, 4vw, 20px);
+      stroke: #eff8e2;
+      fill: none;
+      color: #eff8e2;
     }
     .top-meta { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 6px; flex-wrap: wrap; }
     .q-pill {
@@ -1295,7 +1296,11 @@ select:focus {
   background: #2d0a3d;
   color: #eff8e2;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background 0.08s, transform 0.08s;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .kb-key:active {
@@ -1868,17 +1873,658 @@ select:focus {
       border-radius: 99px;
     }
     .review-scroll::-webkit-scrollbar-thumb:hover { background: rgba(184,212,92,0.4); }
+
+    /* ════════════════════════════════════════════════
+       WELCOME SCREEN
+    ════════════════════════════════════════════════ */
+    #s-welcome {
+      min-height: 100dvh;
+      justify-content: center;
+      align-items: center;
+      padding: 32px 24px;
+      gap: 0;
+    }
+    .welcome-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      width: 100%;
+      max-width: 420px;
+      margin: auto;
+    }
+    .welcome-icon {
+      font-size: 52px;
+      margin-bottom: 28px;
+      filter: drop-shadow(0 0 20px rgba(184,212,92,0.4));
+    }
+    .welcome-heading {
+      font-size: clamp(30px, 7vw, 46px);
+      font-weight: 800;
+      color: #eff8e2;
+      text-align: center;
+      letter-spacing: -1px;
+      line-height: 1.15;
+      margin-bottom: 12px;
+    }
+    .welcome-heading span {
+      background: linear-gradient(135deg, #B8D45C, #7BA832);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .welcome-quote {
+      font-size: clamp(13px, 3.2vw, 15px);
+      color: rgba(239,248,226,0.45);
+      text-align: center;
+      font-style: italic;
+      line-height: 1.5;
+      max-width: 320px;
+      margin: 0 auto 36px;
+    }
+    .welcome-input-wrap {
+      width: 100%;
+      position: relative;
+      margin-bottom: 14px;
+    }
+    .welcome-input {
+      width: 100%;
+      padding: 18px 20px;
+      border-radius: 16px;
+      border: 1.5px solid rgba(184,212,92,0.25);
+      background: rgba(87,50,128,0.15);
+      backdrop-filter: blur(10px);
+      color: #eff8e2;
+      font-size: clamp(15px, 3.5vw, 17px);
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      text-align: center;
+    }
+    .welcome-input::placeholder {
+      color: rgba(239,248,226,0.3);
+      font-style: italic;
+    }
+    .welcome-input:focus {
+      border-color: rgba(184,212,92,0.6);
+      box-shadow: 0 0 0 3px rgba(184,212,92,0.1), 0 0 30px rgba(184,212,92,0.08);
+    }
+    .welcome-btn {
+      width: 100%;
+      padding: 17px;
+      border-radius: 14px;
+      border: none;
+      background: linear-gradient(135deg, #7BA832, #5a7d25);
+      color: #eff8e2;
+      font-size: clamp(15px, 3.5vw, 17px);
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 0.3px;
+      transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+      box-shadow: 0 4px 20px rgba(123,168,50,0.3);
+    }
+    .welcome-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(123,168,50,0.4); }
+    .welcome-btn:active { transform: scale(0.97); }
+    .welcome-btn:disabled { opacity: 0.35; cursor: default; transform: none; }
+
+    /* ════════════════════════════════════════════════
+       DASHBOARD SCREEN
+    ════════════════════════════════════════════════ */
+    #s-dashboard {
+      gap: 14px;
+    }
+    .dash-header {
+      border-radius: 20px;
+      padding: clamp(20px, 5vw, 28px);
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(145deg, rgba(100,40,150,0.5) 0%, rgba(55,10,80,0.6) 100%);
+      border: 1px solid rgba(184,212,92,0.18);
+      box-shadow: 0 0 0 1px rgba(87,50,128,0.3), 0 16px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(184,212,92,0.2);
+    }
+    .dash-header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 8%; right: 8%; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(184,212,92,0.8) 50%, transparent);
+    }
+    .dash-greeting {
+      font-size: clamp(11px, 2.5vw, 13px);
+      font-weight: 600;
+      color: rgba(239,248,226,0.45);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
+    }
+    .dash-name {
+      font-size: clamp(24px, 6vw, 36px);
+      font-weight: 800;
+      color: #eff8e2;
+      letter-spacing: -0.5px;
+      line-height: 1.15;
+    }
+    .dash-name span { color: #B8D45C; }
+    .dash-tagline {
+      font-size: clamp(12px, 2.8vw, 14px);
+      color: rgba(239,248,226,0.4);
+      margin-top: 6px;
+    }
+    .dash-header-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .dash-start-btn {
+      flex: 1;
+      padding: 13px 16px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, #7BA832, #5a7d25);
+      color: #eff8e2;
+      font-size: clamp(13px,3vw,15px);
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+      box-shadow: 0 4px 16px rgba(123,168,50,0.3);
+    }
+    .dash-start-btn:hover { transform: translateY(-1px); }
+    .dash-start-btn:active { transform: scale(0.97); }
+    .dash-profile-btn {
+      padding: 13px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(184,212,92,0.2);
+      background: rgba(87,50,128,0.2);
+      color: rgba(239,248,226,0.6);
+      font-size: 15px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.18s;
+    }
+    .dash-profile-btn:hover { border-color: rgba(184,212,92,0.4); color: #eff8e2; }
+
+    /* Today stats row */
+    .dash-today {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .dash-stat {
+      background: rgba(45,10,61,0.6);
+      border: 1px solid rgba(184,212,92,0.1);
+      border-radius: 14px;
+      padding: 14px 10px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .dash-stat-val {
+      font-size: clamp(20px,5vw,28px);
+      font-weight: 800;
+      color: #B8D45C;
+      line-height: 1;
+    }
+    .dash-stat-lbl {
+      font-size: clamp(10px,2.2vw,11px);
+      font-weight: 600;
+      color: rgba(239,248,226,0.35);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    /* Recent sessions */
+    .dash-section-title {
+      font-size: clamp(10px,2.2vw,11px);
+      font-weight: 700;
+      color: rgba(239,248,226,0.35);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 2px;
+    }
+    .dash-recent {
+      background: rgba(45,10,61,0.5);
+      border: 1px solid rgba(184,212,92,0.1);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .dash-session {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(184,212,92,0.07);
+      gap: 10px;
+    }
+    .dash-session:last-child { border-bottom: none; }
+    .dash-session-date {
+      font-size: 12px;
+      color: rgba(239,248,226,0.4);
+      flex-shrink: 0;
+    }
+    .dash-session-score {
+      font-size: 13px;
+      font-weight: 700;
+      color: #eff8e2;
+    }
+    .dash-session-pct {
+      font-size: 13px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 20px;
+      flex-shrink: 0;
+    }
+    .dash-session-pct.good { background: rgba(123,168,50,0.2); color: #B8D45C; }
+    .dash-session-pct.bad  { background: rgba(87,50,128,0.3);  color: rgba(239,248,226,0.5); }
+    .dash-empty {
+      padding: 28px 16px;
+      text-align: center;
+      color: rgba(239,248,226,0.3);
+      font-size: 13px;
+    }
+
+    /* Profile edit panel */
+    .dash-profile-panel {
+      background: rgba(45,10,61,0.6);
+      border: 1px solid rgba(184,212,92,0.15);
+      border-radius: 16px;
+      padding: 16px;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .dash-profile-panel.open { display: flex; }
+    .profile-input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1.5px solid rgba(184,212,92,0.2);
+      background: rgba(87,50,128,0.12);
+      color: #eff8e2;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .profile-input:focus { border-color: rgba(184,212,92,0.5); }
+    .profile-save-btn {
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: none;
+      background: rgba(123,168,50,0.25);
+      color: #B8D45C;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      border: 1px solid rgba(123,168,50,0.3);
+      transition: background 0.15s;
+    }
+    .profile-save-btn:hover { background: rgba(123,168,50,0.4); }
+
+    /* ════════════════════════════════════════════════
+       PROFILE SCREEN
+    ════════════════════════════════════════════════ */
+    #s-profile { gap: 14px; }
+
+    .profile-header {
+      border-radius: 20px;
+      padding: clamp(20px,5vw,28px);
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(145deg, rgba(87,50,128,0.5) 0%, rgba(45,10,61,0.7) 100%);
+      border: 1px solid rgba(184,212,92,0.18);
+      box-shadow: 0 0 0 1px rgba(87,50,128,0.3), 0 16px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(184,212,92,0.2);
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .profile-header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 8%; right: 8%; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(184,212,92,0.8) 50%, transparent);
+    }
+    .profile-avatar {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7BA832, #573280);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; font-weight: 800; color: #eff8e2;
+      flex-shrink: 0;
+      border: 2px solid rgba(184,212,92,0.3);
+    }
+    .profile-header-info { flex: 1; min-width: 0; }
+    .profile-header-name {
+      font-size: clamp(20px,5vw,28px);
+      font-weight: 800; color: #eff8e2;
+      letter-spacing: -0.5px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .profile-header-since {
+      font-size: 12px; color: rgba(239,248,226,0.4);
+      margin-top: 3px;
+    }
+    .profile-header-edit {
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(184,212,92,0.2);
+      background: rgba(87,50,128,0.2);
+      color: rgba(239,248,226,0.7);
+      font-size: 13px; font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .profile-header-edit:hover { border-color: rgba(184,212,92,0.5); color: #eff8e2; }
+
+    /* inline name editor */
+    .profile-name-edit {
+      display: none;
+      gap: 8px;
+      align-items: center;
+    }
+    .profile-name-edit.open { display: flex; }
+    .profile-name-edit input {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1.5px solid rgba(184,212,92,0.3);
+      background: rgba(87,50,128,0.15);
+      color: #eff8e2;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+    }
+    .profile-name-edit button {
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: none;
+      background: rgba(123,168,50,0.25);
+      color: #B8D45C;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      border: 1px solid rgba(123,168,50,0.3);
+    }
+
+    /* Stat grid */
+    .profile-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2,1fr);
+      gap: 10px;
+    }
+    .profile-stat-card {
+      background: rgba(45,10,61,0.6);
+      border: 1px solid rgba(184,212,92,0.1);
+      border-radius: 16px;
+      padding: 16px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .profile-stat-icon { font-size: 20px; margin-bottom: 2px; }
+    .profile-stat-val {
+      font-size: clamp(22px,5.5vw,30px);
+      font-weight: 800;
+      color: #B8D45C;
+      line-height: 1;
+    }
+    .profile-stat-lbl {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(239,248,226,0.35);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    /* Accuracy bar */
+    .profile-acc-bar-wrap {
+      background: rgba(45,10,61,0.6);
+      border: 1px solid rgba(184,212,92,0.1);
+      border-radius: 16px;
+      padding: 16px 14px;
+    }
+    .profile-acc-row {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 8px;
+    }
+    .profile-acc-label { font-size: 12px; color: rgba(239,248,226,0.5); font-weight: 600; }
+    .profile-acc-val   { font-size: 18px; font-weight: 800; color: #B8D45C; }
+    .profile-bar-bg {
+      height: 8px; border-radius: 99px;
+      background: rgba(87,50,128,0.3);
+      overflow: hidden;
+    }
+    .profile-bar-fill {
+      height: 100%; border-radius: 99px;
+      background: linear-gradient(90deg, #7BA832, #B8D45C);
+      transition: width 0.6s cubic-bezier(0.22,1,0.36,1);
+    }
+
+    /* Recent sessions on profile */
+    .profile-sessions {
+      background: rgba(45,10,61,0.5);
+      border: 1px solid rgba(184,212,92,0.1);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    /* Danger zone */
+    .profile-danger {
+      background: rgba(45,10,61,0.4);
+      border: 1px solid rgba(202,60,37,0.2);
+      border-radius: 16px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .profile-danger-label { font-size: 13px; color: rgba(239,248,226,0.5); }
+    .profile-danger-btn {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(202,60,37,0.4);
+      background: rgba(202,60,37,0.12);
+      color: rgba(202,60,37,0.8);
+      font-size: 12px; font-weight: 700;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .profile-danger-btn:hover { background: rgba(202,60,37,0.25); color: #ff6b4a; }
   </style>
 </head>
 <body>
 <div class="page-wrap">
 <div class="app">
 
+
+  <!-- WELCOME SCREEN — shown only to new users -->
+  <div class="screen" id="s-welcome">
+    <div class="welcome-inner">
+      <div class="welcome-icon">🧮</div>
+      <h1 class="welcome-heading">Hello,<br><span>Mathematician.</span></h1>
+      <p class="welcome-quote" id="welcomeQuote"></p>
+      <div class="welcome-input-wrap">
+        <input
+          class="welcome-input"
+          id="welcomeNameInput"
+          type="text"
+          placeholder="What should I call you?"
+          maxlength="24"
+          autocomplete="off"
+          oninput="document.getElementById('welcomeSubmitBtn').disabled = !this.value.trim()"
+          onkeydown="if(event.key==='Enter' && this.value.trim()) saveWelcomeName()"
+        >
+      </div>
+      <button class="welcome-btn" id="welcomeSubmitBtn" disabled onclick="saveWelcomeName()">Let's go →</button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD SCREEN — home screen for returning users -->
+  <div class="screen" id="s-dashboard">
+    <div class="dash-header">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+        <div>
+          <div class="dash-greeting" id="dashGreeting">Good morning</div>
+          <div class="dash-name">Welcome, <span id="dashNameSpan">—</span></div>
+          <div class="dash-tagline" id="dashTagline">Ready to sharpen your skills?</div>
+        </div>
+        <button class="back-btn" onclick="showProfile()" title="Profile" style="flex-shrink:0;margin-top:2px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+          </svg>
+        </button>
+      </div>
+      <div class="dash-header-actions">
+        <button class="dash-start-btn" onclick="show('s-setup')">Start Practice →</button>
+      </div>
+    </div>
+
+    <!-- Today's stats: Sessions | Accuracy | Day Streak -->
+    <div class="dash-section-title">Today</div>
+    <div class="dash-today">
+      <div class="dash-stat">
+        <div class="dash-stat-val" id="dashTodaySessions">0</div>
+        <div class="dash-stat-lbl">Sessions</div>
+      </div>
+      <div class="dash-stat">
+        <div class="dash-stat-val" id="dashTodayAcc">—</div>
+        <div class="dash-stat-lbl">Accuracy</div>
+      </div>
+      <div class="dash-stat">
+        <div class="dash-stat-val" id="dashDayStreak">—</div>
+        <div class="dash-stat-lbl">Day Streak 🔥</div>
+      </div>
+    </div>
+
+    <!-- Recent sessions -->
+    <div class="dash-section-title">Recent sessions</div>
+    <div class="dash-recent" id="dashRecentList">
+      <div class="dash-empty">No sessions yet — start your first quiz!</div>
+    </div>
+  </div>
+
+
+  <!-- PROFILE SCREEN -->
+  <div class="screen" id="s-profile">
+
+    <div class="profile-header">
+      <div class="profile-avatar" id="profileAvatar">?</div>
+      <div class="profile-header-info">
+        <div class="profile-header-name" id="profileDisplayName">—</div>
+        <div class="profile-header-since" id="profileSince">Member since —</div>
+      </div>
+      <button class="profile-header-edit" onclick="toggleProfileNameEdit()">Edit</button>
+      <button class="back-btn" onclick="goHome()" title="Home" style="flex-shrink:0;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9.5z"/>
+          <polyline points="9,21 9,12 15,12 15,21"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- inline name edit -->
+    <div class="profile-name-edit" id="profileNameEditRow">
+      <input type="text" id="profileNameEditInput" maxlength="24" placeholder="New name">
+      <button onclick="saveProfileNameFromScreen()">Save</button>
+    </div>
+
+    <!-- Lifetime stats grid -->
+    <div class="dash-section-title">Lifetime stats</div>
+    <div class="profile-stats-grid">
+      <div class="profile-stat-card">
+        <div class="profile-stat-icon">🎯</div>
+        <div class="profile-stat-val" id="profTotalSessions">0</div>
+        <div class="profile-stat-lbl">Total Sessions</div>
+      </div>
+      <div class="profile-stat-card">
+        <div class="profile-stat-icon">✅</div>
+        <div class="profile-stat-val" id="profTotalQuestions">0</div>
+        <div class="profile-stat-lbl">Questions Answered</div>
+      </div>
+      <div class="profile-stat-card">
+        <div class="profile-stat-icon">🔥</div>
+        <div class="profile-stat-val" id="profBestStreak">0</div>
+        <div class="profile-stat-lbl">Best Streak</div>
+      </div>
+      <div class="profile-stat-card">
+        <div class="profile-stat-icon">📅</div>
+        <div class="profile-stat-val" id="profDayStreak">0</div>
+        <div class="profile-stat-lbl">Day Streak</div>
+      </div>
+    </div>
+
+    <!-- Overall accuracy bar -->
+    <div class="profile-acc-bar-wrap">
+      <div class="profile-acc-row">
+        <span class="profile-acc-label">Overall accuracy</span>
+        <span class="profile-acc-val" id="profAccVal">—</span>
+      </div>
+      <div class="profile-bar-bg">
+        <div class="profile-bar-fill" id="profAccBar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Best score -->
+    <div class="profile-stats-grid">
+      <div class="profile-stat-card">
+        <div class="profile-stat-icon">🏆</div>
+        <div class="profile-stat-val" id="profBestPct">—</div>
+        <div class="profile-stat-lbl">Best Score</div>
+      </div>
+      <div class="profile-stat-card">
+        <div class="profile-stat-icon">📈</div>
+        <div class="profile-stat-val" id="profAvgPct">—</div>
+        <div class="profile-stat-lbl">Avg Score</div>
+      </div>
+    </div>
+
+    <!-- Recent sessions -->
+    <div class="dash-section-title">Session history</div>
+    <div class="profile-sessions" id="profileSessionList">
+      <div class="dash-empty">No sessions yet</div>
+    </div>
+
+    <!-- Danger zone -->
+    <div class="profile-danger">
+      <span class="profile-danger-label">Reset all data and start fresh</span>
+      <button class="profile-danger-btn" onclick="confirmResetProfile()">Reset profile</button>
+    </div>
+
+  </div>
+
   <!-- SETUP SCREEN -->
   <div class="screen active" id="s-setup">
     <div class="setup-header">
-      <h1>Speed Maths Trainer</h1>
-      <p>Configure your test below</p>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+        <div>
+          <h1>Speed Maths Trainer</h1>
+          <p>Configure your test below</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-shrink:0;">
+          <button class="back-btn" onclick="showProfile()" title="Profile">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="8" r="4"/>
+              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+            </svg>
+          </button>
+          <button class="back-btn" onclick="goHome()" title="Home">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9.5z"/>
+              <polyline points="9,21 9,12 15,12 15,21"/>
+            </svg>
+          </button>
+        </div>
+      </div>
     </div>
 
     <div class="bento-grid">
@@ -2048,14 +2694,8 @@ select:focus {
   <div class="screen" id="s-test">
     <div class="setup-header">
 
-  <div style="display:flex;align-items:center;gap:12px;">
-    <button class="back-btn" onclick="goHome()">
-      <svg viewBox="0 0 24 24">
-        <polyline points="15,18 9,12 15,6"/>
-      </svg>
-    </button>
-
-    <div class="top-meta">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+    <div class="top-meta" style="justify-content:flex-start;">
       <div class="q-pill">
         Q <span id="qNum">01</span> of <span id="qTotal">10</span>
       </div>
@@ -2063,6 +2703,12 @@ select:focus {
       <div class="streak-pill" id="streakPill">🔥 1</div>
       <div class="lives-pill" id="livesPill" style="display:none;">❤️❤️❤️</div>
     </div>
+    <button class="back-btn" onclick="goHome()" title="Home" style="flex-shrink:0;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9.5z"/>
+        <polyline points="9,21 9,12 15,12 15,21"/>
+      </svg>
+    </button>
   </div>
 <div class="prog-wrap">
       <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
@@ -2144,11 +2790,11 @@ select:focus {
   <!-- GAME OVER SCREEN -->
   <div class="screen" id="s-gameover">
     <div class="setup-header">
-      <div style="display:flex;align-items:center;gap:12px;">
-        <button class="back-btn" onclick="goHome()">
-          <svg viewBox="0 0 24 24"><polyline points="15,18 9,12 15,6"/></svg>
-        </button>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
         <div class="res-title">Game Over</div>
+        <button class="back-btn" onclick="goHome()" title="Home">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9.5z"/><polyline points="9,21 9,12 15,12 15,21"/></svg>
+        </button>
       </div>
     </div>
     <div class="setup-body">
@@ -2170,14 +2816,14 @@ select:focus {
 
   <!-- SAME HEADER STYLE -->
   <div class="setup-header">
-    <div style="display:flex;align-items:center;gap:12px;">
-      <button class="back-btn" onclick="goHome()">
-        <svg viewBox="0 0 24 24">
-          <polyline points="15,18 9,12 15,6"/>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <div class="res-title">Test complete</div>
+      <button class="back-btn" onclick="goHome()" title="Home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9.5z"/>
+          <polyline points="9,21 9,12 15,12 15,21"/>
         </svg>
       </button>
-
-      <div class="res-title">Test complete</div>
     </div>
   </div>
 
@@ -2342,7 +2988,6 @@ function setMultType(btn){
     const focusOn = document.getElementById('focusTog').checked;
     if(focusOn) buildFocusGrid();
   }
-  function goHome(){ clearTimer(); clearStopwatch(); show('s-setup'); }
 
   function setDiff(d, e){
     document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('active'));
@@ -3058,27 +3703,37 @@ const input = document.getElementById('ansInput');
 const keys = document.querySelectorAll('.kb-key');
 
 keys.forEach(key => {
-  key.addEventListener('click', () => {
+  // Use pointerdown instead of click — eliminates ~300ms mobile tap delay
+  key.addEventListener('pointerdown', (e) => {
+    e.preventDefault(); // prevent ghost click and focus steal
     if (input.disabled) return;
 
     if (key.classList.contains('kb-del')) {
       input.value = input.value.slice(0, -1);
+      // visual feedback
+      key.style.background = '#3d1050';
+      setTimeout(() => key.style.background = '', 80);
       return;
     }
 
     if (key.classList.contains('kb-enter')) {
+      key.style.background = '#7a45aa';
+      setTimeout(() => key.style.background = '', 80);
       checkAnswer();
       return;
     }
 
     input.value += key.textContent;
+    // visual feedback
+    key.style.background = '#C5D86D';
+    key.style.color = '#1a0a2e';
+    setTimeout(() => { key.style.background = ''; key.style.color = ''; }, 80);
 
-    // auto submit logic still works
     if (autoSub) {
       const q = qs[cur];
       const targetLen = q.reverse ? String(q.n).length : String(q.answer).length;
       if (input.value.length >= targetLen) {
-        setTimeout(() => checkAnswer(), 100);
+        setTimeout(() => checkAnswer(), 60);
       }
     }
   });
@@ -3142,8 +3797,7 @@ function clearStopwatch() {
 }
 
 // ───────── HISTORY ─────────
-const HISTORY_KEY = 'quiz_history';
-const MAX_HISTORY = 20;
+// (HISTORY_KEY and MAX_HISTORY defined in profile section below)
 
 function eraseHistoryAsk() {
   document.getElementById('eraseBtn').style.display = 'none';
@@ -3163,7 +3817,7 @@ function eraseHistoryConfirm() {
 function saveHistory(score, total, pct) {
   let history = [];
   try { history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch(e) {}
-  history.unshift({ score, total, pct, date: new Date().toISOString() });
+  history.unshift({ score, total, correct: score, pct, date: new Date().toISOString() });
   history = history.slice(0, MAX_HISTORY);
   try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); } catch(e) {}
 }
@@ -3194,7 +3848,232 @@ function toggleHistory(){
   arrow.classList.toggle('open', !isOpen);
 }
 
-// ───────── EXPORT ─────────
+// ═══════════════════════════════════════════════
+//  PROFILE · WELCOME · DASHBOARD
+// ═══════════════════════════════════════════════
+const PROFILE_KEY = 'quiz_profile';
+const HISTORY_KEY = 'quiz_history';
+const MAX_HISTORY = 200;
+
+const QUOTES = [
+  "Every expert was once a beginner.",
+  "Repetition is the mother of mastery.",
+  "The brain that works hardest, grows fastest.",
+  "Speed comes from practice, not shortcuts.",
+  "Champions aren't born. They calculate.",
+  "One more session closer to excellence.",
+  "Maths is the language of the universe.",
+  "Hard problems now = easy exams later.",
+  "Your future self will thank you for today.",
+  "Consistency beats intensity every time.",
+];
+
+function getProfile() {
+  try { return JSON.parse(localStorage.getItem(PROFILE_KEY)) || {}; } catch(e) { return {}; }
+}
+function saveProfile(data) {
+  try { localStorage.setItem(PROFILE_KEY, JSON.stringify(data)); } catch(e) {}
+}
+function getSessionHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch(e) { return []; }
+}
+function getTodaySessions(history) {
+  const today = new Date().toDateString();
+  return history.filter(h => new Date(h.date).toDateString() === today);
+}
+
+// Compute day streak from history
+function computeDayStreak(history) {
+  if (!history.length) return 0;
+  const days = [...new Set(history.map(h => new Date(h.date).toDateString()))];
+  // sort descending
+  days.sort((a,b) => new Date(b) - new Date(a));
+  const todayStr = new Date().toDateString();
+  const ystStr   = new Date(Date.now()-86400000).toDateString();
+  // Must have played today or yesterday to have active streak
+  if (days[0] !== todayStr && days[0] !== ystStr) return 0;
+  let streak = 1;
+  for (let i = 1; i < days.length; i++) {
+    const prev = new Date(days[i-1]);
+    const curr = new Date(days[i]);
+    const diff = Math.round((prev - curr) / 86400000);
+    if (diff === 1) streak++;
+    else break;
+  }
+  return streak;
+}
+
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return 'Good morning';
+  if (h < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
+// ── Welcome ──
+function saveWelcomeName() {
+  const name = document.getElementById('welcomeNameInput').value.trim();
+  if (!name) return;
+  saveProfile({ name, joinedDate: new Date().toISOString() });
+  showDashboard();
+}
+
+// ── Dashboard ──
+function showDashboard() {
+  const profile = getProfile();
+  const history = getSessionHistory();
+  const todaySessions = getTodaySessions(history);
+
+  document.getElementById('dashGreeting').textContent = getGreeting();
+  document.getElementById('dashNameSpan').textContent = profile.name || 'Friend';
+
+  // Tagline
+  if (!todaySessions.length) {
+    document.getElementById('dashTagline').textContent = 'Ready to sharpen your skills?';
+  } else {
+    const avg = Math.round(todaySessions.reduce((s,h)=>s+h.pct,0)/todaySessions.length);
+    document.getElementById('dashTagline').textContent =
+      `${todaySessions.length} session${todaySessions.length>1?'s':''} today · avg ${avg}%`;
+  }
+
+  // Today stats
+  document.getElementById('dashTodaySessions').textContent = todaySessions.length || '0';
+  if (todaySessions.length) {
+    const totalQ   = todaySessions.reduce((s,h)=>s+(h.total||0),0);
+    const correctQ = todaySessions.reduce((s,h)=>s+(h.correct||0),0);
+    const acc = totalQ ? Math.round(correctQ/totalQ*100) : Math.round(todaySessions.reduce((s,h)=>s+h.pct,0)/todaySessions.length);
+    document.getElementById('dashTodayAcc').textContent = acc + '%';
+  } else {
+    document.getElementById('dashTodayAcc').textContent = '—';
+  }
+  document.getElementById('dashDayStreak').textContent = computeDayStreak(history) || '0';
+
+  // Recent sessions list
+  const list = document.getElementById('dashRecentList');
+  if (!history.length) {
+    list.innerHTML = '<div class="dash-empty">No sessions yet — start your first quiz!</div>';
+  } else {
+    list.innerHTML = history.slice(0,8).map(h => {
+      const dateStr = new Date(h.date).toLocaleDateString(undefined,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+      const cls = h.pct >= 70 ? 'good' : 'bad';
+      return `<div class="dash-session">
+        <span class="dash-session-date">${dateStr}</span>
+        <span class="dash-session-score">${h.score}/${h.total}</span>
+        <span class="dash-session-pct ${cls}">${h.pct}%</span>
+      </div>`;
+    }).join('');
+  }
+
+  show('s-dashboard');
+}
+
+// ── Profile screen ──
+function showProfile() {
+  const profile  = getProfile();
+  const history  = getSessionHistory();
+  const pb       = getPB();
+
+  // Avatar initial
+  const name = profile.name || '?';
+  document.getElementById('profileAvatar').textContent = name.charAt(0).toUpperCase();
+  document.getElementById('profileDisplayName').textContent = name;
+  document.getElementById('profileSince').textContent = profile.joinedDate
+    ? 'Member since ' + new Date(profile.joinedDate).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'})
+    : 'Member';
+
+  // Lifetime stats
+  document.getElementById('profTotalSessions').textContent  = history.length;
+  const totalQ   = history.reduce((s,h)=>s+(h.total||0),0);
+  const correctQ = history.reduce((s,h)=>s+(h.correct||0),0);
+  document.getElementById('profTotalQuestions').textContent = totalQ || history.reduce((s,h)=>s+h.total,0);
+  document.getElementById('profBestStreak').textContent     = pb.bestStreak || 0;
+  document.getElementById('profDayStreak').textContent      = computeDayStreak(history);
+
+  // Accuracy
+  const avgPct = history.length
+    ? Math.round(history.reduce((s,h)=>s+h.pct,0)/history.length)
+    : 0;
+  document.getElementById('profAccVal').textContent = avgPct ? avgPct+'%' : '—';
+  setTimeout(()=>{ document.getElementById('profAccBar').style.width = (avgPct||0)+'%'; }, 80);
+
+  // Best / avg
+  const bestPct = pb.bestPct || (history.length ? Math.max(...history.map(h=>h.pct)) : 0);
+  document.getElementById('profBestPct').textContent = bestPct ? bestPct+'%' : '—';
+  document.getElementById('profAvgPct').textContent  = avgPct  ? avgPct+'%'  : '—';
+
+  // Session list
+  const slist = document.getElementById('profileSessionList');
+  if (!history.length) {
+    slist.innerHTML = '<div class="dash-empty">No sessions yet</div>';
+  } else {
+    slist.innerHTML = history.slice(0,20).map(h => {
+      const dateStr = new Date(h.date).toLocaleDateString(undefined,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+      const cls = h.pct >= 70 ? 'good' : 'bad';
+      return `<div class="dash-session">
+        <span class="dash-session-date">${dateStr}</span>
+        <span class="dash-session-score">${h.score}/${h.total}</span>
+        <span class="dash-session-pct ${cls}">${h.pct}%</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Reset edit row
+  document.getElementById('profileNameEditRow').classList.remove('open');
+  show('s-profile');
+}
+
+function toggleProfileNameEdit() {
+  const row = document.getElementById('profileNameEditRow');
+  const isOpen = row.classList.contains('open');
+  if (!isOpen) document.getElementById('profileNameEditInput').value = getProfile().name || '';
+  row.classList.toggle('open', !isOpen);
+}
+
+function saveProfileNameFromScreen() {
+  const name = document.getElementById('profileNameEditInput').value.trim();
+  if (!name) return;
+  const profile = getProfile();
+  profile.name = name;
+  saveProfile(profile);
+  document.getElementById('profileDisplayName').textContent = name;
+  document.getElementById('profileAvatar').textContent = name.charAt(0).toUpperCase();
+  document.getElementById('profileNameEditRow').classList.remove('open');
+  // update dashboard name too if visible
+  const ns = document.getElementById('dashNameSpan');
+  if (ns) ns.textContent = name;
+}
+
+function confirmResetProfile() {
+  if (!confirm('This will delete all your data permanently. Are you sure?')) return;
+  try { localStorage.removeItem(PROFILE_KEY); } catch(e){}
+  try { localStorage.removeItem(HISTORY_KEY); } catch(e){}
+  try { localStorage.removeItem(PB_KEY); } catch(e){}
+  location.reload();
+}
+
+// ── goHome ──
+function goHome() {
+  clearTimer();
+  clearStopwatch();
+  const profile = getProfile();
+  if (profile.name) { showDashboard(); } else { show('s-setup'); }
+}
+
+// ── Initial screen routing ──
+(function init() {
+  const profile = getProfile();
+  if (!profile.name) {
+    document.getElementById('s-welcome').classList.add('active');
+    document.getElementById('s-setup').classList.remove('active');
+    document.getElementById('welcomeQuote').textContent = QUOTES[Math.floor(Math.random()*QUOTES.length)];
+  } else {
+    document.getElementById('s-setup').classList.remove('active');
+    showDashboard();
+  }
+})();
+
+
+
 function exportResults(){
   const lines = ['Question,Type,Your Answer,Correct Answer,Result'];
   results.forEach(r=>{
