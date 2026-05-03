@@ -910,74 +910,128 @@ display: block;
       margin-top: 4px;
       font-weight: 400;
     }
-    .stat-row {
+    /* ── Results Bento Grid ── */
+    .res-bento {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: clamp(8px, 2.5vw, 12px);
-      margin: 0 clamp(12px, 4vw, 20px) clamp(14px, 4vw, 22px);
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: clamp(7px,2vw,10px);
+      margin: 0 clamp(12px,4vw,20px) clamp(10px,3vw,14px);
       flex-shrink: 0;
     }
-    .stat-c {
+    /* Best % and Best Streak — each a half-width card */
+    .pb-c {
+      background: #2d0a3d;
+      border-radius: 14px;
+      padding: clamp(12px,3.5vw,16px) clamp(10px,3vw,14px);
+      text-align: center;
+      border: 1px solid rgba(239,248,226,0.1);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 16px rgba(0,0,0,0.3);
+    }
+    .pb-v { font-size: clamp(18px,5vw,22px); font-weight: 800; color: #eff8e2; line-height: 1; }
+    .pb-l { font-size: 10px; color: rgba(239,248,226,0.35); margin-top: 5px; text-transform: uppercase; letter-spacing: 0.08em; }
+    .pb-new { color: #B8D45C; text-shadow: 0 0 12px rgba(184,212,92,0.5); }
+
+    /* XP card — spans full width */
+    .pb-xp-card {
+      grid-column: 1 / -1;
+      background: #2d0a3d;
+      border-radius: 14px;
+      padding: clamp(10px,3vw,14px) clamp(12px,4vw,16px);
+      border: 1px solid rgba(184,212,92,0.12);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 16px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .pb-xp-left { display: flex; align-items: baseline; gap: 6px; }
+    .pb-xp-val { font-size: clamp(18px,5vw,22px); font-weight: 800; color: #B8D45C; line-height: 1; }
+    .pb-xp-lbl { font-size: 10px; color: rgba(239,248,226,0.35); text-transform: uppercase; letter-spacing: 0.08em; }
+    .pb-xp-bar-wrap { flex: 1; max-width: 140px; }
+    .pb-xp-bar-bg { height: 5px; border-radius: 99px; background: rgba(87,50,128,0.4); overflow: hidden; }
+    .pb-xp-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg,#7BA832,#B8D45C); transition: width 0.5s cubic-bezier(0.22,1,0.36,1); width: 0%; }
+
+    /* Correct / Wrong — single card with divider */
+    .res-cw-card {
+      grid-column: 1 / -1;
       background: rgba(80,20,110,0.22);
       backdrop-filter: blur(28px);
       -webkit-backdrop-filter: blur(28px);
-      border-radius: 12px;
-      padding: clamp(10px, 3vw, 16px) clamp(8px, 2vw, 14px);
-      text-align: center;
-      border: 1px solid rgba(184,212,92,0.12);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.07),
-        0 4px 16px rgba(0,0,0,0.3);
+      border-radius: 14px;
+      border: 1px solid rgba(184,212,92,0.1);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 4px 16px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: stretch;
     }
-    .stat-v { font-size: clamp(18px, 5.5vw, 24px); font-weight: 700; }
-    .stat-l { font-size: clamp(10px, 2.5vw, 12px); color: rgba(239,248,226,0.65); margin-top: 3px; }
-    .sv-ok  { color: #B8D45C; }
-    .sv-no  { color: #ada8b6; }
-    .sv-tot { color: rgba(239,248,226,0.6); }
+    .res-cw-half {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(12px,3.5vw,16px) 8px;
+    }
+    .res-cw-divider {
+      width: 1px;
+      background: rgba(239,248,226,0.1);
+      margin: 12px 0;
+      flex-shrink: 0;
+    }
+    .res-cw-val { font-size: clamp(22px,6vw,28px); font-weight: 800; line-height: 1; }
+    .res-cw-lbl { font-size: 10px; color: rgba(239,248,226,0.4); margin-top: 5px; text-transform: uppercase; letter-spacing: 0.08em; }
+    .res-cw-ok { color: #B8D45C; }
+    .res-cw-no { color: #ff6b6b; }
+
+    /* hide old stat-row and stat-c */
+    .stat-row { display: none !important; }
+    .stat-c, .stat-v, .stat-l { }  /* keep for timed mode's own row */
+    #timedStatRow .stat-c { display: block; }
 
     .review-wrap {
-      margin: 0 clamp(12px, 4vw, 20px) clamp(12px, 3.5vw, 18px);
+      margin: 0 clamp(12px, 4vw, 20px) clamp(10px, 3vw, 14px);
       background: rgba(70,15,95,0.2);
       backdrop-filter: blur(28px);
       -webkit-backdrop-filter: blur(28px);
-      border-radius: 16px;
+      border-radius: 14px;
       overflow: hidden;
       border: 1px solid rgba(184,212,92,0.1);
       box-shadow:
         inset 0 1px 0 rgba(255,255,255,0.06),
         0 8px 32px rgba(0,0,0,0.35);
-      flex: 1;
       display: flex;
       flex-direction: column;
       min-height: 0;
     }
     .review-head {
-      padding: clamp(10px, 3vw, 14px) clamp(12px, 4vw, 18px);
-      font-size: clamp(10px, 2.5vw, 12px);
-      font-weight: 600;
+      padding: 9px clamp(12px, 4vw, 16px);
+      font-size: 10px;
+      font-weight: 700;
       color: rgba(239,248,226,0.35);
       text-transform: uppercase;
-      letter-spacing: 0.07em;
-      border-bottom: 1px solid rgba(239,248,226,0.1);
+      letter-spacing: 0.08em;
+      border-bottom: 1px solid rgba(239,248,226,0.08);
       flex-shrink: 0;
     }
-    .review-scroll { flex: 1; overflow-y: auto; max-height: clamp(160px, 30vw, 260px); }
+    /* No inner scroll — let the page scroll naturally */
+    .review-scroll { overflow: visible; }
     .history-empty {
-      padding: 16px;
+      padding: 14px;
       text-align: center;
       color: rgba(239,248,226,0.25);
-      font-size: 13px;
+      font-size: 12px;
     }
     .review-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: clamp(8px, 2.5vw, 12px) clamp(12px, 4vw, 18px);
-      border-bottom: 1px solid rgba(239,248,226,0.08);
+      padding: 9px clamp(12px, 4vw, 16px);
+      border-bottom: 1px solid rgba(239,248,226,0.07);
+      gap: 8px;
     }
     .review-item:last-child { border-bottom: none; }
-    .ri-q { font-size: clamp(12px, 3.2vw, 15px); color: rgba(239,248,226,0.5); }
-    .ri-a { font-size: clamp(12px, 3.2vw, 15px); font-weight: 600; }
+    .ri-q { font-size: 13px; color: rgba(239,248,226,0.55); flex-shrink: 0; }
+    .ri-a { font-size: 12px; font-weight: 600; text-align: right; }
     .ri-ok { color: #B8D45C; }
     .ri-no { color: #ff6b6b; }
 
@@ -1252,16 +1306,17 @@ select:focus {
   background: #2d0a3d;
   color: #eff8e2;
   cursor: pointer;
-  transition: background 0.08s, transform 0.08s;
+  transition: transform 0.08s;
   touch-action: manipulation;
   user-select: none;
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
 
-.kb-key:active {
+.kb-key:active,
+.kb-key.kb-pressed {
   transform: scale(0.95);
-  background: #C5D86D;
+  background: rgba(197,216,109,0.5);
 }
 
 .kb-del {
@@ -1426,13 +1481,7 @@ select:focus {
     /* ════════════════════════════════════
        RESULTS — personal bests + chart
     ════════════════════════════════════ */
-    .pb-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: clamp(8px,2.5vw,12px);
-      margin: 0 clamp(12px,4vw,20px) clamp(10px,3vw,14px);
-      flex-shrink: 0;
-    }
+    .pb-row { display: none !important; }
     .pb-c {
       background: #2d0a3d;
       border-radius: 12px;
@@ -1505,18 +1554,8 @@ select:focus {
     /* ════════════════════════════════════
        WEAKNESS SECTION
     ════════════════════════════════════ */
-    .weakness-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: clamp(8px,2.5vw,11px) clamp(12px,4vw,18px);
-      border-bottom: 1px solid rgba(239,248,226,0.08);
-    }
-    .weakness-item:last-child { border-bottom: none; }
-    .wi-n { font-size: clamp(12px,3.2vw,15px); color: rgba(239,248,226,0.5); }
-    .wi-bar-wrap { display: none; }
-    .wi-bar { display: none; }
-    .wi-pct { font-size: clamp(11px,2.8vw,13px); font-weight: 600; color: #B8D45C; min-width: 80px; text-align: right; }
+    .weakness-item { display: none; }
+    .wi-n, .wi-bar-wrap, .wi-bar, .wi-pct { display: none; }
 
     /* ════════════════════════════════════
        CONFETTI
@@ -1729,7 +1768,7 @@ select:focus {
     }
 
     .review-wrap {
-      overflow-y: auto;
+      overflow: visible;
     }
 
     .setup-header h1,
@@ -2231,59 +2270,63 @@ select:focus {
 
     /* ── Milestone Toast ── */
     @keyframes milestoneIn {
-      0%   { opacity:0; transform: translateY(40px) scale(0.9); }
-      60%  { transform: translateY(-6px) scale(1.02); }
-      100% { opacity:1; transform: translateY(0) scale(1); }
+      0%   { opacity: 0; transform: translateX(-50%) translateY(-16px); }
+      100% { opacity: 1; transform: translateX(-50%) translateY(0); }
     }
     @keyframes milestoneOut {
-      from { opacity:1; transform: translateY(0) scale(1); }
-      to   { opacity:0; transform: translateY(30px) scale(0.92); }
+      0%   { opacity: 1; transform: translateX(-50%) translateY(0); }
+      100% { opacity: 0; transform: translateX(-50%) translateY(-12px); }
     }
     #milestoneToast {
       position: fixed;
-      bottom: 28px;
+      top: max(16px, env(safe-area-inset-top, 16px));
       left: 50%;
       transform: translateX(-50%);
       z-index: 9999;
-      min-width: 280px;
-      max-width: 360px;
-      background: linear-gradient(135deg, rgba(100,40,150,0.97) 0%, rgba(30,5,50,0.98) 100%);
-      border: 1px solid rgba(184,212,92,0.4);
-      border-radius: 18px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 40px rgba(184,212,92,0.12);
-      padding: 18px 20px;
+      width: min(calc(100vw - 32px), 340px);
+      background: linear-gradient(135deg, rgba(70,25,110,0.98) 0%, rgba(25,5,45,0.99) 100%);
+      border: 1px solid rgba(184,212,92,0.3);
+      border-radius: 14px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(184,212,92,0.06);
+      padding: 12px 14px;
       display: none;
       align-items: center;
-      gap: 14px;
+      gap: 10px;
       pointer-events: none;
     }
     #milestoneToast.show {
       display: flex;
-      animation: milestoneIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+      animation: milestoneIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
     #milestoneToast.hide {
-      animation: milestoneOut 0.35s ease-in both;
+      animation: milestoneOut 0.25s ease-in both;
     }
-    .milestone-icon { font-size: 32px; flex-shrink: 0; line-height: 1; }
-    .milestone-text {}
+    .milestone-icon { font-size: 22px; flex-shrink: 0; line-height: 1; }
+    .milestone-text { flex: 1; min-width: 0; }
     .milestone-label {
-      font-size: 11px;
+      font-size: 9px;
       font-weight: 700;
-      color: rgba(184,212,92,0.6);
+      color: rgba(184,212,92,0.55);
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      margin-bottom: 3px;
+      margin-bottom: 2px;
     }
     .milestone-title {
-      font-size: 16px;
+      font-size: 13px;
       font-weight: 800;
       color: #eff8e2;
       line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .milestone-sub {
-      font-size: 12px;
-      color: rgba(239,248,226,0.5);
-      margin-top: 3px;
+      font-size: 11px;
+      color: rgba(239,248,226,0.45);
+      margin-top: 1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     /* ── Milestones Section on Profile ── */
@@ -3319,7 +3362,6 @@ select:focus {
       </div>
       <div class="score-pill" id="scorePill">Score: 0</div>
       <div class="streak-pill" id="streakPill">🔥 1</div>
-      <div class="xp-pill" id="xpPill">Lv 1</div>
       <div class="lives-pill" id="livesPill" style="display:none;">❤️❤️❤️</div>
     </div>
     <button class="back-btn" onclick="goHome()" title="Home" style="flex-shrink:0;">
@@ -3491,11 +3533,6 @@ select:focus {
       </div>
     </div>
 
-    <div class="pb-row">
-      <div class="pb-c"><div class="pb-v" id="pbBest">—</div><div class="pb-l">Best %</div></div>
-      <div class="pb-c"><div class="pb-v" id="pbStreak">—</div><div class="pb-l">Best Streak</div></div>
-      <div class="pb-c"><div class="pb-v" id="pbXP">—</div><div class="pb-l">Total XP</div></div>
-    </div>
 
     <div class="chart-wrap" id="chartWrap">
       <div class="chart-title">Squares vs Cubes accuracy</div>
@@ -3511,24 +3548,38 @@ select:focus {
       </div>
     </div>
 
-    <div class="stat-row">
-      <div class="stat-c">
-        <div class="stat-v sv-ok" id="sCorrect">0</div>
-        <div class="stat-l">Correct</div>
+    <div class="res-bento">
+      <!-- Best % -->
+      <div class="pb-c"><div class="pb-v" id="pbBest">—</div><div class="pb-l">Best %</div></div>
+      <!-- Best Streak -->
+      <div class="pb-c"><div class="pb-v" id="pbStreak">—</div><div class="pb-l">Best Streak</div></div>
+      <!-- XP full-width -->
+      <div class="pb-xp-card">
+        <div class="pb-xp-left">
+          <div class="pb-xp-val" id="pbXP">—</div>
+          <div class="pb-xp-lbl">Total XP</div>
+        </div>
+        <div class="pb-xp-bar-wrap">
+          <div class="pb-xp-bar-bg"><div class="pb-xp-bar-fill" id="resXpBar"></div></div>
+        </div>
       </div>
-      <div class="stat-c">
-        <div class="stat-v sv-no" id="sWrong">0</div>
-        <div class="stat-l">Wrong</div>
-      </div>
-      <div class="stat-c">
-        <div class="stat-v sv-tot" id="sTotal">0</div>
-        <div class="stat-l">Total</div>
+      <!-- Correct / Wrong single card -->
+      <div class="res-cw-card">
+        <div class="res-cw-half">
+          <div class="res-cw-val res-cw-ok" id="sCorrect">0</div>
+          <div class="res-cw-lbl">Correct</div>
+        </div>
+        <div class="res-cw-divider"></div>
+        <div class="res-cw-half">
+          <div class="res-cw-val res-cw-no" id="sWrong">0</div>
+          <div class="res-cw-lbl">Wrong</div>
+        </div>
       </div>
     </div>
 
-    <div class="review-wrap" id="weaknessWrap" style="display:none;">
-      <div class="review-head">⚠️ Struggled with these</div>
-      <div class="review-scroll" id="weaknessList"></div>
+    <div id="weaknessWrap" style="display:none; margin: 0 clamp(12px,4vw,20px) clamp(10px,3vw,14px);">
+      <div style="font-size:10px;font-weight:700;color:rgba(239,248,226,0.35);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:7px;">⚠️ Struggled with</div>
+      <div id="weaknessList" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
     </div>
 
     <!-- ANSWER REVIEW -->
@@ -4272,8 +4323,7 @@ function startTimer(){
     const normalSection = document.getElementById('normalScoreSection');
     const timedSection  = document.getElementById('timedScoreSection');
     const timedStatRow  = document.getElementById('timedStatRow');
-    const normalStatRow = document.querySelector('.stat-row');
-    const pbRow         = document.querySelector('.pb-row');
+    const resBento      = document.querySelector('.res-bento');
     const chartWrap     = document.getElementById('chartWrap');
     const resTitle      = document.getElementById('resultsTitle');
 
@@ -4282,7 +4332,7 @@ function startTimer(){
       normalSection.style.display = 'none';
       timedSection.style.display  = 'flex';
       timedStatRow.style.display  = 'grid';
-      if(normalStatRow) normalStatRow.style.display = 'none';
+      if(resBento) resBento.style.display = 'none';
 
       // Timed hero numbers
       document.getElementById('timedResTotal').textContent = total;
@@ -4303,14 +4353,20 @@ function startTimer(){
       normalSection.style.display = '';
       timedSection.style.display  = 'none';
       timedStatRow.style.display  = 'none';
-      if(normalStatRow) normalStatRow.style.display = '';
+      if(resBento) resBento.style.display = 'grid';
     }
 
     document.getElementById('resPct').textContent = pct+'%';
     document.getElementById('resSub').textContent = `${score} of ${total} correct`;
     document.getElementById('sCorrect').textContent = score;
     document.getElementById('sWrong').textContent   = wrong;
-    document.getElementById('sTotal').textContent   = total;
+    // fill XP bar in bento
+    const xpD = getXPData();
+    const xpBarEl = document.getElementById('resXpBar');
+    if (xpBarEl) {
+      const xpPct = Math.min(100, Math.round(((xpD.totalXP - xpForLevel(xpD.currentLevel)) / xpForCurrentLevel(xpD.currentLevel)) * 100));
+      setTimeout(() => { xpBarEl.style.width = xpPct + '%'; }, 120);
+    }
 
     // answer review
     document.getElementById('reviewList').innerHTML = results.map(r=>{
@@ -4351,11 +4407,12 @@ function startTimer(){
     const weak = Object.values(wrongMap).filter(w=>w.wrong/w.total>0.5).sort((a,b)=>b.wrong/b.total-a.wrong/a.total).slice(0,5);
     const wWrap = document.getElementById('weaknessWrap');
     if(weak.length){
-      wWrap.style.display='flex';
+      wWrap.style.display='block';
       document.getElementById('weaknessList').innerHTML = weak.map(w=>{
-        const sym=w.type==='square'?'²':'³';
-        const pctW=Math.round(w.wrong/w.total*100);
-        return `<div class="weakness-item"><span class="wi-n">${w.n}${sym}</span><div class="wi-bar-wrap"><div class="wi-bar" style="width:${pctW}%"></div></div><span class="wi-pct">${w.wrong}/${w.total} wrong</span></div>`;
+        const sym  = w.type==='square'?'²':'³';
+        const tot  = (w.correct||0) + (w.wrong||0);
+        const acc  = tot > 0 ? Math.round(((w.correct||0)/tot)*100) : 0;
+        return `<span style="display:inline-flex;align-items:center;background:rgba(255,80,60,0.12);border:1px solid rgba(255,100,80,0.22);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:700;color:rgba(239,248,226,0.7);">${w.n}${sym}</span>`;
       }).join('');
     } else { wWrap.style.display='none'; }
 
@@ -4495,26 +4552,23 @@ keys.forEach(key => {
     e.preventDefault(); // prevent ghost click and focus steal
     if (input.disabled) return;
 
+    // Instant visual feedback via class — no setTimeout lag
+    key.classList.add('kb-pressed');
+    const removePress = () => { key.classList.remove('kb-pressed'); key.removeEventListener('pointerup', removePress); key.removeEventListener('pointerleave', removePress); };
+    key.addEventListener('pointerup',    removePress);
+    key.addEventListener('pointerleave', removePress);
+
     if (key.classList.contains('kb-del')) {
       input.value = input.value.slice(0, -1);
-      // visual feedback
-      key.style.background = '#3d1050';
-      setTimeout(() => key.style.background = '', 80);
       return;
     }
 
     if (key.classList.contains('kb-enter')) {
-      key.style.background = '#7a45aa';
-      setTimeout(() => key.style.background = '', 80);
       checkAnswer();
       return;
     }
 
     input.value += key.textContent;
-    // visual feedback
-    key.style.background = '#C5D86D';
-    key.style.color = '#1a0a2e';
-    setTimeout(() => { key.style.background = ''; key.style.color = ''; }, 80);
 
     if (autoSub) {
       const q = qs[cur];
@@ -4803,7 +4857,7 @@ function showDashboard() {
   if (!history.length) {
     list.innerHTML = '<div class="dash-empty">No sessions yet — start your first quiz!</div>';
   } else {
-    list.innerHTML = history.slice(0,8).map(h => {
+    list.innerHTML = history.slice(0,5).map(h => {
       const dateStr = new Date(h.date).toLocaleDateString(undefined,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
       const cls = h.pct >= 70 ? 'good' : 'bad';
       return `<div class="dash-session">
@@ -4928,33 +4982,79 @@ function goHome() {
 
 
 function exportResults(){
-  const lines = ['Question,Type,Your Answer,Correct Answer,Result'];
-  results.forEach(r=>{
-    const q = r.q;
-    const sym = q.type==='square'?'²':q.type==='cube'?'³':'×';
-    const qStr = q.type==='table' ? `${q.n}×${q.m}` : `${q.n}${sym}`;
-    const correctAns = q.type==='table' ? q.answer : (q.reverse ? q.n : q.answer);
-    lines.push(`"${qStr}","${q.type}","${r.userAnswer}","${correctAns}","${r.correct?'Correct':'Wrong'}"`);
+  const date    = new Date().toLocaleDateString(undefined, {day:'numeric', month:'short', year:'numeric'});
+  const total   = results.length;
+  const correct = results.filter(r => r.correct).length;
+  const wrong   = total - correct;
+  const pct     = total > 0 ? Math.round((correct / total) * 100) : 0;
+
+  const rows = results.map((r, i) => {
+    const q   = r.q;
+    const sym = q.type === 'square' ? '²' : q.type === 'cube' ? '³' : '×';
+    const qStr = q.type === 'table' ? `${q.n} × ${q.m}` : `${q.n}${sym}`;
+    const correctAns = q.type === 'table' ? q.answer : (q.reverse ? q.n : q.answer);
+    const userAns = r.correct ? '—' : (r.timedOut ? "time's up" : r.userAnswer);
+    const rowBg = r.correct ? '#f0fce8' : '#fff2f2';
+    const mark  = r.correct ? '✓' : '✗';
+    const markColor = r.correct ? '#4a8a1a' : '#cc2222';
+    return `<tr style="background:${rowBg};">
+      <td style="padding:7px 12px;color:#666;font-size:12px;">${i+1}</td>
+      <td style="padding:7px 12px;font-weight:600;font-size:14px;">${qStr}</td>
+      <td style="padding:7px 12px;font-size:13px;">${correctAns}</td>
+      <td style="padding:7px 12px;font-size:13px;color:${r.correct?'#555':'#cc4444'}">${r.correct ? '—' : userAns}</td>
+      <td style="padding:7px 12px;font-weight:700;color:${markColor};font-size:15px;">${mark}</td>
+    </tr>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>Quiz Results – ${date}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #fff; color: #1a1a1a; padding: 32px; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
+    .title { font-size: 22px; font-weight: 800; color: #1a0030; }
+    .subtitle { font-size: 12px; color: #888; margin-top: 4px; }
+    .stats { display: flex; gap: 14px; }
+    .stat-box { background: #f5f0ff; border-radius: 10px; padding: 10px 16px; text-align: center; min-width: 64px; }
+    .stat-val { font-size: 20px; font-weight: 800; color: #3a0070; }
+    .stat-lbl { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+    .stat-box.ok .stat-val { color: #3a7a00; }
+    .stat-box.no .stat-val { color: #cc2222; }
+    table { width: 100%; border-collapse: collapse; border-radius: 10px; overflow: hidden; }
+    thead tr { background: #1a0030; color: #fff; }
+    thead td { padding: 9px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+    tbody tr:hover { filter: brightness(0.97); }
+    .footer { margin-top: 20px; font-size: 11px; color: #aaa; text-align: center; }
+    @media print { body { padding: 16px; } }
+  </style></head><body>
+  <div class="header">
+    <div>
+      <div class="title">Quiz Results</div>
+      <div class="subtitle">${date} &nbsp;·&nbsp; Squares &amp; Cubes</div>
+    </div>
+    <div class="stats">
+      <div class="stat-box"><div class="stat-val">${pct}%</div><div class="stat-lbl">Score</div></div>
+      <div class="stat-box ok"><div class="stat-val">${correct}</div><div class="stat-lbl">Correct</div></div>
+      <div class="stat-box no"><div class="stat-val">${wrong}</div><div class="stat-lbl">Wrong</div></div>
+    </div>
+  </div>
+  <table>
+    <thead><tr>
+      <td>#</td><td>Question</td><td>Answer</td><td>Your Answer</td><td>Result</td>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div class="footer">Generated by Squares &amp; Cubes Quiz App</div>
+  </body></html>`;
+
+  const win = window.open('', '_blank', 'width=700,height=900');
+  if (!win) return;
+  win.document.write(html);
+  win.document.close();
+  win.addEventListener('load', () => {
+    win.focus();
+    win.print();
   });
-  const csv = lines.join('\n');
-  const filename = `quiz_results_${new Date().toISOString().slice(0,10)}.csv`;
-  try {
-    const blob = new Blob([csv], {type:'text/csv'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
-  } catch(e) {
-    const a = document.createElement('a');
-    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  }
 }
 // ═══════════════════════════════════════════════
 //  MOTIVATION & RETENTION SYSTEM
@@ -5169,9 +5269,58 @@ const WEAKNESS_KEY      = 'quiz_weakness';        // {"12": {correct, wrong}, ..
 const DAILY_CHAL_KEY    = 'quiz_daily_challenge'; // {date, completed, score, pct}
 
 // ── XP Level Titles ──
+// Level title tiers — 50 levels total
 const LEVEL_TITLES = [
-  'Beginner','Apprentice','Student','Practitioner','Skilled',
-  'Advanced','Expert','Master','Grandmaster','Legend'
+  'Beginner',     // 1–3
+  'Beginner',
+  'Beginner',
+  'Apprentice',   // 4–7
+  'Apprentice',
+  'Apprentice',
+  'Apprentice',
+  'Student',      // 8–12
+  'Student',
+  'Student',
+  'Student',
+  'Student',
+  'Practitioner', // 13–18
+  'Practitioner',
+  'Practitioner',
+  'Practitioner',
+  'Practitioner',
+  'Practitioner',
+  'Skilled',      // 19–25
+  'Skilled',
+  'Skilled',
+  'Skilled',
+  'Skilled',
+  'Skilled',
+  'Skilled',
+  'Advanced',     // 26–32
+  'Advanced',
+  'Advanced',
+  'Advanced',
+  'Advanced',
+  'Advanced',
+  'Advanced',
+  'Expert',       // 33–39
+  'Expert',
+  'Expert',
+  'Expert',
+  'Expert',
+  'Expert',
+  'Expert',
+  'Master',       // 40–45
+  'Master',
+  'Master',
+  'Master',
+  'Master',
+  'Master',
+  'Grandmaster',  // 46–49
+  'Grandmaster',
+  'Grandmaster',
+  'Grandmaster',
+  'Legend',       // 50
 ];
 
 // ─────────────────────────────────────────────
@@ -5229,8 +5378,28 @@ function saveXPData(d) {
   try { localStorage.setItem(XP_KEY, JSON.stringify(d)); } catch(e) {}
 }
 
-function xpForLevel(level) { return (level - 1) * 100; }
-function levelFromXP(xp)   { return Math.floor(xp / 100) + 1; }
+/** XP needed to reach a given level (cumulative total from 0).
+ *  Formula: sum of floor(150 * 1.18^(i-1)) for i = 1..level-1
+ *  Level 50 requires ~110,000+ XP total.
+ */
+function xpForLevel(level) {
+  if (level <= 1) return 0;
+  let total = 0;
+  for (let i = 1; i < level; i++) total += Math.floor(100 * Math.pow(1.12, i - 1));
+  return total;
+}
+
+function levelFromXP(xp) {
+  let level = 1;
+  while (level < 50 && xpForLevel(level + 1) <= xp) level++;
+  return level;
+}
+
+/** XP required just for the current level span */
+function xpForCurrentLevel(level) {
+  if (level >= 50) return xpForLevel(50) - xpForLevel(49); // cap at 50
+  return xpForLevel(level + 1) - xpForLevel(level);
+}
 function levelTitle(level) {
   return LEVEL_TITLES[Math.min(level - 1, LEVEL_TITLES.length - 1)];
 }
@@ -5248,6 +5417,15 @@ function addXP(bonus) {
   return { gain, totalXP: data.totalXP, level: data.currentLevel };
 }
 
+function deductXP() {
+  const loss = 3; // 1/3 of base 10 XP
+  const data = getXPData();
+  data.totalXP = Math.max(0, data.totalXP - loss);
+  data.currentLevel = levelFromXP(data.totalXP);
+  saveXPData(data);
+  showXPFloat(-loss);
+}
+
 /** Show floating "+10 XP" effect near the answer input */
 function showXPFloat(gain) {
   const ref = document.getElementById('ansInput') || document.getElementById('checkBtn');
@@ -5255,7 +5433,9 @@ function showXPFloat(gain) {
   const rect = ref.getBoundingClientRect();
   const float = document.createElement('div');
   float.className = 'xp-float';
-  float.textContent = `+${gain} XP`;
+  float.textContent = (gain > 0 ? '+' : '') + gain + ' XP';
+  float.style.color = gain > 0 ? '#B8D45C' : '#ff6b6b';
+  float.style.textShadow = gain > 0 ? '0 0 10px rgba(184,212,92,0.6)' : '0 0 10px rgba(255,107,107,0.5)';
   float.style.left  = (rect.left + rect.width / 2 - 20) + 'px';
   float.style.top   = (rect.top + window.scrollY - 8) + 'px';
   document.body.appendChild(float);
@@ -5263,19 +5443,16 @@ function showXPFloat(gain) {
 }
 
 function updateXPPill() {
-  const data = getXPData();
-  const pill = document.getElementById('xpPill');
-  if (pill) {
-    pill.textContent = `Lv ${data.currentLevel} · ${data.totalXP} XP`;
-    pill.classList.add('active');
-  }
+  // XP pill removed from test header — no-op
 }
 
 function updateDashXP() {
-  const data = getXPData();
+  const data  = getXPData();
   const level = data.currentLevel;
-  const xpInLevel = data.totalXP - xpForLevel(level);
-  const pct = Math.min(100, xpInLevel);
+  const xpStart  = xpForLevel(level);
+  const xpNeeded = xpForCurrentLevel(level);
+  const xpIn     = data.totalXP - xpStart;
+  const pct      = Math.min(100, Math.round((xpIn / xpNeeded) * 100));
   const el = {
     level:  document.getElementById('dashXpLevel'),
     title:  document.getElementById('dashXpTitle'),
@@ -5284,7 +5461,7 @@ function updateDashXP() {
   };
   if (el.level) el.level.textContent = `Lv ${level}`;
   if (el.title) el.title.textContent = levelTitle(level);
-  if (el.sub)   el.sub.textContent   = `${data.totalXP} XP total`;
+  if (el.sub)   el.sub.textContent   = `${xpIn} / ${xpNeeded} XP to next level`;
   if (el.bar)   el.bar.style.width   = pct + '%';
 }
 
@@ -5617,17 +5794,18 @@ show = function(id) {
 // ─────────────────────────────────────────────
 const _origCheckAnswer = checkAnswer;
 checkAnswer = function() {
-  // capture state before calling original
   const prevScore = score;
   _origCheckAnswer();
-  // if score went up, a correct answer was given
   if (score > prevScore) {
     onCorrectAnswer(streak);
     const q = qs[cur];
     if (q) trackWeaknessAnswer(q.n, q.type, true);
   } else {
     const q = qs[cur];
-    if (q && answered) trackWeaknessAnswer(q.n, q.type, false);
+    if (q && answered) {
+      trackWeaknessAnswer(q.n, q.type, false);
+      deductXP();
+    }
   }
 };
 
@@ -5639,6 +5817,7 @@ pickAnswer = function(chosen, correct) {
     const isCorrect = chosen === correct;
     trackWeaknessAnswer(q.n, q.type, isCorrect);
     if (isCorrect) onCorrectAnswer(streak);
+    else deductXP();
   }
 };
 
