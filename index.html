@@ -2450,43 +2450,138 @@ select:focus {
     .session-nudge.show { display: flex; }
     .session-nudge-icon { font-size: 20px; flex-shrink: 0; }
 
-    /* ── Daily Challenge Button ── */
+    /* ── Daily Challenge Floating Pin Card ── */
     .daily-challenge-btn {
-      width: 100%;
-      padding: 14px 18px;
-      border-radius: 14px;
-      border: 1px solid rgba(184,212,92,0.25);
-      background: linear-gradient(135deg, rgba(60,20,90,0.8), rgba(40,10,60,0.9));
+      /* Floating pinned to the right edge */
+      position: fixed;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%) translateX(calc(100% - 36px));
+      z-index: 200;
+
+      /* Size */
+      width: 200px;
+      padding: 12px 14px;
+      border-radius: 14px 0 0 14px;
+      border: 1px solid rgba(184,212,92,0.3);
+      border-right: none;
+
+      background: linear-gradient(135deg, rgba(55,15,85,0.92), rgba(30,5,50,0.97));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+
       color: #eff8e2;
-      font-size: clamp(13px,3vw,15px);
+      font-family: 'Inter', sans-serif;
       font-weight: 700;
       cursor: pointer;
-      font-family: 'Inter', sans-serif;
+
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+
+      box-shadow:
+        -4px 0 30px rgba(0,0,0,0.5),
+        -2px 0 12px rgba(87,50,128,0.3),
+        inset 1px 0 0 rgba(184,212,92,0.08);
+
+      transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+                  box-shadow 0.25s ease,
+                  border-color 0.2s;
+
+      /* Pin tab visual — a small pull-tab on the left */
+      overflow: visible;
+    }
+
+    /* The visible pull-tab peeking out from the right */
+    .daily-challenge-btn::before {
+      content: var(--dc-tab-date, '?');
+      position: absolute;
+      left: -2px;
+      top: 50%;
+      transform: translateX(-100%) translateY(-50%);
+      width: 36px;
+      height: 52px;
+      background: linear-gradient(135deg, rgba(55,15,85,0.95), rgba(30,5,50,0.98));
+      border: 1px solid rgba(184,212,92,0.3);
+      border-right: none;
+      border-radius: 10px 0 0 10px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      transition: all 0.2s cubic-bezier(0.22,1,0.36,1);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-      margin-bottom: 2px;
-    }
-    .daily-challenge-btn:hover { border-color: rgba(184,212,92,0.45); transform: translateY(-1px); }
-    .daily-challenge-btn:active { transform: scale(0.97); }
-    .daily-challenge-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-    .daily-challenge-left { display: flex; align-items: center; gap: 10px; }
-    .daily-challenge-icon { font-size: 20px; }
-    .daily-challenge-info {}
-    .daily-challenge-title { font-size: 13px; font-weight: 700; color: #eff8e2; text-align:left; }
-    .daily-challenge-sub { font-size: 11px; color: rgba(239,248,226,0.45); text-align:left; margin-top:1px; }
-    .daily-challenge-badge {
-      font-size: 11px;
+      justify-content: center;
+      font-size: 9px;
       font-weight: 700;
-      padding: 4px 10px;
+      font-family: 'Inter', sans-serif;
+      color: #B8D45C;
+      letter-spacing: 0.02em;
+      text-align: center;
+      line-height: 1.3;
+      white-space: pre;
+      box-shadow: -3px 0 14px rgba(0,0,0,0.4);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 0 3px;
+    }
+
+    /* Hover: slide the card into view */
+    .daily-challenge-btn:hover,
+    .daily-challenge-btn:focus-visible {
+      transform: translateY(-50%) translateX(0);
+      border-color: rgba(184,212,92,0.5);
+      box-shadow:
+        -6px 0 40px rgba(0,0,0,0.6),
+        -2px 0 20px rgba(87,50,128,0.4),
+        0 0 16px rgba(184,212,92,0.1),
+        inset 1px 0 0 rgba(184,212,92,0.12);
+      outline: none;
+    }
+
+    .daily-challenge-btn:active { transform: translateY(-50%) translateX(0) scale(0.98); }
+    .daily-challenge-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .daily-challenge-btn:disabled:hover { transform: translateY(-50%) translateX(calc(100% - 36px)); }
+
+    /* Hide the icon inside since it's now in ::before */
+    .daily-challenge-left { display: flex; align-items: center; gap: 8px; width: 100%; }
+    .daily-challenge-icon { display: none; }
+    .daily-challenge-info { flex: 1; min-width: 0; }
+    .daily-challenge-title { font-size: 12px; font-weight: 700; color: #eff8e2; text-align: left; white-space: nowrap; }
+    .daily-challenge-sub { font-size: 10px; color: rgba(239,248,226,0.5); text-align: left; margin-top: 2px; white-space: nowrap; }
+    .daily-challenge-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
       border-radius: 20px;
       flex-shrink: 0;
+      align-self: flex-start;
     }
     .daily-challenge-badge.avail { background: rgba(123,168,50,0.2); color: #B8D45C; border: 1px solid rgba(184,212,92,0.3); }
-    .daily-challenge-badge.done  { background: rgba(87,50,128,0.3);  color: rgba(239,248,226,0.4); }
+    .daily-challenge-badge.done  { background: rgba(87,50,128,0.3);  color: rgba(239,248,226,0.4); border: 1px solid rgba(255,255,255,0.08); }
+
+    /* On mobile: tap-to-open instead of hover */
+    @media (max-width: 599px) {
+      .daily-challenge-btn {
+        top: 50%;
+        bottom: auto;
+        right: 0;
+        transform: translateY(-50%) translateX(calc(100% - 36px));
+        border-radius: 12px 0 0 12px;
+        /* Disable hover slide on touch devices */
+        pointer-events: auto;
+      }
+      /* Disable hover-triggered slide on mobile */
+      .daily-challenge-btn:hover:not(.dc-open) {
+        transform: translateY(-50%) translateX(calc(100% - 36px));
+        border-color: rgba(184,212,92,0.3);
+        box-shadow: -4px 0 30px rgba(0,0,0,0.5), -2px 0 12px rgba(87,50,128,0.3), inset 1px 0 0 rgba(184,212,92,0.08);
+      }
+      /* Tap-open state */
+      .daily-challenge-btn.dc-open {
+        transform: translateY(-50%) translateX(0) !important;
+        border-color: rgba(184,212,92,0.5) !important;
+        box-shadow: -6px 0 40px rgba(0,0,0,0.6), -2px 0 20px rgba(87,50,128,0.4), 0 0 16px rgba(184,212,92,0.1), inset 1px 0 0 rgba(184,212,92,0.12) !important;
+      }
+      .daily-challenge-btn:active { transform: translateY(-50%) translateX(0) scale(0.98) !important; }
+    }
 
     /* ── Weakness Practice Button ── */
     .weakness-practice-btn {
@@ -2510,6 +2605,78 @@ select:focus {
     .weakness-practice-btn:active { transform: scale(0.97); }
     .weakness-practice-btn .wp-left { display:flex; align-items:center; gap:8px; }
     .weakness-practice-btn .wp-count { font-size:10px; background: rgba(255,100,50,0.15); color: rgba(255,180,100,0.8); border-radius:20px; padding:2px 8px; border:1px solid rgba(255,140,80,0.2); }
+
+    /* ── Unlimited mode toggle ── */
+    .unlimited-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .unlimited-tog-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(239,248,226,0.5);
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .unlimited-tog-label input[type=checkbox] { display: none; }
+    .unlimited-tog-pill {
+      width: 34px; height: 18px;
+      border-radius: 99px;
+      background: rgba(87,50,128,0.4);
+      border: 1px solid rgba(239,248,226,0.15);
+      position: relative;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    .unlimited-tog-pill::after {
+      content: '';
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: rgba(239,248,226,0.4);
+      transition: transform 0.2s, background 0.2s;
+    }
+    .unlimited-tog-label input:checked + .unlimited-tog-pill {
+      background: rgba(184,212,92,0.3);
+      border-color: rgba(184,212,92,0.4);
+    }
+    .unlimited-tog-label input:checked + .unlimited-tog-pill::after {
+      transform: translateX(16px);
+      background: #B8D45C;
+    }
+    .qcount-dimmed { opacity: 0.3; pointer-events: none; }
+
+    /* End Session floating button */
+    #endSessionBtn {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 999;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      background: rgba(30,5,50,0.95);
+      border: 1px solid rgba(184,212,92,0.3);
+      border-radius: 99px;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #eff8e2;
+      cursor: pointer;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      backdrop-filter: blur(12px);
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+    }
+    #endSessionBtn.visible { display: flex; }
+    #endSessionBtn:active { transform: translateX(-50%) scale(0.96); }
 
     /* XP display in dashboard stats area */
     .dash-xp-row {
@@ -3165,6 +3332,13 @@ select:focus {
       <div class="bento-cell">
         <div class="bento-label">❓ Questions</div>
         <input type="number" class="num-inp bento-q-inp" id="qCount" value="10" min="1">
+        <div class="unlimited-row">
+          <label class="unlimited-tog-label">
+            <input type="checkbox" id="unlimitedTog" onchange="toggleUnlimitedMode()">
+            <span class="unlimited-tog-pill"></span>
+            ∞ Unlimited
+          </label>
+        </div>
         <div class="bento-label" style="margin-top:12px;">🔢 Type</div>
         <div class="type-row">
           <button class="type-btn" id="btn-squares" onclick="setType('squares')">x²</button>
@@ -3330,18 +3504,6 @@ select:focus {
       </div>
 
     </div><!-- .bento-grid -->
-
-    <!-- Daily Challenge + Weakness mode quick-launch -->
-    <button class="daily-challenge-btn" id="dailyChallengeBtn" onclick="startDailyChallenge()">
-      <div class="daily-challenge-left">
-        <div class="daily-challenge-icon">🗓️</div>
-        <div class="daily-challenge-info">
-          <div class="daily-challenge-title">Daily Challenge</div>
-          <div class="daily-challenge-sub">10 mixed Qs · resets midnight</div>
-        </div>
-      </div>
-      <span class="daily-challenge-badge avail" id="dailyChallengeBadge">Available</span>
-    </button>
 
     <button class="weakness-practice-btn" id="weaknessPracticeBtn" onclick="startWeaknessPractice()">
       <div class="wp-left">⚠️ <span>Focus on weak numbers</span></div>
@@ -3808,6 +3970,7 @@ function setMultType(btn){
 
   function startTest(){
   isTimedMode = (timerMode === 'timed');
+  unlimitedMode = document.getElementById('unlimitedTog').checked;
 
   // In timed mode, generate a large pool of questions to cycle through
   if(isTimedMode){
@@ -3819,6 +3982,13 @@ function setMultType(btn){
     if(!qs.length){ alert('No questions — check your range!'); return; }
     // shuffle to start fresh
     for(let i=qs.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [qs[i],qs[j]]=[qs[j],qs[i]]; }
+  } else if(unlimitedMode){
+    // Generate large pool for unlimited — will recycle
+    const savedCount = document.getElementById('qCount').value;
+    document.getElementById('qCount').value = 500;
+    qs = genQs();
+    document.getElementById('qCount').value = savedCount;
+    if(!qs.length){ alert('No questions — check your range!'); return; }
   } else {
     qs=genQs();
     if(!qs.length){ alert('No questions — check your range!'); return; }
@@ -3834,6 +4004,18 @@ function setMultType(btn){
   livesMode  = document.getElementById('livesTog').checked;
   spacedMode = document.getElementById('spacedTog').checked;
   focusMode  = document.getElementById('focusTog').checked;
+
+  // ── Inject persistent SR items at the front of the queue ──
+  if (spacedMode && !isTimedMode && !unlimitedMode) {
+    const srItems = getSRQuestionsForSession();
+    if (srItems.length) {
+      // Mark them as SR retries and prepend
+      const tagged = srItems.map(q => ({ ...q, _srRetry: true }));
+      qs = [...tagged, ...qs];
+      // Track their indices so we can show RETRY badge
+      tagged.forEach((_, i) => retrySet.add(i));
+    }
+  }
   lives = 3;
   document.getElementById('livesPill').style.display = livesMode ? 'block' : 'none';
   updateLivesPill();
@@ -3857,6 +4039,13 @@ function setMultType(btn){
     document.getElementById('qTotal').textContent = '∞';
   } else {
     tmBar.classList.remove('visible');
+  }
+
+  if(unlimitedMode){
+    document.getElementById('qTotal').textContent = '∞';
+    document.getElementById('endSessionBtn').classList.add('visible');
+  } else {
+    document.getElementById('endSessionBtn').classList.remove('visible');
   }
 
   show('s-test');
@@ -3936,7 +4125,7 @@ function setMultType(btn){
 
     const q=qs[cur], total=qs.length, sym=q.type==='square'?'²':'³';
     document.getElementById('qNum').textContent = isTimedMode ? String(timedQAnswered+1) : String(cur+1).padStart(2,'0');
-    document.getElementById('qTotal').textContent = isTimedMode ? '∞' : total;
+    document.getElementById('qTotal').textContent = isTimedMode ? '∞' : unlimitedMode ? '∞' : total;
     const _sp=document.getElementById('scorePill'); _sp.textContent=`Score: ${score}`; _sp.classList.remove('pill-bump'); void _sp.offsetWidth; _sp.classList.add('pill-bump');
     document.getElementById('progFill').style.width  = `${(cur/total)*100}%`;
     const badge=document.getElementById('qBadge');
@@ -4137,6 +4326,7 @@ function startTimer(){
       });
       streak=0; updateStreakPill();
       if(spacedMode) wrongQueue.push(cur);
+      if(spacedMode) srAddQuestion(q); // persist time-outs too
       if(livesMode){ lives--; updateLivesPill(); }
       results.push({q, userAnswer:'—', correct:false, timedOut:true});
     } else {
@@ -4276,6 +4466,16 @@ function startTimer(){
       loadQ();
       return;
     }
+    if(unlimitedMode){
+      cur++;
+      // Reshuffle and cycle when pool is exhausted
+      if(cur >= qs.length){
+        for(let i=qs.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [qs[i],qs[j]]=[qs[j],qs[i]]; }
+        cur = 0;
+      }
+      loadQ();
+      return;
+    }
     if(cur < qs.length-1){
       cur++; loadQ();
     } else if(spacedMode && wrongQueue.length > 0){
@@ -4312,6 +4512,7 @@ function startTimer(){
 
   function showResults(){
     clearTimer(); clearStopwatch(); clearTimedInterval(); show('s-results');
+    document.getElementById('endSessionBtn').classList.remove('visible');
     // Reset timed mode bar
     document.getElementById('timedModeBar').classList.remove('visible');
 
@@ -4952,6 +5153,10 @@ function confirmResetProfile() {
   try { localStorage.removeItem(PROFILE_KEY); } catch(e){}
   try { localStorage.removeItem(HISTORY_KEY); } catch(e){}
   try { localStorage.removeItem(PB_KEY); } catch(e){}
+  try { localStorage.removeItem(SR_KEY); } catch(e){}
+  try { localStorage.removeItem(WEAKNESS_KEY); } catch(e){}
+  try { localStorage.removeItem(XP_KEY); } catch(e){}
+  try { localStorage.removeItem(DAY_STREAK_KEY); } catch(e){}
   location.reload();
 }
 
@@ -5267,6 +5472,7 @@ const DAY_STREAK_KEY    = 'quiz_day_streak2';   // {streak, bestStreak, lastDate
 const XP_KEY            = 'quiz_xp';             // {totalXP, currentLevel}
 const WEAKNESS_KEY      = 'quiz_weakness';        // {"12": {correct, wrong}, ...}
 const DAILY_CHAL_KEY    = 'quiz_daily_challenge'; // {date, completed, score, pct}
+const SR_KEY            = 'quiz_sr_queue';        // [{n, type, m, answer, reverse}] — cross-session retry queue
 
 // ── XP Level Titles ──
 // Level title tiers — 50 levels total
@@ -5546,6 +5752,52 @@ function getWeakNumbers() {
   });
 }
 
+// ─────────────────────────────────────────────
+// SPACED REPETITION — cross-session persistence
+// ─────────────────────────────────────────────
+
+const SR_MAX = 50;
+
+function getSRQueue() {
+  try { return JSON.parse(localStorage.getItem(SR_KEY)) || []; } catch(e) { return []; }
+}
+function saveSRQueue(q) {
+  try { localStorage.setItem(SR_KEY, JSON.stringify(q.slice(0, SR_MAX))); } catch(e) {}
+}
+
+/** Add a wrong question to the persistent SR queue */
+function srAddQuestion(qObj) {
+  const queue = getSRQueue();
+  const key = qObj.type === 'table' ? `table_${qObj.n}_${qObj.m}` : `${qObj.type}_${qObj.n}`;
+  if (!queue.some(q => q._srKey === key)) {
+    queue.unshift({ ...qObj, _srKey: key, _srAdded: new Date().toISOString() });
+    saveSRQueue(queue);
+  }
+}
+
+/** Remove a question from SR queue after a correct answer */
+function srRemoveQuestion(qObj) {
+  const key = qObj.type === 'table' ? `table_${qObj.n}_${qObj.m}` : `${qObj.type}_${qObj.n}`;
+  saveSRQueue(getSRQueue().filter(q => q._srKey !== key));
+}
+
+/**
+ * Get SR items relevant to the current session type/range, max 5.
+ * Called in startTest() when spacedMode is on.
+ */
+function getSRQuestionsForSession() {
+  const queue = getSRQueue();
+  const from = parseInt(document.getElementById('rangeFrom').value) || 1;
+  const to   = parseInt(document.getElementById('rangeTo').value) || 20;
+  return queue.filter(q => {
+    if (qType === 'multiplication') return q.type === 'table';
+    if (qType === 'squares' && q.type !== 'square') return false;
+    if (qType === 'cubes'   && q.type !== 'cube')   return false;
+    return q.n >= from && q.n <= to;
+  }).slice(0, 5);
+}
+
+
 function updateWeaknessBtn() {
   const weak = getWeakNumbers();
   const btn  = document.getElementById('weaknessPracticeBtn');
@@ -5614,35 +5866,63 @@ function seededRandom(seed) {
   };
 }
 
+/**
+ * getDailyChallengeConfig — returns challenge parameters based on current level bracket.
+ * The seed includes the date AND the bracket so same-bracket users get same challenge.
+ */
+function getDailyChallengeConfig() {
+  const level = getXPData().currentLevel;
+
+  // Level brackets → challenge config
+  // range: [from, to], qCount, timerSecs (0 = off), type, reverseChance (0–1)
+  let bracket, cfg;
+  if      (level <= 5)  { bracket = 'beginner';     cfg = { from:1, to:10, qCount:10, timerSecs:0,  type:'squares', reverse:false, label:'Beginner'     }; }
+  else if (level <= 10) { bracket = 'apprentice';   cfg = { from:1, to:12, qCount:10, timerSecs:0,  type:'both',    reverse:false, label:'Apprentice'   }; }
+  else if (level <= 18) { bracket = 'scholar';      cfg = { from:1, to:15, qCount:12, timerSecs:12, type:'both',    reverse:false, label:'Scholar'      }; }
+  else if (level <= 28) { bracket = 'expert';       cfg = { from:1, to:20, qCount:15, timerSecs:10, type:'both',    reverse:false, label:'Expert'       }; }
+  else if (level <= 38) { bracket = 'master';       cfg = { from:1, to:25, qCount:15, timerSecs:8,  type:'both',    reverse:true,  label:'Master'       }; }
+  else                  { bracket = 'grandmaster';  cfg = { from:1, to:30, qCount:20, timerSecs:7,  type:'both',    reverse:true,  label:'Grandmaster'  }; }
+
+  cfg.bracket = bracket;
+  return cfg;
+}
+
 function generateDailyChallenge() {
   const dateStr = getTodayDateStr();
-  const rng = seededRandom(dateStr);
-  const questions = [];
+  const cfg = getDailyChallengeConfig();
+  // Seed includes bracket so same day + same bracket = same challenge
+  const rng = seededRandom(dateStr + '_' + cfg.bracket);
   const pool = [];
 
-  // Fixed: 10 questions, mixed squares+cubes, range 1–15
-  for (let n = 1; n <= 15; n++) {
-    pool.push({n, type:'square', answer:n*n,   reverse:false});
-    pool.push({n, type:'cube',   answer:n*n*n, reverse:false});
+  for (let n = cfg.from; n <= cfg.to; n++) {
+    if (cfg.type === 'squares' || cfg.type === 'both') {
+      pool.push({ n, type:'square', answer:n*n,   reverse:cfg.reverse ? (rng() > 0.6) : false });
+    }
+    if (cfg.type === 'cubes' || cfg.type === 'both') {
+      pool.push({ n, type:'cube',   answer:n*n*n, reverse:cfg.reverse ? (rng() > 0.7) : false });
+    }
   }
 
-  // Deterministic shuffle using seeded RNG
+  // Deterministic shuffle
   for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(rng() * (i + 1));
     [pool[i], pool[j]] = [pool[j], pool[i]];
   }
 
-  return pool.slice(0, 10);
+  // Recompute answers for any reverse questions (answer = n for reverse)
+  return pool.slice(0, cfg.qCount).map(q => ({ ...q, answer: q.reverse ? q.n : q.answer }));
 }
 
-let isDailyChallenge = false; // flag so we know to save on completion
+let isDailyChallenge = false;
 
 function startDailyChallenge() {
   if (isDailyChallengeCompleted()) {
     const data = getDailyChallengeData();
-    alert(`Today's challenge already done! Score: ${data.score}/10 (${data.pct}%)\nCome back tomorrow for a new one.`);
+    alert(`Today's challenge already done! Score: ${data.score}/${data.total} (${data.pct}%)\nCome back tomorrow for a new one.`);
     return;
   }
+
+  const cfg = getDailyChallengeConfig();
 
   isDailyChallenge = true;
   qs = generateDailyChallenge();
@@ -5651,21 +5931,29 @@ function startDailyChallenge() {
   timedQAnswered = 0;
   isTimedMode = false;
 
-  // Use defaults
-  instant   = true;
-  autoSub   = false;
-  pickMode  = false;
-  reverseMode = false;
-  livesMode = false;
+  instant    = true;
+  autoSub    = false;
+  pickMode   = false;
+  reverseMode = cfg.reverse;
+  livesMode  = false;
   spacedMode = false;
-  focusMode = false;
+  focusMode  = false;
   lives = 3;
-  timerMode = 'off';
-  duration  = 0;
+
+  if (cfg.timerSecs > 0) {
+    timerMode = 'fixed';
+    duration  = cfg.timerSecs;
+  } else {
+    timerMode = 'off';
+    duration  = 0;
+  }
 
   document.getElementById('livesPill').style.display = 'none';
   document.getElementById('streakPill').classList.remove('active');
   document.getElementById('timedModeBar').classList.remove('visible');
+
+  // Show bracket info briefly in the q-card sub text on first load
+  window._dailyChallengeLabel = cfg.label;
 
   show('s-test');
   loadQ();
@@ -5682,9 +5970,54 @@ function updateDailyChallengeBtn() {
     badge.className   = 'daily-challenge-badge done';
     btn.disabled      = true;
   } else {
-    badge.textContent = 'Available';
+    const cfg = getDailyChallengeConfig();
+    badge.textContent = cfg.label + ' · ' + cfg.qCount + 'Q' + (cfg.timerSecs ? ' · ' + cfg.timerSecs + 's' : '');
     badge.className   = 'daily-challenge-badge avail';
     btn.disabled      = false;
+  }
+
+  // Set today's date on the pull-tab via CSS custom property
+  // Format: day number + newline + short month (e.g. "3\nMAY")
+  (function setDcTabDate() {
+    const now = new Date();
+    const day = now.getDate();
+    const mon = now.toLocaleString('en', { month: 'short' }).toUpperCase();
+    btn.style.setProperty('--dc-tab-date', `"${day}\\A${mon}"`);
+  })();
+
+  // Mobile tap-to-open toggle (hover doesn't fire on touch)
+  if (!btn._dcTapBound) {
+    btn._dcTapBound = true;
+    let _dcTapLocked = false;
+
+    btn.addEventListener('touchstart', function(e) {
+      // If card is closed, open it (and suppress the click/startDailyChallenge)
+      if (!btn.classList.contains('dc-open')) {
+        e.preventDefault();
+        btn.classList.add('dc-open');
+        _dcTapLocked = true;
+        // Auto-close after 4s of no interaction
+        clearTimeout(btn._dcAutoClose);
+        btn._dcAutoClose = setTimeout(() => btn.classList.remove('dc-open'), 4000);
+      }
+      // If already open, let the click fire naturally (starts challenge)
+    }, { passive: false });
+
+    btn.addEventListener('click', function(e) {
+      if (_dcTapLocked) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        _dcTapLocked = false;
+      }
+    }, true);
+
+    // Close when tapping anywhere else
+    document.addEventListener('touchstart', function(e) {
+      if (btn.classList.contains('dc-open') && !btn.contains(e.target)) {
+        btn.classList.remove('dc-open');
+        clearTimeout(btn._dcAutoClose);
+      }
+    }, { passive: true });
   }
 }
 
@@ -5759,7 +6092,7 @@ function onSessionComplete(pct, sessionBestStreak) {
 
   // Daily challenge completion
   if (isDailyChallenge) {
-    saveDailyChallengeData({ date: getTodayDateStr(), completed: true, score, pct });
+    saveDailyChallengeData({ date: getTodayDateStr(), completed: true, score, total, pct });
     isDailyChallenge = false;
   }
 
@@ -5775,7 +6108,22 @@ function onSessionComplete(pct, sessionBestStreak) {
 }
 
 // ─────────────────────────────────────────────
-// SETUP SCREEN — update dynamic buttons on show
+// UNLIMITED MODE
+// ─────────────────────────────────────────────
+let unlimitedMode = false;
+
+function toggleUnlimitedMode() {
+  unlimitedMode = document.getElementById('unlimitedTog').checked;
+  const qCountEl = document.getElementById('qCount');
+  qCountEl.classList.toggle('qcount-dimmed', unlimitedMode);
+}
+
+function endUnlimitedSession() {
+  unlimitedMode = false;
+  document.getElementById('endSessionBtn').classList.remove('visible');
+  showResults();
+}
+
 // ─────────────────────────────────────────────
 function updateSetupMotivation() {
   updateDailyChallengeBtn();
@@ -5796,14 +6144,17 @@ const _origCheckAnswer = checkAnswer;
 checkAnswer = function() {
   const prevScore = score;
   _origCheckAnswer();
+  const q = qs[cur];
   if (score > prevScore) {
     onCorrectAnswer(streak);
-    const q = qs[cur];
-    if (q) trackWeaknessAnswer(q.n, q.type, true);
+    if (q) {
+      trackWeaknessAnswer(q.n, q.type, true);
+      if (spacedMode) srRemoveQuestion(q); // graduated — remove from SR
+    }
   } else {
-    const q = qs[cur];
     if (q && answered) {
       trackWeaknessAnswer(q.n, q.type, false);
+      if (spacedMode) srAddQuestion(q); // failed — persist for next session
       deductXP();
     }
   }
@@ -5816,8 +6167,13 @@ pickAnswer = function(chosen, correct) {
   if (q) {
     const isCorrect = chosen === correct;
     trackWeaknessAnswer(q.n, q.type, isCorrect);
-    if (isCorrect) onCorrectAnswer(streak);
-    else deductXP();
+    if (isCorrect) {
+      onCorrectAnswer(streak);
+      if (spacedMode) srRemoveQuestion(q);
+    } else {
+      if (spacedMode) srAddQuestion(q);
+      deductXP();
+    }
   }
 };
 
@@ -5882,6 +6238,9 @@ showProfile = function() {
   setTimeout(updateSetupMotivation, 100);
 })();
 </script>
+<!-- End Session button (Unlimited mode) -->
+<button id="endSessionBtn" onclick="endUnlimitedSession()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="10" height="10" rx="2" fill="#ff6b6b"/></svg> End Session</button>
+
 <!-- Milestone Toast -->
 <div id="milestoneToast">
   <div class="milestone-icon" id="milestoneToastIcon">🏆</div>
@@ -5891,6 +6250,17 @@ showProfile = function() {
     <div class="milestone-sub" id="milestoneToastSub">You answered your first question</div>
   </div>
 </div>
+<!-- Daily Challenge Floating Pin Card (fixed, always visible) -->
+<button class="daily-challenge-btn" id="dailyChallengeBtn" onclick="startDailyChallenge()">
+  <div class="daily-challenge-left">
+    <div class="daily-challenge-icon">🗓️</div>
+    <div class="daily-challenge-info">
+      <div class="daily-challenge-title">Daily Challenge</div>
+      <div class="daily-challenge-sub">10 mixed Qs · resets midnight</div>
+    </div>
+  </div>
+  <span class="daily-challenge-badge avail" id="dailyChallengeBadge">Available</span>
+</button>
 
 </body>
 </html>
