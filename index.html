@@ -3949,6 +3949,7 @@ select:focus {
           <button class="type-btn" id="btn-cubes" onclick="setType('cubes')">x³</button>
           <button class="type-btn active" id="btn-both" onclick="setType('both')">x²/x³</button>
           <button class="type-btn" id="btn-multiplication" onclick="setType('multiplication')">× Mult</button>
+          <button class="type-btn" id="btn-arithmetic" onclick="setType('arithmetic')">± Arith</button>
         </div>
       </div>
 
@@ -4002,6 +4003,24 @@ select:focus {
             <button class="timer-opt" data-2ddiff="hard" onclick="set2dDiff(this)">Hard<span style="display:block;font-size:10px;opacity:0.6;">10–99</span></button>
           </div>
           <div class="mult2d-note" style="margin-top:6px;">Random 2-digit pairs generated each session within the selected range</div>
+        </div>
+      </div>
+
+      <!-- ARITHMETIC CONFIG — shown when arithmetic selected -->
+      <div class="bento-cell" id="arithmeticCell" style="display:none;">
+        <div class="bento-label">± Arithmetic</div>
+        <div class="timer-grid" id="arithTypeGrid">
+          <button class="timer-opt active" data-atype="both" onclick="setArithType(this)">+ &amp; −</button>
+          <button class="timer-opt" data-atype="add" onclick="setArithType(this)">+ Add only</button>
+          <button class="timer-opt" data-atype="sub" onclick="setArithType(this)">− Sub only</button>
+        </div>
+        <div style="margin-top:10px;">
+          <div class="bento-label" style="font-size:10px;margin-bottom:6px;">Difficulty</div>
+          <div class="timer-grid" id="arithDiffGrid">
+            <button class="timer-opt active" data-adiff="2digit" onclick="setArithDiff(this)">2-digit<span style="display:block;font-size:10px;opacity:0.6;">10–99</span></button>
+            <button class="timer-opt" data-adiff="3digit" onclick="setArithDiff(this)">3-digit<span style="display:block;font-size:10px;opacity:0.6;">100–999</span></button>
+            <button class="timer-opt" data-adiff="4digit" onclick="setArithDiff(this)">4-digit<span style="display:block;font-size:10px;opacity:0.6;">1000–9999</span></button>
+          </div>
         </div>
       </div>
 
@@ -4122,7 +4141,7 @@ select:focus {
     <div class="setup-header">
 
   <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
-    <button class="back-btn" onclick="show('s-setup')" title="Back to Setup" style="flex-shrink:0;">
+    <button class="back-btn" onclick="abortTest()" title="Back to Setup" style="flex-shrink:0;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="15,18 9,12 15,6"/>
       </svg>
@@ -4249,7 +4268,7 @@ select:focus {
         <div class="gameover-score" id="goScore">0</div>
         <div class="gameover-sub" id="goSub">0 correct before running out</div>
         <div class="res-btns" style="width:100%;">
-          <button class="home-btn" onclick="goHome()">Setup</button>
+          <button class="home-btn" onclick="abortTest(); show('s-setup')">Setup</button>
           <button class="again-btn" onclick="startTest()">Try again</button>
         </div>
       </div>
@@ -4367,7 +4386,7 @@ select:focus {
     </div>
 
     <div class="res-btns">
-      <button class="home-btn" onclick="goHome()">Setup</button>
+      <button class="home-btn" onclick="abortTest(); show('s-setup')">Setup</button>
       <button class="again-btn" onclick="startTest()">Try again</button>
       <button class="export-btn" onclick="exportResults()">⬇ Export</button>
     </div>
@@ -4413,6 +4432,7 @@ const CIRC=188.5;
 
 // ── TIMED MODE state ──
 let isTimedMode = false;
+  let sessionId = 0; // incremented on every new test start or abort — stale callbacks bail out
 let timedDuration = 60;          // seconds
 let timedInterval = null;        // rAF handle
 let timedStartTime = null;
@@ -4423,6 +4443,20 @@ const TIMED_DURATIONS = [30, 60, 90, 120, 180, 300]; // slider steps
 let streak = 0, bestStreak = 0;
 let lives = 3, livesMode = false;
 let reverseMode = false, spacedMode = false, focusMode = false;
+  let arithSubType = 'both'; // 'add' | 'sub' | 'both'
+  let arithDiff    = '2digit'; // '2digit' | '3digit' | '4digit'
+
+  function setArithType(el){
+    arithSubType = el.dataset.atype;
+    document.querySelectorAll('#arithTypeGrid .timer-opt').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function setArithDiff(el){
+    arithDiff = el.dataset.adiff;
+    document.querySelectorAll('#arithDiffGrid .timer-opt').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+  }
 let focusNums = new Set();
 let wrongQueue = [];   // spaced repetition re-queue
 let retrySet = new Set();
@@ -4465,15 +4499,17 @@ function setMultType(btn){
   function setType(t){
     qType = t;
     const isMultiplication = t === 'multiplication';
-    ['squares','cubes','both','multiplication'].forEach(x=>{
+    const isArithmetic     = t === 'arithmetic';
+    ['squares','cubes','both','multiplication','arithmetic'].forEach(x=>{
       const btn=document.getElementById('btn-'+x);
       if(btn) btn.classList.toggle('active', x===t);
     });
-    document.getElementById('rangeCell').style.display  = isMultiplication ? 'none' : '';
-    document.getElementById('tablesCell').style.display = isMultiplication ? ''     : 'none';
+    document.getElementById('rangeCell').style.display       = (isMultiplication || isArithmetic) ? 'none' : '';
+    document.getElementById('tablesCell').style.display      = isMultiplication ? '' : 'none';
+    document.getElementById('arithmeticCell').style.display  = isArithmetic     ? '' : 'none';
     const revTog = document.getElementById('reverseTog');
     const revRow = revTog ? revTog.closest('.bento-tog') : null;
-    if(revRow){ revRow.classList.toggle('tog-disabled', isMultiplication); if(isMultiplication) revTog.checked = false; }
+    if(revRow){ revRow.classList.toggle('tog-disabled', isMultiplication || isArithmetic); if(isMultiplication || isArithmetic) revTog.checked = false; }
     const focusOn = document.getElementById('focusTog').checked;
     if(focusOn) buildFocusGrid();
   }
@@ -4580,6 +4616,23 @@ function setMultType(btn){
           pool.push({n:a, m:b, type:'table', answer:a*b, reverse:false});
         }
       }
+    } else if(qType === 'arithmetic'){
+      const diffRanges = { '2digit': [10, 99], '3digit': [100, 999], '4digit': [1000, 9999] };
+      const [aFrom, aTo] = diffRanges[arithDiff] || [10, 99];
+      for(let i = 0; i < 300; i++){
+        const a = Math.floor(Math.random()*(aTo - aFrom + 1)) + aFrom;
+        const b = Math.floor(Math.random()*(aTo - aFrom + 1)) + aFrom;
+        let op;
+        if(arithSubType === 'add')      op = 'add';
+        else if(arithSubType === 'sub') op = 'sub';
+        else                            op = Math.random() < 0.5 ? 'add' : 'sub';
+        if(op === 'add'){
+          pool.push({n: a, m: b, type: 'add', answer: a + b, reverse: false});
+        } else {
+          const big = Math.max(a, b), small = Math.min(a, b);
+          pool.push({n: big, m: small, type: 'sub', answer: big - small, reverse: false});
+        }
+      }
     } else {
       for(let n=from;n<=to;n++){
         if(focusMode && focusNums.size > 0 && !focusNums.has(n)) continue;
@@ -4597,6 +4650,8 @@ function setMultType(btn){
   }
 
   function startTest(){
+  sessionId++;
+  const currentSession = sessionId;
   isTimedMode = (timerMode === 'timed');
   unlimitedMode = document.getElementById('unlimitedTog').checked;
 
@@ -4760,6 +4815,12 @@ function setMultType(btn){
     if(q.type==='table'){
       badge.textContent = 'Tables';
       badge.className = 'q-badge badge-sq';
+    } else if(q.type==='add'){
+      badge.textContent = 'Addition';
+      badge.className   = 'q-badge badge-sq';
+    } else if(q.type==='sub'){
+      badge.textContent = 'Subtraction';
+      badge.className   = 'q-badge badge-cu';
     } else {
       badge.textContent = q.type==='square'?'Square':'Cube';
       badge.className   = 'q-badge '+(q.type==='square'?'badge-sq':'badge-cu');
@@ -4769,6 +4830,12 @@ function setMultType(btn){
     if(q.type==='table'){
       document.getElementById('qExpr').textContent = `${q.n} × ${q.m}`;
       document.getElementById('qSub').textContent = 'What is the answer?';
+    } else if(q.type==='add'){
+      document.getElementById('qExpr').textContent = `${q.n} + ${q.m}`;
+      document.getElementById('qSub').textContent = 'What is the sum?';
+    } else if(q.type==='sub'){
+      document.getElementById('qExpr').textContent = `${q.n} − ${q.m}`;
+      document.getElementById('qSub').textContent = 'What is the difference?';
     } else if(q.reverse){
       document.getElementById('qExpr').textContent = q.answer.toLocaleString();
       document.getElementById('qSub').textContent  = q.type==='square' ? 'What number squared gives this?' : 'What number cubed gives this?';
@@ -4805,8 +4872,10 @@ function setMultType(btn){
       document.getElementById('typeZone').style.display = 'block';
       document.getElementById('pickZone').style.display = 'none';
       const digits = q.reverse ? String(q.n).length : String(q.answer).length;
-      if(!q.reverse){
+      if(!q.reverse && q.type !== 'add' && q.type !== 'sub'){
         document.getElementById('qSub').textContent = autoSub?`Answer has ${digits} digit${digits>1?'s':''}`:'What is the answer?';
+      } else if(q.type === 'add' || q.type === 'sub'){
+        document.getElementById('qSub').textContent = autoSub ? `Answer has ${digits} digit${digits>1?'s':''}` : (q.type==='add'?'What is the sum?':'What is the difference?');
       }
       const inp=document.getElementById('ansInput');
 const keyboard = document.getElementById('keyboard');
@@ -4850,7 +4919,7 @@ if(timerMode === 'stopwatch'){
 
   function buildPickGrid(q){
     let options, correctPick;
-    if(q.type === 'table'){
+    if(q.type === 'table' || q.type === 'add' || q.type === 'sub'){
       correctPick = q.answer;
       options = genOptions(q.answer, q);
     } else if(q.reverse){
@@ -4916,7 +4985,7 @@ if(timerMode === 'stopwatch'){
 
   if(!isCorrect && livesMode){
     lives--; updateLivesPill();
-    if(lives <= 0){ setTimeout(()=>gameOver(), 900); return; }
+    if(lives <= 0){ const _sid=sessionId; setTimeout(()=>{ if(sessionId===_sid) gameOver(); }, 900); return; }
   }
 
   const pickType = document.getElementById('pickModeType')?.value || 'auto';
@@ -4926,7 +4995,7 @@ if(timerMode === 'stopwatch'){
     nb.textContent = cur < qs.length-1 ? 'Next question →' : 'See results →';
   } else {
     nb.style.display = 'none';
-    setTimeout(() => nextQ(), isTimedMode ? 500 : 900);
+    const _sid=sessionId; setTimeout(() => { if(sessionId===_sid) nextQ(); }, isTimedMode ? 500 : 900);
   }
 }
 
@@ -4975,7 +5044,7 @@ function startTimer(){
     }
 
     const _sp=document.getElementById('scorePill'); _sp.textContent=`Score: ${score}`; _sp.classList.remove('pill-bump'); void _sp.offsetWidth; _sp.classList.add('pill-bump');
-    setTimeout(() => nextQ(), 1300);
+    const _sid=sessionId; setTimeout(() => { if(sessionId===_sid) nextQ(); }, 1300);
   }
 
   const start = performance.now();
@@ -5026,7 +5095,7 @@ function startTimer(){
   clearTimer();
   answered = true;
 
-  const correctVal = q.type==='table' ? q.answer : (q.reverse ? q.n : q.answer);
+  const correctVal = (q.type==='table'||q.type==='add'||q.type==='sub') ? q.answer : (q.reverse ? q.n : q.answer);
   const correct = val === correctVal;
   if(correct){ score++; streak++; if(streak>bestStreak) bestStreak=streak; }
   else { streak=0; if(spacedMode) wrongQueue.push(cur); }
@@ -5045,7 +5114,7 @@ function startTimer(){
     lives--;
     updateLivesPill();
     if(lives <= 0){
-      setTimeout(()=>gameOver(), instant ? 1200 : 400);
+      const _sid=sessionId; setTimeout(()=>{ if(sessionId===_sid) gameOver(); }, instant ? 1200 : 400);
       const nb = document.getElementById('nextBtn');
       nb.style.display='block';
       nb.textContent='Game Over';
@@ -5065,7 +5134,11 @@ function startTimer(){
     const sym = q.type==='square'?'²':'³';
     fb.style.display='block'; void fb.offsetWidth; fb.classList.add('visible');
     if(q.type==='table'){
-      fb.textContent = correct ? `Correct! ${q.n} × ${q.m} = ${q.answer}` : `✗ ${q.n} × ${q.m} = ${q.answer}`;
+      fb.textContent = correct ? `✓ ${q.n} × ${q.m} = ${q.answer}` : `✗ ${q.n} × ${q.m} = ${q.answer}`;
+    } else if(q.type==='add'){
+      fb.textContent = correct ? `✓ ${q.n} + ${q.m} = ${q.answer}` : `✗ ${q.n} + ${q.m} = ${q.answer}`;
+    } else if(q.type==='sub'){
+      fb.textContent = correct ? `✓ ${q.n} − ${q.m} = ${q.answer}` : `✗ ${q.n} − ${q.m} = ${q.answer}`;
     } else {
       fb.textContent = correct
         ? (q.reverse ? `✓ Base is ${q.n}` : `✓ ${q.n}${sym} = ${q.answer}`)
@@ -5074,19 +5147,19 @@ function startTimer(){
     fb.className='fb-box '+(correct?'fb-ok':'fb-no');
 
     if(isTimedMode){
-      setTimeout(() => { if(answered) nextQ(); }, 600);
+      const _sid=sessionId; setTimeout(() => { if(sessionId===_sid && answered) nextQ(); }, 600);
     }
   } else {
     btn.textContent = 'Next';
     if(!isMobile) setTimeout(() => btn.focus(), 150);
-    if(isTimedMode) setTimeout(() => { if(answered) nextQ(); }, 400);
+    if(isTimedMode){ const _sid=sessionId; setTimeout(() => { if(sessionId===_sid && answered) nextQ(); }, 400); }
   }
 
   // ✅ FIXED: independent auto submit
   if(autoSub && !isTimedMode){
     const delay = instant ? 900 : 0;
-    setTimeout(() => {
-      if(answered) nextQ();
+    const _sid=sessionId; setTimeout(() => {
+      if(sessionId===_sid && answered) nextQ();
     }, delay);
   }
 }  function nextQ(){
@@ -5205,49 +5278,102 @@ function startTimer(){
     document.getElementById('reviewList').innerHTML = results.map(r=>{
       const sym=r.q.type==='square'?'²':r.q.type==='cube'?'³':'';
       const cls=r.correct?'ri-ok':'ri-no', mark=r.correct?'✓':'✗';
-      const disp = r.q.type==='table' ? `${r.q.n}×${r.q.m}` : (r.q.reverse ? r.q.answer.toLocaleString() : `${r.q.n}${sym}`);
-      const correctAns = r.q.type==='table' ? r.q.answer : (r.q.reverse ? r.q.n : r.q.answer);
+      let disp;
+      if(r.q.type==='table')       disp = `${r.q.n}×${r.q.m}`;
+      else if(r.q.type==='add')    disp = `${r.q.n}+${r.q.m}`;
+      else if(r.q.type==='sub')    disp = `${r.q.n}−${r.q.m}`;
+      else if(r.q.reverse)         disp = r.q.answer.toLocaleString();
+      else                         disp = `${r.q.n}${sym}`;
+      const correctAns = (r.q.type==='table'||r.q.type==='add'||r.q.type==='sub') ? r.q.answer : (r.q.reverse ? r.q.n : r.q.answer);
       const note=r.correct?`${correctAns}`:r.timedOut?`${correctAns} (time's up)`:`${correctAns} (you: ${r.userAnswer})`;
       return `<div class="review-item"><span class="ri-q">${disp}</span><span class="ri-a ${cls}">${mark} ${note}</span></div>`;
     }).join('');
 
-    // squares vs cubes chart
+    // accuracy chart — adapts to mode
     const sqR = results.filter(r=>r.q.type==='square');
     const cuR = results.filter(r=>r.q.type==='cube');
-    const sqPct = sqR.length ? Math.round(sqR.filter(r=>r.correct).length/sqR.length*100) : null;
-    const cuPct = cuR.length ? Math.round(cuR.filter(r=>r.correct).length/cuR.length*100) : null;
-    document.getElementById('chartWrap').style.display = (sqR.length&&cuR.length) ? 'flex' : 'none';
-    if(sqR.length&&cuR.length){
+    const adR = results.filter(r=>r.q.type==='add');
+    const sbR = results.filter(r=>r.q.type==='sub');
+    const chartWrapEl = document.getElementById('chartWrap');
+    if(adR.length && sbR.length){
+      // arithmetic mode: Add vs Sub
+      const adPct = Math.round(adR.filter(r=>r.correct).length/adR.length*100);
+      const sbPct = Math.round(sbR.filter(r=>r.correct).length/sbR.length*100);
+      chartWrapEl.style.display = 'flex';
+      document.getElementById('chartSqVal').textContent = adPct+'%';
+      document.getElementById('chartCuVal').textContent = sbPct+'%';
+      chartWrapEl.querySelector('.chart-title').textContent = 'Addition vs Subtraction accuracy';
+      chartWrapEl.querySelectorAll('.chart-row-label')[0].textContent = 'Addition';
+      chartWrapEl.querySelectorAll('.chart-row-label')[1].textContent = 'Subtract';
+      document.getElementById('chartSqBar').style.width = '0%';
+      document.getElementById('chartCuBar').style.width = '0%';
+      setTimeout(()=>{
+        document.getElementById('chartSqBar').style.width = adPct+'%';
+        document.getElementById('chartCuBar').style.width = sbPct+'%';
+      }, 80);
+    } else if(sqR.length && cuR.length){
+      // squares/cubes mode
+      const sqPct = Math.round(sqR.filter(r=>r.correct).length/sqR.length*100);
+      const cuPct = Math.round(cuR.filter(r=>r.correct).length/cuR.length*100);
+      chartWrapEl.style.display = 'flex';
+      chartWrapEl.querySelector('.chart-title').textContent = 'Squares vs Cubes accuracy';
+      chartWrapEl.querySelectorAll('.chart-row-label')[0].textContent = 'Squares';
+      chartWrapEl.querySelectorAll('.chart-row-label')[1].textContent = 'Cubes';
       document.getElementById('chartSqVal').textContent = sqPct+'%';
       document.getElementById('chartCuVal').textContent = cuPct+'%';
-      // reset then animate
       document.getElementById('chartSqBar').style.width = '0%';
       document.getElementById('chartCuBar').style.width = '0%';
       setTimeout(()=>{
         document.getElementById('chartSqBar').style.width = sqPct+'%';
         document.getElementById('chartCuBar').style.width = cuPct+'%';
       }, 80);
+    } else {
+      chartWrapEl.style.display = 'none';
     }
 
-    // weakness: numbers wrong >50% of attempts this session
-    const wrongMap = {};
-    results.forEach(r=>{
-      const key = r.q.n+'_'+r.q.type;
-      if(!wrongMap[key]) wrongMap[key]={n:r.q.n,type:r.q.type,wrong:0,total:0};
-      wrongMap[key].total++;
-      if(!r.correct) wrongMap[key].wrong++;
-    });
-    const weak = Object.values(wrongMap).filter(w=>w.wrong/w.total>0.5).sort((a,b)=>b.wrong/b.total-a.wrong/a.total).slice(0,5);
+    // weakness section
     const wWrap = document.getElementById('weaknessWrap');
-    if(weak.length){
-      wWrap.style.display='block';
-      document.getElementById('weaknessList').innerHTML = weak.map(w=>{
-        const sym  = w.type==='square'?'²':'³';
-        const tot  = (w.correct||0) + (w.wrong||0);
-        const acc  = tot > 0 ? Math.round(((w.correct||0)/tot)*100) : 0;
-        return `<span style="display:inline-flex;align-items:center;background:rgba(255,80,60,0.12);border:1px solid rgba(255,100,80,0.22);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:700;color:rgba(239,248,226,0.7);">${w.n}${sym}</span>`;
-      }).join('');
-    } else { wWrap.style.display='none'; }
+    const isArithMixed = adR.length > 0 && sbR.length > 0;
+    const isArithSingle = (qType === 'arithmetic') && !isArithMixed;
+
+    if(isArithSingle){
+      // Add-only or Sub-only: hide struggled section entirely
+      wWrap.style.display = 'none';
+    } else if(isArithMixed){
+      // Mixed arithmetic: show Add vs Sub wrong/total comparison pills
+      const adWrong = adR.filter(r=>!r.correct).length;
+      const sbWrong = sbR.filter(r=>!r.correct).length;
+      const hasTrouble = adWrong > 0 || sbWrong > 0;
+      if(hasTrouble){
+        wWrap.style.display = 'block';
+        document.getElementById('weaknessList').innerHTML =
+          `<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,80,60,0.12);border:1px solid rgba(255,100,80,0.22);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700;color:rgba(239,248,226,0.7);">
+            + Addition <span style="color:#ff8070;margin-left:2px;">${adWrong}/${adR.length} wrong</span>
+          </span>
+          <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,80,60,0.12);border:1px solid rgba(255,100,80,0.22);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700;color:rgba(239,248,226,0.7);">
+            − Subtraction <span style="color:#ff8070;margin-left:2px;">${sbWrong}/${sbR.length} wrong</span>
+          </span>`;
+      } else {
+        wWrap.style.display = 'none';
+      }
+    } else {
+      // Squares/cubes/tables mode: original per-number weakness chips
+      const wrongMap = {};
+      results.forEach(r=>{
+        const key = r.q.n+'_'+r.q.type;
+        if(!wrongMap[key]) wrongMap[key]={n:r.q.n,type:r.q.type,wrong:0,total:0};
+        wrongMap[key].total++;
+        if(!r.correct) wrongMap[key].wrong++;
+      });
+      const weak = Object.values(wrongMap).filter(w=>w.wrong/w.total>0.5).sort((a,b)=>b.wrong/b.total-a.wrong/a.total).slice(0,5);
+      if(weak.length){
+        wWrap.style.display='block';
+        document.getElementById('weaknessList').innerHTML = weak.map(w=>{
+          const sym = w.type==='square'?'²':w.type==='cube'?'³':'';
+          return `<span style="display:inline-flex;align-items:center;background:rgba(255,80,60,0.12);border:1px solid rgba(255,100,80,0.22);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:700;color:rgba(239,248,226,0.7);">${w.n}${sym}</span>`;
+        }).join('');
+      } else { wWrap.style.display='none'; }
+    }
 
     // personal bests — handled by onSessionComplete() via MutationObserver
     const pb = getPB();
@@ -5541,7 +5667,7 @@ function endTimedMode(){
     answered = true;
     const q = qs[cur];
     const val = parseInt(document.getElementById('ansInput').value);
-    const correctVal = q.type==='table' ? q.answer : (q.reverse ? q.n : q.answer);
+    const correctVal = (q.type==='table'||q.type==='add'||q.type==='sub') ? q.answer : (q.reverse ? q.n : q.answer);
     const correct = !isNaN(val) && val === correctVal;
     results.push({q, userAnswer: isNaN(val)?'—':val, correct, timedOut:true});
     if(correct){ score++; }
@@ -5809,12 +5935,29 @@ function confirmResetProfile() {
 }
 
 // ── goHome ──
-function goHome() {
+function abortTest() {
+  sessionId++;          // kill all in-flight setTimeout callbacks
   clearTimer();
   clearStopwatch();
   clearTimedInterval();
-  isTimedMode = false;
+  isTimedMode   = false;
+  unlimitedMode = false;
+  answered      = false;
   document.getElementById('timedModeBar').classList.remove('visible');
+  document.getElementById('endSessionBtn').classList.remove('visible');
+  show('s-setup');
+}
+
+function goHome() {
+  sessionId++; // invalidate all in-flight setTimeout callbacks
+  clearTimer();
+  clearStopwatch();
+  clearTimedInterval();
+  isTimedMode   = false;
+  unlimitedMode = false;
+  answered      = false;
+  document.getElementById('timedModeBar').classList.remove('visible');
+  document.getElementById('endSessionBtn').classList.remove('visible');
   const profile = getProfile();
   if (profile.name) { showDashboard(); } else { show('s-setup'); }
 }
@@ -5843,9 +5986,13 @@ function exportResults(){
 
   const rows = results.map((r, i) => {
     const q   = r.q;
-    const sym = q.type === 'square' ? '²' : q.type === 'cube' ? '³' : '×';
-    const qStr = q.type === 'table' ? `${q.n} × ${q.m}` : `${q.n}${sym}`;
-    const correctAns = q.type === 'table' ? q.answer : (q.reverse ? q.n : q.answer);
+    const sym = q.type === 'square' ? '²' : q.type === 'cube' ? '³' : '';
+    let qStr;
+    if(q.type === 'table')    qStr = `${q.n} × ${q.m}`;
+    else if(q.type === 'add') qStr = `${q.n} + ${q.m}`;
+    else if(q.type === 'sub') qStr = `${q.n} − ${q.m}`;
+    else                      qStr = `${q.n}${sym}`;
+    const correctAns = (q.type==='table'||q.type==='add'||q.type==='sub') ? q.answer : (q.reverse ? q.n : q.answer);
     const userAns = r.correct ? '—' : (r.timedOut ? "time's up" : r.userAnswer);
     const rowBg = r.correct ? '#f0fce8' : '#fff2f2';
     const mark  = r.correct ? '✓' : '✗';
@@ -6396,18 +6543,34 @@ function saveWeaknessData(d) {
 }
 
 /** Update per-number stats after each answer */
+/** Get the digit-band label for a number (for arithmetic tracking) */
+function getArithDiffBand(n) {
+  if (n >= 1000) return '4digit';
+  if (n >= 100)  return '3digit';
+  return '2digit';
+}
+
 function trackWeaknessAnswer(n, type, correct) {
   const data = getWeaknessData();
-  const key  = `${n}_${type}`;
-  if (!data[key]) data[key] = { n, type, correct: 0, wrong: 0 };
+  let key;
+  if (type === 'add' || type === 'sub') {
+    // Track by operation + digit-band, not by specific number
+    const band = getArithDiffBand(n);
+    key = `${type}_${band}`;
+    if (!data[key]) data[key] = { type, band, correct: 0, wrong: 0, isArith: true };
+  } else {
+    key = `${n}_${type}`;
+    if (!data[key]) data[key] = { n, type, correct: 0, wrong: 0 };
+  }
   if (correct) data[key].correct++;
   else         data[key].wrong++;
   saveWeaknessData(data);
 }
 
 /**
- * getWeakNumbers — returns array of {n, type} where accuracy < 70%
- * and at least 3 attempts made.
+ * getWeakNumbers — returns weak entries (accuracy < 70%, min 3 attempts).
+ * For arithmetic: returns {type, band, isArith} objects.
+ * For others: returns {n, type} objects.
  */
 function getWeakNumbers() {
   const data = getWeaknessData();
@@ -6417,9 +6580,93 @@ function getWeakNumbers() {
   });
 }
 
+/** Returns only weak entries relevant to the currently selected qType */
+function getContextualWeakAreas() {
+  const all = getWeakNumbers();
+  if (qType === 'arithmetic') {
+    return all.filter(d => d.isArith);
+  }
+  return all.filter(d => !d.isArith);
+}
+
+function updateWeaknessBtn() {
+  const weak = getContextualWeakAreas();
+  const btn  = document.getElementById('weaknessPracticeBtn');
+  const badge= document.getElementById('weakCountBadge');
+  if (!btn) return;
+  if (weak.length > 0) {
+    btn.style.display = 'flex';
+    if (badge) {
+      if (qType === 'arithmetic') {
+        // Describe which operations/bands are weak
+        const labels = weak.map(w => {
+          const op   = w.type === 'add' ? '+' : '−';
+          const band = w.band === '4digit' ? '4-dig' : w.band === '3digit' ? '3-dig' : '2-dig';
+          return `${op}${band}`;
+        });
+        badge.textContent = labels.join(', ') + ' weak';
+      } else {
+        badge.textContent = `${weak.length} weak`;
+      }
+    }
+  } else {
+    btn.style.display = 'none';
+  }
+}
+
+/** Start a quiz focused only on weak areas */
+function startWeaknessPractice() {
+  const weak = getContextualWeakAreas();
+  if (!weak.length) {
+    alert('No weak areas yet! Practice more to identify areas to improve.');
+    return;
+  }
+
+  if (qType === 'arithmetic') {
+    // Determine which operation(s) and digit band(s) are weak
+    const hasWeakAdd = weak.some(w => w.type === 'add');
+    const hasWeakSub = weak.some(w => w.type === 'sub');
+
+    // Pick operation sub-type
+    if (hasWeakAdd && hasWeakSub) arithSubType = 'both';
+    else if (hasWeakAdd)          arithSubType = 'add';
+    else                          arithSubType = 'sub';
+
+    // Pick the worst digit band (most wrong / total ratio)
+    const worst = weak.slice().sort((a, b) => {
+      const ra = a.wrong / (a.correct + a.wrong);
+      const rb = b.wrong / (b.correct + b.wrong);
+      return rb - ra;
+    })[0];
+    arithDiff = worst.band;
+
+    // Sync the UI toggles
+    document.querySelectorAll('#arithTypeGrid .timer-opt').forEach(b => {
+      b.classList.toggle('active', b.dataset.atype === arithSubType);
+    });
+    document.querySelectorAll('#arithDiffGrid .timer-opt').forEach(b => {
+      b.classList.toggle('active', b.dataset.adiff === arithDiff);
+    });
+
+    // Make sure arithmetic mode is active
+    setType('arithmetic');
+    startTest();
+  } else {
+    // Original number-based focus for squares/cubes/tables
+    const weakNums = [...new Set(weak.map(w => w.n))];
+    focusNums = new Set(weakNums);
+    document.getElementById('focusTog').checked = true;
+    focusMode = true;
+    toggleFocusGrid();
+    if (qType !== 'multiplication') {
+      weakNums.forEach(n => focusNums.add(n));
+    }
+    startTest();
+  }
+}
+
 // ─────────────────────────────────────────────
 // SPACED REPETITION — cross-session persistence
-// ─────────────────────────────────────────────
 
 const SR_MAX = 50;
 
@@ -6462,40 +6709,6 @@ function getSRQuestionsForSession() {
   }).slice(0, 5);
 }
 
-
-function updateWeaknessBtn() {
-  const weak = getWeakNumbers();
-  const btn  = document.getElementById('weaknessPracticeBtn');
-  const badge= document.getElementById('weakCountBadge');
-  if (!btn) return;
-  if (weak.length > 0) {
-    btn.style.display = 'flex';
-    if (badge) badge.textContent = `${weak.length} weak`;
-  } else {
-    btn.style.display = 'none';
-  }
-}
-
-/** Start a quiz focused only on weak numbers */
-function startWeaknessPractice() {
-  const weak = getWeakNumbers();
-  if (!weak.length) {
-    alert('No weak numbers yet! Practice more to identify areas to improve.');
-    return;
-  }
-  // Override focus mode with weak numbers
-  const weakNums = [...new Set(weak.map(w => w.n))];
-  focusNums = new Set(weakNums);
-  document.getElementById('focusTog').checked = true;
-  focusMode = true;
-  toggleFocusGrid();
-  // Force to squares+cubes type if possible
-  if (qType !== 'multiplication') {
-    // Mark the chips as selected
-    weakNums.forEach(n => focusNums.add(n));
-  }
-  startTest();
-}
 
 // ─────────────────────────────────────────────
 // 5. DAILY CHALLENGE MODE
