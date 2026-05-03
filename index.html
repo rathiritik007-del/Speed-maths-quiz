@@ -1364,7 +1364,7 @@ select:focus {
       letter-spacing: 0.05em;
     }
 
-    /* ═════════════════════════════t��══════
+    /* ════════════════════════════════════
        GAME OVER screen
     ════════════════════════════════════ */
     .gameover-body {
@@ -6142,6 +6142,8 @@ function onSessionComplete(pct, sessionBestStreak) {
   if (isDailyChallenge) {
     saveDailyChallengeData({ date: getTodayDateStr(), completed: true, score, total, pct });
     isDailyChallenge = false;
+    const activeScreen = document.querySelector('.screen.active');
+    updateDailyChallengeVisibility(activeScreen ? activeScreen.id : 's-setup');
   }
 
   // Pulse the day streak stat in dashboard if it increased
