@@ -218,7 +218,7 @@
       100% { background-position:  200% center; }
     }
 
-    /* ─we� Glowing border pulse on q-card ── */
+    /* ── Glowing border pulse on q-card ── */
     @keyframes borderPulse {
       0%, 100% { border-color: rgba(184,212,92,0.15); }
       50%       { border-color: rgba(184,212,92,0.35); }
@@ -321,19 +321,15 @@
   padding: clamp(20px, 5vw, 32px);
   position: relative;
   overflow: hidden;
-
   background: linear-gradient(
     145deg,
     rgba(100,40,150,0.45) 0%,
     rgba(55,10,80,0.55) 50%,
     rgba(30,5,50,0.6) 100%
   );
-
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-
   border: 1px solid rgba(184,212,92,0.18);
-
   box-shadow:
     0 16px 48px rgba(0,0,0,0.6),
     0 0 40px rgba(87,50,128,0.2),
@@ -607,17 +603,16 @@
     ════════════════════════════════════ */
     .test-top {
       background: linear-gradient(145deg, rgba(87,50,128,0.5) 0%, rgba(26,5,40,0.97) 100%);
-  padding: clamp(14px, 4vw, 22px) clamp(14px, 5vw, 24px) clamp(12px, 3.5vw, 18px);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
-  position: relative;
-
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-  border-bottom: 1px solid rgba(184,212,92,0.15);
-  box-shadow: inset 0 1px 0 rgba(184,212,92,0.12), 0 0 30px rgba(87,50,128,0.15);
+      padding: clamp(14px, 4vw, 22px) clamp(14px, 5vw, 24px) clamp(12px, 3.5vw, 18px);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+      position: relative;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      border-bottom: 1px solid rgba(184,212,92,0.15);
+      box-shadow: inset 0 1px 0 rgba(184,212,92,0.12), 0 0 30px rgba(87,50,128,0.15);
     }
     .back-btn {
       width: clamp(32px, 8vw, 38px);
@@ -1599,7 +1594,7 @@ select:focus {
       letter-spacing: 0.04em;
     }
 
-    /* ══════════i��═════════════════════════
+    /* ════════════════════════════════════
        BENTO GRID LAYOUT
     ════════════════════════════════════ */
     .bento-grid {
@@ -3136,6 +3131,256 @@ select:focus {
     }
     .timed-result-num { animation: timedNumIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 0.1s; }
 
+  /* ══════════════════════════════════════════════
+     THEME: MINIMAL
+     Fully flat — solid colours, no blur, no glow, no transparency
+  ══════════════════════════════════════════════ */
+
+  /* 1. Kill every backdrop-filter site-wide */
+  html[data-theme="minimal"] * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* 2. Remove animated background blobs */
+  html[data-theme="minimal"] body::before,
+  html[data-theme="minimal"] body::after { display: none; }
+
+  /* 3. App shell */
+  html[data-theme="minimal"] .app {
+    background: #12001e;
+    box-shadow: none;
+    border-color: rgba(184,212,92,0.15);
+  }
+  html[data-theme="minimal"] .app::before,
+  html[data-theme="minimal"] .app::after { display: none; }
+
+  /* 4. Setup header / dash header / profile header — solid surface */
+  html[data-theme="minimal"] .setup-header,
+  html[data-theme="minimal"] .dash-header,
+  html[data-theme="minimal"] .profile-header {
+    background: #1e0532;
+    box-shadow: none;
+    border-color: rgba(184,212,92,0.12);
+  }
+  html[data-theme="minimal"] .setup-header::before,
+  html[data-theme="minimal"] .setup-header::after,
+  html[data-theme="minimal"] .dash-header::before,
+  html[data-theme="minimal"] .profile-header::before { display: none; }
+
+  /* 5. Setup body */
+  html[data-theme="minimal"] .setup-body {
+    background: #160328;
+    box-shadow: none;
+  }
+
+  /* 6. Cards */
+  html[data-theme="minimal"] .card,
+  html[data-theme="minimal"] .q-card,
+  html[data-theme="minimal"] .res-cw-card,
+  html[data-theme="minimal"] .review-wrap,
+  html[data-theme="minimal"] .timer-bar-wrap,
+  html[data-theme="minimal"] .stopwatch-wrap,
+  html[data-theme="minimal"] .daily-goal-card,
+  html[data-theme="minimal"] .profile-stat-card,
+  html[data-theme="minimal"] .pb-c,
+  html[data-theme="minimal"] .pb-xp-card {
+    background: #1e0532;
+    box-shadow: none;
+  }
+  html[data-theme="minimal"] .card::before,
+  html[data-theme="minimal"] .q-card::before,
+  html[data-theme="minimal"] .card::after,
+  html[data-theme="minimal"] .q-card::after { display: none; }
+
+  /* 7. Answer input */
+  html[data-theme="minimal"] .ans-input {
+    background: #0f0120;
+    box-shadow: none;
+  }
+  html[data-theme="minimal"] .ans-input:focus {
+    box-shadow: none;
+    border-color: #7b44a8;
+  }
+  html[data-theme="minimal"] .ans-input.correct {
+    background: #141f06;
+    border-color: #B8D45C;
+    box-shadow: none;
+  }
+  html[data-theme="minimal"] .ans-input.wrong { box-shadow: none; }
+
+  /* 8. Pick-mode buttons */
+  html[data-theme="minimal"] .pick-btn {
+    background: #1e0532;
+    box-shadow: none;
+  }
+  html[data-theme="minimal"] .pick-btn:hover:not(:disabled) {
+    background: #280840;
+    box-shadow: none;
+  }
+  html[data-theme="minimal"] .pick-btn.correct { background: #141f06; box-shadow: none; }
+  html[data-theme="minimal"] .pick-btn.wrong   { box-shadow: none; }
+  html[data-theme="minimal"] .pick-btn.reveal  { box-shadow: none; }
+
+  /* 9. Buttons */
+  html[data-theme="minimal"] .again-btn,
+  html[data-theme="minimal"] .again-btn:hover { box-shadow: none; }
+  html[data-theme="minimal"] .type-btn.active { box-shadow: none; }
+
+  /* 10. Text glows */
+  html[data-theme="minimal"] .big-num  { text-shadow: none; }
+  html[data-theme="minimal"] .pb-new   { text-shadow: none; }
+
+  /* 11. Timed mode bar */
+  html[data-theme="minimal"] .timed-mode-bar { background: #1e0532; box-shadow: none; }
+
+  /* ── Welcome screen ── */
+  html[data-theme="minimal"] .welcome-input {
+    background: #0f0120;
+    box-shadow: none;
+  }
+  html[data-theme="minimal"] .welcome-input:focus { box-shadow: none; }
+  html[data-theme="minimal"] .welcome-icon { filter: none; }
+  html[data-theme="minimal"] .welcome-btn,
+  html[data-theme="minimal"] .welcome-btn:hover { box-shadow: none; }
+
+  /* ── Test screen header / quiz elements ── */
+  html[data-theme="minimal"] .test-top {
+    background: #1e0532;
+  }
+  html[data-theme="minimal"] .q-pill {
+    background: #1a0430;
+    border-color: rgba(255,255,255,0.08);
+  }
+  html[data-theme="minimal"] .score-pill {
+    background: #1a0a28;
+  }
+  html[data-theme="minimal"] .prog-bar {
+    background: #1e0532;
+  }
+  html[data-theme="minimal"] .num-inp {
+    background: #0f0120;
+    box-shadow: none;
+  }
+  html[data-theme="minimal"] .fb-ok {
+    background: #0a1a03;
+    border-color: rgba(184,212,92,0.35);
+  }
+  html[data-theme="minimal"] .fb-no {
+    background: #1a0404;
+    border-color: rgba(255,82,82,0.3);
+  }
+  html[data-theme="minimal"] .timer-opt.active { box-shadow: none; }
+  html[data-theme="minimal"] .type-btn.active  { box-shadow: none; }
+  html[data-theme="minimal"] .diff-btn.active  { background: #1a0a28; box-shadow: none; }
+
+  /* ── Dashboard screen ── */
+  html[data-theme="minimal"] .dash-stat,
+  html[data-theme="minimal"] .dash-recent,
+  html[data-theme="minimal"] .dash-xp-row,
+  html[data-theme="minimal"] .dash-profile-panel,
+  html[data-theme="minimal"] .improve-banner {
+    background: #1e0532;
+    box-shadow: none;
+  }
+  html[data-theme="minimal"] .dash-profile-btn {
+    background: #1e0532;
+    box-shadow: none;
+  }
+  html[data-theme="minimal"] .dash-profile-btn:hover { background: #280840; }
+  html[data-theme="minimal"] .dash-start-btn { box-shadow: none; }
+  html[data-theme="minimal"] .dash-session-pct.good { background: #0d1a03; }
+  html[data-theme="minimal"] .dash-session-pct.bad  { background: #160328; }
+  html[data-theme="minimal"] .dash-xp-bar-bg        { background: #2a0840; }
+  html[data-theme="minimal"] .daily-goal-done-badge { background: #0d1a03; }
+  html[data-theme="minimal"] .goal-edit-input       { background: #0f0120; box-shadow: none; }
+
+  /* ── Bento grid (results screen) ── */
+  html[data-theme="minimal"] .bento-cell.accent,
+  html[data-theme="minimal"] .bento-cell.green { background: #1e0532; }
+
+  /* ── XP / streak bars ── */
+  html[data-theme="minimal"] .pb-xp-bar-bg { background: #2a0840; }
+
+  /* ── Spaced-repetition retry badge ── */
+  html[data-theme="minimal"] .retry-badge { background: #1e0532; }
+
+  /* ── Daily challenge slide-in ── */
+  html[data-theme="minimal"] .daily-challenge-btn {
+    background: #12001e;
+    box-shadow: none;
+  }
+  html[data-theme="minimal"] .dc-tab,
+  html[data-theme="minimal"] .daily-challenge-btn:hover .dc-tab,
+  html[data-theme="minimal"] .daily-challenge-btn.dc-open .dc-tab {
+    background: #1e0532;
+  }
+
+  /* ── End-session floating button ── */
+  html[data-theme="minimal"] #endSessionBtn { background: #1e0532; box-shadow: none; }
+
+  /* ── Glow removal: box-shadows ── */
+  html[data-theme="minimal"] .num-inp:focus          { box-shadow: none; }
+  html[data-theme="minimal"] .toggle input:checked + .tslider { box-shadow: none; }
+  html[data-theme="minimal"] .res-cw-card            { box-shadow: none; }
+  html[data-theme="minimal"] .review-wrap            { box-shadow: none; }
+  html[data-theme="minimal"] .check-btn,
+  html[data-theme="minimal"] .check-btn:hover        { box-shadow: none; }
+  html[data-theme="minimal"] .select-trigger         { box-shadow: none; }
+  html[data-theme="minimal"] .bento-start,
+  html[data-theme="minimal"] .bento-start:hover      { box-shadow: none; }
+  html[data-theme="minimal"] .daily-challenge-btn,
+  html[data-theme="minimal"] .daily-challenge-btn.dc-open { box-shadow: none !important; }
+
+  /* ── Glow removal: text-shadows ── */
+  html[data-theme="minimal"] .timed-mode-countdown      { text-shadow: none; }
+  html[data-theme="minimal"] .timed-mode-countdown.urgent { text-shadow: none; }
+  html[data-theme="minimal"] .timed-result-num          { text-shadow: none; }
+  html[data-theme="minimal"] .gameover-score            { text-shadow: none; }
+  html[data-theme="minimal"] .dc-streak-count           { text-shadow: none; }
+
+  /* ── Glow removal: filter ── */
+  html[data-theme="minimal"] .welcome-icon              { filter: none; }
+  html[data-theme="minimal"] .app::before               { filter: none; }
+
+  /* Theme switcher pill */
+  .theme-switcher {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 12px;
+  }
+  .theme-switcher-label {
+    font-size: clamp(13px,3.5vw,15px);
+    color: #eff8e2;
+    flex: 1;
+  }
+  .theme-opts {
+    display: flex;
+    gap: 4px;
+    background: rgba(0,0,0,0.25);
+    border-radius: 10px;
+    padding: 3px;
+  }
+  .theme-opt-btn {
+    padding: 5px 12px;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: rgba(239,248,226,0.45);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+  }
+  .theme-opt-btn.active {
+    background: rgba(184,212,92,0.15);
+    color: #B8D45C;
+    border: 1px solid rgba(184,212,92,0.3);
+  }
+
   </style>
 </head>
 <body>
@@ -3334,6 +3579,18 @@ select:focus {
     <div class="dash-section-title">Session history</div>
     <div class="profile-sessions" id="profileSessionList">
       <div class="dash-empty">No sessions yet</div>
+    </div>
+
+    <!-- Appearance -->
+    <div class="dash-section-title">Appearance</div>
+    <div class="card" style="margin-bottom:10px;">
+      <div class="theme-switcher">
+        <span class="theme-switcher-label">Theme</span>
+        <div class="theme-opts" id="themeOpts">
+          <button class="theme-opt-btn active" id="themeOptDefault" onclick="setTheme('default')">Default</button>
+          <button class="theme-opt-btn" id="themeOptMinimal" onclick="setTheme('minimal')">Minimal</button>
+        </div>
+      </div>
     </div>
 
     <!-- Danger zone -->
@@ -5825,7 +6082,7 @@ function getWeakNumbers() {
   });
 }
 
-// ─────────a��───────────────────────────────────
+// ─────────────────────────────────────────────
 // SPACED REPETITION — cross-session persistence
 // ─────────────────────────────────────────────
 
@@ -6396,5 +6653,38 @@ showProfile = function() {
   </div>
 </button>
 
+
+<script>
+// ── THEME SYSTEM ──
+const THEME_KEY = 'quiz_theme';
+
+function initTheme() {
+  const saved = localStorage.getItem(THEME_KEY) || 'default';
+  applyTheme(saved, false);
+}
+
+function setTheme(theme) {
+  localStorage.setItem(THEME_KEY, theme);
+  applyTheme(theme, true);
+}
+
+function applyTheme(theme, animate) {
+  const html = document.documentElement;
+  if (theme === 'minimal') {
+    html.setAttribute('data-theme', 'minimal');
+  } else {
+    html.removeAttribute('data-theme');
+  }
+  // Sync button states
+  const btnDefault = document.getElementById('themeOptDefault');
+  const btnMinimal = document.getElementById('themeOptMinimal');
+  if (btnDefault && btnMinimal) {
+    btnDefault.classList.toggle('active', theme === 'default');
+    btnMinimal.classList.toggle('active', theme === 'minimal');
+  }
+}
+
+initTheme();
+</script>
 </body>
 </html>
