@@ -1632,9 +1632,9 @@ select:focus {
     ════════════════════════════════════ */
     .bento-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 5fr 4fr;
       grid-template-rows: auto;
-      gap: 10px;
+      gap: 12px;
       padding: clamp(10px,3vw,16px);
       overflow-y: auto;
       overflow-x: hidden;
@@ -1643,6 +1643,7 @@ select:focus {
       width: 100%;
       max-width: 100%;
     }
+    .bento-cell.tall { grid-row: span 2; }
 
     /* full-width cells */
     .bento-cell { 
@@ -1777,6 +1778,9 @@ select:focus {
       }
       .bento-cell.wide {
         grid-column: 1;
+      }
+      .bento-cell.tall {
+        grid-row: span 1;
       }
     }
 
@@ -2631,7 +2635,9 @@ select:focus {
       padding: 3px 9px;
       border-radius: 20px;
       margin-top: 6px;
-      display: inline-block;
+      display: block;
+      width: fit-content;
+      white-space: nowrap;
     }
     .daily-challenge-badge.avail { background: color-mix(in srgb, var(--p2), transparent 10%); color: var(--acc); border: 1px solid color-mix(in srgb, var(--p4), transparent 30%); }
     .daily-challenge-badge.done  { background: color-mix(in srgb, var(--p1), transparent 20%); color: rgba(239,248,226,0.35); border: 1px solid color-mix(in srgb, var(--p4), transparent 65%); }
@@ -3816,6 +3822,12 @@ select:focus {
       <div class="dash-empty">No sessions yet</div>
     </div>
 
+    <!-- Daily Challenge history -->
+    <div class="dash-section-title">Daily challenges</div>
+    <div class="profile-sessions" id="dcHistoryList">
+      <div class="dash-empty">No challenges completed yet</div>
+    </div>
+
     <!-- Appearance -->
     <div class="dash-section-title">Appearance</div>
     <div class="card" style="margin-bottom:10px;">
@@ -3932,8 +3944,8 @@ select:focus {
 
     <div class="bento-grid">
 
-      <!-- QUESTIONS + TYPE — left cell -->
-      <div class="bento-cell">
+      <!-- QUESTIONS + TYPE — left cell, spans 2 rows -->
+      <div class="bento-cell tall">
         <div class="bento-label">❓ Questions</div>
         <input type="number" class="num-inp bento-q-inp" id="qCount" value="10" min="1">
         <div class="unlimited-row">
@@ -3950,6 +3962,10 @@ select:focus {
           <button class="type-btn active" id="btn-both" onclick="setType('both')">x²/x³</button>
           <button class="type-btn" id="btn-multiplication" onclick="setType('multiplication')">× Mult</button>
           <button class="type-btn" id="btn-arithmetic" onclick="setType('arithmetic')">± Arith</button>
+        </div>
+        <div class="bento-tog" id="reverseRow" style="margin-top:10px;">
+          <span class="bento-tog-label">Sq/Cube root<span class="bento-tog-sub">Type the base number</span></span>
+          <label class="toggle"><input type="checkbox" id="reverseTog"><span class="tslider"></span></label>
         </div>
       </div>
 
@@ -4062,11 +4078,11 @@ select:focus {
         </div>
       </div>
 
-      <!-- INPUT MODE — right cell -->
+      <!-- ANSWER — right cell (merged Input mode + Feedback) -->
       <div class="bento-cell">
-        <div class="bento-label">✏️ Input mode</div>
+        <div class="bento-label">✏️ Answer</div>
         <div class="bento-tog">
-          <span class="bento-tog-label">Options mode<span class="bento-tog-sub">Choose options</span></span>
+          <span class="bento-tog-label">Multiple choice<span class="bento-tog-sub">Pick from options</span></span>
           <label class="toggle"><input type="checkbox" id="pickModeTog"><span class="tslider"></span></label>
         </div>
         <div id="pickModeDropdown" style="display:none;">
@@ -4080,8 +4096,12 @@ select:focus {
           </select>
         </div>
         <div class="bento-tog">
-          <span class="bento-tog-label">Sq/Cube root<span class="bento-tog-sub">Type the base number</span></span>
-          <label class="toggle"><input type="checkbox" id="reverseTog"><span class="tslider"></span></label>
+          <span class="bento-tog-label">Auto-submit<span class="bento-tog-sub">Submit on digit count</span></span>
+          <label class="toggle"><input type="checkbox" id="autosubTog" checked><span class="tslider"></span></label>
+        </div>
+        <div class="bento-tog">
+          <span class="bento-tog-label">Instant feedback<span class="bento-tog-sub">Show result immediately</span></span>
+          <label class="toggle"><input type="checkbox" id="feedbackTog" checked><span class="tslider"></span></label>
         </div>
       </div>
 
@@ -4102,17 +4122,9 @@ select:focus {
         </div>
       </div>
 
-      <!-- FEEDBACK + FOCUS — right cell -->
-      <div class="bento-cell">
-        <div class="bento-label">💬 Feedback</div>
-        <div class="bento-tog">
-          <span class="bento-tog-label">Instant<span class="bento-tog-sub">Show result immediately</span></span>
-          <label class="toggle"><input type="checkbox" id="feedbackTog" checked><span class="tslider"></span></label>
-        </div>
-        <div class="bento-tog">
-          <span class="bento-tog-label">Auto-submit<span class="bento-tog-sub">Submit on digit count</span></span>
-          <label class="toggle"><input type="checkbox" id="autosubTog" checked><span class="tslider"></span></label>
-        </div>
+      <!-- GAMEPLAY + FOCUS — full width -->
+      <div class="bento-cell wide">
+        <div class="bento-label">🎯 Focus</div>
         <div class="bento-tog">
           <span class="bento-tog-label">Focus mode<span class="bento-tog-sub">Pick specific numbers</span></span>
           <label class="toggle"><input type="checkbox" id="focusTog" onchange="toggleFocusGrid()"><span class="tslider"></span></label>
@@ -4508,8 +4520,10 @@ function setMultType(btn){
     document.getElementById('tablesCell').style.display      = isMultiplication ? '' : 'none';
     document.getElementById('arithmeticCell').style.display  = isArithmetic     ? '' : 'none';
     const revTog = document.getElementById('reverseTog');
-    const revRow = revTog ? revTog.closest('.bento-tog') : null;
-    if(revRow){ revRow.classList.toggle('tog-disabled', isMultiplication || isArithmetic); if(isMultiplication || isArithmetic) revTog.checked = false; }
+    const revRow = document.getElementById('reverseRow');
+    const showRoot = !isMultiplication && !isArithmetic;
+    if(revRow) revRow.style.display = showRoot ? '' : 'none';
+    if(revTog && !showRoot) revTog.checked = false;
     const focusOn = document.getElementById('focusTog').checked;
     if(focusOn) buildFocusGrid();
   }
@@ -4655,6 +4669,15 @@ function setMultType(btn){
   isTimedMode = (timerMode === 'timed');
   unlimitedMode = document.getElementById('unlimitedTog').checked;
 
+  // Read all toggle states BEFORE generating questions so they are applied correctly
+  instant    = document.getElementById('feedbackTog').checked;
+  autoSub    = document.getElementById('autosubTog').checked;
+  pickMode   = document.getElementById('pickModeTog').checked;
+  reverseMode= document.getElementById('reverseTog').checked;
+  livesMode  = document.getElementById('livesTog').checked;
+  spacedMode = document.getElementById('spacedTog').checked;
+  focusMode  = document.getElementById('focusTog').checked;
+
   // In timed mode, generate a large pool of questions to cycle through
   if(isTimedMode){
     // generate big pool (200 questions), we'll cycle infinitely
@@ -4680,13 +4703,6 @@ function setMultType(btn){
   cur=0; score=0; results=[];
   streak=0; wrongQueue=[];retrySet=new Set();
   timedQAnswered=0;
-  instant    = document.getElementById('feedbackTog').checked;
-  autoSub    = document.getElementById('autosubTog').checked;
-  pickMode   = document.getElementById('pickModeTog').checked;
-  reverseMode= document.getElementById('reverseTog').checked;
-  livesMode  = document.getElementById('livesTog').checked;
-  spacedMode = document.getElementById('spacedTog').checked;
-  focusMode  = document.getElementById('focusTog').checked;
 
   // ── Inject persistent SR items at the front of the queue ──
   if (spacedMode && !isTimedMode && !unlimitedMode) {
@@ -5896,6 +5912,27 @@ function showProfile() {
     }).join('');
   }
 
+  // Daily challenge history
+  const dcList = document.getElementById('dcHistoryList');
+  if (dcList) {
+    let dcHist = [];
+    try { dcHist = JSON.parse(localStorage.getItem(DC_HISTORY_KEY)) || []; } catch(e) {}
+    if (!dcHist.length) {
+      dcList.innerHTML = '<div class="dash-empty">No challenges completed yet</div>';
+    } else {
+      dcList.innerHTML = dcHist.slice(0, 30).map(h => {
+        const dateStr = new Date(h.date).toLocaleDateString(undefined, {day:'numeric', month:'short', year:'numeric'});
+        const cls = h.pct >= 70 ? 'good' : 'bad';
+        return `<div class="dash-session">
+          <span class="dash-session-date">${dateStr}</span>
+          <span class="dash-session-score" style="color:rgba(239,248,226,0.45);font-size:11px;">${h.bracket || '—'}</span>
+          <span class="dash-session-score">${h.score}/${h.total}</span>
+          <span class="dash-session-pct ${cls}">${h.pct}%</span>
+        </div>`;
+      }).join('');
+    }
+  }
+
   // Reset edit row
   document.getElementById('profileNameEditRow').classList.remove('open');
   show('s-profile');
@@ -5931,6 +5968,7 @@ function confirmResetProfile() {
   try { localStorage.removeItem(WEAKNESS_KEY); } catch(e){}
   try { localStorage.removeItem(XP_KEY); } catch(e){}
   try { localStorage.removeItem(DAY_STREAK_KEY); } catch(e){}
+  try { localStorage.removeItem(DC_HISTORY_KEY); } catch(e){}
   location.reload();
 }
 
@@ -6283,6 +6321,7 @@ const DAY_STREAK_KEY    = 'quiz_day_streak2';   // {streak, bestStreak, lastDate
 const XP_KEY            = 'quiz_xp';             // {totalXP, currentLevel}
 const WEAKNESS_KEY      = 'quiz_weakness';        // {"12": {correct, wrong}, ...}
 const DAILY_CHAL_KEY    = 'quiz_daily_challenge'; // {date, completed, score, pct}
+const DC_HISTORY_KEY    = 'quiz_dc_history';      // [{date, score, total, pct, bracket}]
 const SR_KEY            = 'quiz_sr_queue';        // [{n, type, m, answer, reverse}] — cross-session retry queue
 
 // ── XP Level Titles ──
@@ -6724,6 +6763,18 @@ function getDailyChallengeData() {
 }
 function saveDailyChallengeData(d) {
   try { localStorage.setItem(DAILY_CHAL_KEY, JSON.stringify(d)); } catch(e) {}
+  // Also append to running DC history log
+  if (d.completed) {
+    try {
+      const hist = JSON.parse(localStorage.getItem(DC_HISTORY_KEY)) || [];
+      // Don't duplicate the same date
+      if (!hist.length || hist[0].date !== d.date) {
+        const cfg = getDailyChallengeConfig();
+        hist.unshift({ date: d.date, score: d.score, total: d.total, pct: d.pct, bracket: cfg.label });
+        localStorage.setItem(DC_HISTORY_KEY, JSON.stringify(hist.slice(0, 90))); // keep ~3 months
+      }
+    } catch(e) {}
+  }
 }
 
 function isDailyChallengeCompleted() {
@@ -6840,18 +6891,21 @@ function startDailyChallenge() {
 function updateDailyChallengeBtn() {
   const btn   = document.getElementById('dailyChallengeBtn');
   const badge = document.getElementById('dailyChallengeBadge');
+  const sub   = document.getElementById('dcFloatSub');
   if (!btn) return;
   const done = isDailyChallengeCompleted();
   if (done) {
     const data = getDailyChallengeData();
-    badge.textContent = `Done · ${data.pct}%`;
-    badge.className   = 'daily-challenge-badge done';
-    btn.disabled      = true;
+    if (badge) { badge.textContent = `Done · ${data.pct}%`; badge.className = 'daily-challenge-badge done'; }
+    if (sub)   sub.textContent = `${data.score}/${data.total} correct · come back tomorrow`;
+    btn.disabled = true;
   } else {
     const cfg = getDailyChallengeConfig();
-    badge.textContent = cfg.label + ' · ' + cfg.qCount + 'Q' + (cfg.timerSecs ? ' · ' + cfg.timerSecs + 's' : '');
-    badge.className   = 'daily-challenge-badge avail';
-    btn.disabled      = false;
+    const typeStr = cfg.type === 'squares' ? 'Squares only' : cfg.type === 'cubes' ? 'Cubes only' : 'Squares & Cubes';
+    const pillText = cfg.timerSecs ? `${cfg.label} • ${cfg.qCount} Qs • ${cfg.timerSecs}s` : `${cfg.label} • ${cfg.qCount} Qs`;
+    if (badge) { badge.textContent = pillText; badge.className = 'daily-challenge-badge avail'; }
+    if (sub)   sub.textContent = typeStr;
+    btn.disabled = false;
   }
 
   // Set today's date on the pull-tab via CSS custom property
@@ -7195,8 +7249,8 @@ showProfile = function() {
   <div class="daily-challenge-left">
     <div class="daily-challenge-info">
       <div class="daily-challenge-title">Daily Challenge</div>
-      <div class="daily-challenge-sub">10 mixed Qs · resets midnight</div>
-      <span class="daily-challenge-badge avail" id="dailyChallengeBadge">Available</span>
+      <div class="daily-challenge-sub" id="dcFloatSub">Squares only</div>
+      <span class="daily-challenge-badge avail" id="dailyChallengeBadge">Beginner • 10 Qs</span>
     </div>
   </div>
 </button>
