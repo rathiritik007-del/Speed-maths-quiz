@@ -132,7 +132,7 @@
     @keyframes correctFlash {
       0%   { box-shadow: 0 0 0 0   rgba(184,212,92,0.8); }
       50%  { box-shadow: 0 0 0 10px rgba(184,212,92,0.2); }
-      100% { box-shadow: 0 0 20px rgba(184,212,92,0.3), 0 0 0 1px rgba(184,212,92,0.3); }
+      100% { box-shadow: 0 0 20px rgba(184,212,92,0.3); }
     }
     .ans-input.correct { animation: correctFlash 0.4s ease-out forwards; }
 
@@ -255,12 +255,15 @@
     /* ── Main app card ── */
     .app {
   width: 100%;
-  max-width: 900px;     /* control width */
-  margin: 0 auto;       /* center horizontally */
+  max-width: 900px;
+  margin: 0 auto;
+  height: auto;
+  display: flex;
+  flex-direction: column;
 
   border-radius: 20px;
   position: relative;
-  overflow: hidden;     /* 🔥 prevents glass bleed */
+  overflow: hidden;
 
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
@@ -275,7 +278,6 @@
   border: 1px solid rgba(184,212,92,0.12);
 
   box-shadow:
-    0 0 0 1px rgba(87,50,128,0.25),
     0 30px 80px rgba(0,0,0,0.8),
     0 0 60px rgba(87,50,128,0.12),
     inset 0 1px 0 rgba(184,212,92,0.08),
@@ -334,7 +336,6 @@
   border: 1px solid rgba(184,212,92,0.18);
 
   box-shadow:
-    0 0 0 1px rgba(87,50,128,0.3),
     0 16px 48px rgba(0,0,0,0.6),
     0 0 40px rgba(87,50,128,0.2),
     inset 0 1px 0 rgba(184,212,92,0.25),
@@ -373,7 +374,6 @@
     @media (min-width: 600px) {
       html, body { overflow-y: auto; height: auto; }
       .page-wrap {
-        background: transparent;
         height: auto;
         min-height: 100dvh;
         padding: 32px 20px;
@@ -383,19 +383,19 @@
         height: auto;
         min-height: unset;
         border-radius: 20px;
+        max-width: 100%;
       }
     }
 
     @media (min-width: 900px) {
-      .page-wrap { align-items: center; padding: 40px 20px; }
+      .page-wrap { align-items: center; min-height: 100vh; padding: 40px 20px; }
+      .app { width: 100%; max-width: 100%; min-height: unset; }
     }
 
     .screen {
   display: none;
   flex-direction: column;
-  flex: 1;
-  min-height: 0;
-  gap: 16px; /* 🔥 THIS replaces ALL margins */
+  gap: 16px;
 }
     .screen.active { display: flex; }
 
@@ -430,7 +430,6 @@
 
   border: 1px solid rgba(184,212,92,0.08);
   box-shadow:
-    0 0 0 1px rgba(87,50,128,0.2),
     0 8px 40px rgba(0,0,0,0.7),
     inset 0 1px 0 rgba(184,212,92,0.04);
 
@@ -451,8 +450,7 @@
       box-shadow:
         0 4px 24px rgba(0,0,0,0.35),
         inset 0 1px 0 rgba(255,255,255,0.07),
-        inset 0 0 0 1px rgba(184,212,92,0.04),
-        0 0 0 1px rgba(87,50,128,0.15);
+        inset 0 1px 0 rgba(184,212,92,0.04);
       position: relative;
       overflow: hidden;
     }
@@ -748,11 +746,9 @@ display: block;
       padding: clamp(16px, 5vw, 24px);
       border: 1px solid rgba(184,212,92,0.15);
       box-shadow:
-        0 0 0 1px rgba(87,50,128,0.25),
-        0 8px 32px rgba(0,0,0,0.4),
+            0 8px 32px rgba(0,0,0,0.4),
         0 0 24px rgba(87,50,128,0.12),
         inset 0 1px 0 rgba(255,255,255,0.08),
-        inset 0 0 0 1px rgba(184,212,92,0.03);
       flex-shrink: 0;
       position: relative;
       overflow: hidden;
@@ -930,7 +926,6 @@ display: block;
       text-align: center;
       border: 1px solid rgba(184,212,92,0.12);
       box-shadow:
-        0 0 0 1px rgba(87,50,128,0.18),
         inset 0 1px 0 rgba(255,255,255,0.07),
         0 4px 16px rgba(0,0,0,0.3);
     }
@@ -949,7 +944,6 @@ display: block;
       overflow: hidden;
       border: 1px solid rgba(184,212,92,0.1);
       box-shadow:
-        0 0 0 1px rgba(87,50,128,0.18),
         inset 0 1px 0 rgba(255,255,255,0.06),
         0 8px 32px rgba(0,0,0,0.35);
       flex: 1;
@@ -990,7 +984,7 @@ display: block;
     .res-btns {
       display: flex;
       gap: clamp(8px, 2.5vw, 12px);
-      padding: 0 clamp(12px, 4vw, 20px) clamp(16px, 5vw, 26px);
+      padding: clamp(12px,3.5vw,16px) clamp(12px, 4vw, 20px) clamp(16px, 5vw, 26px);
       flex-shrink: 0;
     }
     .again-btn {
@@ -1059,18 +1053,18 @@ display: block;
       width: 100%;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 0 0 1px rgba(87,50,128,0.2), inset 0 1px 0 rgba(184,212,92,0.05);
+      box-shadow: inset 0 1px 0 rgba(184,212,92,0.05);
     }
     .pick-btn:hover:not(:disabled) {
       border-color: rgba(184,212,92,0.4);
       background: linear-gradient(145deg, rgba(87,50,128,0.4), rgba(45,10,61,0.9));
-      box-shadow: 0 0 16px rgba(87,50,128,0.4), 0 0 0 1px rgba(184,212,92,0.2);
+      box-shadow: 0 0 16px rgba(87,50,128,0.4);
     }
     .pick-btn.correct {
       border-color: #B8D45C;
       background: rgba(184,212,92,0.12);
       color: #B8D45C;
-      box-shadow: 0 0 20px rgba(184,212,92,0.3), 0 0 0 1px rgba(184,212,92,0.3);
+      box-shadow: 0 0 20px rgba(184,212,92,0.3);
     }
     .pick-btn.wrong {
       border-color: rgba(173,168,182,0.5);
@@ -1095,44 +1089,6 @@ display: block;
       letter-spacing: 0.02em;
     }
 
-    /* ── Large desktop: comfortable centred card ── */
-    @media (min-width: 900px) {
-      .page-wrap { align-items: center; min-height: 100vh; padding: 40px 20px; }
-      .app { width: 100%;
-  max-width: 900px; min-height: unset; }
-    }
-
-/* ── MAKE APP WIDER (SAFE) ── */
-@media (min-width: 600px) {
-  .app {
-    max-width: 100%;
-    border-radius: 20px;
-    height: auto;
-  }
-
-  html, body {
-    overflow-x: hidden;
-    overflow-y: auto;
-    height: auto;
-  }
-
-  .page-wrap {
-    padding: 32px 20px;
-    align-items: flex-start;
-  }
-}
-
-@media (min-width: 900px) {
-  .app {
-    width: 100%;
-  max-width: 100%; /* main change */
-  }
-
-  .page-wrap {
-    align-items: center;
-    padding: 40px 20px;
-  }
-}
 input:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -1317,9 +1273,7 @@ select:focus {
   color: #eff8e2;
 }
 
-.page-wrap {
-  min-height: 100dvh; /* ADD THIS */
-}
+/* .page-wrap height is set in the main block above */
 
 
 
@@ -1493,10 +1447,13 @@ select:focus {
     .chart-wrap {
       margin: 0 clamp(12px,4vw,20px) clamp(10px,3vw,14px);
       background: #2d0a3d;
-      border-radius: 16px;
-      padding: clamp(12px,3.5vw,18px);
+      border-radius: 14px;
+      padding: 12px 14px;
       border: 1px solid rgba(239,248,226,0.1);
       flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
     .chart-title {
       font-size: clamp(10px,2.5vw,11px);
@@ -1504,29 +1461,45 @@ select:focus {
       color: rgba(239,248,226,0.35);
       text-transform: uppercase;
       letter-spacing: 0.07em;
-      margin-bottom: 12px;
     }
-    /* chart-vals: value labels in their own row ABOVE bars */
-    .chart-vals {
+    /* Compact inline row per type */
+    .chart-row {
       display: flex;
+      align-items: center;
       gap: 8px;
-      margin-bottom: 6px;
     }
-    .chart-vals .chart-val {
+    .chart-row-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(239,248,226,0.45);
+      width: 50px;
+      flex-shrink: 0;
+    }
+    .chart-row-bar-bg {
       flex: 1;
-      text-align: center;
+      height: 7px;
+      border-radius: 99px;
+      background: rgba(239,248,226,0.08);
+      overflow: hidden;
     }
-    .chart-bars { display: flex; gap: 8px; align-items: flex-end; height: 80px; }
-    .chart-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; justify-content: flex-end; }
-    .chart-bar {
-      width: 100%;
-      border-radius: 4px 4px 0 0;
-      transition: height 0.4s ease;
-      min-height: 3px;
+    .chart-row-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.5s cubic-bezier(0.22,1,0.36,1);
+      width: 0%;
     }
-    .chart-bar-sq { background: rgba(206,207,199,0.75); }
-    .chart-bar-cu { background: rgba(87,50,128,0.85); }
-    .chart-lbl { font-size: 11px; color: rgba(239,248,226,0.4); }
+    .chart-row-bar-fill.sq { background: rgba(206,207,199,0.7); }
+    .chart-row-bar-fill.cu { background: rgba(184,212,92,0.75); }
+    .chart-row-pct {
+      font-size: 12px;
+      font-weight: 700;
+      color: #eff8e2;
+      width: 34px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+    /* keep old selectors harmless */
+    .chart-vals, .chart-bars, .chart-col, .chart-bar, .chart-bar-sq, .chart-bar-cu, .chart-lbl { display: none !important; }
     .chart-val { font-size: 12px; font-weight: 600; color: #eff8e2; }
 
     /* ════════════════════════════════════
@@ -1878,7 +1851,7 @@ select:focus {
        WELCOME SCREEN
     ════════════════════════════════════════════════ */
     #s-welcome {
-      min-height: 100dvh;
+      min-height: 0;
       justify-content: center;
       align-items: center;
       padding: 32px 24px;
@@ -1982,7 +1955,7 @@ select:focus {
       overflow: hidden;
       background: linear-gradient(145deg, rgba(100,40,150,0.5) 0%, rgba(55,10,80,0.6) 100%);
       border: 1px solid rgba(184,212,92,0.18);
-      box-shadow: 0 0 0 1px rgba(87,50,128,0.3), 0 16px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(184,212,92,0.2);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(184,212,92,0.2);
     }
     .dash-header::before {
       content: '';
@@ -2125,6 +2098,401 @@ select:focus {
       font-size: 13px;
     }
 
+    /* ── Daily Goal Card ── */
+    .daily-goal-card {
+      background: rgba(45,10,61,0.6);
+      border: 1px solid rgba(184,212,92,0.15);
+      border-radius: 16px;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .daily-goal-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .daily-goal-label {
+      font-size: clamp(12px,2.8vw,13px);
+      font-weight: 700;
+      color: rgba(239,248,226,0.7);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .daily-goal-count {
+      font-size: clamp(12px,2.8vw,13px);
+      font-weight: 700;
+      color: #B8D45C;
+    }
+    .daily-goal-bar-bg {
+      height: 8px;
+      border-radius: 99px;
+      background: rgba(87,50,128,0.35);
+      overflow: hidden;
+    }
+    .daily-goal-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, #7BA832, #B8D45C);
+      transition: width 0.6s cubic-bezier(0.22,1,0.36,1);
+      min-width: 0;
+    }
+    .daily-goal-bar-fill.done {
+      background: linear-gradient(90deg, #B8D45C, #d4f07a);
+    }
+    .daily-goal-done-badge {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      background: rgba(123,168,50,0.18);
+      border: 1px solid rgba(184,212,92,0.3);
+      border-radius: 10px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #B8D45C;
+    }
+    .daily-goal-done-badge.show { display: flex; }
+    .goal-edit-row {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      margin-top: 2px;
+    }
+    .goal-edit-row.open { display: flex; }
+    .goal-edit-input {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: 9px;
+      border: 1.5px solid rgba(184,212,92,0.25);
+      background: rgba(87,50,128,0.15);
+      color: #eff8e2;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+    }
+    .goal-edit-input:focus { border-color: #B8D45C; }
+    .goal-edit-save {
+      padding: 8px 14px;
+      border-radius: 9px;
+      border: none;
+      background: #7BA832;
+      color: #eff8e2;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+    }
+    .goal-edit-btn {
+      background: none;
+      border: none;
+      color: rgba(184,212,92,0.45);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      padding: 2px 4px;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    .goal-edit-btn:hover { color: #B8D45C; }
+
+    /* ── Improvement / Motivation Banner ── */
+    .improve-banner {
+      display: none;
+      border-radius: 14px;
+      padding: 14px 16px;
+      align-items: center;
+      gap: 12px;
+      background: rgba(45,10,61,0.6);
+      border: 1px solid rgba(184,212,92,0.18);
+      animation: fbIn 0.35s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    .improve-banner.show { display: flex; }
+    .improve-banner-icon {
+      font-size: 26px;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    .improve-banner-text { flex: 1; }
+    .improve-banner-title {
+      font-size: clamp(13px,3vw,14px);
+      font-weight: 700;
+      color: #B8D45C;
+      line-height: 1.3;
+    }
+    .improve-banner-sub {
+      font-size: clamp(11px,2.5vw,12px);
+      color: rgba(239,248,226,0.45);
+      margin-top: 2px;
+    }
+
+    /* ── Milestone Toast ── */
+    @keyframes milestoneIn {
+      0%   { opacity:0; transform: translateY(40px) scale(0.9); }
+      60%  { transform: translateY(-6px) scale(1.02); }
+      100% { opacity:1; transform: translateY(0) scale(1); }
+    }
+    @keyframes milestoneOut {
+      from { opacity:1; transform: translateY(0) scale(1); }
+      to   { opacity:0; transform: translateY(30px) scale(0.92); }
+    }
+    #milestoneToast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      min-width: 280px;
+      max-width: 360px;
+      background: linear-gradient(135deg, rgba(100,40,150,0.97) 0%, rgba(30,5,50,0.98) 100%);
+      border: 1px solid rgba(184,212,92,0.4);
+      border-radius: 18px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 40px rgba(184,212,92,0.12);
+      padding: 18px 20px;
+      display: none;
+      align-items: center;
+      gap: 14px;
+      pointer-events: none;
+    }
+    #milestoneToast.show {
+      display: flex;
+      animation: milestoneIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    #milestoneToast.hide {
+      animation: milestoneOut 0.35s ease-in both;
+    }
+    .milestone-icon { font-size: 32px; flex-shrink: 0; line-height: 1; }
+    .milestone-text {}
+    .milestone-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: rgba(184,212,92,0.6);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 3px;
+    }
+    .milestone-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #eff8e2;
+      line-height: 1.2;
+    }
+    .milestone-sub {
+      font-size: 12px;
+      color: rgba(239,248,226,0.5);
+      margin-top: 3px;
+    }
+
+    /* ── Milestones Section on Profile ── */
+    .milestones-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
+    }
+    .milestone-badge {
+      background: rgba(45,10,61,0.6);
+      border: 1px solid rgba(184,212,92,0.1);
+      border-radius: 14px;
+      padding: 14px 12px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      opacity: 0.35;
+      filter: grayscale(0.6);
+      transition: all 0.25s;
+    }
+    .milestone-badge.unlocked {
+      opacity: 1;
+      filter: none;
+      border-color: rgba(184,212,92,0.3);
+      background: rgba(60,20,80,0.7);
+    }
+    .milestone-badge-icon { font-size: 26px; line-height: 1; }
+    .milestone-badge-name {
+      font-size: 11px;
+      font-weight: 700;
+      color: rgba(239,248,226,0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .milestone-badge.unlocked .milestone-badge-name { color: #B8D45C; }
+    .milestone-badge-val {
+      font-size: 10px;
+      color: rgba(239,248,226,0.3);
+    }
+    .milestone-badge.unlocked .milestone-badge-val { color: rgba(239,248,226,0.5); }
+
+    /* ══════════════════════════════════════════════
+       NEW: XP + LEVEL PILL
+    ══════════════════════════════════════════════ */
+    .xp-pill {
+      display: none;
+      background: linear-gradient(135deg, rgba(87,50,128,0.7), rgba(50,20,80,0.8));
+      border: 1px solid rgba(184,212,92,0.25);
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: clamp(10px,2.2vw,12px);
+      font-weight: 700;
+      color: #B8D45C;
+      white-space: nowrap;
+      cursor: default;
+    }
+    .xp-pill.active { display: block; }
+
+    /* XP Float animation */
+    @keyframes xpFloat {
+      0%   { opacity: 1; transform: translateY(0) scale(1); }
+      80%  { opacity: 0.8; transform: translateY(-28px) scale(1.1); }
+      100% { opacity: 0; transform: translateY(-40px) scale(0.9); }
+    }
+    .xp-float {
+      position: absolute;
+      pointer-events: none;
+      font-size: 13px;
+      font-weight: 800;
+      color: #B8D45C;
+      text-shadow: 0 0 10px rgba(184,212,92,0.6);
+      animation: xpFloat 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      z-index: 100;
+      white-space: nowrap;
+    }
+
+    /* ── Day Streak Pulse (dashboard pill) ── */
+    @keyframes streakPulse {
+      0%   { box-shadow: 0 0 0 0 rgba(255,150,30,0.5); transform: scale(1); }
+      50%  { box-shadow: 0 0 0 8px rgba(255,150,30,0); transform: scale(1.06); }
+      100% { box-shadow: 0 0 0 0 rgba(255,150,30,0); transform: scale(1); }
+    }
+    .streak-pulse { animation: streakPulse 0.6s ease-out; }
+
+    /* ── NEW BEST glow on results pb row ── */
+    .pb-new-best {
+      color: #B8D45C !important;
+      text-shadow: 0 0 12px rgba(184,212,92,0.7), 0 0 30px rgba(184,212,92,0.3);
+      position: relative;
+    }
+    .pb-new-label {
+      display: inline-block;
+      background: linear-gradient(135deg, #7BA832, #B8D45C);
+      color: #0d0015;
+      font-size: 9px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 6px;
+      letter-spacing: 0.06em;
+      margin-left: 4px;
+      vertical-align: middle;
+      text-shadow: none;
+    }
+
+    /* ── Session Feedback Nudge (above results buttons) ── */
+    .session-nudge {
+      display: none;
+      border-radius: 12px;
+      padding: 12px 16px;
+      align-items: center;
+      gap: 10px;
+      background: rgba(45,10,61,0.7);
+      border: 1px solid rgba(184,212,92,0.15);
+      font-size: clamp(12px,2.8vw,13px);
+      color: rgba(239,248,226,0.75);
+      font-weight: 500;
+      margin: 8px clamp(12px,4vw,20px) 0;
+    }
+    .session-nudge.show { display: flex; }
+    .session-nudge-icon { font-size: 20px; flex-shrink: 0; }
+
+    /* ── Daily Challenge Button ── */
+    .daily-challenge-btn {
+      width: 100%;
+      padding: 14px 18px;
+      border-radius: 14px;
+      border: 1px solid rgba(184,212,92,0.25);
+      background: linear-gradient(135deg, rgba(60,20,90,0.8), rgba(40,10,60,0.9));
+      color: #eff8e2;
+      font-size: clamp(13px,3vw,15px);
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      transition: all 0.2s cubic-bezier(0.22,1,0.36,1);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      margin-bottom: 2px;
+    }
+    .daily-challenge-btn:hover { border-color: rgba(184,212,92,0.45); transform: translateY(-1px); }
+    .daily-challenge-btn:active { transform: scale(0.97); }
+    .daily-challenge-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .daily-challenge-left { display: flex; align-items: center; gap: 10px; }
+    .daily-challenge-icon { font-size: 20px; }
+    .daily-challenge-info {}
+    .daily-challenge-title { font-size: 13px; font-weight: 700; color: #eff8e2; text-align:left; }
+    .daily-challenge-sub { font-size: 11px; color: rgba(239,248,226,0.45); text-align:left; margin-top:1px; }
+    .daily-challenge-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      flex-shrink: 0;
+    }
+    .daily-challenge-badge.avail { background: rgba(123,168,50,0.2); color: #B8D45C; border: 1px solid rgba(184,212,92,0.3); }
+    .daily-challenge-badge.done  { background: rgba(87,50,128,0.3);  color: rgba(239,248,226,0.4); }
+
+    /* ── Weakness Practice Button ── */
+    .weakness-practice-btn {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,140,80,0.2);
+      background: rgba(40,10,30,0.7);
+      color: rgba(239,248,226,0.8);
+      font-size: clamp(12px,2.8vw,13px);
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      transition: all 0.2s cubic-bezier(0.22,1,0.36,1);
+    }
+    .weakness-practice-btn:hover { border-color: rgba(255,140,80,0.4); }
+    .weakness-practice-btn:active { transform: scale(0.97); }
+    .weakness-practice-btn .wp-left { display:flex; align-items:center; gap:8px; }
+    .weakness-practice-btn .wp-count { font-size:10px; background: rgba(255,100,50,0.15); color: rgba(255,180,100,0.8); border-radius:20px; padding:2px 8px; border:1px solid rgba(255,140,80,0.2); }
+
+    /* XP display in dashboard stats area */
+    .dash-xp-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(45,10,61,0.5);
+      border: 1px solid rgba(184,212,92,0.1);
+      border-radius: 14px;
+      padding: 12px 16px;
+      justify-content: space-between;
+    }
+    .dash-xp-left { display: flex; align-items: center; gap: 10px; }
+    .dash-xp-level {
+      font-size: clamp(20px,5vw,26px);
+      font-weight: 800;
+      color: #B8D45C;
+      line-height: 1;
+    }
+    .dash-xp-info {}
+    .dash-xp-title { font-size: 12px; font-weight: 700; color: rgba(239,248,226,0.6); }
+    .dash-xp-sub   { font-size: 11px; color: rgba(239,248,226,0.35); margin-top: 1px; }
+    .dash-xp-bar-wrap { flex: 1; max-width: 120px; }
+    .dash-xp-bar-bg { height: 6px; border-radius: 99px; background: rgba(87,50,128,0.4); overflow: hidden; }
+    .dash-xp-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #7BA832, #B8D45C); transition: width 0.6s cubic-bezier(0.22,1,0.36,1); }
+
     /* Profile edit panel */
     .dash-profile-panel {
       background: rgba(45,10,61,0.6);
@@ -2176,7 +2544,7 @@ select:focus {
       overflow: hidden;
       background: linear-gradient(145deg, rgba(87,50,128,0.5) 0%, rgba(45,10,61,0.7) 100%);
       border: 1px solid rgba(184,212,92,0.18);
-      box-shadow: 0 0 0 1px rgba(87,50,128,0.3), 0 16px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(184,212,92,0.2);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(184,212,92,0.2);
       display: flex;
       align-items: center;
       gap: 18px;
@@ -2339,6 +2707,182 @@ select:focus {
       white-space: nowrap;
     }
     .profile-danger-btn:hover { background: rgba(202,60,37,0.25); color: #ff6b4a; }
+    /* ════════════════════════════════════
+       TIMED MODE DURATION SLIDER
+    ════════════════════════════════════ */
+    .timed-slider-wrap {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .timed-slider-wrap.visible { display: flex; }
+    .timed-slider-labels {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .timed-slider-label {
+      font-size: 11px;
+      color: rgba(239,248,226,0.35);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+    .timed-slider-val {
+      font-size: 22px;
+      font-weight: 800;
+      color: #B8D45C;
+      text-shadow: 0 0 16px rgba(184,212,92,0.4);
+      letter-spacing: -0.5px;
+    }
+    .timed-range {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      background: rgba(239,248,226,0.12);
+      border-radius: 99px;
+      outline: none;
+      cursor: pointer;
+    }
+    .timed-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: #B8D45C;
+      border: 3px solid #1a0035;
+      box-shadow: 0 0 10px rgba(184,212,92,0.6);
+      cursor: pointer;
+      margin-top: -8px;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .timed-range::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+      box-shadow: 0 0 18px rgba(184,212,92,0.8);
+    }
+    .timed-range::-webkit-slider-runnable-track {
+      height: 6px; border-radius: 99px;
+    }
+    .timed-range::-moz-range-thumb {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: #B8D45C;
+      border: 3px solid #1a0035;
+      box-shadow: 0 0 10px rgba(184,212,92,0.6);
+      cursor: pointer;
+    }
+    .timed-range-ticks {
+      display: flex;
+      justify-content: space-between;
+      padding: 0 4px;
+    }
+    .timed-tick {
+      font-size: 10px;
+      color: rgba(239,248,226,0.25);
+      font-weight: 600;
+      flex: 1;
+      text-align: center;
+    }
+    .timed-tick.active-tick { color: #B8D45C; }
+
+    /* ════════════════════════════════════
+       TIMED MODE — IN-QUIZ COUNTDOWN BAR
+    ════════════════════════════════════ */
+    .timed-mode-bar {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      padding: 10px 16px 12px;
+      background: rgba(50,10,75,0.4);
+      border-bottom: 1px solid rgba(184,212,92,0.12);
+      flex-shrink: 0;
+    }
+    .timed-mode-bar.visible { display: flex; }
+    .timed-mode-bar-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .timed-mode-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(239,248,226,0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .timed-mode-qcount {
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(239,248,226,0.5);
+    }
+    .timed-mode-countdown {
+      font-size: 24px;
+      font-weight: 800;
+      color: #B8D45C;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.5px;
+      text-shadow: 0 0 20px rgba(184,212,92,0.4);
+      transition: color 0.3s;
+    }
+    .timed-mode-countdown.urgent { color: #ff7070; text-shadow: 0 0 20px rgba(255,112,112,0.5); }
+    .timed-mode-track {
+      height: 8px;
+      background: rgba(239,248,226,0.1);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .timed-mode-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, #B8D45C, #7BA832);
+      transition: width 0.1s linear;
+    }
+    .timed-mode-fill.urgent { background: linear-gradient(90deg, #ff7070, #cc4444); }
+
+    /* ════════════════════════════════════
+       TIMED RESULTS
+    ════════════════════════════════════ */
+    .timed-result-hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: clamp(18px,5vw,28px) 0 clamp(10px,3vw,16px);
+      flex-shrink: 0;
+    }
+    .timed-result-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(239,248,226,0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .timed-result-num {
+      font-size: clamp(52px, 15vw, 72px);
+      font-weight: 800;
+      color: #B8D45C;
+      letter-spacing: -2px;
+      line-height: 1;
+      text-shadow: 0 0 30px rgba(184,212,92,0.6), 0 0 80px rgba(184,212,92,0.2);
+    }
+    .timed-result-sub {
+      font-size: clamp(13px, 3.2vw, 15px);
+      color: rgba(239,248,226,0.45);
+      margin-top: 2px;
+    }
+    .timed-stat-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: clamp(8px, 2.5vw, 12px);
+      margin: 0 clamp(12px,4vw,20px) clamp(12px,3.5vw,18px);
+      flex-shrink: 0;
+    }
+    @keyframes timedNumIn {
+      from { opacity:0; transform: scale(0.4) translateY(12px); }
+      to   { opacity:1; transform: scale(1) translateY(0); }
+    }
+    .timed-result-num { animation: timedNumIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 0.1s; }
+
   </style>
 </head>
 <body>
@@ -2386,6 +2930,47 @@ select:focus {
       </div>
       <div class="dash-header-actions">
         <button class="dash-start-btn" onclick="show('s-setup')">Start Practice →</button>
+      </div>
+    </div>
+
+    <!-- Improvement Banner (shown when user beats their avg) -->
+    <div class="improve-banner" id="improveBanner">
+      <div class="improve-banner-icon" id="improveBannerIcon">📈</div>
+      <div class="improve-banner-text">
+        <div class="improve-banner-title" id="improveBannerTitle">You improved!</div>
+        <div class="improve-banner-sub" id="improveBannerSub"></div>
+      </div>
+    </div>
+
+    <!-- Daily Goal Card -->
+    <div class="daily-goal-card">
+      <div class="daily-goal-top">
+        <div class="daily-goal-label">🎯 Daily Goal <button class="goal-edit-btn" onclick="toggleGoalEdit()">edit</button></div>
+        <div class="daily-goal-count"><span id="goalDoneCount">0</span> / <span id="goalTargetCount">20</span> Qs</div>
+      </div>
+      <div class="daily-goal-bar-bg">
+        <div class="daily-goal-bar-fill" id="dailyGoalFill" style="width:0%"></div>
+      </div>
+      <div class="daily-goal-done-badge" id="goalDoneBadge">🏅 Daily goal complete!</div>
+      <div class="goal-edit-row" id="goalEditRow">
+        <input type="number" class="goal-edit-input" id="goalEditInput" min="5" max="200" step="5" placeholder="e.g. 20">
+        <button class="goal-edit-save" onclick="saveGoalEdit()">Save</button>
+      </div>
+    </div>
+
+    <!-- XP / Level Row -->
+    <div class="dash-xp-row">
+      <div class="dash-xp-left">
+        <div class="dash-xp-level" id="dashXpLevel">Lv 1</div>
+        <div class="dash-xp-info">
+          <div class="dash-xp-title" id="dashXpTitle">Beginner</div>
+          <div class="dash-xp-sub" id="dashXpSub">0 XP total</div>
+        </div>
+      </div>
+      <div class="dash-xp-bar-wrap">
+        <div class="dash-xp-bar-bg">
+          <div class="dash-xp-bar-fill" id="dashXpBar" style="width:0%"></div>
+        </div>
       </div>
     </div>
 
@@ -2488,6 +3073,10 @@ select:focus {
       </div>
     </div>
 
+    <!-- Milestones -->
+    <div class="dash-section-title">Milestones</div>
+    <div class="milestones-grid" id="milestonesGrid"></div>
+
     <!-- Recent sessions -->
     <div class="dash-section-title">Session history</div>
     <div class="profile-sessions" id="profileSessionList">
@@ -2529,7 +3118,20 @@ select:focus {
 
     <div class="bento-grid">
 
-      <!-- RANGE — left cell -->
+      <!-- QUESTIONS + TYPE — left cell -->
+      <div class="bento-cell">
+        <div class="bento-label">❓ Questions</div>
+        <input type="number" class="num-inp bento-q-inp" id="qCount" value="10" min="1">
+        <div class="bento-label" style="margin-top:12px;">🔢 Type</div>
+        <div class="type-row">
+          <button class="type-btn" id="btn-squares" onclick="setType('squares')">x²</button>
+          <button class="type-btn" id="btn-cubes" onclick="setType('cubes')">x³</button>
+          <button class="type-btn active" id="btn-both" onclick="setType('both')">x²/x³</button>
+          <button class="type-btn" id="btn-multiplication" onclick="setType('multiplication')">× Mult</button>
+        </div>
+      </div>
+
+      <!-- RANGE — right cell -->
       <div class="bento-cell" id="rangeCell">
         <div class="bento-label">📐 Number range</div>
         <div class="diff-row">
@@ -2550,7 +3152,7 @@ select:focus {
         </div>
       </div>
 
-      <!-- MULTIPLICATION CONFIG — left cell (shown when multiplication selected) -->
+      <!-- MULTIPLICATION CONFIG — right cell (shown when multiplication selected) -->
       <div class="bento-cell" id="tablesCell" style="display:none;">
         <div class="bento-label">✖️ Multiplication</div>
         <div class="timer-grid" id="multTypeGrid">
@@ -2582,34 +3184,9 @@ select:focus {
         </div>
       </div>
 
-      <!-- QUESTIONS + TYPE — right cell -->
-      <div class="bento-cell">
-        <div class="bento-label">❓ Questions</div>
-        <input type="number" class="num-inp bento-q-inp" id="qCount" value="10" min="1">
-        <div class="bento-label" style="margin-top:12px;">🔢 Type</div>
-        <div class="type-row">
-          <button class="type-btn" id="btn-squares" onclick="setType('squares')">x²</button>
-          <button class="type-btn" id="btn-cubes" onclick="setType('cubes')">x³</button>
-          <button class="type-btn active" id="btn-both" onclick="setType('both')">x²/x³</button>
-          <button class="type-btn" id="btn-multiplication" onclick="setType('multiplication')">× Mult</button>
-        </div>
-      </div>
-
       <!-- TIMER — left cell -->
       <div class="bento-cell">
         <div class="bento-label">⏱ Timer</div>
-
-        <!-- FALLBACK dropdown (kept for reference, disabled):
-        <div class="custom-select" id="timerDropdown">
-          <div class="select-trigger" id="timerTrigger">7s timer</div>
-          <div class="select-menu" id="timerMenu">
-            <div class="select-option" data-value="off">Off</div>
-            <div class="select-option active" data-value="fixed">7s timer</div>
-            <div class="select-option" data-value="custom">Custom</div>
-            <div class="select-option" data-value="stopwatch">Stopwatch</div>
-          </div>
-        </div>
-        -->
 
         <!-- MINI GRID TIMER SELECTOR -->
         <div class="timer-grid" id="timerGrid">
@@ -2617,8 +3194,32 @@ select:focus {
           <button class="timer-opt active" data-value="fixed" onclick="setTimerOpt(this)">7s</button>
           <button class="timer-opt" data-value="custom" onclick="setTimerOpt(this)">Custom</button>
           <button class="timer-opt" data-value="stopwatch" onclick="setTimerOpt(this)">⏱ Watch</button>
+          <button class="timer-opt" data-value="timed" onclick="setTimerOpt(this)" style="grid-column:1/-1;">⚡ Timed Mode</button>
         </div>
         <input type="number" id="customTimerInput" placeholder="Seconds (e.g. 10)" style="display:none;width:100%;padding:8px;border-radius:8px;background:#23022e;color:#eff8e2;border:1px solid rgba(239,248,226,0.2);font-family:'Inter',sans-serif;margin-top:4px;">
+
+        <!-- TIMED MODE: duration slider -->
+        <div class="timed-slider-wrap" id="timedSliderWrap">
+          <div class="timed-slider-labels">
+            <span class="timed-slider-label">Duration</span>
+            <span class="timed-slider-val" id="timedSliderVal">60s</span>
+          </div>
+          <input
+            type="range"
+            class="timed-range"
+            id="timedDurationSlider"
+            min="0" max="5" step="1" value="1"
+            oninput="onTimedSliderChange(this)"
+          >
+          <div class="timed-range-ticks">
+            <span class="timed-tick" data-idx="0">30s</span>
+            <span class="timed-tick active-tick" data-idx="1">60s</span>
+            <span class="timed-tick" data-idx="2">90s</span>
+            <span class="timed-tick" data-idx="3">2m</span>
+            <span class="timed-tick" data-idx="4">3m</span>
+            <span class="timed-tick" data-idx="5">5m</span>
+          </div>
+        </div>
       </div>
 
       <!-- INPUT MODE — right cell -->
@@ -2648,7 +3249,7 @@ select:focus {
       <div class="bento-cell">
         <div class="bento-label">🎮 Gameplay</div>
         <div class="bento-tog">
-          <span class="bento-tog-label">Lives<span class="bento-tog-sub">3 lives mode</span></span>
+          <span class="bento-tog-label">Survival<span class="bento-tog-sub">3 lives </span></span>
           <label class="toggle"><input type="checkbox" id="livesTog"><span class="tslider"></span></label>
         </div>
         <div class="bento-tog">
@@ -2687,6 +3288,23 @@ select:focus {
 
     </div><!-- .bento-grid -->
 
+    <!-- Daily Challenge + Weakness mode quick-launch -->
+    <button class="daily-challenge-btn" id="dailyChallengeBtn" onclick="startDailyChallenge()">
+      <div class="daily-challenge-left">
+        <div class="daily-challenge-icon">🗓️</div>
+        <div class="daily-challenge-info">
+          <div class="daily-challenge-title">Daily Challenge</div>
+          <div class="daily-challenge-sub">10 mixed Qs · resets midnight</div>
+        </div>
+      </div>
+      <span class="daily-challenge-badge avail" id="dailyChallengeBadge">Available</span>
+    </button>
+
+    <button class="weakness-practice-btn" id="weaknessPracticeBtn" onclick="startWeaknessPractice()">
+      <div class="wp-left">⚠️ <span>Focus on weak numbers</span></div>
+      <span class="wp-count" id="weakCountBadge">0 weak</span>
+    </button>
+
     <button class="bento-start" onclick="startTest()">Start test →</button>
   </div>
 
@@ -2701,6 +3319,7 @@ select:focus {
       </div>
       <div class="score-pill" id="scorePill">Score: 0</div>
       <div class="streak-pill" id="streakPill">🔥 1</div>
+      <div class="xp-pill" id="xpPill">Lv 1</div>
       <div class="lives-pill" id="livesPill" style="display:none;">❤️❤️❤️</div>
     </div>
     <button class="back-btn" onclick="goHome()" title="Home" style="flex-shrink:0;">
@@ -2714,6 +3333,19 @@ select:focus {
       <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
     </div>
 </div>
+
+    <!-- TIMED MODE: big countdown bar (shown only in timed mode) -->
+    <div class="timed-mode-bar" id="timedModeBar">
+      <div class="timed-mode-bar-top">
+        <span class="timed-mode-label">⚡ Timed Mode</span>
+        <span class="timed-mode-qcount" id="timedQCount">0 answered</span>
+        <span class="timed-mode-countdown" id="timedCountdown">60s</span>
+      </div>
+      <div class="timed-mode-track">
+        <div class="timed-mode-fill" id="timedFill" style="width:100%"></div>
+      </div>
+    </div>
+
 <div class="setup-body">
 <div class="top-content">
 
@@ -2817,7 +3449,7 @@ select:focus {
   <!-- SAME HEADER STYLE -->
   <div class="setup-header">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
-      <div class="res-title">Test complete</div>
+      <div class="res-title" id="resultsTitle">Test complete</div>
       <button class="back-btn" onclick="goHome()" title="Home">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9.5z"/>
@@ -2830,31 +3462,52 @@ select:focus {
   <!-- SAME BODY STYLE -->
   <div class="setup-body">
 
-    <div class="score-circle">
+    <!-- NORMAL mode score -->
+    <div class="score-circle" id="normalScoreSection">
       <div class="big-pct" id="resPct">0%</div>
       <div class="big-sub" id="resSub">0 of 0 correct</div>
+    </div>
+
+    <!-- TIMED mode score (hidden by default) -->
+    <div class="timed-result-hero" id="timedScoreSection" style="display:none;">
+      <div class="timed-result-label">Questions answered</div>
+      <div class="timed-result-num" id="timedResTotal">0</div>
+      <div class="timed-result-sub" id="timedResSub">— correct · — wrong</div>
+    </div>
+
+    <!-- Timed stats row (hidden by default) -->
+    <div class="timed-stat-row" id="timedStatRow" style="display:none;">
+      <div class="stat-c">
+        <div class="stat-v sv-ok" id="timedResCorrect">0</div>
+        <div class="stat-l">Correct</div>
+      </div>
+      <div class="stat-c">
+        <div class="stat-v sv-no" id="timedResWrong">0</div>
+        <div class="stat-l">Wrong</div>
+      </div>
+      <div class="stat-c">
+        <div class="stat-v" style="color:#ada8b6;" id="timedResAcc">0%</div>
+        <div class="stat-l">Accuracy</div>
+      </div>
     </div>
 
     <div class="pb-row">
       <div class="pb-c"><div class="pb-v" id="pbBest">—</div><div class="pb-l">Best %</div></div>
       <div class="pb-c"><div class="pb-v" id="pbStreak">—</div><div class="pb-l">Best Streak</div></div>
+      <div class="pb-c"><div class="pb-v" id="pbXP">—</div><div class="pb-l">Total XP</div></div>
     </div>
 
     <div class="chart-wrap" id="chartWrap">
-      <div class="chart-title">Accuracy — Squares vs Cubes</div>
-      <div class="chart-vals">
-        <div class="chart-val" id="chartSqVal">—</div>
-        <div class="chart-val" id="chartCuVal">—</div>
+      <div class="chart-title">Squares vs Cubes accuracy</div>
+      <div class="chart-row">
+        <span class="chart-row-label">Squares</span>
+        <div class="chart-row-bar-bg"><div class="chart-row-bar-fill sq" id="chartSqBar"></div></div>
+        <span class="chart-row-pct" id="chartSqVal">—</span>
       </div>
-      <div class="chart-bars">
-        <div class="chart-col">
-          <div class="chart-bar chart-bar-sq" id="chartSqBar" style="height:0px"></div>
-          <div class="chart-lbl">Squares</div>
-        </div>
-        <div class="chart-col">
-          <div class="chart-bar chart-bar-cu" id="chartCuBar" style="height:0px"></div>
-          <div class="chart-lbl">Cubes</div>
-        </div>
+      <div class="chart-row">
+        <span class="chart-row-label">Cubes</span>
+        <div class="chart-row-bar-bg"><div class="chart-row-bar-fill cu" id="chartCuBar"></div></div>
+        <span class="chart-row-pct" id="chartCuVal">—</span>
       </div>
     </div>
 
@@ -2885,23 +3538,10 @@ select:focus {
     </div>
 
     <!-- COLLAPSIBLE HISTORY -->
-    <div id="eraseWrap" style="text-align:center;margin:-8px 0 4px;">
-      <button class="erase-btn" id="eraseBtn" onclick="eraseHistoryAsk()">🗑 erase history</button>
-      <span id="eraseConfirm" style="display:none;font-size:11px;color:rgba(239,248,226,0.5);gap:6px;align-items:center;justify-content:center;">
-        Sure? <button class="erase-btn" style="color:#ff6b6b;display:inline;" onclick="eraseHistoryConfirm()">Yes, erase</button>
-        <button class="erase-btn" style="display:inline;" onclick="eraseHistoryCancel()">Cancel</button>
-      </span>
-    </div>
-    <div class="review-wrap" id="historyWrap">
-      <div class="history-toggle" onclick="toggleHistory()">
-        <span class="history-toggle-label">📋 Result history</span>
-        <span class="history-toggle-arrow" id="historyArrow">▼</span>
-      </div>
-      <div class="history-collapsible" id="historyCollapsible">
-        <div style="border-top:1px solid rgba(239,248,226,0.1);">
-          <div class="review-scroll" id="historyList"><div class="history-empty">No history yet</div></div>
-        </div>
-      </div>
+
+    <div class="session-nudge" id="sessionNudge">
+      <span class="session-nudge-icon" id="sessionNudgeIcon">💪</span>
+      <span id="sessionNudgeText">You were so close!</span>
     </div>
 
     <div class="res-btns">
@@ -2929,6 +3569,14 @@ let stopwatchStart=null;
 let timerMode = 'fixed';
 let duration = 7;
 const CIRC=188.5;
+
+// ── TIMED MODE state ──
+let isTimedMode = false;
+let timedDuration = 60;          // seconds
+let timedInterval = null;        // rAF handle
+let timedStartTime = null;
+let timedQAnswered = 0;
+const TIMED_DURATIONS = [30, 60, 90, 120, 180, 300]; // slider steps
 
 // ── new feature state ──
 let streak = 0, bestStreak = 0;
@@ -3108,11 +3756,26 @@ function setMultType(btn){
   }
 
   function startTest(){
-  qs=genQs();
-  if(!qs.length){ alert('No questions — check your range!'); return; }
+  isTimedMode = (timerMode === 'timed');
+
+  // In timed mode, generate a large pool of questions to cycle through
+  if(isTimedMode){
+    // generate big pool (200 questions), we'll cycle infinitely
+    const savedCount = document.getElementById('qCount').value;
+    document.getElementById('qCount').value = 200;
+    qs = genQs();
+    document.getElementById('qCount').value = savedCount;
+    if(!qs.length){ alert('No questions — check your range!'); return; }
+    // shuffle to start fresh
+    for(let i=qs.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [qs[i],qs[j]]=[qs[j],qs[i]]; }
+  } else {
+    qs=genQs();
+    if(!qs.length){ alert('No questions — check your range!'); return; }
+  }
 
   cur=0; score=0; results=[];
   streak=0; wrongQueue=[];retrySet=new Set();
+  timedQAnswered=0;
   instant    = document.getElementById('feedbackTog').checked;
   autoSub    = document.getElementById('autosubTog').checked;
   pickMode   = document.getElementById('pickModeTog').checked;
@@ -3125,17 +3788,33 @@ function setMultType(btn){
   updateLivesPill();
   document.getElementById('streakPill').classList.remove('active');
 
-  // ✅ NEW TIMER LOGIC
   const mode = timerMode;
   const custom = parseInt(document.getElementById('customTimerInput').value);
-
   timerMode = mode;
 
   if(mode === 'fixed') duration = 7;
   else if(mode === 'custom') duration = isNaN(custom) ? 7 : custom;
 
+  // Show/hide timed mode bar
+  const tmBar = document.getElementById('timedModeBar');
+  if(isTimedMode){
+    tmBar.classList.add('visible');
+    // hide per-question timer, progress bar
+    document.getElementById('timerZone').style.display = 'none';
+    document.getElementById('stopwatchZone').style.display = 'none';
+    // update q pill to show infinite
+    document.getElementById('qTotal').textContent = '∞';
+  } else {
+    tmBar.classList.remove('visible');
+  }
+
   show('s-test');
   loadQ();
+
+  // Start global timed countdown AFTER loadQ
+  if(isTimedMode){
+    startTimedCountdown();
+  }
 }
 
   /* ── Generate 4 plausible wrong answers ── */
@@ -3196,9 +3875,17 @@ function setMultType(btn){
 
   function loadQ(){
     clearTimer(); answered=false;
+
+    // In timed mode, cycle through question pool infinitely
+    if(isTimedMode && cur >= qs.length){
+      // reshuffle and restart pool
+      for(let i=qs.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [qs[i],qs[j]]=[qs[j],qs[i]]; }
+      cur = 0;
+    }
+
     const q=qs[cur], total=qs.length, sym=q.type==='square'?'²':'³';
-    document.getElementById('qNum').textContent   = String(cur+1).padStart(2,'0');
-    document.getElementById('qTotal').textContent = total;
+    document.getElementById('qNum').textContent = isTimedMode ? String(timedQAnswered+1) : String(cur+1).padStart(2,'0');
+    document.getElementById('qTotal').textContent = isTimedMode ? '∞' : total;
     const _sp=document.getElementById('scorePill'); _sp.textContent=`Score: ${score}`; _sp.classList.remove('pill-bump'); void _sp.offsetWidth; _sp.classList.add('pill-bump');
     document.getElementById('progFill').style.width  = `${(cur/total)*100}%`;
     const badge=document.getElementById('qBadge');
@@ -3235,8 +3922,8 @@ function setMultType(btn){
     // Animate ans zone
     const ansZone = document.querySelector('.ans-zone');
     if(ansZone){ ansZone.classList.remove('ans-zone-anim'); void ansZone.offsetWidth; ansZone.classList.add('ans-zone-anim'); }
-    document.getElementById('timerZone').style.display = (timerMode === 'fixed' || timerMode === 'custom') ? 'block' : 'none';
-    document.getElementById('stopwatchZone').style.display = timerMode === 'stopwatch' ? 'flex' : 'none';
+    document.getElementById('timerZone').style.display = (!isTimedMode && (timerMode === 'fixed' || timerMode === 'custom')) ? 'block' : 'none';
+    document.getElementById('stopwatchZone').style.display = (!isTimedMode && timerMode === 'stopwatch') ? 'flex' : 'none';
 
     if(pickMode){
       // PICK MODE
@@ -3343,6 +4030,7 @@ if(timerMode === 'stopwatch'){
   updateStreakPill();
 
   results.push({q:qs[cur], userAnswer:chosen, correct:isCorrect, timedOut:false});
+  if(isTimedMode) timedQAnswered++;
 
   const btns = document.querySelectorAll('.pick-btn');
   btns.forEach(btn => {
@@ -3365,12 +4053,12 @@ if(timerMode === 'stopwatch'){
 
   const pickType = document.getElementById('pickModeType')?.value || 'auto';
   const nb = document.getElementById('nextBtn');
-  if(pickType === 'manual'){
+  if(!isTimedMode && pickType === 'manual'){
     nb.style.display = 'block';
     nb.textContent = cur < qs.length-1 ? 'Next question →' : 'See results →';
   } else {
     nb.style.display = 'none';
-    setTimeout(() => nextQ(), 900);
+    setTimeout(() => nextQ(), isTimedMode ? 500 : 900);
   }
 }
 
@@ -3410,6 +4098,7 @@ function startTimer(){
       updateStreakPill();
 
       results.push({q, userAnswer:isNaN(val)?'—':val, correct, timedOut:true});
+      if(isTimedMode) timedQAnswered++;
 
       document.getElementById('ansInput').disabled = true;
       document.getElementById('checkBtn').disabled = true;
@@ -3473,6 +4162,7 @@ function startTimer(){
 
   updateStreakPill();
   results.push({q,userAnswer:val,correct,timedOut:false});
+  if(isTimedMode) timedQAnswered++;
 
   const input = document.getElementById('ansInput');
   input.disabled = true;
@@ -3494,33 +4184,47 @@ function startTimer(){
   const nb = document.getElementById('nextBtn');
 
   if(instant){
-    nb.style.display = 'block';
-    nb.textContent = cur < qs.length-1 ? 'Next question →' : 'See results →';
+    if(!isTimedMode){
+      nb.style.display = 'block';
+      nb.textContent = cur < qs.length-1 ? 'Next question →' : 'See results →';
+    }
 
     const fb = document.getElementById('fbBox');
     const sym = q.type==='square'?'²':'³';
     fb.style.display='block'; void fb.offsetWidth; fb.classList.add('visible');
     if(q.type==='table'){
-      fb.textContent = correct ? `Correct! ${q.n} × ${q.m} = ${q.answer}` : `Not quite — ${q.n} × ${q.m} = ${q.answer}. You said ${val}.`;
+      fb.textContent = correct ? `Correct! ${q.n} × ${q.m} = ${q.answer}` : `✗ ${q.n} × ${q.m} = ${q.answer}`;
     } else {
       fb.textContent = correct
-        ? (q.reverse ? `Correct! ${q.answer}${sym} → base is ${q.n}` : `Correct! ${q.n}${sym} = ${q.answer}`)
-        : (q.reverse ? `Not quite — the answer is ${q.n}. You said ${val}.` : `Not quite — ${q.n}${sym} = ${q.answer}. You said ${val}.`);
+        ? (q.reverse ? `✓ Base is ${q.n}` : `✓ ${q.n}${sym} = ${q.answer}`)
+        : (q.reverse ? `✗ Answer is ${q.n}` : `✗ ${q.n}${sym} = ${q.answer}`);
     }
     fb.className='fb-box '+(correct?'fb-ok':'fb-no');
+
+    if(isTimedMode){
+      setTimeout(() => { if(answered) nextQ(); }, 600);
+    }
   } else {
     btn.textContent = 'Next';
+    if(isTimedMode) setTimeout(() => { if(answered) nextQ(); }, 400);
   }
 
   // ✅ FIXED: independent auto submit
-  if(autoSub){
+  if(autoSub && !isTimedMode){
+    const delay = instant ? 900 : 0;
     setTimeout(() => {
       if(answered) nextQ();
-    }, instant ? 900 : 0);
+    }, delay);
   }
 }  function nextQ(){
     clearTimer();
     if(lives <= 0 && livesMode){ gameOver(); return; }
+    if(isTimedMode){
+      // In timed mode: keep going until time runs out
+      cur++;
+      loadQ();
+      return;
+    }
     if(cur < qs.length-1){
       cur++; loadQ();
     } else if(spacedMode && wrongQueue.length > 0){
@@ -3556,8 +4260,52 @@ function startTimer(){
   }
 
   function showResults(){
-    clearTimer(); clearStopwatch(); show('s-results'); setTimeout(()=>{ const bp=document.getElementById('bigPct'); if(bp){bp.classList.remove('big-pct-anim'); void bp.offsetWidth; bp.classList.add('big-pct-anim');} document.querySelectorAll('.stat-c').forEach((el,i)=>{ el.style.animation='none'; void el.offsetWidth; el.style.animation=''; el.style.animationDelay=`${0.15+i*0.07}s`; }); }, 50);
-    const total=results.length, wrong=total-score, pct=Math.round((score/total)*100);
+    clearTimer(); clearStopwatch(); clearTimedInterval(); show('s-results');
+    // Reset timed mode bar
+    document.getElementById('timedModeBar').classList.remove('visible');
+
+    setTimeout(()=>{ const bp=document.getElementById('bigPct'); if(bp){bp.classList.remove('big-pct-anim'); void bp.offsetWidth; bp.classList.add('big-pct-anim');} document.querySelectorAll('.stat-c').forEach((el,i)=>{ el.style.animation='none'; void el.offsetWidth; el.style.animation=''; el.style.animationDelay=`${0.15+i*0.07}s`; }); }, 50);
+
+    const total=results.length, wrong=total-score, pct=total>0?Math.round((score/total)*100):0;
+
+    // Toggle between normal and timed results view
+    const normalSection = document.getElementById('normalScoreSection');
+    const timedSection  = document.getElementById('timedScoreSection');
+    const timedStatRow  = document.getElementById('timedStatRow');
+    const normalStatRow = document.querySelector('.stat-row');
+    const pbRow         = document.querySelector('.pb-row');
+    const chartWrap     = document.getElementById('chartWrap');
+    const resTitle      = document.getElementById('resultsTitle');
+
+    if(isTimedMode){
+      resTitle.textContent = '⚡ Timed Results';
+      normalSection.style.display = 'none';
+      timedSection.style.display  = 'flex';
+      timedStatRow.style.display  = 'grid';
+      if(normalStatRow) normalStatRow.style.display = 'none';
+
+      // Timed hero numbers
+      document.getElementById('timedResTotal').textContent = total;
+      document.getElementById('timedResSub').textContent = `${score} correct · ${wrong} wrong`;
+      document.getElementById('timedResCorrect').textContent = score;
+      document.getElementById('timedResWrong').textContent = wrong;
+      document.getElementById('timedResAcc').textContent = pct + '%';
+
+      // Trigger animation
+      const numEl = document.getElementById('timedResTotal');
+      numEl.style.animation = 'none'; void numEl.offsetWidth; numEl.style.animation = '';
+
+      // confetti if >80% accuracy and >5 questions
+      if(pct >= 80 && total >= 5) launchConfetti();
+
+    } else {
+      resTitle.textContent = 'Test complete';
+      normalSection.style.display = '';
+      timedSection.style.display  = 'none';
+      timedStatRow.style.display  = 'none';
+      if(normalStatRow) normalStatRow.style.display = '';
+    }
+
     document.getElementById('resPct').textContent = pct+'%';
     document.getElementById('resSub').textContent = `${score} of ${total} correct`;
     document.getElementById('sCorrect').textContent = score;
@@ -3579,14 +4327,17 @@ function startTimer(){
     const cuR = results.filter(r=>r.q.type==='cube');
     const sqPct = sqR.length ? Math.round(sqR.filter(r=>r.correct).length/sqR.length*100) : null;
     const cuPct = cuR.length ? Math.round(cuR.filter(r=>r.correct).length/cuR.length*100) : null;
-    document.getElementById('chartWrap').style.display = (sqR.length&&cuR.length) ? 'block' : 'none';
+    document.getElementById('chartWrap').style.display = (sqR.length&&cuR.length) ? 'flex' : 'none';
     if(sqR.length&&cuR.length){
       document.getElementById('chartSqVal').textContent = sqPct+'%';
       document.getElementById('chartCuVal').textContent = cuPct+'%';
+      // reset then animate
+      document.getElementById('chartSqBar').style.width = '0%';
+      document.getElementById('chartCuBar').style.width = '0%';
       setTimeout(()=>{
-        document.getElementById('chartSqBar').style.height = (sqPct*0.70)+'px';
-        document.getElementById('chartCuBar').style.height = (cuPct*0.70)+'px';
-      },50);
+        document.getElementById('chartSqBar').style.width = sqPct+'%';
+        document.getElementById('chartCuBar').style.width = cuPct+'%';
+      }, 80);
     }
 
     // weakness: numbers wrong >50% of attempts this session
@@ -3608,23 +4359,23 @@ function startTimer(){
       }).join('');
     } else { wWrap.style.display='none'; }
 
-    // personal bests
+    // personal bests — handled by onSessionComplete() via MutationObserver
     const pb = getPB();
-    const isNewBest = pct > (pb.bestPct||0);
-    const isNewStreak = bestStreak > (pb.bestStreak||0);
-    if(isNewBest) pb.bestPct = pct;
+    const isNewBest    = pct > (pb.bestPct||0);
+    const isNewStreak  = bestStreak > (pb.bestStreak||0);
+    if(isNewBest)   pb.bestPct    = pct;
     if(isNewStreak) pb.bestStreak = bestStreak;
     savePB(pb);
-    document.getElementById('pbBest').textContent = (pb.bestPct||0)+'%';
-    document.getElementById('pbBest').className = 'pb-v' + (isNewBest?' pb-new':'');
+    // pb row UI rendered by renderPBRow() in onSessionComplete — just init placeholders
+    document.getElementById('pbBest').textContent   = (pb.bestPct||0)+'%';
+    document.getElementById('pbBest').className     = 'pb-v';
     document.getElementById('pbStreak').textContent = pb.bestStreak||0;
-    document.getElementById('pbStreak').className = 'pb-v' + (isNewStreak?' pb-new':'');
+    document.getElementById('pbStreak').className   = 'pb-v';
 
-    // confetti on 100%
-    if(pct===100) launchConfetti();
+    // confetti — only on new best (onSessionComplete handles it); 100% still fires here
+    if(pct===100 && !isNewBest) launchConfetti();
 
     saveHistory(score, total, pct);
-    renderHistory();
   }
 
   document.getElementById('ansInput').addEventListener('input',()=>{
@@ -3660,13 +4411,49 @@ pickTog.addEventListener('change', () => {
 });
 
 // ───────── TIMER MINI GRID ─────────
+const TIMED_DURATIONS_SETUP = [30, 60, 90, 120, 180, 300];
+
+function onTimedSliderChange(slider) {
+  const idx = parseInt(slider.value);
+  timedDuration = TIMED_DURATIONS_SETUP[idx];
+  const labels = ['30s','60s','90s','2m','3m','5m'];
+  document.getElementById('timedSliderVal').textContent = labels[idx];
+  // update tick highlights
+  document.querySelectorAll('.timed-tick').forEach((t,i) => {
+    t.classList.toggle('active-tick', i === idx);
+  });
+  // update slider gradient
+  const pct = (idx / 5) * 100;
+  slider.style.background = `linear-gradient(90deg, #B8D45C ${pct}%, rgba(239,248,226,0.12) ${pct}%)`;
+}
+
 function setTimerOpt(el){
-  document.querySelectorAll('.timer-opt').forEach(b=>b.classList.remove('active'));
+  // only remove active from timer grid buttons, not pick mode or other grids
+  document.querySelectorAll('#timerGrid .timer-opt').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
   timerMode = el.dataset.value;
   const ci = document.getElementById('customTimerInput');
+  const tw = document.getElementById('timedSliderWrap');
   ci.style.display = timerMode === 'custom' ? 'block' : 'none';
+  tw.classList.toggle('visible', timerMode === 'timed');
+  // update qCount label visibility
+  const qCountCell = document.getElementById('qCount').closest('.bento-cell');
+  // in timed mode, question count doesn't matter - show hint
+  const qCountInput = document.getElementById('qCount');
+  if (timerMode === 'timed') {
+    qCountInput.style.opacity = '0.3';
+    qCountInput.title = 'Not used in Timed Mode — answer as many as you can!';
+  } else {
+    qCountInput.style.opacity = '';
+    qCountInput.title = '';
+  }
 }
+
+// init slider gradient on page load
+(function initTimedSlider(){
+  const slider = document.getElementById('timedDurationSlider');
+  if(slider) onTimedSliderChange(slider);
+})();
 
 // ───────── TIMER DROPDOWN (kept, disabled in HTML — guarded) ─────────
 const dropdown = document.getElementById('timerDropdown');
@@ -3796,6 +4583,69 @@ function clearStopwatch() {
   }
 }
 
+// ───────── TIMED MODE COUNTDOWN ─────────
+function startTimedCountdown(){
+  if(timedInterval){ cancelAnimationFrame(timedInterval); timedInterval=null; }
+  timedStartTime = performance.now();
+
+  function tick(now){
+    const elapsed = (now - timedStartTime) / 1000;
+    const remaining = Math.max(0, timedDuration - elapsed);
+    const pct = (remaining / timedDuration) * 100;
+
+    const countdownEl = document.getElementById('timedCountdown');
+    const fillEl = document.getElementById('timedFill');
+    const qCountEl = document.getElementById('timedQCount');
+
+    if(countdownEl){
+      if(remaining >= 60){
+        const m = Math.floor(remaining/60), s = Math.ceil(remaining%60);
+        countdownEl.textContent = m + ':' + String(s).padStart(2,'0');
+      } else {
+        countdownEl.textContent = Math.ceil(remaining) + 's';
+      }
+      countdownEl.classList.toggle('urgent', remaining <= 10);
+    }
+    if(fillEl){
+      fillEl.style.width = pct + '%';
+      fillEl.classList.toggle('urgent', remaining <= 10);
+    }
+    if(qCountEl){
+      qCountEl.textContent = timedQAnswered + ' answered';
+    }
+
+    if(remaining > 0){
+      timedInterval = requestAnimationFrame(tick);
+    } else {
+      // Time's up!
+      timedInterval = null;
+      endTimedMode();
+    }
+  }
+  timedInterval = requestAnimationFrame(tick);
+}
+
+function clearTimedInterval(){
+  if(timedInterval){ cancelAnimationFrame(timedInterval); timedInterval=null; }
+}
+
+function endTimedMode(){
+  clearTimedInterval();
+  clearTimer();
+  clearStopwatch();
+  // If mid-question, record as timed out
+  if(!answered){
+    answered = true;
+    const q = qs[cur];
+    const val = parseInt(document.getElementById('ansInput').value);
+    const correctVal = q.type==='table' ? q.answer : (q.reverse ? q.n : q.answer);
+    const correct = !isNaN(val) && val === correctVal;
+    results.push({q, userAnswer: isNaN(val)?'—':val, correct, timedOut:true});
+    if(correct){ score++; }
+  }
+  showResults();
+}
+
 // ───────── HISTORY ─────────
 // (HISTORY_KEY and MAX_HISTORY defined in profile section below)
 
@@ -3817,7 +4667,7 @@ function eraseHistoryConfirm() {
 function saveHistory(score, total, pct) {
   let history = [];
   try { history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch(e) {}
-  history.unshift({ score, total, correct: score, pct, date: new Date().toISOString() });
+  history.unshift({ score, total, correct: score, pct, date: new Date().toISOString(), timed: isTimedMode ? timedDuration : null });
   history = history.slice(0, MAX_HISTORY);
   try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); } catch(e) {}
 }
@@ -4055,6 +4905,9 @@ function confirmResetProfile() {
 function goHome() {
   clearTimer();
   clearStopwatch();
+  clearTimedInterval();
+  isTimedMode = false;
+  document.getElementById('timedModeBar').classList.remove('visible');
   const profile = getProfile();
   if (profile.name) { showDashboard(); } else { show('s-setup'); }
 }
@@ -4103,6 +4956,762 @@ function exportResults(){
     document.body.removeChild(a);
   }
 }
+// ═══════════════════════════════════════════════
+//  MOTIVATION & RETENTION SYSTEM
+// ═══════════════════════════════════════════════
+
+const GOAL_KEY       = 'quiz_daily_goal';
+const MILESTONES_KEY = 'quiz_milestones';
+
+// ── Daily Goal ──
+function getDailyGoal() {
+  try { return parseInt(localStorage.getItem(GOAL_KEY)) || 20; } catch(e) { return 20; }
+}
+function saveDailyGoal(n) {
+  try { localStorage.setItem(GOAL_KEY, n); } catch(e) {}
+}
+
+function getTodayQuestionCount(history) {
+  const today = new Date().toDateString();
+  return history
+    .filter(h => new Date(h.date).toDateString() === today)
+    .reduce((s, h) => s + (h.total || 0), 0);
+}
+
+function toggleGoalEdit() {
+  const row = document.getElementById('goalEditRow');
+  const isOpen = row.classList.contains('open');
+  if (!isOpen) document.getElementById('goalEditInput').value = getDailyGoal();
+  row.classList.toggle('open', !isOpen);
+}
+
+function saveGoalEdit() {
+  const val = parseInt(document.getElementById('goalEditInput').value);
+  if (!val || val < 1) return;
+  saveDailyGoal(val);
+  document.getElementById('goalEditRow').classList.remove('open');
+  updateDailyGoalUI();
+}
+
+function updateDailyGoalUI() {
+  const history   = getSessionHistory();
+  const goal      = getDailyGoal();
+  const done      = getTodayQuestionCount(history);
+  const pct       = Math.min(100, Math.round((done / goal) * 100));
+  const isDone    = done >= goal;
+
+  document.getElementById('goalDoneCount').textContent   = done;
+  document.getElementById('goalTargetCount').textContent = goal;
+  document.getElementById('dailyGoalFill').style.width   = pct + '%';
+  document.getElementById('dailyGoalFill').classList.toggle('done', isDone);
+
+  const badge = document.getElementById('goalDoneBadge');
+  badge.classList.toggle('show', isDone);
+  if (isDone) badge.textContent = '🏅 Daily goal complete! ' + done + '/' + goal + ' done';
+}
+
+// ── Improvement Detection ──
+function computeImprovementMessage(history, latestPct) {
+  if (history.length < 2) return null;
+  // compare latest session to the previous 5 sessions avg (excluding latest)
+  const prev = history.slice(1, 6);
+  const prevAvg = Math.round(prev.reduce((s, h) => s + h.pct, 0) / prev.length);
+  const diff = latestPct - prevAvg;
+
+  if (diff >= 20) return { icon: '🚀', title: 'Huge improvement!', sub: `+${diff}% above your recent average of ${prevAvg}%` };
+  if (diff >= 10) return { icon: '📈', title: 'You improved!',     sub: `+${diff}% above your recent average of ${prevAvg}%` };
+  if (diff >= 5)  return { icon: '✨', title: 'Nice progress!',    sub: `+${diff}% above your recent average of ${prevAvg}%` };
+  if (latestPct === 100) return { icon: '🏆', title: 'Perfect score!', sub: 'Absolutely flawless — well done!' };
+  if (diff < -10) return { icon: '💪', title: 'Keep going!',       sub: `Your avg is ${prevAvg}% — you'll get there` };
+  return null;
+}
+
+function showImproveBanner(msg) {
+  const banner = document.getElementById('improveBanner');
+  if (!msg) { banner.classList.remove('show'); return; }
+  document.getElementById('improveBannerIcon').textContent  = msg.icon;
+  document.getElementById('improveBannerTitle').textContent = msg.title;
+  document.getElementById('improveBannerSub').textContent   = msg.sub;
+  banner.classList.add('show');
+}
+
+// ── Milestones Definition ──
+const MILESTONE_DEFS = [
+  { id: 'first_q',     icon: '🌱', name: 'First Steps',    desc: 'Answer your first question',      check: (h,pb) => getTotalQs(h) >= 1 },
+  { id: 'q_50',        icon: '⭐', name: '50 Questions',   desc: '50 questions answered',            check: (h,pb) => getTotalQs(h) >= 50 },
+  { id: 'q_100',       icon: '💯', name: 'Century',        desc: '100 questions answered',           check: (h,pb) => getTotalQs(h) >= 100 },
+  { id: 'q_500',       icon: '🔥', name: 'On Fire',        desc: '500 questions answered',           check: (h,pb) => getTotalQs(h) >= 500 },
+  { id: 'q_1000',      icon: '💎', name: '1K Club',        desc: '1,000 questions answered',         check: (h,pb) => getTotalQs(h) >= 1000 },
+  { id: 'q_5000',      icon: '👑', name: 'Legend',         desc: '5,000 questions answered',         check: (h,pb) => getTotalQs(h) >= 5000 },
+  { id: 'perfect',     icon: '🏆', name: 'Perfect',        desc: 'Score 100% on any quiz',           check: (h,pb) => (pb.bestPct||0) >= 100 },
+  { id: 'streak_3',    icon: '🗓️', name: '3-Day Streak',   desc: 'Practice 3 days in a row',         check: (h,pb) => computeDayStreak(h) >= 3 },
+  { id: 'streak_7',    icon: '📅', name: 'Week Warrior',   desc: 'Practice 7 days in a row',         check: (h,pb) => computeDayStreak(h) >= 7 },
+  { id: 'streak_30',   icon: '🌟', name: 'Monthly Master', desc: '30-day streak',                    check: (h,pb) => computeDayStreak(h) >= 30 },
+  { id: 'acc_80',      icon: '🎯', name: 'Sharp Shooter',  desc: 'Achieve 80%+ accuracy in a quiz',  check: (h,pb) => (pb.bestPct||0) >= 80 },
+  { id: 'acc_90',      icon: '🦅', name: 'Eagle Eye',      desc: '90%+ in any quiz',                 check: (h,pb) => (pb.bestPct||0) >= 90 },
+  { id: 'sessions_10', icon: '📚', name: 'Dedicated',      desc: 'Complete 10 sessions',             check: (h,pb) => h.length >= 10 },
+  { id: 'sessions_50', icon: '🎓', name: 'Scholar',        desc: 'Complete 50 sessions',             check: (h,pb) => h.length >= 50 },
+  { id: 'goal_done',   icon: '🏅', name: 'Goal Crusher',   desc: 'Complete your daily goal',         check: (h,pb) => getTodayQuestionCount(h) >= getDailyGoal() },
+];
+
+function getTotalQs(history) {
+  return history.reduce((s, h) => s + (h.total || 0), 0);
+}
+
+function getUnlockedMilestones() {
+  try { return JSON.parse(localStorage.getItem(MILESTONES_KEY)) || []; } catch(e) { return []; }
+}
+function saveUnlockedMilestone(id) {
+  const unlocked = getUnlockedMilestones();
+  if (!unlocked.includes(id)) {
+    unlocked.push(id);
+    try { localStorage.setItem(MILESTONES_KEY, JSON.stringify(unlocked)); } catch(e) {}
+  }
+}
+
+let _milestoneQueue = [];
+let _milestoneShowing = false;
+
+function checkAndTriggerMilestones(history, pb) {
+  const unlocked = getUnlockedMilestones();
+  const newOnes  = [];
+  MILESTONE_DEFS.forEach(m => {
+    if (!unlocked.includes(m.id) && m.check(history, pb)) {
+      saveUnlockedMilestone(m.id);
+      newOnes.push(m);
+    }
+  });
+  if (newOnes.length) {
+    _milestoneQueue.push(...newOnes);
+    if (!_milestoneShowing) drainMilestoneQueue();
+  }
+}
+
+function drainMilestoneQueue() {
+  if (!_milestoneQueue.length) { _milestoneShowing = false; return; }
+  _milestoneShowing = true;
+  const m = _milestoneQueue.shift();
+  showMilestoneToast(m, () => setTimeout(drainMilestoneQueue, 400));
+}
+
+function showMilestoneToast(m, onDone) {
+  const toast = document.getElementById('milestoneToast');
+  document.getElementById('milestoneToastIcon').textContent  = m.icon;
+  document.getElementById('milestoneToastTitle').textContent = m.name;
+  document.getElementById('milestoneToastSub').textContent   = m.desc;
+  toast.classList.remove('hide');
+  toast.classList.add('show');
+  launchConfetti();
+  setTimeout(() => {
+    toast.classList.add('hide');
+    setTimeout(() => {
+      toast.classList.remove('show', 'hide');
+      if (onDone) onDone();
+    }, 400);
+  }, 3200);
+}
+
+function renderMilestonesGrid() {
+  const grid     = document.getElementById('milestonesGrid');
+  if (!grid) return;
+  const history  = getSessionHistory();
+  const pb       = getPB();
+  const unlocked = getUnlockedMilestones();
+  grid.innerHTML = MILESTONE_DEFS.map(m => {
+    const isUnlocked = unlocked.includes(m.id);
+    return `<div class="milestone-badge ${isUnlocked ? 'unlocked' : ''}">
+      <div class="milestone-badge-icon">${m.icon}</div>
+      <div class="milestone-badge-name">${m.name}</div>
+      <div class="milestone-badge-val">${m.desc}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Hook into showDashboard to update goal & banner ──
+const _origShowDashboard = showDashboard;
+showDashboard = function() {
+  _origShowDashboard();
+  updateDailyGoalUI();
+  // Show improvement banner based on last session
+  const history = getSessionHistory();
+  if (history.length >= 2) {
+    const msg = computeImprovementMessage(history, history[0].pct);
+    showImproveBanner(msg);
+  } else {
+    document.getElementById('improveBanner').classList.remove('show');
+  }
+};
+
+// ── Hook into showProfile to render milestones ──
+const _origShowProfile = showProfile;
+showProfile = function() {
+  _origShowProfile();
+  renderMilestonesGrid();
+};
+
+// ── Hook into saveHistory to trigger milestone checks ──
+const _origSaveHistory = saveHistory;
+saveHistory = function(s, total, pct) {
+  _origSaveHistory(s, total, pct);
+  const history = getSessionHistory();
+  const pb      = getPB();
+  setTimeout(() => checkAndTriggerMilestones(history, pb), 800);
+};
+
+// ═══════════════════════════════════════════════
+//  NEW RETENTION SYSTEMS
+// ═══════════════════════════════════════════════
+
+// ── Storage Keys ──
+const DAY_STREAK_KEY    = 'quiz_day_streak2';   // {streak, bestStreak, lastDate}
+const XP_KEY            = 'quiz_xp';             // {totalXP, currentLevel}
+const WEAKNESS_KEY      = 'quiz_weakness';        // {"12": {correct, wrong}, ...}
+const DAILY_CHAL_KEY    = 'quiz_daily_challenge'; // {date, completed, score, pct}
+
+// ── XP Level Titles ──
+const LEVEL_TITLES = [
+  'Beginner','Apprentice','Student','Practitioner','Skilled',
+  'Advanced','Expert','Master','Grandmaster','Legend'
+];
+
+// ─────────────────────────────────────────────
+// 1. DAILY STREAK SYSTEM
+// ─────────────────────────────────────────────
+
+function getDayStreakData() {
+  try { return JSON.parse(localStorage.getItem(DAY_STREAK_KEY)) || {streak:0, bestStreak:0, lastDate:''}; }
+  catch(e) { return {streak:0, bestStreak:0, lastDate:''}; }
+}
+function saveDayStreakData(d) {
+  try { localStorage.setItem(DAY_STREAK_KEY, JSON.stringify(d)); } catch(e) {}
+}
+
+/**
+ * updateDayStreak — call on quiz completion.
+ * Returns {streak, bestStreak, increased} for UI feedback.
+ */
+function updateDayStreak() {
+  const today = new Date().toISOString().slice(0,10); // YYYY-MM-DD
+  const data  = getDayStreakData();
+  const prev  = data.lastDate;
+
+  let increased = false;
+  if (!prev || prev === today) {
+    // same day or first play — no change
+  } else {
+    const prevD   = new Date(prev);
+    const todayD  = new Date(today);
+    const diffMs  = todayD - prevD;
+    const diffDays= Math.round(diffMs / 86400000);
+    if (diffDays === 1) {
+      data.streak++;
+      increased = true;
+    } else {
+      data.streak = 1;
+    }
+  }
+  if (!prev) data.streak = 1;
+  if (data.streak > data.bestStreak) data.bestStreak = data.streak;
+  data.lastDate = today;
+  saveDayStreakData(data);
+  return { ...data, increased };
+}
+
+// ─────────────────────────────────────────────
+// 2. XP + LEVEL SYSTEM
+// ─────────────────────────────────────────────
+
+function getXPData() {
+  try { return JSON.parse(localStorage.getItem(XP_KEY)) || {totalXP: 0, currentLevel: 1}; }
+  catch(e) { return {totalXP: 0, currentLevel: 1}; }
+}
+function saveXPData(d) {
+  try { localStorage.setItem(XP_KEY, JSON.stringify(d)); } catch(e) {}
+}
+
+function xpForLevel(level) { return (level - 1) * 100; }
+function levelFromXP(xp)   { return Math.floor(xp / 100) + 1; }
+function levelTitle(level) {
+  return LEVEL_TITLES[Math.min(level - 1, LEVEL_TITLES.length - 1)];
+}
+
+/**
+ * addXP — called after each correct answer.
+ * bonus=true when current session answer-streak is 3+
+ */
+function addXP(bonus) {
+  const gain = bonus ? 15 : 10;
+  const data = getXPData();
+  data.totalXP += gain;
+  data.currentLevel = levelFromXP(data.totalXP);
+  saveXPData(data);
+  return { gain, totalXP: data.totalXP, level: data.currentLevel };
+}
+
+/** Show floating "+10 XP" effect near the answer input */
+function showXPFloat(gain) {
+  const ref = document.getElementById('ansInput') || document.getElementById('checkBtn');
+  if (!ref) return;
+  const rect = ref.getBoundingClientRect();
+  const float = document.createElement('div');
+  float.className = 'xp-float';
+  float.textContent = `+${gain} XP`;
+  float.style.left  = (rect.left + rect.width / 2 - 20) + 'px';
+  float.style.top   = (rect.top + window.scrollY - 8) + 'px';
+  document.body.appendChild(float);
+  setTimeout(() => float.remove(), 950);
+}
+
+function updateXPPill() {
+  const data = getXPData();
+  const pill = document.getElementById('xpPill');
+  if (pill) {
+    pill.textContent = `Lv ${data.currentLevel} · ${data.totalXP} XP`;
+    pill.classList.add('active');
+  }
+}
+
+function updateDashXP() {
+  const data = getXPData();
+  const level = data.currentLevel;
+  const xpInLevel = data.totalXP - xpForLevel(level);
+  const pct = Math.min(100, xpInLevel);
+  const el = {
+    level:  document.getElementById('dashXpLevel'),
+    title:  document.getElementById('dashXpTitle'),
+    sub:    document.getElementById('dashXpSub'),
+    bar:    document.getElementById('dashXpBar'),
+  };
+  if (el.level) el.level.textContent = `Lv ${level}`;
+  if (el.title) el.title.textContent = levelTitle(level);
+  if (el.sub)   el.sub.textContent   = `${data.totalXP} XP total`;
+  if (el.bar)   el.bar.style.width   = pct + '%';
+}
+
+// ─────────────────────────────────────────────
+// 3. PERSONAL BEST TRACKING (ENHANCED)
+// ─────────────────────────────────────────────
+
+/**
+ * updatePersonalBests — call at end of session.
+ * Returns flags for what was beaten.
+ */
+function updatePersonalBests(pct, sessionBestStreak, totalXP) {
+  const pb = getPB();
+  const flags = { newBestPct: false, newBestStreak: false };
+
+  if (pct > (pb.bestPct || 0)) {
+    pb.bestPct = pct;
+    flags.newBestPct = true;
+  }
+  if (sessionBestStreak > (pb.bestStreak || 0)) {
+    pb.bestStreak = sessionBestStreak;
+    flags.newBestStreak = true;
+  }
+  savePB(pb);
+  return { pb, flags };
+}
+
+// Render PB row with NEW BEST labels
+function renderPBRow(pb, flags) {
+  const pbBestEl   = document.getElementById('pbBest');
+  const pbStreakEl = document.getElementById('pbStreak');
+  const pbXPEl     = document.getElementById('pbXP');
+  const xpData     = getXPData();
+
+  if (pbBestEl) {
+    pbBestEl.innerHTML = (pb.bestPct || 0) + '%' +
+      (flags.newBestPct ? '<span class="pb-new-label">NEW BEST</span>' : '');
+    pbBestEl.className = 'pb-v' + (flags.newBestPct ? ' pb-new-best' : '');
+  }
+  if (pbStreakEl) {
+    pbStreakEl.innerHTML = (pb.bestStreak || 0) +
+      (flags.newBestStreak ? '<span class="pb-new-label">NEW BEST</span>' : '');
+    pbStreakEl.className = 'pb-v' + (flags.newBestStreak ? ' pb-new-best' : '');
+  }
+  if (pbXPEl) {
+    pbXPEl.textContent = xpData.totalXP + ' XP';
+    pbXPEl.className   = 'pb-v';
+  }
+}
+
+// ─────────────────────────────────────────────
+// 4. WEAKNESS TRACKING
+// ─────────────────────────────────────────────
+
+function getWeaknessData() {
+  try { return JSON.parse(localStorage.getItem(WEAKNESS_KEY)) || {}; }
+  catch(e) { return {}; }
+}
+function saveWeaknessData(d) {
+  try { localStorage.setItem(WEAKNESS_KEY, JSON.stringify(d)); } catch(e) {}
+}
+
+/** Update per-number stats after each answer */
+function trackWeaknessAnswer(n, type, correct) {
+  const data = getWeaknessData();
+  const key  = `${n}_${type}`;
+  if (!data[key]) data[key] = { n, type, correct: 0, wrong: 0 };
+  if (correct) data[key].correct++;
+  else         data[key].wrong++;
+  saveWeaknessData(data);
+}
+
+/**
+ * getWeakNumbers — returns array of {n, type} where accuracy < 70%
+ * and at least 3 attempts made.
+ */
+function getWeakNumbers() {
+  const data = getWeaknessData();
+  return Object.values(data).filter(d => {
+    const total = d.correct + d.wrong;
+    return total >= 3 && (d.correct / total) < 0.70;
+  });
+}
+
+function updateWeaknessBtn() {
+  const weak = getWeakNumbers();
+  const btn  = document.getElementById('weaknessPracticeBtn');
+  const badge= document.getElementById('weakCountBadge');
+  if (!btn) return;
+  if (weak.length > 0) {
+    btn.style.display = 'flex';
+    if (badge) badge.textContent = `${weak.length} weak`;
+  } else {
+    btn.style.display = 'none';
+  }
+}
+
+/** Start a quiz focused only on weak numbers */
+function startWeaknessPractice() {
+  const weak = getWeakNumbers();
+  if (!weak.length) {
+    alert('No weak numbers yet! Practice more to identify areas to improve.');
+    return;
+  }
+  // Override focus mode with weak numbers
+  const weakNums = [...new Set(weak.map(w => w.n))];
+  focusNums = new Set(weakNums);
+  document.getElementById('focusTog').checked = true;
+  focusMode = true;
+  toggleFocusGrid();
+  // Force to squares+cubes type if possible
+  if (qType !== 'multiplication') {
+    // Mark the chips as selected
+    weakNums.forEach(n => focusNums.add(n));
+  }
+  startTest();
+}
+
+// ─────────────────────────────────────────────
+// 5. DAILY CHALLENGE MODE
+// ─────────────────────────────────────────────
+
+function getTodayDateStr() {
+  return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+}
+
+function getDailyChallengeData() {
+  try { return JSON.parse(localStorage.getItem(DAILY_CHAL_KEY)) || {}; }
+  catch(e) { return {}; }
+}
+function saveDailyChallengeData(d) {
+  try { localStorage.setItem(DAILY_CHAL_KEY, JSON.stringify(d)); } catch(e) {}
+}
+
+function isDailyChallengeCompleted() {
+  const data = getDailyChallengeData();
+  return data.date === getTodayDateStr() && data.completed;
+}
+
+/** Seeded random using date string as seed — deterministic per day */
+function seededRandom(seed) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < seed.length; i++) {
+    h ^= seed.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return function() {
+    h ^= h << 13; h ^= h >> 17; h ^= h << 5;
+    return ((h >>> 0) / 0xffffffff);
+  };
+}
+
+function generateDailyChallenge() {
+  const dateStr = getTodayDateStr();
+  const rng = seededRandom(dateStr);
+  const questions = [];
+  const pool = [];
+
+  // Fixed: 10 questions, mixed squares+cubes, range 1–15
+  for (let n = 1; n <= 15; n++) {
+    pool.push({n, type:'square', answer:n*n,   reverse:false});
+    pool.push({n, type:'cube',   answer:n*n*n, reverse:false});
+  }
+
+  // Deterministic shuffle using seeded RNG
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+
+  return pool.slice(0, 10);
+}
+
+let isDailyChallenge = false; // flag so we know to save on completion
+
+function startDailyChallenge() {
+  if (isDailyChallengeCompleted()) {
+    const data = getDailyChallengeData();
+    alert(`Today's challenge already done! Score: ${data.score}/10 (${data.pct}%)\nCome back tomorrow for a new one.`);
+    return;
+  }
+
+  isDailyChallenge = true;
+  qs = generateDailyChallenge();
+  cur = 0; score = 0; results = [];
+  streak = 0; wrongQueue = []; retrySet = new Set();
+  timedQAnswered = 0;
+  isTimedMode = false;
+
+  // Use defaults
+  instant   = true;
+  autoSub   = false;
+  pickMode  = false;
+  reverseMode = false;
+  livesMode = false;
+  spacedMode = false;
+  focusMode = false;
+  lives = 3;
+  timerMode = 'off';
+  duration  = 0;
+
+  document.getElementById('livesPill').style.display = 'none';
+  document.getElementById('streakPill').classList.remove('active');
+  document.getElementById('timedModeBar').classList.remove('visible');
+
+  show('s-test');
+  loadQ();
+}
+
+function updateDailyChallengeBtn() {
+  const btn   = document.getElementById('dailyChallengeBtn');
+  const badge = document.getElementById('dailyChallengeBadge');
+  if (!btn) return;
+  const done = isDailyChallengeCompleted();
+  if (done) {
+    const data = getDailyChallengeData();
+    badge.textContent = `Done · ${data.pct}%`;
+    badge.className   = 'daily-challenge-badge done';
+    btn.disabled      = true;
+  } else {
+    badge.textContent = 'Available';
+    badge.className   = 'daily-challenge-badge avail';
+    btn.disabled      = false;
+  }
+}
+
+// ─────────────────────────────────────────────
+// 6. SESSION FEEDBACK LOOP
+// ─────────────────────────────────────────────
+
+function showSessionNudge(pct, pb) {
+  const el   = document.getElementById('sessionNudge');
+  const icon = document.getElementById('sessionNudgeIcon');
+  const text = document.getElementById('sessionNudgeText');
+  if (!el) return;
+
+  const best = pb.bestPct || 0;
+  const diff = best - pct;
+  let msg = null;
+
+  if (pct === 100) {
+    msg = { icon: '🏆', text: 'Perfect score — you nailed it!' };
+  } else if (pct >= 90) {
+    msg = { icon: '🔥', text: 'So close to perfect — one more run?' };
+  } else if (diff === 0) {
+    msg = { icon: '🌟', text: 'You matched your best — beat it next time!' };
+  } else if (diff > 0 && diff <= 5) {
+    msg = { icon: '💪', text: `Just ${diff}% away from your personal best!` };
+  } else if (diff > 5 && diff <= 15) {
+    msg = { icon: '📈', text: `Your best is ${best}% — you can beat it!` };
+  } else if (pct < 50) {
+    msg = { icon: '🎯', text: 'Keep at it — each session builds speed.' };
+  } else {
+    msg = { icon: '✨', text: 'Good session! Try again to beat your score.' };
+  }
+
+  if (msg) {
+    icon.textContent = msg.icon;
+    text.textContent = msg.text;
+    el.classList.add('show');
+  } else {
+    el.classList.remove('show');
+  }
+}
+
+// ─────────────────────────────────────────────
+// HOOK: called on every correct answer
+// ─────────────────────────────────────────────
+function onCorrectAnswer(sessionStreak) {
+  const bonus = sessionStreak >= 3;
+  const xpResult = addXP(bonus);
+  showXPFloat(xpResult.gain);
+  updateXPPill();
+}
+
+// ─────────────────────────────────────────────
+// HOOK: called at end of session (from showResults)
+// ─────────────────────────────────────────────
+function onSessionComplete(pct, sessionBestStreak) {
+  // Day streak
+  const streakResult = updateDayStreak();
+
+  // Update XP pill in test header
+  updateXPPill();
+
+  // Personal bests
+  const { pb, flags } = updatePersonalBests(pct, sessionBestStreak, getXPData().totalXP);
+  renderPBRow(pb, flags);
+
+  // Confetti only on new best accuracy
+  if (flags.newBestPct && pct > 0) launchConfetti();
+
+  // Session nudge
+  showSessionNudge(pct, pb);
+
+  // Daily challenge completion
+  if (isDailyChallenge) {
+    saveDailyChallengeData({ date: getTodayDateStr(), completed: true, score, pct });
+    isDailyChallenge = false;
+  }
+
+  // Pulse the day streak stat in dashboard if it increased
+  if (streakResult.increased) {
+    const streakStat = document.getElementById('dashDayStreak');
+    if (streakStat) {
+      streakStat.closest('.dash-stat')?.classList.remove('streak-pulse');
+      void streakStat.closest('.dash-stat')?.offsetWidth;
+      streakStat.closest('.dash-stat')?.classList.add('streak-pulse');
+    }
+  }
+}
+
+// ─────────────────────────────────────────────
+// SETUP SCREEN — update dynamic buttons on show
+// ─────────────────────────────────────────────
+function updateSetupMotivation() {
+  updateDailyChallengeBtn();
+  updateWeaknessBtn();
+}
+
+// Patch show() to refresh setup motivation state
+const _origShow = show;
+show = function(id) {
+  _origShow(id);
+  if (id === 's-setup') updateSetupMotivation();
+};
+
+// ─────────────────────────────────────────────
+// PATCH checkAnswer & pickAnswer to track XP + weakness
+// ─────────────────────────────────────────────
+const _origCheckAnswer = checkAnswer;
+checkAnswer = function() {
+  // capture state before calling original
+  const prevScore = score;
+  _origCheckAnswer();
+  // if score went up, a correct answer was given
+  if (score > prevScore) {
+    onCorrectAnswer(streak);
+    const q = qs[cur];
+    if (q) trackWeaknessAnswer(q.n, q.type, true);
+  } else {
+    const q = qs[cur];
+    if (q && answered) trackWeaknessAnswer(q.n, q.type, false);
+  }
+};
+
+const _origPickAnswer = pickAnswer;
+pickAnswer = function(chosen, correct) {
+  _origPickAnswer(chosen, correct);
+  const q = qs[cur];
+  if (q) {
+    const isCorrect = chosen === correct;
+    trackWeaknessAnswer(q.n, q.type, isCorrect);
+    if (isCorrect) onCorrectAnswer(streak);
+  }
+};
+
+// ─────────────────────────────────────────────
+// PATCH showResults to call onSessionComplete
+// ─────────────────────────────────────────────
+const _origShowResults = showResults;
+// We need to wrap carefully since showResults is inside a closure
+// Intercept via the outer showDashboard/goHome chain — patch at module level
+(function patchShowResults() {
+  // Override the inline showResults inside the closure is tricky,
+  // so we hook into the results screen becoming visible via MutationObserver
+  const observer = new MutationObserver(() => {
+    const resultsScreen = document.getElementById('s-results');
+    if (resultsScreen && resultsScreen.classList.contains('active')) {
+      // Only fire once per activation
+      if (resultsScreen.dataset.nudgeFired !== 'true') {
+        resultsScreen.dataset.nudgeFired = 'true';
+        const total = results.length;
+        const pct   = total > 0 ? Math.round((score / total) * 100) : 0;
+        onSessionComplete(pct, bestStreak);
+      }
+    } else if (resultsScreen) {
+      resultsScreen.dataset.nudgeFired = 'false';
+    }
+  });
+  observer.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['class'] });
+})();
+
+// ─────────────────────────────────────────────
+// PATCH showDashboard to include XP
+// ─────────────────────────────────────────────
+const _origShowDash2 = showDashboard;
+showDashboard = function() {
+  _origShowDash2();
+  updateDashXP();
+  updateSetupMotivation();
+};
+
+// ─────────────────────────────────────────────
+// PATCH showProfile to include XP + day streak data
+// ─────────────────────────────────────────────
+const _origShowProf2 = showProfile;
+showProfile = function() {
+  _origShowProf2();
+  // Update day streak on profile from new system
+  const ds = getDayStreakData();
+  const dsDayEl = document.getElementById('profDayStreak');
+  if (dsDayEl && ds.streak) dsDayEl.textContent = ds.streak;
+  const dsBestEl = document.getElementById('profBestStreak');
+  // bestStreak in profile shows session streak (existing), leave that
+  // also update XP on dashboard
+  updateDashXP();
+};
+
+// ─────────────────────────────────────────────
+// INIT: update XP pill and setup screen on load
+// ─────────────────────────────────────────────
+(function initRetentionSystems() {
+  updateXPPill();
+  // Defer setup screen update slightly (after init routing runs)
+  setTimeout(updateSetupMotivation, 100);
+})();
 </script>
+<!-- Milestone Toast -->
+<div id="milestoneToast">
+  <div class="milestone-icon" id="milestoneToastIcon">🏆</div>
+  <div class="milestone-text">
+    <div class="milestone-label">Milestone Unlocked!</div>
+    <div class="milestone-title" id="milestoneToastTitle">First Steps</div>
+    <div class="milestone-sub" id="milestoneToastSub">You answered your first question</div>
+  </div>
+</div>
+
 </body>
 </html>
