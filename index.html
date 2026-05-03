@@ -2456,8 +2456,10 @@ select:focus {
       position: fixed;
       right: 0;
       top: 50%;
-      transform: translateY(-50%) translateX(calc(100% - 36px));
+      transform: translateY(-50%) translateX(calc(100% - 36px)) translateZ(0);
       z-index: 200;
+      opacity: 0;
+      pointer-events: none;
 
       /* Size */
       width: 200px;
@@ -2486,8 +2488,11 @@ select:focus {
         inset 1px 0 0 rgba(184,212,92,0.08);
 
       transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+                  opacity 0.22s ease,
                   box-shadow 0.25s ease,
                   border-color 0.2s;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
 
       /* Pin tab visual — a small pull-tab on the left */
       overflow: visible;
@@ -2526,7 +2531,7 @@ select:focus {
     /* Hover: slide the card into view */
     .daily-challenge-btn:hover,
     .daily-challenge-btn:focus-visible {
-      transform: translateY(-50%) translateX(0);
+      transform: translateY(-50%) translateX(0) translateZ(0);
       border-color: rgba(184,212,92,0.5);
       box-shadow:
         -6px 0 40px rgba(0,0,0,0.6),
@@ -2536,9 +2541,9 @@ select:focus {
       outline: none;
     }
 
-    .daily-challenge-btn:active { transform: translateY(-50%) translateX(0) scale(0.98); }
+    .daily-challenge-btn:active { transform: translateY(-50%) translateX(0) scale(0.98) translateZ(0); }
     .daily-challenge-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .daily-challenge-btn:disabled:hover { transform: translateY(-50%) translateX(calc(100% - 36px)); }
+    .daily-challenge-btn:disabled:hover { transform: translateY(-50%) translateX(calc(100% - 36px)) translateZ(0); }
 
     /* Hide the icon inside since it's now in ::before */
     .daily-challenge-left { display: flex; align-items: center; gap: 8px; width: 100%; }
@@ -2576,7 +2581,7 @@ select:focus {
       }
       /* Tap-open state */
       .daily-challenge-btn.dc-open {
-        transform: translateY(-50%) translateX(0) !important;
+        transform: translateY(-50%) translateX(0) translateZ(0) !important;
         border-color: rgba(184,212,92,0.5) !important;
         box-shadow: -6px 0 40px rgba(0,0,0,0.6), -2px 0 20px rgba(87,50,128,0.4), 0 0 16px rgba(184,212,92,0.1), inset 1px 0 0 rgba(184,212,92,0.12) !important;
       }
@@ -5985,40 +5990,38 @@ function updateDailyChallengeBtn() {
     btn.style.setProperty('--dc-tab-date', `"${day}\\A${mon}"`);
   })();
 
-  // Mobile tap-to-open toggle (hover doesn't fire on touch)
+  // Mobile tap-to-open, then tap-to-launch (hover doesn't work on touch)
   if (!btn._dcTapBound) {
     btn._dcTapBound = true;
-    let _dcTapLocked = false;
 
-    btn.addEventListener('touchstart', function(e) {
-      // If card is closed, open it (and suppress the click/startDailyChallenge)
+    btn.addEventListener('touchend', function(e) {
+      // Only intercept on touch — pointer events on desktop are fine via hover+click
       if (!btn.classList.contains('dc-open')) {
+        // First touch: just open the card, don't start the challenge
         e.preventDefault();
+        e.stopPropagation();
         btn.classList.add('dc-open');
-        _dcTapLocked = true;
-        // Auto-close after 4s of no interaction
         clearTimeout(btn._dcAutoClose);
-        btn._dcAutoClose = setTimeout(() => btn.classList.remove('dc-open'), 4000);
+        btn._dcAutoClose = setTimeout(() => btn.classList.remove('dc-open'), 5000);
+      } else {
+        // Already open: let it fall through to the onclick handler (startDailyChallenge)
+        // No preventDefault — the click will fire naturally
+        clearTimeout(btn._dcAutoClose);
       }
-      // If already open, let the click fire naturally (starts challenge)
     }, { passive: false });
 
-    btn.addEventListener('click', function(e) {
-      if (_dcTapLocked) {
-        e.stopImmediatePropagation();
-        e.preventDefault();
-        _dcTapLocked = false;
-      }
-    }, true);
-
-    // Close when tapping anywhere else
-    document.addEventListener('touchstart', function(e) {
+    // Close when tapping anywhere outside the card
+    document.addEventListener('touchend', function(e) {
       if (btn.classList.contains('dc-open') && !btn.contains(e.target)) {
         btn.classList.remove('dc-open');
         clearTimeout(btn._dcAutoClose);
       }
     }, { passive: true });
   }
+
+  // Hide immediately if challenge was just completed
+  const currentScreen = document.querySelector('.screen.active');
+  if (currentScreen) updateDailyChallengeVisibility(currentScreen.id);
 }
 
 // ─────────────────────────────────────────────
@@ -6130,12 +6133,26 @@ function updateSetupMotivation() {
   updateWeaknessBtn();
 }
 
-// Patch show() to refresh setup motivation state
+// Patch show() to refresh setup motivation state + control daily challenge card visibility
 const _origShow = show;
 show = function(id) {
   _origShow(id);
   if (id === 's-setup') updateSetupMotivation();
+  updateDailyChallengeVisibility(id);
 };
+
+function updateDailyChallengeVisibility(screenId) {
+  const btn = document.getElementById('dailyChallengeBtn');
+  if (!btn) return;
+  const allowedScreens = ['s-setup', 's-dashboard'];
+  const visible = allowedScreens.includes(screenId) && !isDailyChallengeCompleted();
+  btn.style.transition = visible
+    ? 'transform 0.32s cubic-bezier(0.22,1,0.36,1), opacity 0.22s ease, box-shadow 0.25s ease, border-color 0.2s'
+    : 'transform 0.22s ease, opacity 0.18s ease';
+  btn.style.opacity = visible ? '1' : '0';
+  btn.style.pointerEvents = visible ? 'auto' : 'none';
+  if (!visible) btn.classList.remove('dc-open');
+}
 
 // ─────────────────────────────────────────────
 // PATCH checkAnswer & pickAnswer to track XP + weakness
@@ -6235,7 +6252,13 @@ showProfile = function() {
 (function initRetentionSystems() {
   updateXPPill();
   // Defer setup screen update slightly (after init routing runs)
-  setTimeout(updateSetupMotivation, 100);
+  setTimeout(() => {
+    updateSetupMotivation();
+    // Set initial visibility based on whatever screen is active at load
+    const activeScreen = document.querySelector('.screen.active');
+    if (activeScreen) updateDailyChallengeVisibility(activeScreen.id);
+    else updateDailyChallengeVisibility('s-setup'); // default
+  }, 120);
 })();
 </script>
 <!-- End Session button (Unlimited mode) -->
