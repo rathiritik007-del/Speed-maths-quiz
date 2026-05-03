@@ -2454,11 +2454,11 @@ select:focus {
 
     @keyframes dcSlideIn {
       0%   { transform: translateY(-50%) translateX(100%); }
-      55%  { transform: translateY(-50%) translateX(calc(100% - 54px)); }
-      72%  { transform: translateY(-50%) translateX(calc(100% - 38px)); }
-      85%  { transform: translateY(-50%) translateX(calc(100% - 50px)); }
-      93%  { transform: translateY(-50%) translateX(calc(100% - 43px)); }
-      100% { transform: translateY(-50%) translateX(calc(100% - 46px)); }
+      55%  { transform: translateY(-50%) translateX(calc(100% - 60px)); }
+      72%  { transform: translateY(-50%) translateX(calc(100% - 44px)); }
+      85%  { transform: translateY(-50%) translateX(calc(100% - 56px)); }
+      93%  { transform: translateY(-50%) translateX(calc(100% - 50px)); }
+      100% { transform: translateY(-50%) translateX(calc(100% - 52px)); }
     }
     .daily-challenge-btn.dc-bounce {
       animation: dcSlideIn 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -2468,14 +2468,14 @@ select:focus {
       position: fixed;
       right: 0;
       top: 50%;
-      transform: translateY(-50%) translateX(calc(100% - 46px));
+      transform: translateY(-50%) translateX(calc(100% - 52px));
       z-index: 200;
       opacity: 0;
       pointer-events: none;
 
-      width: 230px;
-      min-height: 64px;
-      padding: 10px 12px 10px 58px;
+      width: 236px;
+      min-height: 68px;
+      padding: 10px 12px 10px 64px;
       border-radius: 14px 0 0 14px;
       border: 1px solid rgba(87,50,128,0.45);
       border-right: none;
@@ -2513,7 +2513,7 @@ select:focus {
       left: 0;
       top: 0;
       bottom: 0;
-      width: 46px;
+      width: 52px;
       background: rgba(60, 20, 90, 0.45);
       backdrop-filter: blur(14px) saturate(1.6);
       -webkit-backdrop-filter: blur(14px) saturate(1.6);
@@ -2536,19 +2536,46 @@ select:focus {
       border-right-color: rgba(87,50,128,0.5);
     }
     .dc-tab-day {
-      font-size: 17px;
+      font-size: 20px;
       font-weight: 700;
       color: #B8D45C;
       line-height: 1;
     }
     .dc-tab-mon {
-      font-size: 8px;
+      font-size: 9px;
       font-weight: 600;
       color: rgba(184,212,92,0.7);
       letter-spacing: 0.1em;
       text-transform: uppercase;
     }
     .dc-tab-pull { display: none; }
+
+    /* Chevron hint */
+    .dc-chevron {
+      font-size: 16px;
+      font-weight: 700;
+      color: rgba(184,212,92,0.75);
+      line-height: 1;
+      margin-top: 6px;
+      animation: dcChevronPulse 2s ease-in-out infinite;
+    }
+    @keyframes dcChevronPulse {
+      0%, 100% { opacity: 0.4; transform: translateX(0); }
+      50%       { opacity: 1;   transform: translateX(-3px); }
+    }
+    /* Hide chevron while card is open */
+    .daily-challenge-btn:hover .dc-chevron,
+    .daily-challenge-btn.dc-open .dc-chevron { opacity: 0; }
+
+    /* Periodic nudge — peeks left every ~8s */
+    @keyframes dcNudge {
+      0%, 100% { transform: translateY(-50%) translateX(calc(100% - 52px)); }
+      3%        { transform: translateY(-50%) translateX(calc(100% - 68px)); }
+      6%        { transform: translateY(-50%) translateX(calc(100% - 52px)); }
+    }
+    .daily-challenge-btn.dc-nudge {
+      animation: dcNudge 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
 
     /* Hover: slide fully open */
     .daily-challenge-btn:hover,
@@ -2564,7 +2591,7 @@ select:focus {
 
     .daily-challenge-btn:active { transform: translateY(-50%) translateX(0) scale(0.98); }
     .daily-challenge-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .daily-challenge-btn:disabled:hover { transform: translateY(-50%) translateX(calc(100% - 46px)); }
+    .daily-challenge-btn:disabled:hover { transform: translateY(-50%) translateX(calc(100% - 52px)); }
 
     .daily-challenge-left { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; width: 100%; }
     .daily-challenge-icon { display: none; }
@@ -2585,10 +2612,10 @@ select:focus {
     /* Mobile: tap-to-open */
     @media (max-width: 599px) {
       .daily-challenge-btn {
-        transform: translateY(-50%) translateX(calc(100% - 46px));
+        transform: translateY(-50%) translateX(calc(100% - 52px));
       }
       .daily-challenge-btn:hover:not(.dc-open) {
-        transform: translateY(-50%) translateX(calc(100% - 46px));
+        transform: translateY(-50%) translateX(calc(100% - 52px));
         border-color: rgba(87,50,128,0.45);
         box-shadow: -6px 0 32px rgba(0,0,0,0.7), -2px 0 14px rgba(87,50,128,0.35);
       }
@@ -5366,7 +5393,7 @@ const MILESTONE_DEFS = [
   { id: 'q_1000',      icon: '💎', name: '1K Club',        desc: '1,000 questions answered',         check: (h,pb) => getTotalQs(h) >= 1000 },
   { id: 'q_5000',      icon: '👑', name: 'Legend',         desc: '5,000 questions answered',         check: (h,pb) => getTotalQs(h) >= 5000 },
   { id: 'perfect',     icon: '🏆', name: 'Perfect',        desc: 'Score 100% on any quiz',           check: (h,pb) => (pb.bestPct||0) >= 100 },
-  { id: 'streak_3',    icon: 'm���️', name: '3-Day Streak',   desc: 'Practice 3 days in a row',         check: (h,pb) => computeDayStreak(h) >= 3 },
+  { id: 'streak_3',    icon: '🗓️', name: '3-Day Streak',   desc: 'Practice 3 days in a row',         check: (h,pb) => computeDayStreak(h) >= 3 },
   { id: 'streak_7',    icon: '📅', name: 'Week Warrior',   desc: 'Practice 7 days in a row',         check: (h,pb) => computeDayStreak(h) >= 7 },
   { id: 'streak_30',   icon: '🌟', name: 'Monthly Master', desc: '30-day streak',                    check: (h,pb) => computeDayStreak(h) >= 30 },
   { id: 'acc_80',      icon: '🎯', name: 'Sharp Shooter',  desc: 'Achieve 80%+ accuracy in a quiz',  check: (h,pb) => (pb.bestPct||0) >= 80 },
@@ -6175,6 +6202,21 @@ function updateDailyChallengeVisibility(screenId) {
     void btn.offsetWidth;
     btn.classList.add('dc-bounce');
     setTimeout(() => btn.classList.remove('dc-bounce'), 700);
+
+    // Periodic nudge every 8s while retracted
+    if (!btn._dcNudgeInterval) {
+      btn._dcNudgeInterval = setInterval(() => {
+        if (!btn.classList.contains('dc-open') && !btn.classList.contains('dc-bounce')) {
+          btn.classList.remove('dc-nudge');
+          void btn.offsetWidth;
+          btn.classList.add('dc-nudge');
+          setTimeout(() => btn.classList.remove('dc-nudge'), 650);
+        }
+      }, 8000);
+    }
+  } else {
+    clearInterval(btn._dcNudgeInterval);
+    btn._dcNudgeInterval = null;
   }
 
   const pullLabel = document.getElementById('dcPullLabel');
@@ -6310,6 +6352,7 @@ showProfile = function() {
   <div class="dc-tab">
     <span class="dc-tab-day" id="dcTabDay">3</span>
     <span class="dc-tab-mon" id="dcTabMon">MAY</span>
+    <span class="dc-chevron">‹</span>
   </div>
   <div class="daily-challenge-left">
     <div class="daily-challenge-info">
