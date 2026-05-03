@@ -157,11 +157,10 @@
     /* ── Score pill bump on correct ── */
     @keyframes pillBump {
       0%   { transform: scale(1); }
-      40%  { transform: scale(1.25); }
-      70%  { transform: scale(0.95); }
+      40%  { transform: scale(1.07); }
       100% { transform: scale(1); }
     }
-    .pill-bump { animation: pillBump 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .pill-bump { animation: pillBump 0.3s ease-out; }
 
     /* ── Progress bar fill smooth ── */
     .prog-fill { transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
@@ -219,7 +218,7 @@
       100% { background-position:  200% center; }
     }
 
-    /* ── Glowing border pulse on q-card ── */
+    /* ─we� Glowing border pulse on q-card ── */
     @keyframes borderPulse {
       0%, 100% { border-color: rgba(184,212,92,0.15); }
       50%       { border-color: rgba(184,212,92,0.35); }
@@ -1600,7 +1599,7 @@ select:focus {
       letter-spacing: 0.04em;
     }
 
-    /* ════════════════════════════════════
+    /* ══════════i��═════════════════════════
        BENTO GRID LAYOUT
     ════════════════════════════════════ */
     .bento-grid {
@@ -3562,7 +3561,12 @@ select:focus {
     <div class="setup-header">
 
   <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
-    <div class="top-meta" style="justify-content:flex-start;">
+    <button class="back-btn" onclick="show('s-setup')" title="Back to Setup" style="flex-shrink:0;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15,18 9,12 15,6"/>
+      </svg>
+    </button>
+    <div class="top-meta" style="justify-content:flex-start;flex:1;">
       <div class="q-pill">
         Q <span id="qNum">01</span> of <span id="qTotal">10</span>
       </div>
@@ -4472,6 +4476,7 @@ function startTimer(){
     if(!isTimedMode){
       nb.style.display = 'block';
       nb.textContent = cur < qs.length-1 ? 'Next question →' : 'See results →';
+      if(!isMobile) setTimeout(() => nb.focus(), 150);
     }
 
     const fb = document.getElementById('fbBox');
@@ -4491,6 +4496,7 @@ function startTimer(){
     }
   } else {
     btn.textContent = 'Next';
+    if(!isMobile) setTimeout(() => btn.focus(), 150);
     if(isTimedMode) setTimeout(() => { if(answered) nextQ(); }, 400);
   }
 
@@ -4689,6 +4695,13 @@ function startTimer(){
   });
   document.getElementById('ansInput').addEventListener('keydown',e=>{
     if(e.key==='Enter'){ answered?nextQ():checkAnswer(); }
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const quizScreen = document.getElementById('s-quiz');
+    if (!quizScreen || !quizScreen.classList.contains('active')) return;
+    if (e.target && (e.target.tagName === 'BUTTON' || e.target.tagName === 'A')) return;
+    if (answered) { e.preventDefault(); nextQ(); }
   });
 const pickTog = document.getElementById('pickModeTog');
 const autoTog = document.getElementById('autosubTog');
@@ -5443,6 +5456,22 @@ function drainMilestoneQueue() {
   showMilestoneToast(m, () => setTimeout(drainMilestoneQueue, 400));
 }
 
+function showDCCompleteToast(pct, onDone) {
+  const toast = document.getElementById('milestoneToast');
+  document.getElementById('milestoneToastIcon').textContent  = '🎯';
+  document.getElementById('milestoneToastTitle').textContent = 'Daily Challenge Complete!';
+  document.getElementById('milestoneToastSub').textContent   = `${pct}% — Come back tomorrow for a new one`;
+  toast.classList.remove('hide');
+  toast.classList.add('show');
+  setTimeout(() => {
+    toast.classList.add('hide');
+    setTimeout(() => {
+      toast.classList.remove('show', 'hide');
+      if (onDone) onDone();
+    }, 400);
+  }, 3000);
+}
+
 function showMilestoneToast(m, onDone) {
   const toast = document.getElementById('milestoneToast');
   document.getElementById('milestoneToastIcon').textContent  = m.icon;
@@ -5796,7 +5825,7 @@ function getWeakNumbers() {
   });
 }
 
-// ─────────────────────────────────────────────
+// ─────────a��───────────────────────────────────
 // SPACED REPETITION — cross-session persistence
 // ─────────────────────────────────────────────
 
@@ -6121,7 +6150,7 @@ function onCorrectAnswer(sessionStreak) {
 // ─────────────────────────────────────────────
 // HOOK: called at end of session (from showResults)
 // ─────────────────────────────────────────────
-function onSessionComplete(pct, sessionBestStreak) {
+function onSessionComplete(pct, sessionBestStreak, score, total) {
   // Day streak
   const streakResult = updateDayStreak();
 
@@ -6142,8 +6171,10 @@ function onSessionComplete(pct, sessionBestStreak) {
   if (isDailyChallenge) {
     saveDailyChallengeData({ date: getTodayDateStr(), completed: true, score, total, pct });
     isDailyChallenge = false;
-    const activeScreen = document.querySelector('.screen.active');
-    updateDailyChallengeVisibility(activeScreen ? activeScreen.id : 's-setup');
+    showDCCompleteToast(pct, () => {
+      const activeScreen = document.querySelector('.screen.active');
+      updateDailyChallengeVisibility(activeScreen ? activeScreen.id : 's-setup');
+    });
   }
 
   // Pulse the day streak stat in dashboard if it increased
@@ -6287,7 +6318,7 @@ const _origShowResults = showResults;
         resultsScreen.dataset.nudgeFired = 'true';
         const total = results.length;
         const pct   = total > 0 ? Math.round((score / total) * 100) : 0;
-        onSessionComplete(pct, bestStreak);
+        onSessionComplete(pct, bestStreak, score, total);
       }
     } else if (resultsScreen) {
       resultsScreen.dataset.nudgeFired = 'false';
