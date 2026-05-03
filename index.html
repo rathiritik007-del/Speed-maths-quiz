@@ -2451,41 +2451,53 @@ select:focus {
     .session-nudge-icon { font-size: 20px; flex-shrink: 0; }
 
     /* ── Daily Challenge Floating Pin Card ── */
+
+    @keyframes dcSlideIn {
+      0%   { transform: translateY(-50%) translateX(100%); }
+      55%  { transform: translateY(-50%) translateX(calc(100% - 54px)); }
+      72%  { transform: translateY(-50%) translateX(calc(100% - 38px)); }
+      85%  { transform: translateY(-50%) translateX(calc(100% - 50px)); }
+      93%  { transform: translateY(-50%) translateX(calc(100% - 43px)); }
+      100% { transform: translateY(-50%) translateX(calc(100% - 46px)); }
+    }
+    .daily-challenge-btn.dc-bounce {
+      animation: dcSlideIn 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
     .daily-challenge-btn {
-      /* Floating pinned to the right edge */
       position: fixed;
       right: 0;
       top: 50%;
-      transform: translateY(-50%) translateX(calc(100% - 36px)) translateZ(0);
+      transform: translateY(-50%) translateX(calc(100% - 46px));
       z-index: 200;
       opacity: 0;
       pointer-events: none;
 
-      /* Size */
-      width: 200px;
-      padding: 12px 14px;
+      width: 230px;
+      min-height: 64px;
+      padding: 10px 12px 10px 58px;
       border-radius: 14px 0 0 14px;
-      border: 1px solid rgba(184,212,92,0.3);
+      border: 1px solid rgba(87,50,128,0.45);
       border-right: none;
 
-      background: linear-gradient(135deg, rgba(55,15,85,0.92), rgba(30,5,50,0.97));
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      background: rgba(18, 6, 32, 0.97);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
 
       color: #eff8e2;
       font-family: 'Inter', sans-serif;
-      font-weight: 700;
       cursor: pointer;
 
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      gap: 6px;
+      justify-content: center;
+      gap: 0;
+      overflow: visible;
 
       box-shadow:
-        -4px 0 30px rgba(0,0,0,0.5),
-        -2px 0 12px rgba(87,50,128,0.3),
-        inset 1px 0 0 rgba(184,212,92,0.08);
+        -6px 0 32px rgba(0,0,0,0.7),
+        -2px 0 14px rgba(87,50,128,0.35);
 
       transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
                   opacity 0.22s ease,
@@ -2493,97 +2505,97 @@ select:focus {
                   border-color 0.2s;
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
-
-      /* Pin tab visual — a small pull-tab on the left */
-      overflow: visible;
     }
 
-    /* The visible pull-tab peeking out from the right */
-    .daily-challenge-btn::before {
-      content: var(--dc-tab-date, '?');
+    /* The date box — frosted glass when retracted, solid when open */
+    .dc-tab {
       position: absolute;
-      left: -2px;
-      top: 50%;
-      transform: translateX(-100%) translateY(-50%);
-      width: 36px;
-      height: 52px;
-      background: linear-gradient(135deg, rgba(55,15,85,0.95), rgba(30,5,50,0.98));
-      border: 1px solid rgba(184,212,92,0.3);
-      border-right: none;
-      border-radius: 10px 0 0 10px;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 46px;
+      background: rgba(60, 20, 90, 0.45);
+      backdrop-filter: blur(14px) saturate(1.6);
+      -webkit-backdrop-filter: blur(14px) saturate(1.6);
+      border-right: 1px solid rgba(120,70,180,0.35);
+      border-radius: 14px 0 0 14px;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-size: 9px;
-      font-weight: 700;
-      font-family: 'Inter', sans-serif;
-      color: #B8D45C;
-      letter-spacing: 0.02em;
-      text-align: center;
-      line-height: 1.3;
-      white-space: pre;
-      box-shadow: -3px 0 14px rgba(0,0,0,0.4);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      padding: 0 3px;
+      gap: 2px;
+      pointer-events: none;
+      transition: background 0.25s ease, backdrop-filter 0.25s ease;
     }
+    /* Solid when expanded */
+    .daily-challenge-btn:hover .dc-tab,
+    .daily-challenge-btn.dc-open .dc-tab {
+      background: rgba(45, 12, 72, 0.95);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      border-right-color: rgba(87,50,128,0.5);
+    }
+    .dc-tab-day {
+      font-size: 17px;
+      font-weight: 700;
+      color: #B8D45C;
+      line-height: 1;
+    }
+    .dc-tab-mon {
+      font-size: 8px;
+      font-weight: 600;
+      color: rgba(184,212,92,0.7);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .dc-tab-pull { display: none; }
 
-    /* Hover: slide the card into view */
+    /* Hover: slide fully open */
     .daily-challenge-btn:hover,
     .daily-challenge-btn:focus-visible {
-      transform: translateY(-50%) translateX(0) translateZ(0);
-      border-color: rgba(184,212,92,0.5);
+      transform: translateY(-50%) translateX(0);
+      border-color: rgba(87,50,128,0.8);
       box-shadow:
-        -6px 0 40px rgba(0,0,0,0.6),
-        -2px 0 20px rgba(87,50,128,0.4),
-        0 0 16px rgba(184,212,92,0.1),
-        inset 1px 0 0 rgba(184,212,92,0.12);
+        -8px 0 40px rgba(0,0,0,0.75),
+        -2px 0 20px rgba(87,50,128,0.5),
+        0 0 20px rgba(184,212,92,0.06);
       outline: none;
     }
 
-    .daily-challenge-btn:active { transform: translateY(-50%) translateX(0) scale(0.98) translateZ(0); }
+    .daily-challenge-btn:active { transform: translateY(-50%) translateX(0) scale(0.98); }
     .daily-challenge-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .daily-challenge-btn:disabled:hover { transform: translateY(-50%) translateX(calc(100% - 36px)) translateZ(0); }
+    .daily-challenge-btn:disabled:hover { transform: translateY(-50%) translateX(calc(100% - 46px)); }
 
-    /* Hide the icon inside since it's now in ::before */
-    .daily-challenge-left { display: flex; align-items: center; gap: 8px; width: 100%; }
+    .daily-challenge-left { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; width: 100%; }
     .daily-challenge-icon { display: none; }
-    .daily-challenge-info { flex: 1; min-width: 0; }
-    .daily-challenge-title { font-size: 12px; font-weight: 700; color: #eff8e2; text-align: left; white-space: nowrap; }
-    .daily-challenge-sub { font-size: 10px; color: rgba(239,248,226,0.5); text-align: left; margin-top: 2px; white-space: nowrap; }
+    .daily-challenge-info { width: 100%; }
+    .daily-challenge-title { font-size: 12px; font-weight: 700; color: #eff8e2; text-align: left; white-space: nowrap; line-height: 1.2; }
+    .daily-challenge-sub { font-size: 10px; color: rgba(239,248,226,0.45); text-align: left; margin-top: 3px; white-space: nowrap; }
     .daily-challenge-badge {
       font-size: 10px;
-      font-weight: 700;
-      padding: 3px 8px;
+      font-weight: 600;
+      padding: 3px 9px;
       border-radius: 20px;
-      flex-shrink: 0;
-      align-self: flex-start;
+      margin-top: 6px;
+      display: inline-block;
     }
-    .daily-challenge-badge.avail { background: rgba(123,168,50,0.2); color: #B8D45C; border: 1px solid rgba(184,212,92,0.3); }
-    .daily-challenge-badge.done  { background: rgba(87,50,128,0.3);  color: rgba(239,248,226,0.4); border: 1px solid rgba(255,255,255,0.08); }
+    .daily-challenge-badge.avail { background: rgba(45,12,72,0.9); color: #B8D45C; border: 1px solid rgba(87,50,128,0.7); }
+    .daily-challenge-badge.done  { background: rgba(30,8,50,0.8); color: rgba(239,248,226,0.35); border: 1px solid rgba(87,50,128,0.35); }
 
-    /* On mobile: tap-to-open instead of hover */
+    /* Mobile: tap-to-open */
     @media (max-width: 599px) {
       .daily-challenge-btn {
-        top: 50%;
-        bottom: auto;
-        right: 0;
-        transform: translateY(-50%) translateX(calc(100% - 36px));
-        border-radius: 12px 0 0 12px;
-        /* Disable hover slide on touch devices */
-        pointer-events: auto;
+        transform: translateY(-50%) translateX(calc(100% - 46px));
       }
-      /* Disable hover-triggered slide on mobile */
       .daily-challenge-btn:hover:not(.dc-open) {
-        transform: translateY(-50%) translateX(calc(100% - 36px));
-        border-color: rgba(184,212,92,0.3);
-        box-shadow: -4px 0 30px rgba(0,0,0,0.5), -2px 0 12px rgba(87,50,128,0.3), inset 1px 0 0 rgba(184,212,92,0.08);
+        transform: translateY(-50%) translateX(calc(100% - 46px));
+        border-color: rgba(87,50,128,0.45);
+        box-shadow: -6px 0 32px rgba(0,0,0,0.7), -2px 0 14px rgba(87,50,128,0.35);
       }
-      /* Tap-open state */
       .daily-challenge-btn.dc-open {
-        transform: translateY(-50%) translateX(0) translateZ(0) !important;
-        border-color: rgba(184,212,92,0.5) !important;
-        box-shadow: -6px 0 40px rgba(0,0,0,0.6), -2px 0 20px rgba(87,50,128,0.4), 0 0 16px rgba(184,212,92,0.1), inset 1px 0 0 rgba(184,212,92,0.12) !important;
+        transform: translateY(-50%) translateX(0) !important;
+        border-color: rgba(87,50,128,0.8) !important;
+        box-shadow: -8px 0 40px rgba(0,0,0,0.75), -2px 0 20px rgba(87,50,128,0.5) !important;
       }
       .daily-challenge-btn:active { transform: translateY(-50%) translateX(0) scale(0.98) !important; }
     }
@@ -5985,9 +5997,10 @@ function updateDailyChallengeBtn() {
   // Format: day number + newline + short month (e.g. "3\nMAY")
   (function setDcTabDate() {
     const now = new Date();
-    const day = now.getDate();
-    const mon = now.toLocaleString('en', { month: 'short' }).toUpperCase();
-    btn.style.setProperty('--dc-tab-date', `"${day}\\A${mon}"`);
+    const dayEl = document.getElementById('dcTabDay');
+    const monEl = document.getElementById('dcTabMon');
+    if (dayEl) dayEl.textContent = now.getDate();
+    if (monEl) monEl.textContent = now.toLocaleString('en', { month: 'short' }).toUpperCase();
   })();
 
   // Mobile tap-to-open, then tap-to-launch (hover doesn't work on touch)
@@ -5995,26 +6008,31 @@ function updateDailyChallengeBtn() {
     btn._dcTapBound = true;
 
     btn.addEventListener('touchend', function(e) {
-      // Only intercept on touch — pointer events on desktop are fine via hover+click
       if (!btn.classList.contains('dc-open')) {
-        // First touch: just open the card, don't start the challenge
+        // First touch: open the card, don't start the challenge yet
         e.preventDefault();
         e.stopPropagation();
         btn.classList.add('dc-open');
+        const pl = document.getElementById('dcPullLabel');
+        if (pl) pl.classList.remove('show');
         clearTimeout(btn._dcAutoClose);
-        btn._dcAutoClose = setTimeout(() => btn.classList.remove('dc-open'), 5000);
+        btn._dcAutoClose = setTimeout(() => {
+          btn.classList.remove('dc-open');
+          if (pl) pl.classList.add('show');
+        }, 5000);
       } else {
-        // Already open: let it fall through to the onclick handler (startDailyChallenge)
-        // No preventDefault — the click will fire naturally
+        // Already open: let click fire naturally -> startDailyChallenge()
         clearTimeout(btn._dcAutoClose);
       }
     }, { passive: false });
 
-    // Close when tapping anywhere outside the card
+    // Close when tapping anything outside the card
     document.addEventListener('touchend', function(e) {
       if (btn.classList.contains('dc-open') && !btn.contains(e.target)) {
         btn.classList.remove('dc-open');
         clearTimeout(btn._dcAutoClose);
+        const pl = document.getElementById('dcPullLabel');
+        if (pl) pl.classList.add('show');
       }
     }, { passive: true });
   }
@@ -6151,7 +6169,21 @@ function updateDailyChallengeVisibility(screenId) {
     : 'transform 0.22s ease, opacity 0.18s ease';
   btn.style.opacity = visible ? '1' : '0';
   btn.style.pointerEvents = visible ? 'auto' : 'none';
-  if (!visible) btn.classList.remove('dc-open');
+
+  if (visible) {
+    btn.classList.remove('dc-bounce');
+    void btn.offsetWidth;
+    btn.classList.add('dc-bounce');
+    setTimeout(() => btn.classList.remove('dc-bounce'), 700);
+  }
+
+  const pullLabel = document.getElementById('dcPullLabel');
+  if (!visible) {
+    btn.classList.remove('dc-open');
+    if (pullLabel) pullLabel.classList.remove('show');
+  } else {
+    if (pullLabel) pullLabel.classList.add('show');
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -6275,14 +6307,17 @@ showProfile = function() {
 </div>
 <!-- Daily Challenge Floating Pin Card (fixed, always visible) -->
 <button class="daily-challenge-btn" id="dailyChallengeBtn" onclick="startDailyChallenge()">
+  <div class="dc-tab">
+    <span class="dc-tab-day" id="dcTabDay">3</span>
+    <span class="dc-tab-mon" id="dcTabMon">MAY</span>
+  </div>
   <div class="daily-challenge-left">
-    <div class="daily-challenge-icon">🗓️</div>
     <div class="daily-challenge-info">
       <div class="daily-challenge-title">Daily Challenge</div>
       <div class="daily-challenge-sub">10 mixed Qs · resets midnight</div>
+      <span class="daily-challenge-badge avail" id="dailyChallengeBadge">Available</span>
     </div>
   </div>
-  <span class="daily-challenge-badge avail" id="dailyChallengeBadge">Available</span>
 </button>
 
 </body>
