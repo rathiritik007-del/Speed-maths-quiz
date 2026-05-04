@@ -121,44 +121,42 @@
       animation-delay: 0.02s;
     }
 
-    /* ── Question card pop-in ── */
+    /* ── Question card fade-in ── */
     @keyframes qCardPop {
-      0%   { opacity: 0; transform: scale(0.95) translateY(10px); }
-      60%  { transform: scale(1.01) translateY(-2px); }
-      100% { opacity: 1; transform: scale(1) translateY(0); }
+      0%   { opacity: 0; transform: translateY(5px); }
+      100% { opacity: 1; transform: translateY(0); }
     }
     .q-card-anim {
-      animation: qCardPop 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      animation: qCardPop 0.22s ease-out both;
     }
 
-    /* ── Question expression number pop ── */
+    /* ── Question expression number fade-in ── */
     @keyframes exprPop {
-      0%   { opacity: 0; transform: scale(0.7); }
-      70%  { transform: scale(1.06); }
+      0%   { opacity: 0; transform: scale(0.96); }
       100% { opacity: 1; transform: scale(1); }
     }
     .expr-anim {
-      animation: exprPop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-      animation-delay: 0.1s;
+      animation: exprPop 0.2s ease-out both;
+      animation-delay: 0.06s;
     }
 
     /* ── Answer input entrance ── */
     @keyframes inputIn {
-      from { opacity: 0; transform: translateY(8px); }
+      from { opacity: 0; transform: translateY(4px); }
       to   { opacity: 1; transform: translateY(0); }
     }
     .ans-zone-anim {
-      animation: inputIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
-      animation-delay: 0.18s;
+      animation: inputIn 0.2s ease-out both;
+      animation-delay: 0.1s;
     }
 
     /* ── Pick buttons stagger ── */
     @keyframes pickIn {
-      from { opacity: 0; transform: scale(0.92); }
+      from { opacity: 0; transform: scale(0.97); }
       to   { opacity: 1; transform: scale(1); }
     }
     .pick-btn-anim {
-      animation: pickIn 0.3s cubic-bezier(0.34, 1.3, 0.64, 1) both;
+      animation: pickIn 0.18s ease-out both;
     }
 
     /* ── Correct answer flash ── */
@@ -185,7 +183,7 @@
       to   { opacity: 1; transform: translateY(0)    scale(1); }
     }
     .fb-box { animation: none; }
-    .fb-box.visible { animation: fbIn 0.25s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .fb-box.visible { opacity: 1; pointer-events: auto; animation: fbIn 0.25s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
     /* ── Score pill bump on correct ── */
     @keyframes pillBump {
@@ -700,68 +698,104 @@
 .prog-wrap {
   margin-top: 18px;   /* spacing inside header */
 }
-    .timer-bar-wrap {
-display: block;
-  margin: 0 clamp(12px, 4vw, 20px) clamp(10px, 3vw, 16px);
-  padding: 14px 16px;
-  border-radius: 16px;
-
-  background: color-mix(in srgb, var(--p4), transparent 80%);
-  border: 1px solid color-mix(in srgb, var(--acc), transparent 90%);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-}
-
-.timer-bar-inner {
+    .q-card-top-row {
   display: flex;
+  align-items: flex-start;
   justify-content: space-between;
+  margin-bottom: clamp(4px, 1.5vw, 8px);
+}
+
+.q-card-meta {
+  display: flex;
+  flex-direction: row;
   align-items: center;
-  margin-bottom: 8px;
+  gap: 8px;
+  min-width: 0;
 }
 
-.timer-left {
-  font-size: 13px;
-  color: rgba(239,248,226,0.4);
-}
-
-.timer-right {
-  font-weight: 600;
-  color: var(--acc);
-}
-
-.timer-bar {
-  height: 6px;
-  background: rgba(239,248,226,0.25);
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.timer-bar-fill {
-  height: 100%;
-  width: 100%;
-  background: linear-gradient(90deg, var(--p4), var(--p7));
-  transition: width 0.1s linear;
-}
-
-.stopwatch-wrap {
-  margin: 0 clamp(12px, 4vw, 20px) clamp(10px, 3vw, 16px);
-  padding: 14px 16px;
-  border-radius: 16px;
-  background: color-mix(in srgb, var(--p2), transparent 40%);
-  border: 1px solid rgba(239,248,226,0.08);
-  display: none;
-  justify-content: space-between;
+.q-timer-chip {
+  display: flex;
   align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
 }
-.stopwatch-label {
-  font-size: 13px;
-  color: rgba(239,248,226,0.4);
+
+.timer-arc-svg {
+  width: 40px;
+  height: 40px;
+  transform: rotate(-90deg);
+  flex-shrink: 0;
+  display: block;
 }
-.stopwatch-num {
-  font-size: clamp(20px, 5vw, 26px);
-  font-weight: 700;
-  color: var(--acc);
+
+.timer-arc-bg {
+  fill: none;
+  stroke: rgba(239,248,226,0.07);
+  stroke-width: 3.5;
+}
+
+.timer-arc-fill {
+  fill: none;
+  stroke: var(--acc);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-dasharray: 113.1;
+  stroke-dashoffset: 0;
+  opacity: 0.35;
+  transition: stroke-dashoffset 0.15s linear, stroke 0.6s ease;
+}
+
+.q-chip-label {
+  font-size: 10px;
+  color: rgba(239,248,226,0.3);
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
+}
+
+/* ── Timer seconds text label — centered inside the arc ── */
+.timer-secs {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: rgba(239,248,226,0.5);
+  letter-spacing: 0.01em;
+  line-height: 1;
+  pointer-events: none;
+  transition: color 0.6s ease;
+}
+
+/* ── Urgent state: ≤3 seconds ── */
+@keyframes timerPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.06); opacity: 0.88; }
+}
+
+.q-timer-chip.urgent {
+  animation: timerPulse 1s ease-in-out infinite;
+}
+
+.q-timer-chip.urgent .timer-arc-fill {
+  stroke: #e05555;
+  opacity: 0.55;
+}
+
+.q-timer-chip.urgent .timer-secs {
+  color: #e05555;
+}
+
+/* stopwatch now uses .q-timer-chip */
+
+.stopwatch-num {
+  font-size: 12px;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--acc), transparent 30%);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
 }
 
     .q-card {
@@ -770,7 +804,7 @@ display: block;
       backdrop-filter: blur(32px);
       -webkit-backdrop-filter: blur(32px);
       border-radius: clamp(14px, 4vw, 20px);
-      padding: clamp(16px, 5vw, 24px);
+      padding: clamp(10px, 2.5vw, 14px) clamp(10px, 2.5vw, 14px) clamp(16px, 5vw, 24px);
       border: 1px solid color-mix(in srgb, var(--acc), transparent 85%);
       box-shadow:
             0 8px 32px rgba(0,0,0,0.4),
@@ -790,23 +824,24 @@ display: block;
     }
     .q-badge {
       display: inline-block;
-      font-size: clamp(10px, 2.5vw, 12px);
-      padding: 4px clamp(10px, 3vw, 14px);
+      font-size: 10px;
+      padding: 3px 9px;
       border-radius: 20px;
       font-weight: 600;
-      margin-bottom: clamp(8px, 2.5vw, 13px);
-      letter-spacing: 0.03em;
+      margin-bottom: 0;
+      letter-spacing: 0.04em;
+      flex-shrink: 0;
     }
     .badge-sq { background: rgba(239,248,226,0.1); color: #eff8e2; border: 1px solid rgba(239,248,226,0.3); }
     .badge-cu { background: color-mix(in srgb, var(--acc), transparent 85%); color: var(--acc); border: 1px solid color-mix(in srgb, var(--acc), transparent 60%); }
     .q-number {
-      font-size: clamp(11px, 3vw, 14px);
+      font-size: clamp(10px, 2.5vw, 12px);
       color: rgba(239,248,226,0.35);
-      margin-bottom: 4px;
       font-weight: 400;
+      white-space: nowrap;
     }
     .q-expr {
-      font-size: clamp(24px, 7vw, 32px);
+      font-size: clamp(30px, 9vw, 44px);
       font-weight: 700;
       color: #eff8e2;
       text-align: center;
@@ -820,7 +855,7 @@ display: block;
     }
 
     .ans-zone {
-      padding: 0 clamp(12px, 4vw, 20px) 0;
+      padding: 0 clamp(12px, 4vw, 20px) 10px;
       flex-shrink: 0;
     }
     .ans-row {
@@ -851,11 +886,120 @@ display: block;
     .ans-input::-webkit-inner-spin-button,
     .ans-input::-webkit-outer-spin-button { -webkit-appearance: none; }
     .ans-input:focus { border-color: var(--p6); box-shadow: 0 0 0 3px color-mix(in srgb, var(--p4), transparent 70%), 0 0 16px color-mix(in srgb, var(--p4), transparent 75%); }
-    .ans-input.correct { border-color: var(--acc); background: color-mix(in srgb, var(--acc), transparent 92%); color: var(--acc); box-shadow: 0 0 16px color-mix(in srgb, var(--acc), transparent 75%), 0 0 0 3px color-mix(in srgb, var(--acc), transparent 90%); }
-    .ans-input.wrong  { border-color: var(--p7); background: color-mix(in srgb, var(--p7), transparent 92%); color: var(--p7); }
+    /* Correct — green glow, accent colour */
+    .ans-input.correct {
+      border-color: var(--acc);
+      background: color-mix(in srgb, var(--acc), transparent 90%);
+      color: var(--acc);
+      box-shadow: 0 0 18px color-mix(in srgb, var(--acc), transparent 72%),
+                  0 0 0 3px color-mix(in srgb, var(--acc), transparent 88%);
+    }
+    /* Wrong — red tint, user answer stays readable */
+    .ans-input.wrong {
+      border-color: #e05555;
+      background: color-mix(in srgb, #e05555, transparent 88%);
+      color: #ff8080;
+    }
+
+    /* ── Input wrapper — needed for ✔ icon overlay ── */
+    .ans-input-wrap {
+      flex: 1;
+      min-width: 0;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .ans-input-wrap .ans-input { width: 100%; }
+
+    /* ✔ icon — fades in on correct */
+    .ans-input-wrap::after {
+      content: '✔';
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%) scale(0.6);
+      font-size: 16px;
+      color: var(--acc);
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+      pointer-events: none;
+    }
+    .ans-input-wrap.show-correct::after {
+      opacity: 1;
+      transform: translateY(-50%) scale(1);
+    }
+
+    /* ── Answer caption — hidden, replaced by inline split view ── */
+    .ans-caption { display: none; }
+
+    /* ── Split-view inside the input wrapper when wrong ── */
+    .ans-input-wrap.split-wrong {
+      overflow: hidden;
+    }
+    .ans-input-wrap.split-wrong .ans-input {
+      /* The actual input is hidden; we show the split overlay instead */
+      opacity: 0;
+      pointer-events: none;
+    }
+    /* Overlay that shows wrong | correct split */
+    .ans-split-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      border-radius: inherit;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .ans-split-overlay .split-wrong-val {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ff8080;
+      font-size: clamp(16px, 4.5vw, 20px);
+      font-weight: 700;
+      transform: translateX(-100%);
+      animation: splitSlideIn 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      padding: 0 8px;
+      min-width: 0;
+    }
+    .ans-split-overlay .split-sep {
+      width: 1.5px;
+      align-self: stretch;
+      background: rgba(239,248,226,0.2);
+      flex-shrink: 0;
+      transform: scaleY(0);
+      animation: splitSepIn 0.2s 0.18s ease forwards;
+    }
+    .ans-split-overlay .split-correct-val {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--acc);
+      font-size: clamp(16px, 4.5vw, 20px);
+      font-weight: 700;
+      opacity: 0;
+      animation: splitCorrectIn 0.28s 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      padding: 0 8px;
+      min-width: 0;
+    }
+    @keyframes splitSlideIn {
+      from { transform: translateX(-100%); opacity: 0; }
+      to   { transform: translateX(0);    opacity: 1; }
+    }
+    @keyframes splitSepIn {
+      from { transform: scaleY(0); }
+      to   { transform: scaleY(1); }
+    }
+    @keyframes splitCorrectIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
 
     .check-btn {
-      padding: clamp(11px, 3.5vw, 15px) clamp(14px, 4vw, 22px);
+      padding: clamp(11px, 3.5vw, 15px);
       border: 1px solid color-mix(in srgb, var(--acc), transparent 75%);
       border-radius: clamp(10px, 3vw, 13px);
       background: linear-gradient(135deg, var(--p5), var(--p4));
@@ -865,45 +1009,45 @@ display: block;
       cursor: pointer;
       transition: all 0.2s;
       font-family: 'Inter', sans-serif;
-      flex-shrink: 0;
+      width: 100%;
+      display: block;
       box-shadow: 0 0 16px color-mix(in srgb, var(--p4), transparent 65%), inset 0 1px 0 color-mix(in srgb, var(--acc), transparent 90%);
     }
+    .check-btn.is-next {
+      background: transparent;
+      border-color: rgba(239,248,226,0.2);
+      box-shadow: none;
+      font-weight: 500;
+    }
+    .check-btn.is-next:hover { background: var(--p2); }
     .check-btn:hover:not(:disabled) {
       box-shadow: 0 0 24px rgba(87,50,128,0.55), 0 0 8px color-mix(in srgb, var(--acc), transparent 85%);
       border-color: color-mix(in srgb, var(--acc), transparent 60%);
     }
     .check-btn:disabled { opacity: 0.3; cursor: default; box-shadow: none; }
 
+    .action-wrap {
+      position: relative;
+      margin: 0 clamp(12px, 4vw, 20px) clamp(14px, 4vw, 20px);
+    }
     .fb-box {
-      margin: 0 clamp(12px, 4vw, 20px) clamp(8px, 2.5vw, 12px);
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 0; right: 0;
       padding: clamp(10px, 3vw, 13px) clamp(12px, 4vw, 18px);
       border-radius: 12px;
       font-size: clamp(12px, 3.2vw, 15px);
       font-weight: 500;
       text-align: center;
-      display: none;
-      flex-shrink: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s ease;
+      z-index: 10;
     }
     .fb-ok { background: color-mix(in srgb, var(--acc), transparent 88%); color: var(--acc); border: 1px solid color-mix(in srgb, var(--acc), transparent 60%); }
-    .fb-no { background: color-mix(in srgb, #ff7070, transparent 90%); color: #ff7070; border: 1px solid color-mix(in srgb, #ff7070, transparent 65%); }
+    .fb-no { background: color-mix(in srgb, #ff7070, transparent 75%); color: #ff5555; border: 2px solid color-mix(in srgb, #ff7070, transparent 40%); font-weight: 700; }
 
-    .next-btn {
-      margin: 0 clamp(12px, 4vw, 20px) clamp(14px, 4vw, 20px);
-      padding: clamp(11px, 3.5vw, 15px);
-      border: 1.5px solid rgba(239,248,226,0.2);
-      border-radius: clamp(10px, 3vw, 13px);
-      background: transparent;
-      color: #eff8e2;
-      font-size: clamp(13px, 3.5vw, 15px);
-      font-weight: 500;
-      cursor: pointer;
-      width: calc(100% - clamp(24px, 8vw, 40px));
-      transition: all 0.15s;
-      display: none;
-      font-family: 'Inter', sans-serif;
-      flex-shrink: 0;
-    }
-    .next-btn:hover { background: var(--p2); }
+    .next-btn { display: none; }
 
     /* ════════════════════════════════════
        RESULTS SCREEN
@@ -1012,8 +1156,35 @@ display: block;
 
     /* hide old stat-row and stat-c */
     .stat-row { display: none !important; }
-    .stat-c, .stat-v, .stat-l { }  /* keep for timed mode's own row */
-    #timedStatRow .stat-c { display: block; }
+
+    /* ── Timed-mode stat row cards ── */
+    #timedStatRow .stat-c {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      background: var(--p2);
+      border-radius: 12px;
+      padding: clamp(10px, 3vw, 14px) 8px;
+      border: 1px solid rgba(239,248,226,0.1);
+      text-align: center;
+    }
+    .stat-v {
+      font-size: clamp(22px, 6vw, 28px);
+      font-weight: 800;
+      line-height: 1;
+      color: #eff8e2;
+    }
+    .stat-l {
+      font-size: 10px;
+      color: rgba(239,248,226,0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 2px;
+    }
+    .sv-ok { color: var(--acc); }
+    .sv-no { color: #ff6b6b; }
 
     .review-wrap {
       margin: 0 clamp(12px, 4vw, 20px) clamp(10px, 3vw, 14px);
@@ -1148,26 +1319,22 @@ display: block;
       box-shadow: 0 0 20px color-mix(in srgb, var(--acc), transparent 70%);
     }
     .pick-btn.wrong {
-      border-color: color-mix(in srgb, var(--p7), transparent 50%);
-      background: color-mix(in srgb, var(--p7), transparent 92%);
-      color: var(--p7);
-      box-shadow: 0 0 12px color-mix(in srgb, var(--p7), transparent 85%);
+      border-color: #e05555;
+      background: color-mix(in srgb, #e05555, transparent 82%);
+      color: #ff8080;
+      box-shadow: 0 0 14px color-mix(in srgb, #e05555, transparent 75%);
     }
     .pick-btn.reveal {
-      border-color: color-mix(in srgb, var(--acc), transparent 60%);
-      background: color-mix(in srgb, var(--acc), transparent 93%);
-      color: color-mix(in srgb, var(--acc), transparent 35%);
-      box-shadow: 0 0 14px color-mix(in srgb, var(--acc), transparent 85%);
+      border-color: color-mix(in srgb, var(--acc), transparent 55%);
+      background: color-mix(in srgb, var(--acc), transparent 91%);
+      color: color-mix(in srgb, var(--acc), transparent 25%);
+      box-shadow: 0 0 14px color-mix(in srgb, var(--acc), transparent 82%);
     }
 
 
     .pick-btn:disabled { cursor: default; }
     .pick-icon {
-      display: block;
-      font-size: clamp(11px, 3vw, 14px);
-      font-weight: 600;
-      margin-top: 4px;
-      letter-spacing: 0.02em;
+      display: none;
     }
 
 input:disabled {
@@ -2388,7 +2555,7 @@ select:focus {
       text-overflow: ellipsis;
     }
 
-    /* ══════════════════════════════════════════════
+    /* ═════════════════wi ════════════════════════════
        NEW FEATURES CSS
     ══════════════════════════════════════════════ */
 
@@ -2724,11 +2891,15 @@ select:focus {
       background: color-mix(in srgb, var(--p3), transparent 50%);
       border: 1px solid color-mix(in srgb, var(--acc), transparent 82%);
       border-radius: 16px; padding: 14px 16px;
-      flex-direction: column; gap: 10px;
+      flex-direction: column; gap: 0;
       animation: fbIn 0.35s cubic-bezier(0.22,1,0.36,1) both;
     }
     .weekly-summary-card.show { display: flex; }
-    .weekly-summary-title { font-size:11px; font-weight:700; color:rgba(239,248,226,0.4); text-transform:uppercase; letter-spacing:0.08em; }
+    .weekly-summary-title { font-size:11px; font-weight:700; color:rgba(239,248,226,0.4); text-transform:uppercase; letter-spacing:0.08em; cursor:pointer; display:flex; align-items:center; justify-content:space-between; user-select:none; }
+    .weekly-chevron { font-size:12px; opacity:0.5; transition:transform 0.2s ease; }
+    .weekly-chevron.open { transform: rotate(90deg); }
+    .weekly-summary-body { display:none; flex-direction:column; gap:10px; margin-top:10px; }
+    .weekly-summary-body.open { display:flex; }
     .weekly-summary-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
     .weekly-stat { text-align:center; background:color-mix(in srgb, var(--p4), transparent 75%); border-radius:10px; padding:10px 6px; }
     .weekly-stat-val { font-size:clamp(16px,4vw,20px); font-weight:800; color:var(--acc); line-height:1; }
@@ -2759,8 +2930,8 @@ select:focus {
     }
     .hint-btn:hover:not(:disabled) { color:var(--acc); border-color:color-mix(in srgb, var(--acc), transparent 55%); background: color-mix(in srgb, var(--p4), transparent 30%); }
     .hint-btn:disabled { opacity:0.35; cursor:default; font-size: clamp(10px, 2.5vw, 11px); padding: clamp(11px, 3.5vw, 15px) clamp(7px, 2.5vw, 10px); }
-    .hint-reveal { display:none; font-size:12px; font-weight:600; color:rgba(239,248,226,0.6); text-align:center; padding: 8px 16px; margin: 0 clamp(12px,4vw,20px) 0; background: color-mix(in srgb, var(--p3), transparent 55%); border-radius: 10px; border: 1px solid color-mix(in srgb, var(--acc), transparent 82%); letter-spacing:0.02em; line-height: 1.4; flex-shrink: 0; }
-    .hint-reveal.show { display:block; margin-bottom: 10px; }
+    .hint-reveal { display:none; font-size:12px; font-weight:600; color:rgba(239,248,226,0.6); text-align:center; padding: 8px 16px; margin: 6px 0 0; background: color-mix(in srgb, var(--p3), transparent 55%); border-radius: 10px; border: 1px solid color-mix(in srgb, var(--acc), transparent 82%); letter-spacing:0.02em; line-height: 1.4; flex-shrink: 0; }
+    .hint-reveal.show { display:block; }
     html[data-theme="minimal"] .hint-btn { background: var(--surf-d); box-shadow: none; }
 
     /* ── Milestones Section on Profile ── */
@@ -3544,7 +3715,7 @@ select:focus {
       border-bottom: 1px solid color-mix(in srgb, var(--acc), transparent 88%);
       flex-shrink: 0;
     }
-    .timed-mode-bar.visible { display: flex; }
+    .timed-mode-bar, .timed-mode-bar.visible { display: none !important; }
     .timed-mode-bar-top {
       display: flex;
       justify-content: space-between;
@@ -3686,14 +3857,20 @@ select:focus {
   html[data-theme="minimal"] .q-card,
   html[data-theme="minimal"] .res-cw-card,
   html[data-theme="minimal"] .review-wrap,
-  html[data-theme="minimal"] .timer-bar-wrap,
-  html[data-theme="minimal"] .stopwatch-wrap,
   html[data-theme="minimal"] .daily-goal-card,
   html[data-theme="minimal"] .profile-stat-card,
   html[data-theme="minimal"] .pb-c,
   html[data-theme="minimal"] .pb-xp-card {
     background: var(--surf);
     box-shadow: none;
+  }
+  html[data-theme="minimal"] .q-timer-chip {
+    background: none;
+    box-shadow: none;
+  }
+  html[data-theme="minimal"] #timedStatRow .stat-c {
+    background: var(--surf);
+    border-color: rgba(255,255,255,0.07);
   }
   html[data-theme="minimal"] .card::before,
   html[data-theme="minimal"] .q-card::before,
@@ -3726,7 +3903,7 @@ select:focus {
     box-shadow: none;
   }
   html[data-theme="minimal"] .pick-btn.correct { background: var(--ok-bg); box-shadow: none; }
-  html[data-theme="minimal"] .pick-btn.wrong   { box-shadow: none; }
+  html[data-theme="minimal"] .pick-btn.wrong   { background: color-mix(in srgb, #e05555, transparent 85%); border-color: #e05555; box-shadow: none; }
   html[data-theme="minimal"] .pick-btn.reveal  { box-shadow: none; }
 
   /* 9. Buttons */
@@ -3844,6 +4021,7 @@ select:focus {
   html[data-theme="minimal"] .timed-mode-countdown.urgent { text-shadow: none; }
   html[data-theme="minimal"] .timed-result-num          { text-shadow: none; }
   html[data-theme="minimal"] .gameover-score            { text-shadow: none; }
+  html[data-theme="minimal"] .big-pct                   { text-shadow: none; }
   html[data-theme="minimal"] .dc-streak-count           { text-shadow: none; }
 
   /* ── Glow removal: filter ── */
@@ -4168,15 +4346,20 @@ select:focus {
       </div>
     </div>
 
-    <!-- Weekly Summary Card (shown on Mondays) -->
-    <div class="weekly-summary-card" id="weeklySummaryCard">
-      <div class="weekly-summary-title">📅 Last week</div>
-      <div class="weekly-summary-stats">
-        <div class="weekly-stat"><div class="weekly-stat-val" id="wkQs">0</div><div class="weekly-stat-lbl">Questions</div></div>
-        <div class="weekly-stat"><div class="weekly-stat-val" id="wkAcc">—</div><div class="weekly-stat-lbl">Accuracy</div></div>
-        <div class="weekly-stat"><div class="weekly-stat-val" id="wkXP">0</div><div class="weekly-stat-lbl">XP gained</div></div>
+    <!-- Weekly Summary Card -->
+    <div class="weekly-summary-card show" id="weeklySummaryCard">
+      <div class="weekly-summary-title" onclick="toggleWeeklySummary()">
+        <span>📅 Last week</span>
+        <span class="weekly-chevron" id="weeklyChevron">▸</span>
       </div>
-      <div class="weekly-sparkline" id="weeklySparkline"></div>
+      <div class="weekly-summary-body" id="weeklySummaryBody">
+        <div class="weekly-summary-stats">
+          <div class="weekly-stat"><div class="weekly-stat-val" id="wkQs">—</div><div class="weekly-stat-lbl">Questions</div></div>
+          <div class="weekly-stat"><div class="weekly-stat-val" id="wkAcc">—</div><div class="weekly-stat-lbl">Accuracy</div></div>
+          <div class="weekly-stat"><div class="weekly-stat-val" id="wkXP">—</div><div class="weekly-stat-lbl">XP gained</div></div>
+        </div>
+        <div class="weekly-sparkline" id="weeklySparkline"></div>
+      </div>
     </div>
 
     <!-- Improvement Banner (shown when user beats their avg) -->
@@ -4584,7 +4767,7 @@ select:focus {
             type="range"
             class="timed-range"
             id="timedDurationSlider"
-            min="0" max="5" step="1" value="1"
+            min="0" max="6" step="1" value="1"
             oninput="onTimedSliderChange(this)"
           >
           <div class="timed-range-ticks">
@@ -4594,7 +4777,9 @@ select:focus {
             <span class="timed-tick" data-idx="3">2m</span>
             <span class="timed-tick" data-idx="4">3m</span>
             <span class="timed-tick" data-idx="5">5m</span>
+            <span class="timed-tick" data-idx="6">✏️</span>
           </div>
+          <input type="number" id="timedCustomMinsInput" min="1" max="99" step="0.5" placeholder="Minutes" style="display:none;width:100%;margin-top:6px;padding:7px 10px;border-radius:8px;background:var(--p1);color:#eff8e2;border:1px solid color-mix(in srgb, var(--p4), transparent 60%);font-family:'Inter',sans-serif;font-size:14px;text-align:center;" oninput="onTimedCustomMinsChange(this)">
         </div>
       </div>
 
@@ -4714,42 +4899,45 @@ select:focus {
 <div class="top-content">
 
     <div class="q-card">
-      <div id="qBadge" class="q-badge badge-sq">Square</div>
-      <div class="q-number" id="qLabel">Question 01</div>
+      <div class="q-card-top-row">
+        <div class="q-card-meta">
+          <div id="qBadge" class="q-badge badge-sq">Square</div>
+        </div>
+        <!-- countdown arc (fixed/custom) -->
+        <div class="q-timer-chip" id="timerZone" style="display:none;">
+          <svg class="timer-arc-svg" viewBox="0 0 44 44">
+            <circle class="timer-arc-bg" cx="22" cy="22" r="18"/>
+            <circle class="timer-arc-fill" id="timerArc" cx="22" cy="22" r="18"/>
+          </svg>
+          <span class="timer-secs" id="timerSecs">7s</span>
+        </div>
+        <!-- stopwatch chip -->
+        <div class="q-timer-chip" id="stopwatchZone" style="display:none;">
+          <div class="stopwatch-num" id="stopwatchNum">0s</div>
+        </div>
+        <!-- timed-mode session chip -->
+        <div class="q-timer-chip" id="timedChip" style="display:none;">
+          <svg class="timer-arc-svg" viewBox="0 0 44 44">
+            <circle class="timer-arc-bg" cx="22" cy="22" r="18"/>
+            <circle class="timer-arc-fill" id="timedArc" cx="22" cy="22" r="18"/>
+          </svg>
+          <span class="timer-secs" id="timedChipLabel">1m</span>
+        </div>
+      </div>
       <div class="q-expr"   id="qExpr">5²</div>
       <div class="q-sub"    id="qSub">What is the answer?</div>
     </div>
-
-<div class="timer-bar-wrap" id="timerZone">
-  <div class="timer-bar-inner">
-    <div class="timer-left">
-      ⏱ <span>Time left</span>
-    </div>
-    <div class="timer-right" id="timerNum">7s</div>
-  </div>
-
-  <div class="timer-bar">
-    <div class="timer-bar-fill" id="timerFill"></div>
-  </div>
-</div>
-
-<div class="stopwatch-wrap" id="stopwatchZone">
-  <div class="stopwatch-label">⏱ Stopwatch</div>
-  <div class="stopwatch-num" id="stopwatchNum">0.0s</div>
-</div>
 
     <!-- TYPE mode -->
     <div class="ans-zone" id="typeZone">
       <div class="ans-row">
         <button class="hint-btn" id="hintBtn" onclick="useHint()" title="Costs 5 XP">💡 Hint</button>
-        <input 
-  type="text"
-  class="ans-input"
-  id="ansInput"
-  placeholder="?"
->
-        <button class="check-btn" id="checkBtn" onclick="checkAnswer()">Check</button>
+        <div class="ans-input-wrap" id="ansInputWrap">
+          <input type="text" class="ans-input" id="ansInput" placeholder="?">
+        </div>
       </div>
+      <div class="ans-caption" id="ansCaption"></div>
+      <div class="hint-reveal" id="hintReveal"></div>
     </div>
 
     <!-- PICK mode -->
@@ -4757,12 +4945,11 @@ select:focus {
       <div class="pick-grid" id="pickGrid"></div>
     </div>
 
-    <div class="fb-box" id="fbBox"></div>
-    <button class="next-btn" id="nextBtn" onclick="nextQ()">Next question →</button>
+    <div class="action-wrap">
+      <div class="fb-box" id="fbBox"></div>
+      <button class="check-btn" id="checkBtn" onclick="checkAnswer()">Check</button>
+    </div>
 </div>
-
-<!-- Hint reveal sits between question area and keyboard so it never overlaps -->
-<div class="hint-reveal" id="hintReveal"></div>
 
 <div class="custom-keyboard" id="keyboard">
   <div class="kb-grid">
@@ -5221,6 +5408,27 @@ function setMultType(btn){
   function startTest(){
   sessionId++;
   const currentSession = sessionId;
+
+  // Re-sync ALL button-driven state from DOM first so stale JS variables never win
+  const activeTypeBtn = document.querySelector('.type-btn.active');
+  if(activeTypeBtn) qType = activeTypeBtn.id.replace('btn-', '');
+
+  const activeMultType = document.querySelector('#multTypeGrid .timer-opt.active');
+  if(activeMultType) multSubType = activeMultType.dataset.mtype;
+
+  const active2dDiff = document.querySelector('#mult2dDiffGrid .timer-opt.active');
+  if(active2dDiff) mult2dDiff = active2dDiff.dataset['2ddiff'];
+
+  const activeArithType = document.querySelector('#arithTypeGrid .timer-opt.active');
+  if(activeArithType) arithSubType = activeArithType.dataset.atype;
+
+  const activeArithDiff = document.querySelector('#arithDiffGrid .timer-opt.active');
+  if(activeArithDiff) arithDiff = activeArithDiff.dataset.adiff;
+
+  const activeTimerOpt = document.querySelector('#timerGrid .timer-opt.active');
+  if(activeTimerOpt) timerMode = activeTimerOpt.dataset.value;
+
+  // Derive isTimedMode AFTER timerMode is confirmed from DOM
   isTimedMode = (timerMode === 'timed');
   unlimitedMode = document.getElementById('unlimitedTog').checked;
 
@@ -5286,6 +5494,7 @@ function setMultType(btn){
   const tmBar = document.getElementById('timedModeBar');
   if(isTimedMode){
     tmBar.classList.add('visible');
+    document.getElementById('timedChip').style.display = 'flex';
     // hide per-question timer, progress bar
     document.getElementById('timerZone').style.display = 'none';
     document.getElementById('stopwatchZone').style.display = 'none';
@@ -5313,57 +5522,97 @@ function setMultType(btn){
 
   /* ── Generate 4 plausible wrong answers ── */
   function genOptions(correct, qObj){
-    const opts = new Set([correct]);
+    const type = qObj.type;
+    const n    = qObj.n;
     const candidates = [];
 
-    if(qObj.type === 'table'){
-      const n = qObj.n, m = qObj.m;
-      for(let d=1; d<=6; d++){
-        candidates.push(n*(m+d));
-        if(m-d>0) candidates.push(n*(m-d));
-        candidates.push((n+1)*m, (n-1>0?(n-1)*m:n*m+1));
-        candidates.push(correct+d, correct-d>0?correct-d:correct+d+1);
+    function rsh(arr){ for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr; }
+
+    if(type === 'add' || type === 'sub'){
+      // Plausible carry / mental-math errors — always same order of magnitude
+      const offsets = [1, 2, 9, 10, 11, 18, 19, 20, 21, 99, 100, 101, 90, 110];
+      rsh(offsets);
+      for(const o of offsets){
+        candidates.push(correct + o);
+        if(correct - o > 0) candidates.push(correct - o);
       }
-    } else {
-      const isSquare = qObj.type === 'square';
-      const n = qObj.n;
-      for(let delta = 1; delta <= 10; delta++){
-        if(isSquare){
-          candidates.push((n+delta)*(n+delta));
-          candidates.push((n-delta)*(n-delta));
-        } else {
-          candidates.push((n+delta)*(n+delta)*(n+delta));
-          if(n-delta > 0) candidates.push((n-delta)*(n-delta)*(n-delta));
-        }
-        if(correct - delta > 0) candidates.push(correct - delta);
-        candidates.push(correct + delta);
+
+    } else if(type === 'table'){
+      const m = qObj.m;
+      // Adjacent-factor errors — the most natural mistakes for times tables
+      const factorErrs = [];
+      for(let d = 1; d <= 5; d++){
+        factorErrs.push(n * (m + d));
+        if(m - d > 0) factorErrs.push(n * (m - d));
+        factorErrs.push((n + d) * m);
+        if(n - d > 0) factorErrs.push((n - d) * m);
       }
+      // Cross-factor swaps: (n+1)×(m-1) style
+      factorErrs.push((n + 1) * (m > 1 ? m - 1 : m + 1));
+      factorErrs.push((n > 1 ? n - 1 : n + 1) * (m + 1));
+      candidates.push(...rsh(factorErrs));
+      // Close raw offsets as last resort
+      for(let d = 1; d <= 5; d++){
+        candidates.push(correct + d);
+        if(correct - d > 0) candidates.push(correct - d);
+      }
+
+    } else if(type === 'square'){
+      // Tier 1: same-unit-digit squares — look genuinely plausible
+      const unitTarget = (n * n) % 10;
+      const sameUnit = [];
+      for(let k = Math.max(2, n - 25); k <= n + 25; k++){
+        if(k !== n && (k * k) % 10 === unitTarget) sameUnit.push(k * k);
+      }
+      // Sort by proximity to correct answer
+      sameUnit.sort((a, b) => Math.abs(a - correct) - Math.abs(b - correct));
+
+      // Tier 2: adjacent squares (n±1)², (n±2)²…
+      const adjacent = [];
+      for(let d = 1; d <= 8; d++){
+        adjacent.push((n + d) * (n + d));
+        if(n - d > 0) adjacent.push((n - d) * (n - d));
+      }
+      adjacent.sort((a, b) => Math.abs(a - correct) - Math.abs(b - correct));
+
+      // Mix: 2 same-unit-digit first (most deceptive), then nearest adjacent
+      candidates.push(...sameUnit.slice(0, 2), ...adjacent);
+
+    } else if(type === 'cube'){
+      // Tier 1: same-unit-digit cubes
+      const cubeUnit = ((n * n * n) % 10 + 10) % 10;
+      const sameUnit = [];
+      for(let k = Math.max(2, n - 12); k <= n + 12; k++){
+        if(k !== n && ((k * k * k) % 10 + 10) % 10 === cubeUnit) sameUnit.push(k * k * k);
+      }
+      sameUnit.sort((a, b) => Math.abs(a - correct) - Math.abs(b - correct));
+
+      // Tier 2: adjacent cubes
+      const adjacent = [];
+      for(let d = 1; d <= 5; d++){
+        adjacent.push((n + d) * (n + d) * (n + d));
+        if(n - d > 0) adjacent.push((n - d) * (n - d) * (n - d));
+      }
+      adjacent.sort((a, b) => Math.abs(a - correct) - Math.abs(b - correct));
+
+      candidates.push(...sameUnit.slice(0, 2), ...adjacent);
     }
 
-    // Shuffle candidates and pick unique ones
-    for(let i=candidates.length-1;i>0;i--){
-      const j=Math.floor(Math.random()*(i+1));
-      [candidates[i],candidates[j]]=[candidates[j],candidates[i]];
-    }
+    // Build final set of 4 (correct + 3 unique distractors)
+    const opts = new Set([correct]);
     for(const c of candidates){
-      if(c !== correct && c > 0 && !opts.has(c)){
+      if(Number.isInteger(c) && c > 0 && c !== correct && !opts.has(c)){
         opts.add(c);
         if(opts.size === 4) break;
       }
     }
-    // Fallback if not enough
-    let fallback = 1;
-    while(opts.size < 4){
-      if(!opts.has(fallback)) opts.add(fallback);
-      fallback++;
-    }
+    // Fallback: step away from correct until we have 4
+    let fb = 1;
+    while(opts.size < 4){ if(!opts.has(correct + fb)) opts.add(correct + fb); fb++; }
 
     // Shuffle final 4
     const arr = [...opts];
-    for(let i=arr.length-1;i>0;i--){
-      const j=Math.floor(Math.random()*(i+1));
-      [arr[i],arr[j]]=[arr[j],arr[i]];
-    }
+    for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
     return arr;
   }
 
@@ -5397,7 +5646,7 @@ function setMultType(btn){
       badge.className   = 'q-badge '+(q.type==='square'?'badge-sq':'badge-cu');
     }
     const isRetry = retrySet.has(cur);
-    document.getElementById('qLabel').innerHTML = `Question ${String(cur+1).padStart(2,'0')}` + (isRetry ? '<span class="retry-badge">RETRY</span>' : '');
+    const _qLabel = document.getElementById('qLabel'); if(_qLabel) _qLabel.innerHTML = `Question ${String(cur+1).padStart(2,'0')}` + (isRetry ? '<span class="retry-badge">RETRY</span>' : '');
     if(q.type==='table'){
       document.getElementById('qExpr').textContent = `${q.n} × ${q.m}`;
       document.getElementById('qSub').textContent = 'What is the answer?';
@@ -5415,9 +5664,10 @@ function setMultType(btn){
     } else {
       document.getElementById('qExpr').textContent = `${q.n}${sym}`;
     }
-    document.getElementById('fbBox').style.display   = 'none';
-    document.getElementById('fbBox').classList.remove('visible');
-    document.getElementById('nextBtn').style.display = 'none';
+    const _fb = document.getElementById('fbBox');
+    _fb.classList.remove('visible', 'fb-ok', 'fb-no');
+    _fb.textContent = '';
+    // nextBtn removed — checkBtn handles both check and next
 
     // Animate q-card pop
     const qCard = document.querySelector('.q-card');
@@ -5428,8 +5678,9 @@ function setMultType(btn){
     // Animate ans zone
     const ansZone = document.querySelector('.ans-zone');
     if(ansZone){ ansZone.classList.remove('ans-zone-anim'); void ansZone.offsetWidth; ansZone.classList.add('ans-zone-anim'); }
-    document.getElementById('timerZone').style.display = (!isTimedMode && (timerMode === 'fixed' || timerMode === 'custom')) ? 'block' : 'none';
+    document.getElementById('timerZone').style.display = (!isTimedMode && (timerMode === 'fixed' || timerMode === 'custom')) ? 'flex' : 'none';
     document.getElementById('stopwatchZone').style.display = (!isTimedMode && timerMode === 'stopwatch') ? 'flex' : 'none';
+    document.getElementById('timedChip').style.display = isTimedMode ? 'flex' : 'none';
 
     if(pickMode){
       // PICK MODE
@@ -5465,14 +5716,26 @@ if (isMobile) {
   if(hint) hint.style.display = 'block';
 }
       inp.value=''; inp.className='ans-input'; inp.disabled=false;
+      const _wrap = document.getElementById('ansInputWrap');
+      const _cap  = document.getElementById('ansCaption');
+      if(_wrap) {
+        _wrap.classList.remove('show-correct', 'split-wrong');
+        const _old = _wrap.querySelector('.ans-split-overlay');
+        if (_old) _old.remove();
+      }
+      if(_cap)  { _cap.className='ans-caption'; _cap.textContent=''; }
+      const _fb = document.getElementById('fbBox');
+      if(_fb)   { _fb.className='fb-box'; _fb.textContent=''; }
       document.getElementById('checkBtn').disabled     = false;
       const checkBtn = document.getElementById('checkBtn');
 
 if (autoSub) {
   checkBtn.style.display = 'none';
 } else {
-  checkBtn.style.display = 'inline-block';
-  checkBtn.textContent = instant ? 'Check' : 'Next';
+  checkBtn.style.display = 'block';
+  checkBtn.classList.remove('is-next');
+  checkBtn.textContent = instant ? 'Check' : 'Next →';
+  checkBtn.onclick = checkAnswer;
 }
       if (!isMobile) {
   inp.focus();
@@ -5560,12 +5823,13 @@ if(timerMode === 'stopwatch'){
   }
 
   const pickType = document.getElementById('pickModeType')?.value || 'auto';
-  const nb = document.getElementById('nextBtn');
+  const actionBtn = document.getElementById('checkBtn');
   if(!isTimedMode && pickType === 'manual'){
-    nb.style.display = 'block';
-    nb.textContent = cur < qs.length-1 ? 'Next question →' : 'See results →';
+    actionBtn.style.display = 'block';
+    actionBtn.textContent = cur < qs.length-1 ? 'Next question →' : 'See results →';
+    actionBtn.classList.add('is-next');
+    actionBtn.onclick = nextQ;
   } else {
-    nb.style.display = 'none';
     const _sid=sessionId; setTimeout(() => { if(sessionId===_sid) nextQ(); }, isTimedMode ? 500 : 900);
   }
 }
@@ -5575,6 +5839,8 @@ if(timerMode === 'stopwatch'){
     cancelAnimationFrame(timerInterval);
     timerInterval = null;
   }
+  const chip = document.getElementById('timerZone');
+  if (chip) chip.classList.remove('urgent');
 }
 
 function startTimer(){
@@ -5619,6 +5885,12 @@ function startTimer(){
   }
 
   const start = performance.now();
+  const chip = document.getElementById('timerZone');
+  const secsEl = document.getElementById('timerSecs');
+
+  // initialise label to full duration immediately
+  if (secsEl) secsEl.textContent = Math.ceil(duration) + 's';
+  if (chip) chip.classList.remove('urgent');
 
   function animate(now){
     const elapsed = (now - start) / 1000;
@@ -5626,25 +5898,25 @@ function startTimer(){
 
     const percent = (remaining / duration) * 100;
 
-    const fill = document.getElementById('timerFill');
-    const num  = document.getElementById('timerNum');
+    const arc = document.getElementById('timerArc');
+    if (arc) { arc.style.strokeDashoffset = 113.1 * (1 - percent / 100); }
 
-    fill.style.width = percent + '%';
-    num.textContent = Math.ceil(remaining) + 's';
+    // update readable text label
+    if (secsEl) secsEl.textContent = Math.ceil(remaining) + 's';
 
-    const p4 = getComputedStyle(document.documentElement).getPropertyValue('--p4').trim() || '#573280';
-    const p7 = getComputedStyle(document.documentElement).getPropertyValue('--p7').trim() || '#ada8b6';
-    if (remaining <= 2) {
-      fill.style.background = p4;
-      num.style.color = p4;
-    } else {
-      fill.style.background = `linear-gradient(90deg, ${p4}, ${p7})`;
-      num.style.color = p7;
+    // urgent state at ≤ 3 seconds
+    if (chip) {
+      if (remaining <= 3 && remaining > 0) {
+        chip.classList.add('urgent');
+      } else {
+        chip.classList.remove('urgent');
+      }
     }
 
     if (remaining > 0){
       timerInterval = requestAnimationFrame(animate);
     } else {
+      if (chip) chip.classList.remove('urgent');
       if (!answered) timeUp();
     }
   }
@@ -5676,8 +5948,41 @@ function startTimer(){
   if(isTimedMode) timedQAnswered++;
 
   const input = document.getElementById('ansInput');
+  const wrap  = document.getElementById('ansInputWrap');
+  const cap   = document.getElementById('ansCaption');
   input.disabled = true;
+
+  // ── Input colour (always shown regardless of instant) ──
   input.className = 'ans-input ' + (correct ? 'correct' : 'wrong shake');
+
+  // ── ✔ icon on correct ──
+  if (wrap) wrap.classList.toggle('show-correct', correct);
+
+  // ── Split-view on wrong: show user's answer left, correct right ──
+  if (cap) { cap.className = 'ans-caption'; cap.textContent = ''; } // keep hidden
+  if (!correct && wrap) {
+    const sym = q.type==='square'?'²':'³';
+    let correctDisplay = '';
+    if      (q.type==='table') correctDisplay = String(q.answer);
+    else if (q.type==='add')   correctDisplay = String(q.answer);
+    else if (q.type==='sub')   correctDisplay = String(q.answer);
+    else if (q.reverse)        correctDisplay = String(q.n);
+    else                       correctDisplay = String(q.answer);
+
+    // Remove any existing overlay
+    const old = wrap.querySelector('.ans-split-overlay');
+    if (old) old.remove();
+
+    const overlay = document.createElement('div');
+    overlay.className = 'ans-split-overlay';
+    overlay.innerHTML = `<span class="split-wrong-val">${val}</span><span class="split-sep"></span><span class="split-correct-val">${correctDisplay}</span>`;
+    wrap.classList.add('split-wrong');
+    wrap.appendChild(overlay);
+  } else if (correct && wrap) {
+    wrap.classList.remove('split-wrong');
+    const old = wrap.querySelector('.ans-split-overlay');
+    if (old) old.remove();
+  }
 
   const _sp=document.getElementById('scorePill'); _sp.textContent=`Score: ${score}`; _sp.classList.remove('pill-bump'); void _sp.offsetWidth; _sp.classList.add('pill-bump');
 
@@ -5685,45 +5990,30 @@ function startTimer(){
     lives--;
     updateLivesPill();
     if(lives <= 0){
-      const _sid=sessionId; setTimeout(()=>{ if(sessionId===_sid) gameOver(); }, instant ? 1200 : 400);
-      const nb = document.getElementById('nextBtn');
-      nb.style.display='block';
-      nb.textContent='Game Over';
+      const _sid=sessionId; setTimeout(()=>{ if(sessionId===_sid) gameOver(); }, 800);
+      btn.textContent = 'Game Over';
+      btn.classList.add('is-next');
+      btn.onclick = nextQ;
     }
   }
 
-  const nb = document.getElementById('nextBtn');
-
   if(instant){
-    if(!isTimedMode){
-      nb.style.display = 'block';
-      nb.textContent = cur < qs.length-1 ? 'Next question →' : 'See results →';
-      if(!isMobile) setTimeout(() => nb.focus(), 150);
+    if(!isTimedMode && !autoSub){
+      btn.textContent = cur < qs.length-1 ? 'Next →' : 'See results →';
+      btn.classList.add('is-next');
+      btn.onclick = nextQ;
+      if(!isMobile) setTimeout(() => btn.focus(), 150);
     }
-
-    const fb = document.getElementById('fbBox');
-    const sym = q.type==='square'?'²':'³';
-    fb.style.display='block'; void fb.offsetWidth; fb.classList.add('visible');
-    if(q.type==='table'){
-      fb.textContent = correct ? `✓ ${q.n} × ${q.m} = ${q.answer}` : `✗ ${q.n} × ${q.m} = ${q.answer}`;
-    } else if(q.type==='add'){
-      fb.textContent = correct ? `✓ ${q.n} + ${q.m} = ${q.answer}` : `✗ ${q.n} + ${q.m} = ${q.answer}`;
-    } else if(q.type==='sub'){
-      fb.textContent = correct ? `✓ ${q.n} − ${q.m} = ${q.answer}` : `✗ ${q.n} − ${q.m} = ${q.answer}`;
-    } else {
-      fb.textContent = correct
-        ? (q.reverse ? `✓ Base is ${q.n}` : `✓ ${q.n}${sym} = ${q.answer}`)
-        : (q.reverse ? `✗ Answer is ${q.n}` : `✗ ${q.n}${sym} = ${q.answer}`);
-    }
-    fb.className='fb-box '+(correct?'fb-ok':'fb-no');
-
     if(isTimedMode){
       const _sid=sessionId; setTimeout(() => { if(sessionId===_sid && answered) nextQ(); }, 600);
     }
-  } else {
-    btn.textContent = 'Next';
-    if(!isMobile) setTimeout(() => btn.focus(), 150);
-    if(isTimedMode){ const _sid=sessionId; setTimeout(() => { if(sessionId===_sid && answered) nextQ(); }, 400); }
+  } else if(!autoSub) {
+    // instant off — go straight to next, no feedback box needed
+    if(!isTimedMode) {
+      nextQ();
+    } else {
+      const _sid=sessionId; setTimeout(() => { if(sessionId===_sid && answered) nextQ(); }, 400);
+    }
   }
 
   // ✅ FIXED: independent auto submit
@@ -5791,8 +6081,9 @@ function startTimer(){
     document.getElementById('endSessionBtn').classList.remove('visible');
     // Reset timed mode bar
     document.getElementById('timedModeBar').classList.remove('visible');
+    document.getElementById('timedChip').style.display = 'none';
 
-    setTimeout(()=>{ const bp=document.getElementById('bigPct'); if(bp){bp.classList.remove('big-pct-anim'); void bp.offsetWidth; bp.classList.add('big-pct-anim');} document.querySelectorAll('.stat-c').forEach((el,i)=>{ el.style.animation='none'; void el.offsetWidth; el.style.animation=''; el.style.animationDelay=`${0.15+i*0.07}s`; }); }, 50);
+    setTimeout(()=>{ const bp=document.getElementById('resPct'); if(bp){bp.classList.remove('big-pct-anim'); void bp.offsetWidth; bp.classList.add('big-pct-anim');} document.querySelectorAll('#timedStatRow .stat-c').forEach((el,i)=>{ el.style.animation='none'; void el.offsetWidth; el.style.animation=''; el.style.animationDelay=`${0.15+i*0.07}s`; }); }, 50);
 
     const total=results.length, wrong=total-score, pct=total>0?Math.round((score/total)*100):0;
 
@@ -5804,12 +6095,15 @@ function startTimer(){
     const chartWrap     = document.getElementById('chartWrap');
     const resTitle      = document.getElementById('resultsTitle');
 
+    const cwCard = resBento ? resBento.querySelector('.res-cw-card') : null;
+
     if(isTimedMode){
       resTitle.textContent = '⚡ Timed Results';
       normalSection.style.display = 'none';
       timedSection.style.display  = 'flex';
       timedStatRow.style.display  = 'grid';
-      if(resBento) resBento.style.display = 'none';
+      if(resBento) resBento.style.display = 'grid';
+      if(cwCard) cwCard.style.display = 'none';
 
       // Timed hero numbers
       document.getElementById('timedResTotal').textContent = total;
@@ -5831,6 +6125,7 @@ function startTimer(){
       timedSection.style.display  = 'none';
       timedStatRow.style.display  = 'none';
       if(resBento) resBento.style.display = 'grid';
+      if(cwCard) cwCard.style.display = '';
     }
 
     document.getElementById('resPct').textContent = pct+'%';
@@ -5904,7 +6199,11 @@ function startTimer(){
 
     // weakness section
     const wWrap = document.getElementById('weaknessWrap');
-    const isArithMixed = adR.length > 0 && sbR.length > 0;
+    // In timed mode, only count answers the player actively got wrong — not time-outs
+    const weaknessResults = isTimedMode ? results.filter(r => !r.timedOut) : results;
+    const wAdR = weaknessResults.filter(r=>r.q.type==='add');
+    const wSbR = weaknessResults.filter(r=>r.q.type==='sub');
+    const isArithMixed = wAdR.length > 0 && wSbR.length > 0;
     const isArithSingle = (qType === 'arithmetic') && !isArithMixed;
 
     if(isArithSingle){
@@ -5912,8 +6211,8 @@ function startTimer(){
       wWrap.style.display = 'none';
     } else if(isArithMixed){
       // Mixed arithmetic: show Add vs Sub wrong/total comparison pills
-      const adWrong = adR.filter(r=>!r.correct).length;
-      const sbWrong = sbR.filter(r=>!r.correct).length;
+      const adWrong = wAdR.filter(r=>!r.correct).length;
+      const sbWrong = wSbR.filter(r=>!r.correct).length;
       const hasTrouble = adWrong > 0 || sbWrong > 0;
       if(hasTrouble){
         wWrap.style.display = 'block';
@@ -5930,7 +6229,7 @@ function startTimer(){
     } else {
       // Squares/cubes/tables mode: original per-number weakness chips
       const wrongMap = {};
-      results.forEach(r=>{
+      weaknessResults.forEach(r=>{
         const key = r.q.n+'_'+r.q.type;
         if(!wrongMap[key]) wrongMap[key]={n:r.q.n,type:r.q.type,wrong:0,total:0};
         wrongMap[key].total++;
@@ -5962,7 +6261,7 @@ function startTimer(){
     // confetti — only on new best (onSessionComplete handles it); 100% still fires here
     if(pct===100 && !isNewBest) launchConfetti();
 
-    saveHistory(score, total, pct);
+    saveHistory(score, total, pct, Math.max(0, getXPData().totalXP - _sessionStartXP));
   }
 
   document.getElementById('ansInput').addEventListener('input',()=>{
@@ -6005,22 +6304,37 @@ pickTog.addEventListener('change', () => {
 });
 
 // ───────── TIMER MINI GRID ─────────
-const TIMED_DURATIONS_SETUP = [30, 60, 90, 120, 180, 300];
+const TIMED_DURATIONS_SETUP = [30, 60, 90, 120, 180, 300, 60]; // last entry updated by custom input
 
 function onTimedSliderChange(slider) {
   const idx = parseInt(slider.value);
-  timedDuration = TIMED_DURATIONS_SETUP[idx];
-  const labels = ['30s','60s','90s','2m','3m','5m'];
-  document.getElementById('timedSliderVal').textContent = labels[idx];
+  const labels = ['30s','60s','90s','2m','3m','5m','✏️ Custom'];
+  const ci = document.getElementById('timedCustomMinsInput');
+  if (idx === 6) {
+    ci.style.display = 'block';
+    const mins = parseFloat(ci.value) || 1;
+    timedDuration = Math.max(1, Math.round(mins * 60));
+    document.getElementById('timedSliderVal').textContent = mins + 'm custom';
+  } else {
+    ci.style.display = 'none';
+    timedDuration = TIMED_DURATIONS_SETUP[idx];
+    document.getElementById('timedSliderVal').textContent = labels[idx];
+  }
   // update tick highlights
   document.querySelectorAll('.timed-tick').forEach((t,i) => {
     t.classList.toggle('active-tick', i === idx);
   });
   // update slider gradient
-  const pct = (idx / 5) * 100;
+  const pct = (idx / 6) * 100;
   const sliderAcc = getComputedStyle(document.documentElement).getPropertyValue('--acc').trim() || '#B8D45C';
   const sliderBg = getComputedStyle(document.documentElement).getPropertyValue('--p4').trim() || 'rgba(87,50,128,0.4)';
   slider.style.background = `linear-gradient(90deg, ${sliderAcc} ${pct}%, color-mix(in srgb, ${sliderBg}, transparent 70%) ${pct}%)`;
+}
+
+function onTimedCustomMinsChange(input) {
+  const mins = parseFloat(input.value) || 1;
+  timedDuration = Math.max(1, Math.round(mins * 60));
+  document.getElementById('timedSliderVal').textContent = mins + 'm custom';
 }
 
 function setTimerOpt(el){
@@ -6165,7 +6479,12 @@ function startStopwatch() {
   stopwatchStart = performance.now();
   function tick(now) {
     const elapsed = (now - stopwatchStart) / 1000;
-    document.getElementById('stopwatchNum').textContent = elapsed.toFixed(1) + 's';
+    const secs = Math.floor(elapsed);
+    const mins = Math.floor(secs / 60);
+    const rem  = secs % 60;
+    document.getElementById('stopwatchNum').textContent = mins > 0
+      ? mins + ':' + String(rem).padStart(2, '0')
+      : secs + 's';
     stopwatchInterval = requestAnimationFrame(tick);
   }
   stopwatchInterval = requestAnimationFrame(tick);
@@ -6188,14 +6507,21 @@ function startTimedCountdown(){
     const remaining = Math.max(0, timedDuration - elapsed);
     const pct = (remaining / timedDuration) * 100;
 
+    // Update timedChip arc and label
+    const timedArcEl = document.getElementById('timedArc');
+    const timedLabelEl = document.getElementById('timedChipLabel');
+    if(timedArcEl){ timedArcEl.style.strokeDashoffset = 113.1 * (1 - pct/100); }
+    if(timedLabelEl){
+      if(remaining >= 60){ timedLabelEl.textContent = Math.ceil(remaining/60) + 'm'; }
+      else { timedLabelEl.textContent = Math.ceil(remaining) + 's'; }
+    }
     const countdownEl = document.getElementById('timedCountdown');
     const fillEl = document.getElementById('timedFill');
     const qCountEl = document.getElementById('timedQCount');
 
     if(countdownEl){
       if(remaining >= 60){
-        const m = Math.floor(remaining/60), s = Math.ceil(remaining%60);
-        countdownEl.textContent = m + ':' + String(s).padStart(2,'0');
+        countdownEl.textContent = Math.ceil(remaining/60) + 'm';
       } else {
         countdownEl.textContent = Math.ceil(remaining) + 's';
       }
@@ -6259,10 +6585,10 @@ function eraseHistoryConfirm() {
   renderHistory();
 }
 
-function saveHistory(score, total, pct) {
+function saveHistory(score, total, pct, xp) {
   let history = [];
   try { history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch(e) {}
-  history.unshift({ score, total, correct: score, pct, date: new Date().toISOString(), timed: isTimedMode ? timedDuration : null });
+  history.unshift({ score, total, correct: score, pct, xp: xp || 0, date: new Date().toISOString(), timed: isTimedMode ? timedDuration : null });
   history = history.slice(0, MAX_HISTORY);
   try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); } catch(e) {}
 }
@@ -6685,14 +7011,14 @@ function updateDailyGoalUI() {
   const pct       = Math.min(100, Math.round((done / goal) * 100));
   const isDone    = done >= goal;
 
-  document.getElementById('goalDoneCount').textContent   = done;
+  document.getElementById('goalDoneCount').textContent   = Math.min(done, goal);
   document.getElementById('goalTargetCount').textContent = goal;
   document.getElementById('dailyGoalFill').style.width   = pct + '%';
   document.getElementById('dailyGoalFill').classList.toggle('done', isDone);
 
   const badge = document.getElementById('goalDoneBadge');
   badge.classList.toggle('show', isDone);
-  if (isDone) badge.textContent = '🏅 Daily goal complete! ' + done + '/' + goal + ' done';
+  if (isDone) badge.textContent = '🏅 Daily goal complete! ' + goal + '/' + goal + ' done';
 }
 
 // ── Improvement Detection ──
@@ -7534,6 +7860,7 @@ function startDailyChallenge() {
   document.getElementById('livesPill').style.display = 'none';
   document.getElementById('streakPill').classList.remove('active');
   document.getElementById('timedModeBar').classList.remove('visible');
+  const _tc=document.getElementById('timedChip'); if(_tc) _tc.style.display='none';
 
   // Show bracket info briefly in the q-card sub text on first load
   window._dailyChallengeLabel = cfg.label;
@@ -7615,6 +7942,24 @@ function updateDailyChallengeBtn() {
 // 6. SESSION FEEDBACK LOOP
 // ─────────────────────────────────────────────
 
+function getDifficultyNudge() {
+  // Returns a suggestion string if there's a harder level to try, otherwise null
+  if (qType === 'multiplication' && multSubType === '2digit') {
+    if (mult2dDiff === 'easy')   return 'Try bumping to Medium (10–49) next time.';
+    if (mult2dDiff === 'medium') return 'Try bumping to Hard (10–99) next time.';
+  } else if (qType === 'arithmetic') {
+    if (arithDiff === '2digit')  return 'Try bumping to 3-digit numbers next time.';
+    if (arithDiff === '3digit')  return 'Try bumping to 4-digit numbers next time.';
+  } else {
+    // squares / cubes / both / multiplication tables — range based
+    const from = parseInt(document.getElementById('rangeFrom').value) || 1;
+    const to   = parseInt(document.getElementById('rangeTo').value)   || 20;
+    if (to <= 10)  return 'Try expanding the range to 1–20 next time.';
+    if (to <= 20)  return 'Try expanding the range to 1–50 next time.';
+  }
+  return null;
+}
+
 function showSessionNudge(pct, pb) {
   const el   = document.getElementById('sessionNudge');
   const icon = document.getElementById('sessionNudgeIcon');
@@ -7626,9 +7971,11 @@ function showSessionNudge(pct, pb) {
   let msg = null;
 
   if (pct === 100) {
-    msg = { icon: '🏆', text: 'Perfect score — you nailed it!' };
+    const bump = getDifficultyNudge();
+    msg = { icon: '🏆', text: bump ? `Perfect score — you nailed it! ${bump}` : 'Perfect score — you nailed it!' };
   } else if (pct >= 90) {
-    msg = { icon: '🔥', text: 'So close to perfect — one more run?' };
+    const bump = getDifficultyNudge();
+    msg = { icon: '🔥', text: bump ? `So close to perfect — one more run? ${bump}` : 'So close to perfect — one more run?' };
   } else if (diff === 0) {
     msg = { icon: '🌟', text: 'You matched your best — beat it next time!' };
   } else if (diff > 0 && diff <= 5) {
@@ -8348,6 +8695,14 @@ function applyCustomColors() {
   const palette = generateCustomPalette(accentHex, baseHex);
   const html = document.documentElement;
   Object.entries(palette).forEach(([k, v]) => html.style.setProperty(k, v));
+  // Inline styles override CSS attribute-selector rules, so when minimal mode is
+  // active we must explicitly re-apply the darker surface values here.
+  if (html.getAttribute('data-theme') === 'minimal') {
+    html.style.setProperty('--surf',   palette['--p2']);
+    html.style.setProperty('--surf-d', palette['--p1']);
+    html.style.setProperty('--hov',    palette['--p3']);
+    html.style.setProperty('--bar-bg', palette['--p1']);
+  }
   html.setAttribute('data-custom-color', 'active');
   localStorage.setItem(COLOR_THEME_KEY, JSON.stringify({ accent: accentHex, base: baseHex }));
 }
@@ -8556,6 +8911,7 @@ addXP = function(bonus) {
 // Override showXPFloat to show multiplier badge when bonus
 const _origShowXPFloat = showXPFloat;
 showXPFloat = function(gain, isBonus) {
+  if (typeof instant !== 'undefined' && !instant) return;
   const ref = document.getElementById('ansInput') || document.getElementById('checkBtn');
   if (!ref) return;
   const rect = ref.getBoundingClientRect();
@@ -8715,18 +9071,30 @@ function renderWeeklySparkline(history) {
   }).join('');
 }
 
+function toggleWeeklySummary() {
+  const body    = document.getElementById('weeklySummaryBody');
+  const chevron = document.getElementById('weeklyChevron');
+  if (!body) return;
+  const open = body.classList.toggle('open');
+  if (chevron) chevron.classList.toggle('open', open);
+}
+
 function renderWeeklySummary() {
   const card = document.getElementById('weeklySummaryCard');
   if (!card) return;
 
   const today = new Date();
-  const isMonday = today.getDay() === 1;
   const history = getSessionHistory();
 
-  // Show on Mondays OR if user has history from last week (for testing always show if data exists)
-  const prevWeekEnd = new Date(today); prevWeekEnd.setDate(today.getDate() - today.getDay() + (today.getDay()===0?-6:1) - 1);
+  // Always render sparkline (shows current week activity)
+  renderWeeklySparkline(history);
+
+  // Compute last week's window
+  const prevWeekEnd = new Date(today);
+  prevWeekEnd.setDate(today.getDate() - today.getDay() + (today.getDay()===0?-6:1) - 1);
   prevWeekEnd.setHours(23,59,59,999);
-  const prevWeekStart = new Date(prevWeekEnd); prevWeekStart.setDate(prevWeekEnd.getDate() - 6);
+  const prevWeekStart = new Date(prevWeekEnd);
+  prevWeekStart.setDate(prevWeekEnd.getDate() - 6);
   prevWeekStart.setHours(0,0,0,0);
 
   const lastWeekSessions = history.filter(h => {
@@ -8734,30 +9102,22 @@ function renderWeeklySummary() {
     return d >= prevWeekStart && d <= prevWeekEnd;
   });
 
-  // Always render sparkline for current week
-  renderWeeklySparkline(history);
-
-  if (!isMonday || !lastWeekSessions.length) {
-    card.classList.remove('show');
-    return;
+  if (lastWeekSessions.length) {
+    const totalQs     = lastWeekSessions.reduce((s,h) => s+(h.total||0), 0);
+    const totalCorrect= lastWeekSessions.reduce((s,h) => s+(h.correct||0), 0);
+    const acc         = totalQs ? Math.round(totalCorrect/totalQs*100) : 0;
+    // Sum XP stored per session (new sessions have h.xp; old ones default to 0)
+    const xpGained    = lastWeekSessions.reduce((s,h) => s+(h.xp||0), 0);
+    document.getElementById('wkQs').textContent  = totalQs;
+    document.getElementById('wkAcc').textContent = acc ? acc+'%' : '—';
+    document.getElementById('wkXP').textContent  = xpGained;
+  } else {
+    document.getElementById('wkQs').textContent  = '—';
+    document.getElementById('wkAcc').textContent = '—';
+    document.getElementById('wkXP').textContent  = '—';
   }
 
-  const totalQs = lastWeekSessions.reduce((s,h) => s+(h.total||0),0);
-  const totalCorrect = lastWeekSessions.reduce((s,h) => s+(h.correct||0),0);
-  const acc = totalQs ? Math.round(totalCorrect/totalQs*100) : 0;
-
-  // XP gained last week from daily log
-  const xpLog = getWeeklyXP();
-  const startKey = prevWeekStart.toISOString().slice(0,10);
-  const endKey   = prevWeekEnd.toISOString().slice(0,10);
-  const xpKeys   = Object.keys(xpLog).sort();
-  const startXP  = xpLog[xpKeys.find(k => k >= startKey)] || 0;
-  const endXP    = xpLog[xpKeys.filter(k => k <= endKey).pop()] || 0;
-  const xpGained = Math.max(0, endXP - startXP);
-
-  document.getElementById('wkQs').textContent  = totalQs;
-  document.getElementById('wkAcc').textContent = acc ? acc+'%' : '—';
-  document.getElementById('wkXP').textContent  = xpGained;
+  // Always show the card; body starts collapsed (controlled by CSS default)
   card.classList.add('show');
 }
 
