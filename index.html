@@ -1333,7 +1333,7 @@ select:focus {
   background: var(--p2);
   color: #eff8e2;
   cursor: pointer;
-  transition: transform 0.08s;
+  transition: transform 0.08s ease-out, background 0.08s ease-out, border-color 0.08s ease-out;
   touch-action: manipulation;
   user-select: none;
   -webkit-user-select: none;
@@ -1342,8 +1342,10 @@ select:focus {
 
 .kb-key:active,
 .kb-key.kb-pressed {
-  transform: scale(0.95);
-  background: color-mix(in srgb, var(--acc-hi), transparent 50%);
+  transform: scale(0.94);
+  background: color-mix(in srgb, var(--p4), transparent 30%);
+  border-color: color-mix(in srgb, var(--acc), transparent 70%);
+  transition: transform 0.05s ease-out, background 0.05s ease-out, border-color 0.05s ease-out;
 }
 
 .kb-del {
@@ -1609,6 +1611,7 @@ select:focus {
       text-align: center;
       padding: 4px 0 2px;
     }
+    @media (pointer: coarse) { .kb-hint { display: none; } }
 
     /* ════════════════════════════════════
        SPACED REPETITION badge
@@ -2098,15 +2101,19 @@ select:focus {
       background: color-mix(in srgb, var(--p2), transparent 40%);
       border: 1px solid color-mix(in srgb, var(--acc), transparent 90%);
       border-radius: 14px;
-      padding: 14px 10px;
+      padding: 20px 10px;
       text-align: center;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 6px;
+    }
+    .dash-today .dash-stat:nth-child(2) {
+      background: color-mix(in srgb, var(--acc), transparent 93%);
+      border-color: color-mix(in srgb, var(--acc), transparent 78%);
     }
     .dash-stat-val {
-      font-size: clamp(20px,5vw,28px);
-      font-weight: 800;
+      font-size: clamp(28px,6vw,44px);
+      font-weight: 900;
       color: var(--acc);
       line-height: 1;
     }
@@ -2126,6 +2133,15 @@ select:focus {
       text-transform: uppercase;
       letter-spacing: 0.08em;
       margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .dash-section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: color-mix(in srgb, var(--acc), transparent 91%);
     }
     .dash-recent {
       background: color-mix(in srgb, var(--p2), transparent 50%);
@@ -2192,8 +2208,8 @@ select:focus {
       gap: 6px;
     }
     .daily-goal-count {
-      font-size: clamp(12px,2.8vw,13px);
-      font-weight: 700;
+      font-size: clamp(14px,3vw,16px);
+      font-weight: 800;
       color: var(--acc);
     }
     .daily-goal-bar-bg {
@@ -2323,7 +2339,11 @@ select:focus {
       display: none;
       align-items: center;
       gap: 10px;
-      pointer-events: none;
+      pointer-events: auto;
+      cursor: grab;
+      touch-action: pan-y;
+      user-select: none;
+      will-change: transform, opacity;
     }
     #milestoneToast.show {
       display: flex;
@@ -2332,6 +2352,14 @@ select:focus {
     #milestoneToast.hide {
       animation: milestoneOut 0.25s ease-in both;
     }
+    @keyframes toastSwipeLeft {
+      to { opacity: 0; transform: translateX(calc(-50% - 120px)); }
+    }
+    @keyframes toastSwipeRight {
+      to { opacity: 0; transform: translateX(calc(-50% + 120px)); }
+    }
+    #milestoneToast.swipe-left  { animation: toastSwipeLeft  0.22s cubic-bezier(0.4, 0, 1, 1) both; }
+    #milestoneToast.swipe-right { animation: toastSwipeRight 0.22s cubic-bezier(0.4, 0, 1, 1) both; }
     .milestone-icon { font-size: 22px; flex-shrink: 0; line-height: 1; }
     .milestone-text { flex: 1; min-width: 0; }
     .milestone-label {
@@ -2359,6 +2387,381 @@ select:focus {
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
+    /* ══════════════════════════════════════════════
+       NEW FEATURES CSS
+    ══════════════════════════════════════════════ */
+
+    /* 1. Level-Up Modal */
+    #levelUpModal {
+      position: fixed; inset: 0; z-index: 10000;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(12px) saturate(0.6);
+      -webkit-backdrop-filter: blur(12px) saturate(0.6);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+    #levelUpModal.show { opacity: 1; pointer-events: auto; }
+
+    /* Particles that radiate outward behind the card */
+    .levelup-particles {
+      position: absolute; inset: 0; pointer-events: none; overflow: hidden; border-radius: inherit;
+    }
+    .lup-particle {
+      position: absolute;
+      width: 3px; height: 3px;
+      border-radius: 50%;
+      background: var(--acc);
+      opacity: 0;
+      animation: lupParticle 1.4s ease-out both;
+    }
+    @keyframes lupParticle {
+      0%   { opacity: 1; transform: translate(0,0) scale(1); }
+      100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0); }
+    }
+
+    /* Card entrance — rises from below like something surfacing */
+    @keyframes levelUpRise {
+      0%   { opacity:0; transform: translateY(48px) scale(0.93); }
+      55%  { opacity:1; transform: translateY(-6px) scale(1.01); }
+      75%  { transform: translateY(2px) scale(0.995); }
+      100% { transform: translateY(0) scale(1); }
+    }
+    /* Glow halo behind card pulses once */
+    @keyframes haloFlare {
+      0%   { opacity:0; transform: scale(0.6); }
+      30%  { opacity:1; }
+      100% { opacity:0; transform: scale(2.2); }
+    }
+
+    .levelup-halo {
+      position: absolute;
+      width: 280px; height: 280px;
+      border-radius: 50%;
+      background: radial-gradient(circle, color-mix(in srgb, var(--acc), transparent 40%) 0%, transparent 70%);
+      animation: haloFlare 1.1s cubic-bezier(0.22,1,0.36,1) both;
+      animation-delay: 0.1s;
+      pointer-events: none;
+    }
+
+    .levelup-card {
+      position: relative;
+      width: calc(100vw - 48px);
+      max-width: 340px;
+      background:
+        linear-gradient(160deg,
+          color-mix(in srgb, var(--p4), transparent 18%) 0%,
+          color-mix(in srgb, var(--p1), transparent 0%) 50%,
+          color-mix(in srgb, var(--p0), transparent 0%) 100%);
+      border-radius: 28px;
+      padding: 0;
+      overflow: hidden;
+      animation: levelUpRise 0.7s cubic-bezier(0.22,1,0.36,1) both;
+      box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--acc), transparent 60%),
+        0 0 0 1px rgba(255,255,255,0.04) inset,
+        0 32px 80px rgba(0,0,0,0.9),
+        0 0 80px color-mix(in srgb, var(--acc), transparent 82%),
+        0 0 160px color-mix(in srgb, var(--p4), transparent 70%);
+    }
+
+    /* Top accent band — intense bright stripe */
+    .levelup-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        color-mix(in srgb, var(--acc), transparent 30%) 20%,
+        var(--acc) 50%,
+        color-mix(in srgb, var(--acc), transparent 30%) 80%,
+        transparent 100%);
+      filter: blur(0.4px);
+    }
+
+    /* Subtle inner vignette */
+    .levelup-card::after {
+      content: '';
+      position: absolute; inset: 0; border-radius: inherit;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%,
+        color-mix(in srgb, var(--acc), transparent 92%) 0%,
+        transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Top section: icon + level number */
+    .levelup-hero {
+      position: relative;
+      padding: 36px 32px 24px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    /* Emblem — the icon sits inside a metallic ring */
+    .levelup-emblem {
+      position: relative;
+      width: 88px; height: 88px;
+      margin-bottom: 20px;
+    }
+    .levelup-emblem-ring {
+      position: absolute; inset: 0;
+      border-radius: 50%;
+      background: conic-gradient(
+        from 0deg,
+        color-mix(in srgb, var(--acc), transparent 20%),
+        color-mix(in srgb, var(--acc-lo), transparent 5%),
+        var(--acc),
+        color-mix(in srgb, var(--acc-lo), transparent 5%),
+        color-mix(in srgb, var(--acc), transparent 20%)
+      );
+      padding: 3px;
+      box-shadow:
+        0 0 28px color-mix(in srgb, var(--acc), transparent 35%),
+        inset 0 0 12px rgba(0,0,0,0.6);
+      animation: ringRotate 8s linear infinite;
+    }
+    @keyframes ringRotate {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+    .levelup-emblem-inner {
+      position: absolute; inset: 3px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, var(--p4), var(--p1));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 38px;
+      filter: drop-shadow(0 2px 8px rgba(0,0,0,0.6));
+    }
+
+    @keyframes levelNumIn {
+      0%   { opacity:0; transform: scale(0.5) translateY(8px); filter: blur(4px); }
+      60%  { transform: scale(1.06); filter: blur(0); }
+      100% { opacity:1; transform: scale(1); }
+    }
+    .levelup-label {
+      font-size: 9px; font-weight: 800; letter-spacing: 0.22em;
+      color: color-mix(in srgb, var(--acc), transparent 25%);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .levelup-level {
+      font-size: 52px; font-weight: 900; line-height: 1;
+      letter-spacing: -2px;
+      color: var(--acc);
+      text-shadow:
+        0 0 20px color-mix(in srgb, var(--acc), transparent 30%),
+        0 2px 0 color-mix(in srgb, var(--acc-lo), transparent 20%);
+      animation: levelNumIn 0.55s cubic-bezier(0.34,1.56,0.64,1) both;
+      animation-delay: 0.2s;
+    }
+    .levelup-title {
+      font-size: 22px; font-weight: 800;
+      color: #eff8e2;
+      letter-spacing: -0.4px;
+      margin-top: 4px;
+      text-shadow: 0 1px 20px rgba(0,0,0,0.5);
+    }
+
+    /* Divider */
+    .levelup-divider {
+      height: 1px;
+      margin: 0 24px;
+      background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--acc), transparent 65%) 50%, transparent);
+    }
+
+    /* Bottom section: story + bar + button */
+    .levelup-body {
+      padding: 20px 28px 28px;
+      display: flex; flex-direction: column; align-items: center; gap: 16px;
+    }
+
+    .levelup-story {
+      font-size: 15px; font-weight: 600; font-style: italic;
+      color: rgba(239,248,226,0.7);
+      text-align: center; line-height: 1.5;
+      letter-spacing: 0.01em;
+    }
+    .levelup-story .from-title { color: rgba(239,248,226,0.35); }
+    .levelup-story .to-title {
+      color: var(--acc);
+      text-shadow: 0 0 16px color-mix(in srgb, var(--acc), transparent 40%);
+      font-style: normal;
+    }
+
+    .levelup-sub {
+      font-size: 11px; font-weight: 600;
+      color: rgba(239,248,226,0.3);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      text-align: center;
+      margin-top: -6px;
+    }
+
+    /* XP bar — thicker, more prominent */
+    .levelup-bar-wrap {
+      width: 100%;
+      background: rgba(255,255,255,0.06);
+      border-radius: 99px;
+      height: 6px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
+    }
+    .levelup-bar-fill {
+      height: 100%; border-radius: 99px; width: 0%;
+      background: linear-gradient(90deg, var(--acc-lo), var(--acc), color-mix(in srgb, var(--acc-hi), transparent 10%));
+      box-shadow: 0 0 8px color-mix(in srgb, var(--acc), transparent 40%);
+      transition: width 1s cubic-bezier(0.22,1,0.36,1);
+    }
+
+    /* Continue button — solid, authoritative */
+    .levelup-dismiss {
+      width: 100%;
+      padding: 15px 32px;
+      border-radius: 14px;
+      border: none;
+      background: var(--acc);
+      color: var(--p1);
+      font-size: 14px; font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s cubic-bezier(0.34,1.56,0.64,1);
+      box-shadow: 0 4px 20px color-mix(in srgb, var(--acc), transparent 50%);
+    }
+    .levelup-dismiss:hover {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: 0 8px 28px color-mix(in srgb, var(--acc), transparent 35%);
+    }
+    .levelup-dismiss:active { transform: scale(0.97); }
+
+    html[data-theme="minimal"] #levelUpModal { backdrop-filter: none; }
+    html[data-theme="minimal"] .levelup-card { background: var(--surf); box-shadow: none; border: 1px solid color-mix(in srgb, var(--acc), transparent 75%); }
+    html[data-theme="minimal"] .levelup-card::before, html[data-theme="minimal"] .levelup-card::after { display:none; }
+    html[data-theme="minimal"] .levelup-level { text-shadow: none; }
+    html[data-theme="minimal"] .levelup-emblem-ring { animation: none; }
+
+    /* ── Dashboard level number pop-in on level-up ── */
+    @keyframes dashLevelPop {
+      0%   { transform: scale(1);    color: var(--acc); }
+      25%  { transform: scale(1.45); color: #fff;       filter: drop-shadow(0 0 12px var(--acc)); }
+      55%  { transform: scale(0.92);                    filter: none; }
+      80%  { transform: scale(1.1);  color: var(--acc); }
+      100% { transform: scale(1);    color: var(--acc); }
+    }
+    .dash-xp-level.levelup-pop {
+      animation: dashLevelPop 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    /* XP bar flash on level-up */
+    @keyframes xpBarFlash {
+      0%,100% { opacity: 1; }
+      40%     { opacity: 0.3; background: #fff; }
+    }
+    .dash-xp-bar-fill.levelup-flash {
+      animation: xpBarFlash 0.5s ease-out both;
+    }
+
+    /* 2. XP float animation (replaces inline xp-float if any) */
+    .xp-float {
+      position: fixed; z-index: 9998; font-size: 15px; font-weight: 800;
+      pointer-events: none; white-space: nowrap;
+      animation: xpFloatUp 0.9s cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+    @keyframes xpFloatUp {
+      0%   { opacity:1; transform: translateY(0) scale(1); }
+      60%  { opacity:1; transform: translateY(-28px) scale(1.05); }
+      100% { opacity:0; transform: translateY(-52px) scale(0.9); }
+    }
+    .xp-mult-badge { display:inline-block; font-size:10px; font-weight:800; background:var(--acc); color:var(--btn-txt); border-radius:99px; padding:1px 5px; margin-left:4px; vertical-align:middle; }
+
+    /* 3. Session summary card */
+    .session-summary-card {
+      display: none;
+      background: color-mix(in srgb, var(--p2), transparent 40%);
+      border: 1px solid color-mix(in srgb, var(--acc), transparent 80%);
+      border-radius: 16px; padding: 14px 16px;
+      flex-direction: column; gap: 10px;
+      animation: fbIn 0.35s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    .session-summary-card.show { display: flex; }
+    .session-summary-header { display:flex; align-items:center; justify-content:space-between; }
+    .session-summary-title { font-size:11px; font-weight:700; color:rgba(239,248,226,0.4); text-transform:uppercase; letter-spacing:0.08em; }
+    .session-summary-close { background:none; border:none; color:rgba(239,248,226,0.3); cursor:pointer; font-size:14px; padding:0; line-height:1; font-family:'Inter',sans-serif; }
+    .session-summary-close:hover { color:rgba(239,248,226,0.6); }
+    .session-summary-row { display:flex; align-items:center; gap:12px; }
+    .session-summary-score { font-size:clamp(28px,7vw,36px); font-weight:800; color:var(--acc); line-height:1; flex-shrink:0; }
+    .session-summary-meta { flex:1; }
+    .session-summary-label { font-size:13px; font-weight:600; color:#eff8e2; }
+    .session-summary-sub { font-size:11px; color:rgba(239,248,226,0.4); margin-top:2px; }
+    .session-summary-xp-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .session-summary-xp { font-size:12px; font-weight:700; color:var(--acc); background:color-mix(in srgb, var(--acc), transparent 88%); border:1px solid color-mix(in srgb, var(--acc), transparent 75%); border-radius:99px; padding:3px 10px; }
+    .session-summary-streak { font-size:12px; font-weight:700; color:rgba(239,248,226,0.5); background:color-mix(in srgb, var(--p4), transparent 70%); border-radius:99px; padding:3px 10px; }
+    html[data-theme="minimal"] .session-summary-card { background: var(--surf); box-shadow: none; }
+
+    /* 4. Streak warning */
+    .streak-warning {
+      display: none; align-items: center; gap: 12px;
+      background: color-mix(in srgb, #ff8c42, transparent 85%);
+      border: 1px solid color-mix(in srgb, #ff8c42, transparent 60%);
+      border-radius: 14px; padding: 13px 16px;
+      animation: fbIn 0.35s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    .streak-warning.show { display: flex; }
+    .streak-warning-icon { font-size:24px; flex-shrink:0; }
+    .streak-warning-text { flex:1; }
+    .streak-warning-title { font-size:clamp(12px,3vw,13px); font-weight:700; color:#ffe0c0; }
+    .streak-warning-sub { font-size:clamp(10px,2.5vw,11px); color:rgba(255,224,192,0.6); margin-top:2px; }
+    html[data-theme="minimal"] .streak-warning { background: color-mix(in srgb, var(--surf), #ff8c42 18%); box-shadow: none; }
+
+    /* 5. Weekly summary card */
+    .weekly-summary-card {
+      display: none;
+      background: color-mix(in srgb, var(--p3), transparent 50%);
+      border: 1px solid color-mix(in srgb, var(--acc), transparent 82%);
+      border-radius: 16px; padding: 14px 16px;
+      flex-direction: column; gap: 10px;
+      animation: fbIn 0.35s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    .weekly-summary-card.show { display: flex; }
+    .weekly-summary-title { font-size:11px; font-weight:700; color:rgba(239,248,226,0.4); text-transform:uppercase; letter-spacing:0.08em; }
+    .weekly-summary-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+    .weekly-stat { text-align:center; background:color-mix(in srgb, var(--p4), transparent 75%); border-radius:10px; padding:10px 6px; }
+    .weekly-stat-val { font-size:clamp(16px,4vw,20px); font-weight:800; color:var(--acc); line-height:1; }
+    .weekly-stat-lbl { font-size:9px; font-weight:700; color:rgba(239,248,226,0.35); text-transform:uppercase; letter-spacing:0.06em; margin-top:3px; }
+    .weekly-sparkline { display:flex; align-items:flex-end; gap:4px; height:44px; }
+    .sparkline-day { display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:3px; flex:1; }
+    .sparkline-bar { width:100%; border-radius:3px 3px 0 0; background:color-mix(in srgb, var(--acc), transparent 60%); min-height:3px; }
+    .sparkline-bar.today { background:var(--acc); }
+    .sparkline-label { font-size:8px; font-weight:600; color:rgba(239,248,226,0.3); text-transform:uppercase; }
+    html[data-theme="minimal"] .weekly-summary-card { background: var(--surf); box-shadow: none; }
+    html[data-theme="minimal"] .weekly-stat { background: var(--surf-d); }
+
+    /* 6. Answer Hint */
+    .hint-btn {
+      background: color-mix(in srgb, var(--p4), transparent 50%);
+      border: 1px solid color-mix(in srgb, var(--acc), transparent 80%);
+      border-radius: clamp(10px, 3vw, 13px);
+      color: rgba(239,248,226,0.55);
+      font-size: clamp(11px, 3vw, 13px);
+      font-weight: 700;
+      padding: clamp(11px, 3.5vw, 15px) clamp(10px, 3vw, 14px);
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.18s;
+      white-space: nowrap;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    .hint-btn:hover:not(:disabled) { color:var(--acc); border-color:color-mix(in srgb, var(--acc), transparent 55%); background: color-mix(in srgb, var(--p4), transparent 30%); }
+    .hint-btn:disabled { opacity:0.35; cursor:default; font-size: clamp(10px, 2.5vw, 11px); padding: clamp(11px, 3.5vw, 15px) clamp(7px, 2.5vw, 10px); }
+    .hint-reveal { display:none; font-size:12px; font-weight:600; color:rgba(239,248,226,0.6); text-align:center; padding: 8px 16px; margin: 0 clamp(12px,4vw,20px) 0; background: color-mix(in srgb, var(--p3), transparent 55%); border-radius: 10px; border: 1px solid color-mix(in srgb, var(--acc), transparent 82%); letter-spacing:0.02em; line-height: 1.4; flex-shrink: 0; }
+    .hint-reveal.show { display:block; margin-bottom: 10px; }
+    html[data-theme="minimal"] .hint-btn { background: var(--surf-d); box-shadow: none; }
 
     /* ── Milestones Section on Profile ── */
     .milestones-grid {
@@ -2819,6 +3222,63 @@ select:focus {
     }
     .profile-save-btn:hover { background: rgba(123,168,50,0.4); }
 
+    /* ════════════════════════════════════
+       PRACTICE MODE — hide all progression UI
+    ════════════════════════════════════ */
+    html[data-practice="1"] .dash-xp-row,
+    html[data-practice="1"] .streak-warning,
+    html[data-practice="1"] .weekly-summary-card,
+    html[data-practice="1"] #sessionSummaryCard .session-summary-xp-row,
+    html[data-practice="1"] #improveBanner,
+    html[data-practice="1"] #milestoneToast,
+    html[data-practice="1"] #levelUpModal,
+    html[data-practice="1"] #dailyChallengeBtn,
+    html[data-practice="1"] .pb-xp-card,
+    html[data-practice="1"] #hintBtn,
+    html[data-practice="1"] .xp-float { display: none !important; }
+
+    /* Practice mode toggle card in profile */
+    .practice-mode-card {
+      background: color-mix(in srgb, var(--p2), transparent 40%);
+      border: 1px solid color-mix(in srgb, var(--acc), transparent 85%);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .practice-mode-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .practice-mode-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #eff8e2;
+    }
+    .practice-mode-sub {
+      font-size: 11px;
+      color: rgba(239,248,226,0.4);
+      margin-top: 3px;
+      line-height: 1.4;
+    }
+    .practice-mode-active-badge {
+      display: none;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--acc);
+      background: color-mix(in srgb, var(--acc), transparent 88%);
+      border: 1px solid color-mix(in srgb, var(--acc), transparent 70%);
+      border-radius: 99px;
+      padding: 3px 10px;
+      width: fit-content;
+    }
+    html[data-practice="1"] .practice-mode-active-badge { display: block; }
+
     /* ════════════════════════════════════════════════
        PROFILE SCREEN
     ════════════════════════════════════════════════ */
@@ -3174,6 +3634,14 @@ select:focus {
      THEME: MINIMAL
      Fully flat — solid colours, no blur, no glow, no transparency
   ══════════════════════════════════════════════ */
+
+  /* 0. Rebalanced colour palette — dark-purple surfaces, lime accent */
+  html[data-theme="minimal"] {
+    --surf:   var(--p2);   /* #2d0a3d — dark card surface (was medium #573280) */
+    --surf-d: var(--p1);   /* #23022e — deeper secondary surface */
+    --hov:    var(--p3);   /* #3d0a57 — hover highlight */
+    --bar-bg: var(--p1);   /* #23022e — progress bar troughs */
+  }
 
   /* 1. Kill every backdrop-filter site-wide */
   html[data-theme="minimal"] * {
@@ -3672,6 +4140,45 @@ select:focus {
       </div>
     </div>
 
+    <!-- Session Summary Card (last session stats, shown on return to dashboard) -->
+    <div class="session-summary-card" id="sessionSummaryCard">
+      <div class="session-summary-header">
+        <span class="session-summary-title">Last session</span>
+        <button class="session-summary-close" onclick="dismissSessionSummary()">✕</button>
+      </div>
+      <div class="session-summary-row">
+        <div class="session-summary-score" id="sscScore">—</div>
+        <div class="session-summary-meta">
+          <div class="session-summary-label" id="sscLabel">—</div>
+          <div class="session-summary-sub" id="sscSub">—</div>
+        </div>
+      </div>
+      <div class="session-summary-xp-row">
+        <span class="session-summary-xp" id="sscXP">+0 XP</span>
+        <span class="session-summary-streak" id="sscStreak"></span>
+      </div>
+    </div>
+
+    <!-- Streak Warning (shown when streak is at risk — played yesterday, not yet today) -->
+    <div class="streak-warning" id="streakWarning">
+      <div class="streak-warning-icon">⚠️</div>
+      <div class="streak-warning-text">
+        <div class="streak-warning-title" id="streakWarningTitle">Streak at risk!</div>
+        <div class="streak-warning-sub" id="streakWarningSub">Play today to keep your streak alive</div>
+      </div>
+    </div>
+
+    <!-- Weekly Summary Card (shown on Mondays) -->
+    <div class="weekly-summary-card" id="weeklySummaryCard">
+      <div class="weekly-summary-title">📅 Last week</div>
+      <div class="weekly-summary-stats">
+        <div class="weekly-stat"><div class="weekly-stat-val" id="wkQs">0</div><div class="weekly-stat-lbl">Questions</div></div>
+        <div class="weekly-stat"><div class="weekly-stat-val" id="wkAcc">—</div><div class="weekly-stat-lbl">Accuracy</div></div>
+        <div class="weekly-stat"><div class="weekly-stat-val" id="wkXP">0</div><div class="weekly-stat-lbl">XP gained</div></div>
+      </div>
+      <div class="weekly-sparkline" id="weeklySparkline"></div>
+    </div>
+
     <!-- Improvement Banner (shown when user beats their avg) -->
     <div class="improve-banner" id="improveBanner">
       <div class="improve-banner-icon" id="improveBannerIcon">📈</div>
@@ -3907,6 +4414,19 @@ select:focus {
         <input type="color" id="colorPickBase" value="#3d0a57" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none">
         <p class="color-picker-hint">Tap a theme · or tap circles to build your own</p>
       </div>
+    </div>
+
+    <!-- Practice Mode -->
+    <div class="dash-section-title">Mode</div>
+    <div class="practice-mode-card">
+      <div class="practice-mode-row">
+        <div>
+          <div class="practice-mode-title">Pure Practice Mode</div>
+          <div class="practice-mode-sub">Hide XP, levels, streaks, daily challenges and rewards. Just you and the maths.</div>
+        </div>
+        <label class="toggle"><input type="checkbox" id="practiceModeTog" onchange="setPracticeMode(this.checked)"><span class="tslider"></span></label>
+      </div>
+      <div class="practice-mode-active-badge">Active — no progression tracking</div>
     </div>
 
     <!-- Danger zone -->
@@ -4221,6 +4741,7 @@ select:focus {
     <!-- TYPE mode -->
     <div class="ans-zone" id="typeZone">
       <div class="ans-row">
+        <button class="hint-btn" id="hintBtn" onclick="useHint()" title="Costs 5 XP">💡 Hint</button>
         <input 
   type="text"
   class="ans-input"
@@ -4239,6 +4760,9 @@ select:focus {
     <div class="fb-box" id="fbBox"></div>
     <button class="next-btn" id="nextBtn" onclick="nextQ()">Next question →</button>
 </div>
+
+<!-- Hint reveal sits between question area and keyboard so it never overlaps -->
+<div class="hint-reveal" id="hintReveal"></div>
 
 <div class="custom-keyboard" id="keyboard">
   <div class="kb-grid">
@@ -4359,7 +4883,7 @@ select:focus {
       <div class="pb-xp-card">
         <div class="pb-xp-left">
           <div class="pb-xp-val" id="pbXP">—</div>
-          <div class="pb-xp-lbl">Total XP</div>
+          <div class="pb-xp-lbl">XP Earned</div>
         </div>
         <div class="pb-xp-bar-wrap">
           <div class="pb-xp-bar-bg"><div class="pb-xp-bar-fill" id="resXpBar"></div></div>
@@ -4430,6 +4954,37 @@ select:focus {
 </div>
 <script>
 const isMobile = window.matchMedia("(pointer: coarse)").matches;
+
+// ═══════════════════════════════════════════════
+//  PRACTICE MODE
+// ═══════════════════════════════════════════════
+const PRACTICE_MODE_KEY = 'quiz_practice_mode';
+
+function isPracticeMode() {
+  try { return localStorage.getItem(PRACTICE_MODE_KEY) === '1'; } catch(e) { return false; }
+}
+
+function applyPracticeMode(on) {
+  document.documentElement.dataset.practice = on ? '1' : '0';
+  // Sync toggle if profile screen is open
+  const tog = document.getElementById('practiceModeTog');
+  if (tog) tog.checked = on;
+}
+
+function setPracticeMode(on) {
+  try { localStorage.setItem(PRACTICE_MODE_KEY, on ? '1' : '0'); } catch(e) {}
+  applyPracticeMode(on);
+  // If XP/level modal is showing, hide it immediately
+  if (on) {
+    const modal = document.getElementById('levelUpModal');
+    if (modal) modal.classList.remove('show');
+    const toast = document.getElementById('milestoneToast');
+    if (toast) toast.classList.remove('show');
+  }
+}
+
+// Apply on load — before anything renders
+applyPracticeMode(isPracticeMode());
 
   let qs=[], cur=0, score=0, results=[], qType='both';
 let instant=true, autoSub=false, answered=false, pickMode=false;
@@ -5554,13 +6109,8 @@ keys.forEach(key => {
 
     input.value += key.textContent;
 
-    if (autoSub) {
-      const q = qs[cur];
-      const targetLen = q.reverse ? String(q.n).length : String(q.answer).length;
-      if (input.value.length >= targetLen) {
-        setTimeout(() => checkAnswer(), 60);
-      }
-    }
+    // Fire native input event so the single auto-submit listener handles length check
+    input.dispatchEvent(new Event('input'));
   });
 });
 document.getElementById('ansInput').addEventListener('focus', (e) => {
@@ -5868,6 +6418,10 @@ function showProfile() {
   const history  = getSessionHistory();
   const pb       = getPB();
 
+  // Sync practice mode toggle
+  const tog = document.getElementById('practiceModeTog');
+  if (tog) tog.checked = isPracticeMode();
+
   // Avatar initial
   const name = profile.name || '?';
   document.getElementById('profileAvatar').textContent = name.charAt(0).toUpperCase();
@@ -6001,16 +6555,9 @@ function goHome() {
 }
 
 // ── Initial screen routing ──
-(function init() {
-  const profile = getProfile();
-  if (!profile.name) {
-    document.getElementById('s-welcome').classList.add('active');
-    document.getElementById('s-setup').classList.remove('active');
-    document.getElementById('welcomeQuote').textContent = QUOTES[Math.floor(Math.random()*QUOTES.length)];
-  } else {
-    document.getElementById('s-setup').classList.remove('active');
-    showDashboard();
-  }
+(function _deferredInit() {
+  // init() has been moved to end of script — after all showDashboard patches are applied.
+  // This stub intentionally left to preserve surrounding code structure.
 })();
 
 
@@ -6232,37 +6779,117 @@ function drainMilestoneQueue() {
   showMilestoneToast(m, () => setTimeout(drainMilestoneQueue, 400));
 }
 
-function showDCCompleteToast(pct, onDone) {
+// ── Shared toast dismiss system ──
+let _toastDismissTimer = null;
+let _toastOnDone = null;
+
+function _dismissToast(swipeDir) {
   const toast = document.getElementById('milestoneToast');
+  if (!toast.classList.contains('show')) return;
+  clearTimeout(_toastDismissTimer);
+  _toastDismissTimer = null;
+
+  const done = _toastOnDone;
+  _toastOnDone = null;
+
+  if (swipeDir) {
+    toast.classList.add(swipeDir === 'left' ? 'swipe-left' : 'swipe-right');
+    setTimeout(() => {
+      toast.classList.remove('show', 'swipe-left', 'swipe-right');
+      if (done) done();
+    }, 230);
+  } else {
+    toast.classList.add('hide');
+    setTimeout(() => {
+      toast.classList.remove('show', 'hide');
+      if (done) done();
+    }, 280);
+  }
+}
+
+function _showToast(autoHideMs, onDone) {
+  const toast = document.getElementById('milestoneToast');
+  // Cancel any in-progress dismiss
+  clearTimeout(_toastDismissTimer);
+  toast.classList.remove('hide', 'swipe-left', 'swipe-right');
+  _toastOnDone = onDone || null;
+  toast.classList.add('show');
+  _toastDismissTimer = setTimeout(() => _dismissToast(null), autoHideMs);
+}
+
+// Attach swipe handler once
+(function initToastSwipe() {
+  const toast = document.getElementById('milestoneToast');
+  if (!toast) return;
+  let startX = 0, startY = 0, dragging = false, currentX = 0;
+  const SWIPE_THRESHOLD = 60;
+  const DRAG_THRESHOLD  = 8;
+
+  toast.addEventListener('pointerdown', e => {
+    if (!toast.classList.contains('show')) return;
+    startX = e.clientX; startY = e.clientY;
+    currentX = 0; dragging = true;
+    toast.setPointerCapture(e.pointerId);
+  }, { passive: true });
+
+  toast.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    // Cancel if more vertical than horizontal
+    if (!currentX && Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > DRAG_THRESHOLD) { dragging = false; return; }
+    currentX = dx;
+    // Drag the toast with resistance beyond threshold
+    const resistance = Math.abs(dx) > SWIPE_THRESHOLD ? 0.4 : 1;
+    const capped = Math.sign(dx) * (Math.min(Math.abs(dx), SWIPE_THRESHOLD) + Math.max(0, Math.abs(dx) - SWIPE_THRESHOLD) * resistance);
+    toast.style.transition = 'none';
+    toast.style.transform = `translateX(calc(-50% + ${capped}px))`;
+    toast.style.opacity = String(Math.max(0.4, 1 - Math.abs(capped) / 160));
+  }, { passive: true });
+
+  const endSwipe = e => {
+    if (!dragging) return;
+    dragging = false;
+    toast.style.transition = '';
+    toast.style.transform  = '';
+    toast.style.opacity    = '';
+    if (Math.abs(currentX) >= SWIPE_THRESHOLD) {
+      _dismissToast(currentX < 0 ? 'left' : 'right');
+    }
+  };
+  toast.addEventListener('pointerup',     endSwipe, { passive: true });
+  toast.addEventListener('pointercancel', endSwipe, { passive: true });
+})();
+
+function showDCCompleteToast(pct, onDone) {
   document.getElementById('milestoneToastIcon').textContent  = '🎯';
   document.getElementById('milestoneToastTitle').textContent = 'Daily Challenge Complete!';
   document.getElementById('milestoneToastSub').textContent   = `${pct}% — Come back tomorrow for a new one`;
-  toast.classList.remove('hide');
-  toast.classList.add('show');
-  setTimeout(() => {
-    toast.classList.add('hide');
-    setTimeout(() => {
-      toast.classList.remove('show', 'hide');
-      if (onDone) onDone();
-    }, 400);
-  }, 3000);
+  const labelEl = document.getElementById('milestoneToast').querySelector('.milestone-label');
+  if (labelEl) labelEl.textContent = 'Daily Challenge';
+  _showToast(3000, onDone);
 }
 
 function showMilestoneToast(m, onDone) {
-  const toast = document.getElementById('milestoneToast');
   document.getElementById('milestoneToastIcon').textContent  = m.icon;
   document.getElementById('milestoneToastTitle').textContent = m.name;
   document.getElementById('milestoneToastSub').textContent   = m.desc;
-  toast.classList.remove('hide');
-  toast.classList.add('show');
+  const labelEl = document.getElementById('milestoneToast').querySelector('.milestone-label');
+  if (labelEl) labelEl.textContent = 'Milestone Unlocked!';
   launchConfetti();
-  setTimeout(() => {
-    toast.classList.add('hide');
-    setTimeout(() => {
-      toast.classList.remove('show', 'hide');
-      if (onDone) onDone();
-    }, 400);
-  }, 3200);
+  _showToast(3200, onDone);
+}
+
+function showLevelUpToast(level) {
+  const emojis = ['⭐','🌟','💫','🔥','💎','👑','🏆','🦅','🌙','🎯'];
+  const emoji  = emojis[Math.min(Math.floor((level - 1) / 5), emojis.length - 1)];
+  document.getElementById('milestoneToastIcon').textContent  = emoji;
+  document.getElementById('milestoneToastTitle').textContent = `Level ${level} — ${levelTitle(level)}!`;
+  document.getElementById('milestoneToastSub').textContent   = 'You levelled up!';
+  const labelEl = document.getElementById('milestoneToast').querySelector('.milestone-label');
+  if (labelEl) labelEl.textContent = 'Level Up!';
+  launchConfetti();
+  _showToast(3500, null);
 }
 
 function renderMilestonesGrid() {
@@ -6307,6 +6934,7 @@ showProfile = function() {
 const _origSaveHistory = saveHistory;
 saveHistory = function(s, total, pct) {
   _origSaveHistory(s, total, pct);
+  if (isPracticeMode()) return;
   const history = getSessionHistory();
   const pb      = getPB();
   setTimeout(() => checkAndTriggerMilestones(history, pb), 800);
@@ -6474,6 +7102,7 @@ function addXP(bonus) {
 }
 
 function deductXP() {
+  if (isPracticeMode()) return;
   const loss = 3; // 1/3 of base 10 XP
   const data = getXPData();
   data.totalXP = Math.max(0, data.totalXP - loss);
@@ -6503,7 +7132,7 @@ function updateXPPill() {
   // XP pill removed from test header — no-op
 }
 
-function updateDashXP() {
+function updateDashXP(animateLevelUp) {
   const data  = getXPData();
   const level = data.currentLevel;
   const xpStart  = xpForLevel(level);
@@ -6519,7 +7148,31 @@ function updateDashXP() {
   if (el.level) el.level.textContent = `Lv ${level}`;
   if (el.title) el.title.textContent = levelTitle(level);
   if (el.sub)   el.sub.textContent   = `${xpIn} / ${xpNeeded} XP to next level`;
-  if (el.bar)   el.bar.style.width   = pct + '%';
+
+  if (el.bar) {
+    // Reset bar to 0 first on level-up so the fill animates from empty
+    if (animateLevelUp) {
+      el.bar.style.transition = 'none';
+      el.bar.style.width = '0%';
+      void el.bar.offsetWidth;
+      el.bar.style.transition = '';
+    }
+    el.bar.style.width = pct + '%';
+  }
+
+  // Animate level number if levelling up
+  if (animateLevelUp && el.level) {
+    el.level.classList.remove('levelup-pop');
+    void el.level.offsetWidth;
+    el.level.classList.add('levelup-pop');
+    el.level.addEventListener('animationend', () => el.level.classList.remove('levelup-pop'), { once: true });
+    if (el.bar) {
+      el.bar.classList.remove('levelup-flash');
+      void el.bar.offsetWidth;
+      el.bar.classList.add('levelup-flash');
+      el.bar.addEventListener('animationend', () => el.bar.classList.remove('levelup-flash'), { once: true });
+    }
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -6564,7 +7217,8 @@ function renderPBRow(pb, flags) {
     pbStreakEl.className = 'pb-v' + (flags.newBestStreak ? ' pb-new-best' : '');
   }
   if (pbXPEl) {
-    pbXPEl.textContent = xpData.totalXP + ' XP';
+    const xpGained = Math.max(0, getXPData().totalXP - _sessionStartXP);
+    pbXPEl.textContent = '+' + xpGained + ' XP';
     pbXPEl.className   = 'pb-v';
   }
 }
@@ -7000,6 +7654,7 @@ function showSessionNudge(pct, pb) {
 // HOOK: called on every correct answer
 // ─────────────────────────────────────────────
 function onCorrectAnswer(sessionStreak) {
+  if (isPracticeMode()) return;
   const bonus = sessionStreak >= 3;
   const xpResult = addXP(bonus);
   showXPFloat(xpResult.gain);
@@ -7010,8 +7665,14 @@ function onCorrectAnswer(sessionStreak) {
 // HOOK: called at end of session (from showResults)
 // ─────────────────────────────────────────────
 function onSessionComplete(pct, sessionBestStreak, score, total) {
-  // Day streak
+  // Day streak — always track (pure stats, not progression)
   const streakResult = updateDayStreak();
+
+  if (isPracticeMode()) {
+    // In practice mode: only save history + show session nudge, skip everything else
+    showSessionNudge(pct, getPB());
+    return;
+  }
 
   // Update XP pill in test header
   updateXPPill();
@@ -7164,20 +7825,21 @@ pickAnswer = function(chosen, correct) {
 // PATCH showResults to call onSessionComplete
 // ─────────────────────────────────────────────
 const _origShowResults = showResults;
-// We need to wrap carefully since showResults is inside a closure
-// Intercept via the outer showDashboard/goHome chain — patch at module level
 (function patchShowResults() {
-  // Override the inline showResults inside the closure is tricky,
-  // so we hook into the results screen becoming visible via MutationObserver
   const observer = new MutationObserver(() => {
     const resultsScreen = document.getElementById('s-results');
     if (resultsScreen && resultsScreen.classList.contains('active')) {
-      // Only fire once per activation
       if (resultsScreen.dataset.nudgeFired !== 'true') {
         resultsScreen.dataset.nudgeFired = 'true';
         const total = results.length;
         const pct   = total > 0 ? Math.round((score / total) * 100) : 0;
         onSessionComplete(pct, bestStreak, score, total);
+        // Show level-up toast if a level-up occurred during this session
+        if (_pendingLevelUp !== null) {
+          const lvl = _pendingLevelUp.level;
+          setTimeout(() => showLevelUpToast(lvl), 900);
+          // Don't clear _pendingLevelUp here — dashboard still needs it for the modal
+        }
       }
     } else if (resultsScreen) {
       resultsScreen.dataset.nudgeFired = 'false';
@@ -7187,13 +7849,34 @@ const _origShowResults = showResults;
 })();
 
 // ─────────────────────────────────────────────
-// PATCH showDashboard to include XP
+// PATCH showDashboard — single authoritative refresh
+// Ensures XP, day streak, daily goal, DC button are
+// all current on every app open / dashboard visit.
 // ─────────────────────────────────────────────
+// Track level when leaving to results, so dashboard knows if level changed
+let _levelAtResults = null;
+
 const _origShowDash2 = showDashboard;
 showDashboard = function() {
   _origShowDash2();
-  updateDashXP();
+  const pending = _pendingLevelUp;
+  _pendingLevelUp = null; // consume
+  const didLevelUp = pending !== null;
+  // Animate the level number if levelled up
+  setTimeout(() => updateDashXP(didLevelUp), didLevelUp ? 350 : 0);
+  // Show full-screen modal only if the title changed
+  if (didLevelUp) {
+    const newTitle = levelTitle(pending.level);
+    if (newTitle !== pending.oldTitle) {
+      setTimeout(() => showLevelUpModal(pending.level), 600);
+    }
+  }
+  updateDailyGoalUI();
+  updateDailyChallengeBtn();
   updateSetupMotivation();
+  const _h = getSessionHistory();
+  const _streakEl = document.getElementById('dashDayStreak');
+  if (_streakEl) _streakEl.textContent = computeDayStreak(_h) || '0';
 };
 
 // ─────────────────────────────────────────────
@@ -7229,6 +7912,33 @@ showProfile = function() {
 </script>
 <!-- End Session button (Unlimited mode) -->
 <button id="endSessionBtn" onclick="endUnlimitedSession()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="10" height="10" rx="2" fill="#ff6b6b"/></svg> End Session</button>
+
+
+<!-- Level-Up Modal -->
+<div id="levelUpModal" onclick="dismissLevelUp()">
+  <div class="levelup-halo"></div>
+  <div class="levelup-card" onclick="event.stopPropagation()">
+    <div class="levelup-particles" id="levelUpParticles"></div>
+    <div class="levelup-hero">
+      <div class="levelup-emblem">
+        <div class="levelup-emblem-ring"></div>
+        <div class="levelup-emblem-inner" id="levelUpGlow">⭐</div>
+      </div>
+      <div class="levelup-label">Level Up</div>
+      <div class="levelup-level" id="levelUpNum">2</div>
+      <div class="levelup-title" id="levelUpTitle">Apprentice</div>
+    </div>
+    <div class="levelup-divider"></div>
+    <div class="levelup-body">
+      <div class="levelup-story" id="levelUpStory"></div>
+      <div class="levelup-bar-wrap">
+        <div class="levelup-bar-fill" id="levelUpBar"></div>
+      </div>
+      <div class="levelup-sub" id="levelUpSub">Keep going to reach the next level</div>
+      <button class="levelup-dismiss" onclick="dismissLevelUp()">Continue</button>
+    </div>
+  </div>
+</div>
 
 <!-- Milestone Toast -->
 <div id="milestoneToast">
@@ -7715,8 +8425,536 @@ function applyTheme(theme, animate) {
   }
 }
 
+
+// ═══════════════════════════════════════════════
+//  NEW FEATURES JS
+// ═══════════════════════════════════════════════
+
+// ── STORAGE KEYS ──
+const SESSION_SUMMARY_KEY = 'quiz_last_session_summary';
+const WEEKLY_XP_KEY       = 'quiz_weekly_xp';
+
+// ─────────────────────────────────────────────
+// 1. LEVEL-UP MODAL
+// ─────────────────────────────────────────────
+let _prevLevel = null;
+
+function checkLevelUp(newLevel) {
+  if (_prevLevel !== null && newLevel > _prevLevel) {
+    showLevelUpModal(newLevel);
+  }
+  _prevLevel = newLevel;
+}
+
+function showLevelUpModal(level) {
+  const emojis = ['⭐','🌟','💫','🔥','💎','👑','🏆','🦅','🌙','🎯'];
+  const emoji  = emojis[Math.min(Math.floor((level-1)/5), emojis.length-1)];
+  document.getElementById('levelUpGlow').textContent  = emoji;
+  document.getElementById('levelUpNum').textContent   = 'Level ' + level;
+  document.getElementById('levelUpTitle').textContent = levelTitle(level);
+
+  // Unique story line for each title transition
+  const storyEl = document.getElementById('levelUpStory');
+  const prevTitle = levelTitle(level - 1);
+  const newTitle  = levelTitle(level);
+  const TRANSITION_LINES = {
+    'Beginner→Apprentice':     "The journey begins in earnest.",
+    'Apprentice→Student':      "Curiosity becomes discipline.",
+    'Student→Practitioner':    "You stopped guessing. You started knowing.",
+    'Practitioner→Skilled':    "The numbers bend to your will.",
+    'Skilled→Advanced':        "Few make it here.",
+    'Advanced→Expert':         "Most stop before this point.",
+    'Expert→Master':           "This is where legends are made.",
+    'Master→Grandmaster':      "Beyond mastery, there is this.",
+    'Grandmaster→Legend':      "There is no higher.",
+  };
+  if (storyEl) {
+    if (level > 1 && prevTitle !== newTitle) {
+      const line = TRANSITION_LINES[`${prevTitle}→${newTitle}`] || '';
+      storyEl.innerHTML = line
+        ? `<span class="to-title">${line}</span>`
+        : `<span class="from-title">${prevTitle}</span> becomes <span class="to-title">${newTitle}</span>`;
+      storyEl.style.display = '';
+    } else {
+      storyEl.style.display = 'none';
+    }
+  }
+
+  const xpD    = getXPData();
+  const xpIn   = xpD.totalXP - xpForLevel(level);
+  const xpNeed = xpForCurrentLevel(level);
+  document.getElementById('levelUpSub').textContent =
+    level >= 50
+      ? "You've reached the pinnacle \u2014 Legend!"
+      : `${xpIn} / ${xpNeed} XP to Level ${level + 1}`;
+
+  const modal = document.getElementById('levelUpModal');
+  modal.classList.add('show');
+  launchConfetti();
+
+  // Burst particles from card centre
+  const container = document.getElementById('levelUpParticles');
+  if (container) {
+    container.innerHTML = '';
+    const count = 18;
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div');
+      p.className = 'lup-particle';
+      const angle = (i / count) * 360;
+      const dist  = 60 + Math.random() * 80;
+      const rad   = angle * Math.PI / 180;
+      p.style.setProperty('--tx', Math.cos(rad) * dist + 'px');
+      p.style.setProperty('--ty', Math.sin(rad) * dist + 'px');
+      p.style.left = '50%'; p.style.top = '40%';
+      p.style.animationDelay = (Math.random() * 0.15) + 's';
+      p.style.animationDuration = (0.9 + Math.random() * 0.5) + 's';
+      p.style.width = p.style.height = (2 + Math.random() * 3) + 'px';
+      container.appendChild(p);
+    }
+  }
+
+  // Animate bar after paint
+  setTimeout(() => {
+    const pct = level >= 50 ? 100 : Math.min(100, Math.round(xpIn / xpNeed * 100));
+    document.getElementById('levelUpBar').style.width = pct + '%';
+  }, 120);
+}
+
+function dismissLevelUp() {
+  const modal = document.getElementById('levelUpModal');
+  modal.classList.remove('show');
+}
+
+// Patch addXP to detect level-up
+// _pendingLevelUp stores {level, oldTitle} if a level-up just occurred.
+let _pendingLevelUp = null;
+const _origAddXP = addXP;
+addXP = function(bonus) {
+  if (isPracticeMode()) return { gain: 0, totalXP: getXPData().totalXP, level: getXPData().currentLevel };
+  const before = getXPData().currentLevel;
+  const oldTitle = levelTitle(before);
+  const result = _origAddXP(bonus);
+  const after  = getXPData().currentLevel;
+  if (after > before) {
+    // Store for results toast and dashboard modal
+    if (_pendingLevelUp === null) {
+      _pendingLevelUp = { level: after, oldTitle };
+    } else {
+      _pendingLevelUp.level = after; // update to latest level
+    }
+  }
+  _prevLevel = after;
+  return result;
+};
+
+// Init prevLevel on load
+(function() { _prevLevel = getXPData().currentLevel; })();
+
+// ─────────────────────────────────────────────
+// 2. VISIBLE XP MULTIPLIER ON FLOAT
+// ─────────────────────────────────────────────
+// Override showXPFloat to show multiplier badge when bonus
+const _origShowXPFloat = showXPFloat;
+showXPFloat = function(gain, isBonus) {
+  const ref = document.getElementById('ansInput') || document.getElementById('checkBtn');
+  if (!ref) return;
+  const rect = ref.getBoundingClientRect();
+  const float = document.createElement('div');
+  float.className = 'xp-float';
+  const _xpAcc = getComputedStyle(document.documentElement).getPropertyValue('--acc').trim() || '#B8D45C';
+  float.style.color = gain > 0 ? _xpAcc : '#ff6b6b';
+  float.style.textShadow = gain > 0 ? `0 0 10px ${_xpAcc}99` : '0 0 10px rgba(255,107,107,0.5)';
+  float.style.left = (rect.left + rect.width / 2 - 24) + 'px';
+  float.style.top  = (rect.top + window.scrollY - 8) + 'px';
+  let text = (gain > 0 ? '+' : '') + gain + ' XP';
+  if (isBonus) text += '<span class="xp-mult-badge">🔥×1.5</span>';
+  float.innerHTML = text;
+  document.body.appendChild(float);
+  setTimeout(() => float.remove(), 950);
+};
+
+// Override onCorrectAnswer to pass bonus flag to showXPFloat
+const _origOnCorrectAnswer = onCorrectAnswer;
+onCorrectAnswer = function(sessionStreak) {
+  if (isPracticeMode()) return;
+  const bonus = sessionStreak >= 3;
+  const xpResult = addXP(bonus);
+  showXPFloat(xpResult.gain, bonus);
+  updateXPPill();
+};
+
+// ─────────────────────────────────────────────
+// 3. SESSION SUMMARY CARD
+// ─────────────────────────────────────────────
+function saveSessionSummary(pct, correct, total, xpGained, bestStreak) {
+  try {
+    localStorage.setItem(SESSION_SUMMARY_KEY, JSON.stringify({
+      pct, correct, total, xpGained, bestStreak, ts: Date.now()
+    }));
+  } catch(e) {}
+}
+
+function getSessionSummary() {
+  try { return JSON.parse(localStorage.getItem(SESSION_SUMMARY_KEY)) || null; }
+  catch(e) { return null; }
+}
+
+function dismissSessionSummary() {
+  document.getElementById('sessionSummaryCard').classList.remove('show');
+  try { localStorage.removeItem(SESSION_SUMMARY_KEY); } catch(e) {}
+}
+
+function renderSessionSummaryCard() {
+  const s = getSessionSummary();
+  const card = document.getElementById('sessionSummaryCard');
+  if (!s || !card) { card && card.classList.remove('show'); return; }
+  // Only show if from last 4 hours
+  if (Date.now() - s.ts > 4 * 3600 * 1000) { card.classList.remove('show'); return; }
+
+  document.getElementById('sscScore').textContent  = s.pct + '%';
+  document.getElementById('sscLabel').textContent  = `${s.correct} of ${s.total} correct`;
+  document.getElementById('sscSub').textContent    = s.pct >= 80 ? '🎯 Great session!' : s.pct >= 60 ? '📈 Solid effort!' : '💪 Keep practicing!';
+  document.getElementById('sscXP').textContent     = '+' + s.xpGained + ' XP';
+  const streakEl = document.getElementById('sscStreak');
+  if (s.bestStreak >= 3) {
+    streakEl.textContent = '🔥 ' + s.bestStreak + ' streak';
+    streakEl.style.display = '';
+  } else {
+    streakEl.style.display = 'none';
+  }
+  card.classList.add('show');
+}
+
+// Track XP gained during session
+let _sessionStartXP = 0;
+function onSessionStartHook() { _sessionStartXP = getXPData().totalXP; }
+
+// Hook into startTest to record start XP
+const _origStartTest = startTest;
+startTest = function() {
+  onSessionStartHook();
+  _origStartTest();
+};
+
+// Hook into onSessionComplete to save summary
+const _origOnSessionComplete = onSessionComplete;
+onSessionComplete = function(pct, sessionBestStreak, score, total) {
+  _origOnSessionComplete(pct, sessionBestStreak, score, total);
+  const xpGained = Math.max(0, getXPData().totalXP - _sessionStartXP);
+  saveSessionSummary(pct, score, total, xpGained, sessionBestStreak);
+};
+
+// ─────────────────────────────────────────────
+// 4. STREAK WARNING (comeback nudge)
+// ─────────────────────────────────────────────
+function renderStreakWarning() {
+  const el = document.getElementById('streakWarning');
+  if (!el) return;
+  const history = getSessionHistory();
+  const streak  = computeDayStreak(history);
+  if (streak < 2) { el.classList.remove('show'); return; }
+
+  const todayStr = new Date().toDateString();
+  const playedToday = history.some(h => new Date(h.date).toDateString() === todayStr);
+  if (playedToday) { el.classList.remove('show'); return; }
+
+  // Check played yesterday
+  const ystStr = new Date(Date.now() - 86400000).toDateString();
+  const playedYesterday = history.some(h => new Date(h.date).toDateString() === ystStr);
+  if (!playedYesterday) { el.classList.remove('show'); return; }
+
+  // Streak is active but user hasn't played today
+  document.getElementById('streakWarningTitle').textContent = `🔥 ${streak}-day streak at risk!`;
+  document.getElementById('streakWarningSub').textContent   = "You haven't played today \u2014 don't break the chain!";
+  el.classList.add('show');
+}
+
+// ─────────────────────────────────────────────
+// 5. WEEKLY SUMMARY (shown on Mondays for prev week)
+// ─────────────────────────────────────────────
+function getWeeklyXP() {
+  try { return JSON.parse(localStorage.getItem(WEEKLY_XP_KEY)) || {}; } catch(e) { return {}; }
+}
+function saveWeeklyXP(d) {
+  try { localStorage.setItem(WEEKLY_XP_KEY, JSON.stringify(d)); } catch(e) {}
+}
+
+// Save XP snapshot per day for weekly tracking
+function recordDailyXP() {
+  const today = new Date().toISOString().slice(0,10);
+  const d = getWeeklyXP();
+  d[today] = getXPData().totalXP;
+  // Keep only last 14 days
+  const keys = Object.keys(d).sort();
+  if (keys.length > 14) keys.slice(0, keys.length-14).forEach(k => delete d[k]);
+  saveWeeklyXP(d);
+}
+
+function renderWeeklySparkline(history) {
+  const wrap = document.getElementById('weeklySparkline');
+  if (!wrap) return;
+  const days = [];
+  const labels = ['Mo','Tu','We','Th','Fr','Sa','Su'];
+  const today = new Date();
+  const todayStr = today.toDateString();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today); d.setDate(today.getDate() - i);
+    const dStr = d.toDateString();
+    const qs = history
+      .filter(h => new Date(h.date).toDateString() === dStr)
+      .reduce((s,h) => s + (h.total||0), 0);
+    days.push({ label: labels[d.getDay() === 0 ? 6 : d.getDay()-1], qs, isToday: dStr === todayStr });
+  }
+  const maxQs = Math.max(...days.map(d=>d.qs), 1);
+  wrap.innerHTML = days.map(d => {
+    const h = Math.max(4, Math.round((d.qs / maxQs) * 36));
+    return `<div class="sparkline-day">
+      <div class="sparkline-bar${d.isToday?' today':''}" style="height:${h}px;" title="${d.qs} questions"></div>
+      <div class="sparkline-label">${d.label}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderWeeklySummary() {
+  const card = document.getElementById('weeklySummaryCard');
+  if (!card) return;
+
+  const today = new Date();
+  const isMonday = today.getDay() === 1;
+  const history = getSessionHistory();
+
+  // Show on Mondays OR if user has history from last week (for testing always show if data exists)
+  const prevWeekEnd = new Date(today); prevWeekEnd.setDate(today.getDate() - today.getDay() + (today.getDay()===0?-6:1) - 1);
+  prevWeekEnd.setHours(23,59,59,999);
+  const prevWeekStart = new Date(prevWeekEnd); prevWeekStart.setDate(prevWeekEnd.getDate() - 6);
+  prevWeekStart.setHours(0,0,0,0);
+
+  const lastWeekSessions = history.filter(h => {
+    const d = new Date(h.date);
+    return d >= prevWeekStart && d <= prevWeekEnd;
+  });
+
+  // Always render sparkline for current week
+  renderWeeklySparkline(history);
+
+  if (!isMonday || !lastWeekSessions.length) {
+    card.classList.remove('show');
+    return;
+  }
+
+  const totalQs = lastWeekSessions.reduce((s,h) => s+(h.total||0),0);
+  const totalCorrect = lastWeekSessions.reduce((s,h) => s+(h.correct||0),0);
+  const acc = totalQs ? Math.round(totalCorrect/totalQs*100) : 0;
+
+  // XP gained last week from daily log
+  const xpLog = getWeeklyXP();
+  const startKey = prevWeekStart.toISOString().slice(0,10);
+  const endKey   = prevWeekEnd.toISOString().slice(0,10);
+  const xpKeys   = Object.keys(xpLog).sort();
+  const startXP  = xpLog[xpKeys.find(k => k >= startKey)] || 0;
+  const endXP    = xpLog[xpKeys.filter(k => k <= endKey).pop()] || 0;
+  const xpGained = Math.max(0, endXP - startXP);
+
+  document.getElementById('wkQs').textContent  = totalQs;
+  document.getElementById('wkAcc').textContent = acc ? acc+'%' : '—';
+  document.getElementById('wkXP').textContent  = xpGained;
+  card.classList.add('show');
+}
+
+// ─────────────────────────────────────────────
+// 6. ANSWER HINT (costs XP)
+// ─────────────────────────────────────────────
+const HINT_XP_COST = 5;
+let _hintUsedThisQ = false;
+
+function useHint() {
+  if (_hintUsedThisQ || answered) return;
+  const q = qs[cur];
+  if (!q) return;
+
+  let hint = '';
+
+  // ── Squares & Cubes: digit-prefix hint ──
+  if (q.type === 'square' || q.type === 'cube') {
+    const correctVal = q.reverse ? q.n : q.answer;
+    const str = String(Math.abs(correctVal));
+    if (q.reverse) {
+      // Reverse mode: hint about the base
+      if (q.type === 'square') hint = `Think: what number × itself = ${q.answer.toLocaleString()}?`;
+      else hint = `Think: what number × itself × itself = ${q.answer.toLocaleString()}?`;
+    } else {
+      if (str.length <= 1) hint = 'Single digit answer';
+      else if (str.length === 2) hint = `Starts with ${str[0]}…`;
+      else hint = `Starts with ${str.slice(0,2)}…`;
+    }
+
+  // ── Multiplication Tables: Vedic method ──
+  } else if (q.type === 'table') {
+    const a = q.n, b = q.m;
+    // Choose the most helpful Vedic technique
+    if (b === 10) {
+      hint = `×10 trick: just add a 0 → ${a}0`;
+    } else if (b === 9) {
+      hint = `×9 trick: ${a}×10 − ${a} = ${a*10} − ${a} = ${a*9}`;
+    } else if (b === 11) {
+      hint = `×11 trick: ${a}×10 + ${a} = ${a*10} + ${a} = ${a*11}`;
+    } else if (b === 5) {
+      hint = `×5 trick: halve ${a} and ×10 → ${a}÷2×10`;
+    } else if (b === 4) {
+      hint = `×4 trick: double twice → ${a}×2=${a*2}, then ×2=${a*4}`;
+    } else if (b === 8) {
+      hint = `×8 trick: double 3× → ${a}→${a*2}→${a*4}→${a*8}`;
+    } else if (b === 6) {
+      hint = `×6 trick: ×5 + ×1 → ${a*5} + ${a} = ${a*6}`;
+    } else if (b === 7) {
+      hint = `×7 trick: ×5 + ×2 → ${a*5} + ${a*2} = ${a*7}`;
+    } else if (b === 12) {
+      hint = `×12 trick: ×10 + ×2 → ${a*10} + ${a*2} = ${a*12}`;
+    } else if (b === 15) {
+      hint = `×15 trick: ×10 + half → ${a*10} + ${a*5} = ${a*15}`;
+    } else if (a >= 11 && a <= 19 && b >= 11 && b <= 19) {
+      // Vedic: (a+units_b)×10 + units_a×units_b
+      const ua = a - 10, ub = b - 10;
+      hint = `Vedic: (${a}+${ub})×10 + ${ua}×${ub} = ${(a+ub)*10} + ${ua*ub} = ${a*b}`;
+    } else {
+      // Split method: a×b = a×(nearest10 ± remainder)
+      const near = Math.round(b / 10) * 10;
+      const diff = b - near;
+      if (near > 0 && diff !== 0) {
+        const sign = diff > 0 ? '+' : '−';
+        hint = `Split: ${a}×${near} ${sign} ${a}×${Math.abs(diff)} = ${a*near} ${sign} ${a*Math.abs(diff)}`;
+      } else {
+        const str = String(q.answer);
+        hint = str.length <= 1 ? 'Single digit' : `Starts with ${str.slice(0,2)}…`;
+      }
+    }
+
+  // ── Addition: Vedic / mental math ──
+  } else if (q.type === 'add') {
+    const a = q.n, b = q.m;
+    // Round one operand to nearest 10, compensate
+    const nearA = Math.round(a / 10) * 10, diffA = a - nearA;
+    const nearB = Math.round(b / 10) * 10, diffB = b - nearB;
+    // Pick the operand with smaller remainder
+    if (Math.abs(diffA) <= Math.abs(diffB) && nearA !== a) {
+      const sign = diffA > 0 ? '−' : '+';
+      hint = `Round: ${nearA} + ${b} = ${nearA + b}, then ${sign}${Math.abs(diffA)} → ${a+b}`;
+    } else if (nearB !== b) {
+      const sign = diffB > 0 ? '−' : '+';
+      hint = `Round: ${a} + ${nearB} = ${a + nearB}, then ${sign}${Math.abs(diffB)} → ${a+b}`;
+    } else {
+      hint = `Break it: ${a} + ${b} = ${Math.floor(b/10)*10} + ${b%10} → add tens then units`;
+    }
+
+  // ── Subtraction: Vedic complement method ──
+  } else if (q.type === 'sub') {
+    const a = q.n, b = q.m;
+    // Round the subtrahend to nearest 10
+    const nearB = Math.round(b / 10) * 10, diffB = b - nearB;
+    if (nearB !== b && nearB > 0) {
+      const sign = diffB > 0 ? '+' : '−';
+      hint = `Round: ${a} − ${nearB} = ${a - nearB}, then ${sign}${Math.abs(diffB)} → ${a-b}`;
+    } else {
+      // complement from next 10
+      const next10 = Math.ceil(b / 10) * 10;
+      const comp = next10 - b;
+      hint = `Complement: ${b} needs ${comp} to reach ${next10}; ${a}−${next10}=${a-next10}, +${comp}=${a-b}`;
+    }
+  }
+
+  // ── Deduct XP ──
+  const data = getXPData();
+  data.totalXP = Math.max(0, data.totalXP - HINT_XP_COST);
+  data.currentLevel = levelFromXP(data.totalXP);
+  saveXPData(data);
+  showXPFloat(-HINT_XP_COST, false);
+  updateDashXP();
+
+  // ── Show hint ──
+  const hintReveal = document.getElementById('hintReveal');
+  hintReveal.textContent = '💡 ' + hint;
+  hintReveal.classList.add('show');
+
+  // ── Disable button ──
+  const hintBtn = document.getElementById('hintBtn');
+  hintBtn.disabled = true;
+  hintBtn.textContent = '−' + HINT_XP_COST + ' XP';
+  _hintUsedThisQ = true;
+}
+
+// Reset hint state on each new question by observing qExpr changes
+(function() {
+  const qExprEl = document.getElementById('qExpr');
+  if (!qExprEl) return;
+  new MutationObserver(() => {
+    _hintUsedThisQ = false;
+    const hintBtn = document.getElementById('hintBtn');
+    const hintReveal = document.getElementById('hintReveal');
+    if (hintBtn) { hintBtn.disabled = false; hintBtn.textContent = '💡 Hint'; hintBtn.style.display = ''; hintBtn.style.fontSize = ''; hintBtn.style.padding = ''; }
+    if (hintReveal) { hintReveal.textContent=''; hintReveal.classList.remove('show'); }
+    // Hide in pick mode
+    setTimeout(() => {
+      const hb = document.getElementById('hintBtn');
+      if (hb && document.getElementById('pickZone') && document.getElementById('pickZone').style.display !== 'none') {
+        hb.style.display = 'none';
+      }
+    }, 30);
+  }).observe(qExprEl, { childList: true, characterData: true, subtree: true });
+})();
+
+// ─────────────────────────────────────────────
+// 7. DC XP BONUS
+// ─────────────────────────────────────────────
+const DC_XP_BONUS = 50;
+const _origOnSessionComplete2 = onSessionComplete;
+onSessionComplete = function(pct, sessionBestStreak, score, total) {
+  _origOnSessionComplete2(pct, sessionBestStreak, score, total);
+  if (!isPracticeMode() && window._wasDailyChallenge) {
+    const data = getXPData();
+    const bonus = Math.round(DC_XP_BONUS * (pct / 100)); // scale by accuracy
+    if (bonus > 0) {
+      data.totalXP += bonus;
+      data.currentLevel = levelFromXP(data.totalXP);
+      saveXPData(data);
+      setTimeout(() => showXPFloat(bonus, false), 1200);
+    }
+  }
+};
+
+// Track DC start so bonus fires correctly
+const _origStartDC = startDailyChallenge;
+startDailyChallenge = function() {
+  window._wasDailyChallenge = true;
+  _origStartDC();
+};
+
+// ─────────────────────────────────────────────
+// HOOK: render all new dashboard widgets
+// ─────────────────────────────────────────────
+const _origShowDash3 = showDashboard;
+showDashboard = function() {
+  _origShowDash3();
+  renderSessionSummaryCard();
+  renderStreakWarning();
+  renderWeeklySummary();
+  recordDailyXP();
+};
+
 initCustomColors();
 initTheme();
+
+// ── Init routing — runs LAST so all showDashboard patches are applied ──
+(function init() {
+  const profile = getProfile();
+  if (!profile.name) {
+    document.getElementById('s-welcome').classList.add('active');
+    document.getElementById('s-setup').classList.remove('active');
+    document.getElementById('welcomeQuote').textContent = QUOTES[Math.floor(Math.random()*QUOTES.length)];
+  } else {
+    document.getElementById('s-setup').classList.remove('active');
+    showDashboard();
+  }
+})();
 </script>
 </body>
 </html>
