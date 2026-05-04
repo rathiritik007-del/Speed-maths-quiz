@@ -2555,7 +2555,7 @@ select:focus {
       text-overflow: ellipsis;
     }
 
-    /* ═════════════════wi ════════════════════════════
+    /* ══════════════════════════════════════════════
        NEW FEATURES CSS
     ══════════════════════════════════════════════ */
 
@@ -5558,44 +5558,37 @@ function setMultType(btn){
       }
 
     } else if(type === 'square'){
-      // Tier 1: same-unit-digit squares — look genuinely plausible
-      const unitTarget = (n * n) % 10;
-      const sameUnit = [];
-      for(let k = Math.max(2, n - 25); k <= n + 25; k++){
-        if(k !== n && (k * k) % 10 === unitTarget) sameUnit.push(k * k);
-      }
-      // Sort by proximity to correct answer
-      sameUnit.sort((a, b) => Math.abs(a - correct) - Math.abs(b - correct));
-
-      // Tier 2: adjacent squares (n±1)², (n±2)²…
+      // Adjacent squares — always close, always deceptive
       const adjacent = [];
-      for(let d = 1; d <= 8; d++){
+      for(let d = 1; d <= 10; d++){
         adjacent.push((n + d) * (n + d));
         if(n - d > 0) adjacent.push((n - d) * (n - d));
       }
       adjacent.sort((a, b) => Math.abs(a - correct) - Math.abs(b - correct));
 
-      // Mix: 2 same-unit-digit first (most deceptive), then nearest adjacent
-      candidates.push(...sameUnit.slice(0, 2), ...adjacent);
-
-    } else if(type === 'cube'){
-      // Tier 1: same-unit-digit cubes
-      const cubeUnit = ((n * n * n) % 10 + 10) % 10;
+      // One same-unit-digit square (only if within 3× the correct value — avoids huge outliers for small n)
+      const unitTarget = (n * n) % 10;
       const sameUnit = [];
-      for(let k = Math.max(2, n - 12); k <= n + 12; k++){
-        if(k !== n && ((k * k * k) % 10 + 10) % 10 === cubeUnit) sameUnit.push(k * k * k);
+      for(let k = Math.max(2, n - 20); k <= n + 20; k++){
+        const sq = k * k;
+        if(k !== n && sq % 10 === unitTarget && sq >= correct / 3 && sq <= correct * 3) sameUnit.push(sq);
       }
       sameUnit.sort((a, b) => Math.abs(a - correct) - Math.abs(b - correct));
+      if(sameUnit.length) candidates.push(sameUnit[0]);
 
-      // Tier 2: adjacent cubes
+      candidates.push(...adjacent);
+
+    } else if(type === 'cube'){
+      // Cube unit digits are 1-to-1 (each maps to exactly one cube unit digit),
+      // so same-unit cubes are always 10 steps away — far too large a gap to be plausible.
+      // Adjacent cubes are naturally tight and genuinely hard to distinguish.
       const adjacent = [];
-      for(let d = 1; d <= 5; d++){
+      for(let d = 1; d <= 7; d++){
         adjacent.push((n + d) * (n + d) * (n + d));
         if(n - d > 0) adjacent.push((n - d) * (n - d) * (n - d));
       }
       adjacent.sort((a, b) => Math.abs(a - correct) - Math.abs(b - correct));
-
-      candidates.push(...sameUnit.slice(0, 2), ...adjacent);
+      candidates.push(...adjacent);
     }
 
     // Build final set of 4 (correct + 3 unique distractors)
