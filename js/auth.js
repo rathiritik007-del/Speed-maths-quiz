@@ -4,9 +4,14 @@
     isLoggedIn: false
   };
 
+  let authMode = "login";
+
   async function refreshAuthState() {
     if (!window.supabaseClient) {
       console.warn("Supabase client missing.");
+      window.authState.user = null;
+      window.authState.isLoggedIn = false;
+      updateAuthUI();
       return null;
     }
 
@@ -16,11 +21,13 @@
       console.warn("Could not get current Supabase user:", error.message);
       window.authState.user = null;
       window.authState.isLoggedIn = false;
+      updateAuthUI();
       return null;
     }
 
     window.authState.user = data.user || null;
     window.authState.isLoggedIn = !!data.user;
+    updateAuthUI();
 
     return data.user || null;
   }
@@ -62,75 +69,186 @@
 
     window.authState.user = null;
     window.authState.isLoggedIn = false;
+    updateAuthUI();
   }
 
-  function setupAuthUI() {
-    const emailInput = document.getElementById("authEmail");
-    const passwordInput = document.getElementById("authPassword");
-    const signupBtn = document.getElementById("authSignupBtn");
-    const loginBtn = document.getElementById("authLoginBtn");
-    const logoutBtn = document.getElementById("authLogoutBtn");
-    const statusEl = document.getElementById("authStatus");
+  function getAuthEls() {
+    return {
+      modal: document.getElementById("authModal"),
+      form: document.getElementById("authForm"),
+      emailInput: document.getElementById("authEmail"),
+      passwordInput: document.getElementById("authPassword"),
+      submitBtn: document.getElementById("authSubmitBtn"),
+      modeToggle: document.getElementById("authModeToggle"),
+      closeBtn: document.getElementById("authCloseBtn"),
+      logoutBtn: document.getElementById("authLogoutBtn"),
+      statusEl: document.getElementById("authStatus"),
+      titleEl: document.getElementById("authModalTitle"),
+      subEl: document.getElementById("authModalSub"),
+      userEmailEl: document.getElementById("authUserEmail"),
+      userStateEl: document.getElementById("authUserState"),
+      profileBtn: document.getElementById("authProfileBtn"),
+      profileLogoutBtn: document.getElementById("authProfileLogoutBtn"),
+      profileStatus: document.getElementById("authProfileStatus"),
+      profileEmail: document.getElementById("authProfileEmail"),
+      accountCard: document.querySelector(".auth-account-card")
+    };
+  }
 
-    if (!emailInput || !passwordInput || !signupBtn || !loginBtn || !logoutBtn || !statusEl) {
+  function setStatus(message, isError) {
+    const { statusEl } = getAuthEls();
+    if (!statusEl) return;
+    statusEl.textContent = message || "";
+    statusEl.classList.toggle("error", !!isError);
+  }
+
+  function setAuthMode(mode) {
+    authMode = mode === "signup" ? "signup" : "login";
+    const { titleEl, subEl, submitBtn, modeToggle, passwordInput } = getAuthEls();
+    const isSignup = authMode === "signup";
+
+    if (titleEl) titleEl.textContent = isSignup ? "Sign up" : "Log in";
+    if (subEl) {
+      subEl.textContent = isSignup
+        ? "Create an account for progress sync when cloud saving is added."
+        : "Sign in to prepare progress sync for this profile.";
+    }
+    if (submitBtn) submitBtn.textContent = isSignup ? "Sign up" : "Log in";
+    if (modeToggle) modeToggle.textContent = isSignup ? "Already have an account? Log in" : "Need an account? Sign up";
+    if (passwordInput) passwordInput.autocomplete = isSignup ? "new-password" : "current-password";
+  }
+
+  function openAuthModal(mode) {
+    const { modal, emailInput } = getAuthEls();
+    if (!modal) return;
+    if (mode) setAuthMode(mode);
+    updateAuthUI();
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden", "false");
+    if (!window.authState.isLoggedIn && emailInput) {
+      setTimeout(function () { emailInput.focus(); }, 0);
+    }
+  }
+
+  function closeAuthModal() {
+    const { modal } = getAuthEls();
+    if (!modal) return;
+    modal.classList.remove("open");
+    modal.setAttribute("aria-hidden", "true");
+  }
+
+  function updateAuthUI() {
+    const els = getAuthEls();
+    const user = window.authState.user;
+    const loggedIn = !!user;
+    const email = user && user.email ? user.email : "";
+
+    if (els.modal) els.modal.classList.toggle("is-logged-in", loggedIn);
+    if (els.userEmailEl) els.userEmailEl.textContent = email;
+    if (els.userStateEl) els.userStateEl.textContent = loggedIn ? "Logged in" : "Not logged in";
+    if (els.profileStatus) els.profileStatus.textContent = loggedIn ? "Logged in" : "Not logged in";
+    if (els.profileEmail) els.profileEmail.textContent = email;
+    if (els.profileBtn) els.profileBtn.textContent = loggedIn ? "Manage account" : "Sign in / Sync Progress";
+    if (els.accountCard) els.accountCard.classList.toggle("logged-in", loggedIn);
+
+    if (els.profileLogoutBtn) {
+      els.profileLogoutBtn.disabled = !loggedIn;
+    }
+
+    if (els.statusEl && !els.modal?.classList.contains("open")) {
+      setStatus(loggedIn ? "Logged in" : "Not logged in", false);
+    }
+
+    setAuthMode(authMode);
+  }
+
+  async function submitAuthForm(event) {
+    event.preventDefault();
+    const { emailInput, passwordInput, submitBtn } = getAuthEls();
+    if (!emailInput || !passwordInput) return;
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+    if (!email || !password) {
+      setStatus("Enter an email and password.", true);
       return;
     }
 
-    function setStatus(message) {
-      statusEl.textContent = message;
+    try {
+      if (submitBtn) submitBtn.disabled = true;
+      setStatus(authMode === "signup" ? "Creating account..." : "Logging in...", false);
+
+      if (authMode === "signup") {
+        await signUpWithEmail(email, password);
+        setStatus(window.authState.isLoggedIn ? "Logged in" : "Check your email to confirm signup.", false);
+      } else {
+        await loginWithEmail(email, password);
+        setStatus("Logged in", false);
+      }
+
+      passwordInput.value = "";
+      updateAuthUI();
+    } catch (error) {
+      setStatus(error.message || (authMode === "signup" ? "Signup failed." : "Login failed."), true);
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
     }
+  }
 
-    signupBtn.addEventListener("click", async function () {
-      try {
-        setStatus("Signing up...");
-        await signUpWithEmail(emailInput.value.trim(), passwordInput.value);
-        await refreshAuthState();
-        setStatus(window.authState.isLoggedIn ? "Logged in" : "Check your email to confirm signup");
-      } catch (error) {
-        setStatus(error.message || "Signup failed");
-      }
+  async function handleLogout() {
+    try {
+      setStatus("Logging out...", false);
+      await logoutUser();
+      setStatus("Not logged in", false);
+      updateAuthUI();
+    } catch (error) {
+      setStatus(error.message || "Logout failed.", true);
+    }
+  }
+
+  function setupAuthUI() {
+    const els = getAuthEls();
+
+    if (els.form) els.form.addEventListener("submit", submitAuthForm);
+    if (els.modeToggle) {
+      els.modeToggle.addEventListener("click", function () {
+        setAuthMode(authMode === "signup" ? "login" : "signup");
+        setStatus("", false);
+      });
+    }
+    if (els.closeBtn) els.closeBtn.addEventListener("click", closeAuthModal);
+    if (els.logoutBtn) els.logoutBtn.addEventListener("click", handleLogout);
+    if (els.profileLogoutBtn) els.profileLogoutBtn.addEventListener("click", handleLogout);
+
+    document.querySelectorAll("[data-auth-close]").forEach(function (el) {
+      el.addEventListener("click", closeAuthModal);
+    });
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") closeAuthModal();
     });
 
-    loginBtn.addEventListener("click", async function () {
-      try {
-        setStatus("Logging in...");
-        await loginWithEmail(emailInput.value.trim(), passwordInput.value);
-        await refreshAuthState();
-        setStatus(window.authState.isLoggedIn ? "Logged in" : "Login failed");
-      } catch (error) {
-        setStatus(error.message || "Login failed");
-      }
-    });
-
-    logoutBtn.addEventListener("click", async function () {
-      try {
-        setStatus("Logging out...");
-        await logoutUser();
-        setStatus("Not logged in");
-      } catch (error) {
-        setStatus(error.message || "Logout failed");
-      }
-    });
-
-    refreshAuthState().then(function () {
-      setStatus(window.authState.isLoggedIn ? "Logged in" : "Not logged in");
-    });
+    setAuthMode("login");
+    updateAuthUI();
   }
 
   window.refreshAuthState = refreshAuthState;
   window.signUpWithEmail = signUpWithEmail;
   window.loginWithEmail = loginWithEmail;
   window.logoutUser = logoutUser;
+  window.openAuthModal = openAuthModal;
+  window.closeAuthModal = closeAuthModal;
+  window.setAuthMode = setAuthMode;
 
   if (window.supabaseClient) {
     window.supabaseClient.auth.onAuthStateChange(function (_event, session) {
       window.authState.user = session && session.user ? session.user : null;
       window.authState.isLoggedIn = !!window.authState.user;
+      updateAuthUI();
     });
   }
 
   document.addEventListener("DOMContentLoaded", function () {
-    refreshAuthState();
     setupAuthUI();
+    refreshAuthState();
   });
 })();

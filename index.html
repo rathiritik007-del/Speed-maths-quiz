@@ -35,15 +35,6 @@
     </div>
   </div>
 
-  <div id="authPanel" class="auth-panel">
-  <input id="authEmail" type="email" placeholder="Email" autocomplete="email">
-  <input id="authPassword" type="password" placeholder="Password" autocomplete="current-password">
-  <button id="authSignupBtn" type="button">Sign Up</button>
-  <button id="authLoginBtn" type="button">Log In</button>
-  <button id="authLogoutBtn" type="button">Log Out</button>
-  <span id="authStatus">Not logged in</span>
-</div>
-
   <!-- DASHBOARD SCREEN — home screen for returning users -->
   <div class="screen" id="s-dashboard">
     <div class="dash-header">
@@ -216,6 +207,20 @@
     <div class="profile-name-edit" id="profileNameEditRow">
       <input type="text" id="profileNameEditInput" maxlength="24" placeholder="New name">
       <button onclick="saveProfileNameFromScreen()">Save</button>
+    </div>
+
+    <!-- Account sync -->
+    <div class="dash-section-title">Account</div>
+    <div class="auth-account-card">
+      <div class="auth-account-copy">
+        <div class="auth-account-title">Progress sync</div>
+        <div class="auth-account-status" id="authProfileStatus">Not logged in</div>
+        <div class="auth-account-email" id="authProfileEmail"></div>
+      </div>
+      <div class="auth-account-actions">
+        <button class="auth-account-btn" id="authProfileBtn" type="button" onclick="openAuthModal()">Sign in / Sync Progress</button>
+        <button class="auth-account-logout" id="authProfileLogoutBtn" type="button">Log out</button>
+      </div>
     </div>
 
     <!-- Lifetime stats grid -->
@@ -956,6 +961,37 @@
     <div class="milestone-sub" id="milestoneToastSub">You answered your first question</div>
   </div>
 </div>
+<!-- Auth Modal -->
+<div class="auth-modal" id="authModal" aria-hidden="true">
+  <div class="auth-modal-backdrop" data-auth-close></div>
+  <div class="auth-modal-card" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+    <button class="auth-modal-close" id="authCloseBtn" type="button" aria-label="Close sign in modal">&times;</button>
+    <div class="auth-modal-head">
+      <div class="auth-modal-kicker">Account</div>
+      <h2 id="authModalTitle">Log in</h2>
+      <p id="authModalSub">Sign in to prepare progress sync for this profile.</p>
+    </div>
+    <form class="auth-form" id="authForm">
+      <label class="auth-field">
+        <span>Email</span>
+        <input id="authEmail" type="email" autocomplete="email" required>
+      </label>
+      <label class="auth-field">
+        <span>Password</span>
+        <input id="authPassword" type="password" autocomplete="current-password" required>
+      </label>
+      <button class="auth-submit" id="authSubmitBtn" type="submit">Log in</button>
+      <button class="auth-mode-toggle" id="authModeToggle" type="button">Need an account? Sign up</button>
+    </form>
+    <div class="auth-logged-in" id="authLoggedInPanel">
+      <div class="auth-user-email" id="authUserEmail"></div>
+      <div class="auth-user-state" id="authUserState">Logged in</div>
+      <button class="auth-submit" id="authLogoutBtn" type="button">Log out</button>
+    </div>
+    <div class="auth-status" id="authStatus" role="status" aria-live="polite">Not logged in</div>
+  </div>
+</div>
+
 <!-- Daily Challenge Floating Pin Card (fixed, always visible) -->
 <button class="daily-challenge-btn" id="dailyChallengeBtn" onclick="startDailyChallenge()">
   <div class="dc-tab">
