@@ -40,6 +40,27 @@
       --ok-bd:  #0d1a03;
       --no-bd:  var(--p3);
       --btn-txt: #0d0015;
+
+      /* Neutral theme architecture tokens */
+      --acc-2: #8fb7ff;
+      --acc-2-hi: #b5ccff;
+      --text-primary: #f4f2ea;
+      --text-secondary: #b8b4aa;
+      --text-muted: #858078;
+      --border: rgba(255,255,255,0.10);
+      --border-strong: rgba(255,255,255,0.18);
+      --surface-glass: color-mix(in srgb, var(--surf), transparent 8%);
+      --surface-raised: var(--p4);
+      --surface-soft: var(--p2);
+      --app-gradient: linear-gradient(160deg, color-mix(in srgb, var(--p4), transparent 90%) 0%, color-mix(in srgb, var(--p0), transparent 55%) 100%);
+      --header-gradient: linear-gradient(145deg, color-mix(in srgb, var(--p5), transparent 72%) 0%, color-mix(in srgb, var(--p2), transparent 22%) 100%);
+      --shadow-app: 0 26px 70px rgba(0,0,0,0.55), inset 0 1px 0 var(--border);
+      --shadow-card: 0 12px 28px rgba(0,0,0,0.24), inset 0 1px 0 var(--border);
+      --focus-ring: 0 0 0 3px color-mix(in srgb, var(--acc), transparent 78%);
+      --ok: #46b86a;
+      --ok-text: #eaffef;
+      --err: #e06161;
+      --err-bg: rgba(224,97,97,0.14);
     }
 
     html, body {
@@ -423,6 +444,9 @@
   flex-direction: column;
   gap: 16px;
 }
+    #s-setup {
+      padding-bottom: clamp(96px, 22vw, 120px);
+    }
     .screen.active { display: flex; }
 
     /* ════════════════════════════════════
@@ -1726,12 +1750,26 @@ select:focus {
       border-radius: 99px;
       background: rgba(239,248,226,0.08);
       overflow: hidden;
+      position: relative;
+    }
+    .chart-row-bar-bg::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, transparent calc(50% - 0.5px), rgba(239,248,226,0.12) calc(50% - 0.5px), rgba(239,248,226,0.12) calc(50% + 0.5px), transparent calc(50% + 0.5px)),
+        linear-gradient(90deg, rgba(239,248,226,0.10) 1px, transparent 1px),
+        linear-gradient(270deg, rgba(239,248,226,0.10) 1px, transparent 1px);
+      pointer-events: none;
+      z-index: 0;
     }
     .chart-row-bar-fill {
       height: 100%;
       border-radius: 99px;
       transition: width 0.5s cubic-bezier(0.22,1,0.36,1);
       width: 0%;
+      position: relative;
+      z-index: 1;
     }
     .chart-row-bar-fill.sq { background: color-mix(in srgb, var(--p7), transparent 30%); }
     .chart-row-bar-fill.cu { background: color-mix(in srgb, var(--acc), transparent 25%); }
@@ -1742,6 +1780,21 @@ select:focus {
       width: 34px;
       text-align: right;
       flex-shrink: 0;
+    }
+    .chart-axis {
+      display: grid;
+      grid-template-columns: 50px 1fr 34px;
+      gap: 8px;
+      margin-top: -2px;
+      align-items: center;
+    }
+    .chart-axis-scale {
+      display: flex;
+      justify-content: space-between;
+      font-size: 9px;
+      font-weight: 700;
+      line-height: 1;
+      color: rgba(239,248,226,0.28);
     }
     /* keep old selectors harmless */
     .chart-vals, .chart-bars, .chart-col, .chart-bar, .chart-bar-sq, .chart-bar-cu, .chart-lbl { display: none !important; }
@@ -1888,29 +1941,63 @@ select:focus {
 
     /* start button full width at bottom */
     .bento-start {
-      margin: 0 clamp(10px,3vw,16px) clamp(10px,3vw,16px);
+      position: fixed;
+      left: 50%;
+      bottom: clamp(14px,3.5vw,18px);
+      transform: translateX(-50%);
+      z-index: 1000;
+      margin: 0;
       padding: clamp(14px,3.5vw,18px);
       border: none;
       border-radius: 16px;
       background: var(--acc);
-  color: var(--p1); /* important for contrast */
+      color: var(--p1); /* important for contrast */
       font-size: clamp(15px,4vw,18px);
       font-weight: 700;
       cursor: pointer;
-      width: calc(100% - clamp(20px,6vw,32px));
+      width: min(calc(100% - clamp(34px,7.5vw,56px)), 394px);
       letter-spacing: 0.01em;
-      transition: opacity 0.15s, transform 0.1s;
+      transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
       font-family: 'Inter', sans-serif;
       flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      white-space: nowrap;
+    }
+    #s-setup > .bento-start {
+      display: none !important;
+    }
+    #floatingStartBtn {
+      display: none;
+    }
+    body[data-active-screen="s-setup"] #floatingStartBtn {
+      display: flex;
     }
     .bento-start { box-shadow: 0 8px 24px color-mix(in srgb, var(--acc), transparent 70%); }
     .bento-start:hover { opacity: 0.92; box-shadow: 0 12px 32px color-mix(in srgb, var(--acc), transparent 60%); }
-    .bento-start:active { transform: scale(0.98); }
+    .bento-start:active { transform: translateX(-50%) scale(0.98); }
+    .bento-start-icon {
+      width: 16px;
+      height: 16px;
+      border-radius: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .bento-start-icon svg {
+      width: 15px;
+      height: 15px;
+      display: block;
+      overflow: visible;
+    }
 
     @supports (padding-bottom: env(safe-area-inset-bottom)) {
       @media (max-width: 599px) {
         .bento-start {
-          margin-bottom: calc(clamp(10px,3vw,16px) + env(safe-area-inset-bottom));
+          bottom: calc(clamp(10px,3vw,16px) + env(safe-area-inset-bottom));
         }
       }
     }
@@ -2268,28 +2355,42 @@ select:focus {
       background: color-mix(in srgb, var(--p2), transparent 40%);
       border: 1px solid color-mix(in srgb, var(--acc), transparent 90%);
       border-radius: 14px;
-      padding: 20px 10px;
-      text-align: center;
+      padding: 14px 14px 12px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 0;
+      position: relative;
+      overflow: hidden;
     }
     .dash-today .dash-stat:nth-child(2) {
       background: color-mix(in srgb, var(--acc), transparent 93%);
       border-color: color-mix(in srgb, var(--acc), transparent 78%);
     }
+    .dash-stat-icon {
+      font-size: 16px;
+      line-height: 1;
+      margin-bottom: 10px;
+      opacity: 0.75;
+    }
     .dash-stat-val {
-      font-size: clamp(28px,6vw,44px);
+      font-size: clamp(26px, 6vw, 38px);
       font-weight: 900;
       color: var(--acc);
       line-height: 1;
+      margin-bottom: 4px;
     }
     .dash-stat-lbl {
-      font-size: clamp(10px,2.2vw,11px);
-      font-weight: 600;
-      color: rgba(239,248,226,0.35);
+      font-size: clamp(9px, 2vw, 10px);
+      font-weight: 700;
+      color: rgba(239,248,226,0.38);
       text-transform: uppercase;
       letter-spacing: 0.07em;
+    }
+    .dash-stat-sub {
+      font-size: clamp(9px, 2vw, 10px);
+      font-weight: 500;
+      color: rgba(239,248,226,0.25);
+      margin-top: 6px;
     }
 
     /* Recent sessions */
@@ -2350,6 +2451,15 @@ select:focus {
       color: rgba(239,248,226,0.3);
       font-size: 13px;
     }
+
+    /* ── Weekly + Daily Goal side-by-side row ── */
+    .week-goal-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      align-items: stretch;
+    }
+    /* When weekly summary is collapsed, cards naturally align */
 
     /* ── Daily Goal Card ── */
     .daily-goal-card {
@@ -2482,6 +2592,8 @@ select:focus {
       margin-top: 2px;
     }
 
+
+
     /* ── Milestone Toast ── */
     @keyframes milestoneIn {
       0%   { opacity: 0; transform: translateX(-50%) translateY(-16px); }
@@ -2555,7 +2667,7 @@ select:focus {
       text-overflow: ellipsis;
     }
 
-    /* ══════════════════════════════════════════════
+    /* ═════════════════wi ════════════════════════════
        NEW FEATURES CSS
     ══════════════════════════════════════════════ */
 
@@ -2849,25 +2961,26 @@ select:focus {
     /* 3. Session summary card */
     .session-summary-card {
       display: none;
+      width: 100%;
       background: color-mix(in srgb, var(--p2), transparent 40%);
       border: 1px solid color-mix(in srgb, var(--acc), transparent 80%);
-      border-radius: 16px; padding: 14px 16px;
-      flex-direction: column; gap: 10px;
+      border-radius: 16px; padding: 10px 14px;
+      flex-direction: row; flex-wrap: wrap; gap: 6px 12px; align-items: center;
       animation: fbIn 0.35s cubic-bezier(0.22,1,0.36,1) both;
     }
     .session-summary-card.show { display: flex; }
-    .session-summary-header { display:flex; align-items:center; justify-content:space-between; }
-    .session-summary-title { font-size:11px; font-weight:700; color:rgba(239,248,226,0.4); text-transform:uppercase; letter-spacing:0.08em; }
-    .session-summary-close { background:none; border:none; color:rgba(239,248,226,0.3); cursor:pointer; font-size:14px; padding:0; line-height:1; font-family:'Inter',sans-serif; }
+    .session-summary-header { display:flex; width:100%; align-items:center; gap:8px; }
+    .session-summary-title { display:block; font-size:clamp(12px,2.8vw,13px); line-height:1.15; font-weight:700; letter-spacing:0; text-transform:none; color:rgba(239,248,226,0.7); }
+    .session-summary-close { display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:999px; background:color-mix(in srgb, var(--p4), transparent 78%); border:1px solid color-mix(in srgb, var(--acc), transparent 84%); color:rgba(239,248,226,0.52); cursor:pointer; font-size:15px; padding:0; line-height:1; font-family:'Inter',sans-serif; flex-shrink:0; margin-left:auto; }
     .session-summary-close:hover { color:rgba(239,248,226,0.6); }
-    .session-summary-row { display:flex; align-items:center; gap:12px; }
-    .session-summary-score { font-size:clamp(28px,7vw,36px); font-weight:800; color:var(--acc); line-height:1; flex-shrink:0; }
-    .session-summary-meta { flex:1; }
-    .session-summary-label { font-size:13px; font-weight:600; color:#eff8e2; }
-    .session-summary-sub { font-size:11px; color:rgba(239,248,226,0.4); margin-top:2px; }
-    .session-summary-xp-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-    .session-summary-xp { font-size:12px; font-weight:700; color:var(--acc); background:color-mix(in srgb, var(--acc), transparent 88%); border:1px solid color-mix(in srgb, var(--acc), transparent 75%); border-radius:99px; padding:3px 10px; }
-    .session-summary-streak { font-size:12px; font-weight:700; color:rgba(239,248,226,0.5); background:color-mix(in srgb, var(--p4), transparent 70%); border-radius:99px; padding:3px 10px; }
+    .session-summary-row { display:flex; align-items:center; gap:10px; flex:1; min-width:0; }
+    .session-summary-score { font-size:clamp(22px,5.5vw,28px); font-weight:800; color:var(--acc); line-height:1; flex-shrink:0; }
+    .session-summary-meta { flex:1; min-width:0; }
+    .session-summary-label { font-size:clamp(12px,3vw,13px); font-weight:700; color:#eff8e2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .session-summary-sub { font-size:clamp(10px,2.5vw,11px); color:rgba(239,248,226,0.45); margin-top:2px; }
+    .session-summary-xp-row { display:flex; align-items:center; gap:6px; flex-shrink:0; }
+    .session-summary-xp { font-size:11px; font-weight:700; color:var(--acc); background:color-mix(in srgb, var(--acc), transparent 88%); border:1px solid color-mix(in srgb, var(--acc), transparent 75%); border-radius:99px; padding:2px 8px; }
+    .session-summary-streak { font-size:11px; font-weight:700; color:rgba(239,248,226,0.5); background:color-mix(in srgb, var(--p4), transparent 70%); border-radius:99px; padding:2px 8px; }
     html[data-theme="minimal"] .session-summary-card { background: var(--surf); box-shadow: none; }
 
     /* 4. Streak warning */
@@ -2888,23 +3001,22 @@ select:focus {
     /* 5. Weekly summary card */
     .weekly-summary-card {
       display: none;
-      background: color-mix(in srgb, var(--p3), transparent 50%);
-      border: 1px solid color-mix(in srgb, var(--acc), transparent 82%);
-      border-radius: 16px; padding: 14px 16px;
-      flex-direction: column; gap: 0;
+      background: color-mix(in srgb, var(--p2), transparent 40%);
+      border: 1px solid color-mix(in srgb, var(--acc), transparent 85%);
+      border-radius: 16px; padding: 16px 18px;
+      flex-direction: column; gap: 10px;
       animation: fbIn 0.35s cubic-bezier(0.22,1,0.36,1) both;
     }
     .weekly-summary-card.show { display: flex; }
-    .weekly-summary-title { font-size:11px; font-weight:700; color:rgba(239,248,226,0.4); text-transform:uppercase; letter-spacing:0.08em; cursor:pointer; display:flex; align-items:center; justify-content:space-between; user-select:none; }
-    .weekly-chevron { font-size:12px; opacity:0.5; transition:transform 0.2s ease; }
-    .weekly-chevron.open { transform: rotate(90deg); }
-    .weekly-summary-body { display:none; flex-direction:column; gap:10px; margin-top:10px; }
+    .weekly-summary-title { font-size:clamp(12px,2.8vw,13px); font-weight:700; color:rgba(239,248,226,0.7); cursor:default; display:flex; align-items:center; user-select:none; }
+    .weekly-chevron { display: none; }
+    .weekly-summary-body { display:flex; flex-direction:column; gap:8px; }
     .weekly-summary-body.open { display:flex; }
-    .weekly-summary-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
-    .weekly-stat { text-align:center; background:color-mix(in srgb, var(--p4), transparent 75%); border-radius:10px; padding:10px 6px; }
-    .weekly-stat-val { font-size:clamp(16px,4vw,20px); font-weight:800; color:var(--acc); line-height:1; }
-    .weekly-stat-lbl { font-size:9px; font-weight:700; color:rgba(239,248,226,0.35); text-transform:uppercase; letter-spacing:0.06em; margin-top:3px; }
-    .weekly-sparkline { display:flex; align-items:flex-end; gap:4px; height:44px; }
+    .weekly-summary-stats { display:grid; grid-template-columns:1fr; gap:6px; }
+    .weekly-stat { text-align:left; background:color-mix(in srgb, var(--p4), transparent 75%); border-radius:10px; padding:8px 10px; display:flex; align-items:center; justify-content:space-between; }
+    .weekly-stat-val { font-size:clamp(15px,3.5vw,18px); font-weight:800; color:var(--acc); line-height:1; }
+    .weekly-stat-lbl { font-size:9px; font-weight:700; color:rgba(239,248,226,0.35); text-transform:uppercase; letter-spacing:0.06em; margin-top:0; }
+    .weekly-sparkline { display:flex; align-items:flex-end; gap:5px; height:110px; margin-top:8px; background: rgba(255,255,255,0.05); border-radius: 12px; padding: 20px 18px 16px; box-sizing: border-box; }
     .sparkline-day { display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:3px; flex:1; }
     .sparkline-bar { width:100%; border-radius:3px 3px 0 0; background:color-mix(in srgb, var(--acc), transparent 60%); min-height:3px; }
     .sparkline-bar.today { background:var(--acc); }
@@ -3332,26 +3444,30 @@ select:focus {
     /* XP display in dashboard stats area */
     .dash-xp-row {
       display: flex;
+      flex-direction: row;
       align-items: center;
-      gap: 10px;
+      gap: 14px;
       background: color-mix(in srgb, var(--p2), transparent 50%);
       border: 1px solid color-mix(in srgb, var(--acc), transparent 90%);
       border-radius: 14px;
-      padding: 12px 16px;
-      justify-content: space-between;
+      padding: 14px 16px;
     }
-    .dash-xp-left { display: flex; align-items: center; gap: 10px; }
+    .dash-xp-top { display: none; }
+    .dash-xp-left { display: flex; align-items: center; gap: 12px; }
     .dash-xp-level {
-      font-size: clamp(20px,5vw,26px);
-      font-weight: 800;
-      color: var(--acc);
-      line-height: 1;
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--acc), transparent 88%);
+      border: 2px solid color-mix(in srgb, var(--acc), transparent 65%);
+      font-size: 13px; font-weight: 800; color: var(--acc);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
     }
-    .dash-xp-info {}
-    .dash-xp-title { font-size: 12px; font-weight: 700; color: rgba(239,248,226,0.6); }
-    .dash-xp-sub   { font-size: 11px; color: rgba(239,248,226,0.35); margin-top: 1px; }
-    .dash-xp-bar-wrap { flex: 1; max-width: 120px; }
-    .dash-xp-bar-bg { height: 6px; border-radius: 99px; background: color-mix(in srgb, var(--p4), transparent 60%); overflow: hidden; }
+    .dash-xp-info { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
+    .dash-xp-title { font-size: 14px; font-weight: 700; color: rgba(239,248,226,0.85); }
+    .dash-xp-sub   { font-size: 11px; color: rgba(239,248,226,0.35); }
+    .dash-xp-bar-wrap { width: 100%; margin-top: 5px; }
+    .dash-xp-bar-bg { height: 5px; border-radius: 99px; background: color-mix(in srgb, var(--p4), transparent 60%); overflow: hidden; }
     .dash-xp-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--acc-lo), var(--acc)); transition: width 0.6s cubic-bezier(0.22,1,0.36,1); }
 
     /* Profile edit panel */
@@ -3398,7 +3514,6 @@ select:focus {
     ════════════════════════════════════ */
     html[data-practice="1"] .dash-xp-row,
     html[data-practice="1"] .streak-warning,
-    html[data-practice="1"] .weekly-summary-card,
     html[data-practice="1"] #sessionSummaryCard .session-summary-xp-row,
     html[data-practice="1"] #improveBanner,
     html[data-practice="1"] #milestoneToast,
@@ -3647,7 +3762,7 @@ select:focus {
       letter-spacing: 0.07em;
     }
     .timed-slider-val {
-      font-size: 22px;
+      font-size: 19px;
       font-weight: 800;
       color: var(--acc);
       text-shadow: 0 0 16px color-mix(in srgb, var(--acc), transparent 60%);
@@ -3657,18 +3772,20 @@ select:focus {
       -webkit-appearance: none;
       appearance: none;
       width: 100%;
-      height: 6px;
-      background: rgba(239,248,226,0.12);
+      height: 7px;
+      background: color-mix(in srgb, var(--p0), var(--surf) 42%);
+      border: 1px solid color-mix(in srgb, var(--border-strong), transparent 18%);
       border-radius: 99px;
       outline: none;
       cursor: pointer;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.22), 0 1px 0 color-mix(in srgb, var(--p7), transparent 78%);
     }
     .timed-range::-webkit-slider-thumb {
       -webkit-appearance: none;
       width: 22px; height: 22px;
       border-radius: 50%;
       background: var(--acc);
-      border: 3px solid #1a0035;
+      border: 2px solid var(--acc-vlo);
       box-shadow: 0 0 10px color-mix(in srgb, var(--acc), transparent 40%);
       cursor: pointer;
       margin-top: -8px;
@@ -3679,13 +3796,13 @@ select:focus {
       box-shadow: 0 0 18px color-mix(in srgb, var(--acc), transparent 20%);
     }
     .timed-range::-webkit-slider-runnable-track {
-      height: 6px; border-radius: 99px;
+      height: 7px; border-radius: 99px;
     }
     .timed-range::-moz-range-thumb {
       width: 22px; height: 22px;
       border-radius: 50%;
       background: var(--acc);
-      border: 3px solid #1a0035;
+      border: 2px solid var(--acc-vlo);
       box-shadow: 0 0 10px color-mix(in srgb, var(--acc), transparent 40%);
       cursor: pointer;
     }
@@ -3804,7 +3921,7 @@ select:focus {
   /* ══════════════════════════════════════════════
      THEME: MINIMAL
      Fully flat — solid colours, no blur, no glow, no transparency
-  ══════════════════════════════════════════════ */
+  ═════════════════════════════════════════════h   */
 
   /* 0. Rebalanced colour palette — dark-purple surfaces, lime accent */
   html[data-theme="minimal"] {
@@ -3902,9 +4019,9 @@ select:focus {
     background: var(--hov);
     box-shadow: none;
   }
-  html[data-theme="minimal"] .pick-btn.correct { background: var(--ok-bg); box-shadow: none; }
-  html[data-theme="minimal"] .pick-btn.wrong   { background: color-mix(in srgb, #e05555, transparent 85%); border-color: #e05555; box-shadow: none; }
-  html[data-theme="minimal"] .pick-btn.reveal  { box-shadow: none; }
+  html[data-theme="minimal"] .pick-btn.correct,
+  html[data-theme="minimal"] .pick-btn.reveal  { background: var(--ok-bg); border-color: var(--ok-bd); color: var(--ok-text); box-shadow: none; }
+  html[data-theme="minimal"] .pick-btn.wrong   { background: var(--err-bg); border-color: var(--err); color: var(--text-primary); box-shadow: none; }
 
   /* 9. Buttons */
   html[data-theme="minimal"] .again-btn,
@@ -4027,6 +4144,865 @@ select:focus {
   /* ── Glow removal: filter ── */
   html[data-theme="minimal"] .welcome-icon              { filter: none; }
   html[data-theme="minimal"] .app::before               { filter: none; }
+
+  /* Neutral Base Theme Layer */
+  html[data-base-theme] {
+    color-scheme: dark;
+  }
+  html[data-base-theme="light"] {
+    color-scheme: light;
+  }
+  html[data-base-theme] body {
+    background: var(--bg);
+    color: var(--text-primary);
+  }
+  html[data-base-theme] body::before {
+    background:
+      radial-gradient(ellipse 70% 60% at 15% 10%, color-mix(in srgb, var(--p5), transparent 86%) 0%, transparent 66%),
+      radial-gradient(ellipse 55% 50% at 85% 90%, color-mix(in srgb, var(--p4), transparent 88%) 0%, transparent 66%),
+      radial-gradient(ellipse 36% 32% at 76% 18%, color-mix(in srgb, var(--acc), transparent 94%) 0%, transparent 62%);
+  }
+  html[data-base-theme] body::after {
+    background:
+      radial-gradient(ellipse 38% 32% at 92% 32%, color-mix(in srgb, var(--acc-2), transparent 96%) 0%, transparent 58%),
+      radial-gradient(ellipse 32% 28% at 12% 74%, color-mix(in srgb, var(--p5), transparent 92%) 0%, transparent 58%);
+  }
+  html[data-base-theme] .app {
+    background: var(--app-gradient);
+    border-color: var(--border);
+    box-shadow: var(--shadow-app);
+  }
+  html[data-base-theme] .app::before {
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--acc), transparent 72%), transparent);
+  }
+  html[data-base-theme] .app::after {
+    box-shadow: inset 0 0 45px color-mix(in srgb, var(--p6), transparent 94%);
+  }
+  html[data-base-theme] .setup-header,
+  html[data-base-theme] .dash-header,
+  html[data-base-theme] .profile-header,
+  html[data-base-theme] .test-top {
+    background: var(--header-gradient);
+    border-color: var(--border);
+    box-shadow: var(--shadow-card);
+  }
+  html[data-base-theme] .setup-header::before,
+  html[data-base-theme] .dash-header::before,
+  html[data-base-theme] .profile-header::before,
+  html[data-base-theme] .card::before,
+  html[data-base-theme] .q-card::before {
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--acc), transparent 76%), transparent);
+  }
+  html[data-base-theme] .setup-header::after {
+    background: radial-gradient(ellipse, color-mix(in srgb, var(--acc), transparent 94%) 0%, transparent 70%);
+  }
+  html[data-base-theme] .setup-body,
+  html[data-base-theme] .card,
+  html[data-base-theme] .q-card,
+  html[data-base-theme] .res-cw-card,
+  html[data-base-theme] .review-wrap,
+  html[data-base-theme] .daily-goal-card,
+  html[data-base-theme] .weekly-summary-card,
+  html[data-base-theme] .session-summary-card,
+  html[data-base-theme] .profile-stat-card,
+  html[data-base-theme] .profile-sessions,
+  html[data-base-theme] .dash-stat,
+  html[data-base-theme] .dash-recent,
+  html[data-base-theme] .dash-xp-row,
+  html[data-base-theme] .dash-profile-panel,
+  html[data-base-theme] .improve-banner,
+  html[data-base-theme] .bento-cell,
+  html[data-base-theme] .pb-c,
+  html[data-base-theme] .pb-xp-card,
+  html[data-base-theme] #timedStatRow .stat-c {
+    background: var(--surface-glass);
+    border-color: var(--border);
+    box-shadow: var(--shadow-card);
+  }
+  html[data-base-theme] .bento-cell.accent,
+  html[data-base-theme] .bento-cell.green {
+    background: color-mix(in srgb, var(--acc), var(--surface-raised) 88%);
+  }
+  html[data-base-theme] .num-inp,
+  html[data-base-theme] .ans-input,
+  html[data-base-theme] .welcome-input,
+  html[data-base-theme] .goal-edit-input,
+  html[data-base-theme] .select-trigger {
+    background: var(--inp);
+    color: var(--text-primary);
+    border-color: var(--border-strong);
+  }
+  html[data-base-theme] .num-inp:focus,
+  html[data-base-theme] .ans-input:focus,
+  html[data-base-theme] .welcome-input:focus,
+  html[data-base-theme] .goal-edit-input:focus {
+    border-color: var(--acc);
+    box-shadow: var(--focus-ring);
+  }
+  html[data-base-theme] .type-btn,
+  html[data-base-theme] .timer-opt,
+  html[data-base-theme] .diff-btn,
+  html[data-base-theme] .pick-btn,
+  html[data-base-theme] .theme-opt-btn {
+    color: var(--text-secondary);
+    border-color: var(--border);
+  }
+  html[data-base-theme] .theme-opts {
+    background: color-mix(in srgb, var(--inp), transparent 12%);
+    border: 1px solid var(--border);
+  }
+  html[data-base-theme] .type-btn.active,
+  html[data-base-theme] .timer-opt.active,
+  html[data-base-theme] .diff-btn.active,
+  html[data-base-theme] .theme-opt-btn.active {
+    color: var(--acc);
+    border-color: color-mix(in srgb, var(--acc), transparent 40%);
+    background: color-mix(in srgb, var(--acc), transparent 88%);
+  }
+  html[data-base-theme] .setup-header h1,
+  html[data-base-theme] .field-label,
+  html[data-base-theme] .tog-label,
+  html[data-base-theme] .theme-switcher-label,
+  html[data-base-theme] .q-main,
+  html[data-base-theme] .big-num,
+  html[data-base-theme] .dash-profile-name,
+  html[data-base-theme] .profile-header-name,
+  html[data-base-theme] .weekly-summary-title,
+  html[data-base-theme] .daily-goal-label,
+  html[data-base-theme] .dash-xp-title,
+  html[data-base-theme] .dash-section-title,
+  html[data-base-theme] .bento-value,
+  html[data-base-theme] .res-title,
+  html[data-base-theme] .review-title {
+    color: var(--text-primary);
+  }
+  html[data-base-theme] .setup-header p,
+  html[data-base-theme] .card-title,
+  html[data-base-theme] .bento-label,
+  html[data-base-theme] .dash-stat-lbl,
+  html[data-base-theme] .profile-stat-lbl,
+  html[data-base-theme] .dash-xp-sub,
+  html[data-base-theme] .profile-header-since,
+  html[data-base-theme] .weekly-stat-lbl,
+  html[data-base-theme] .timed-result-sub,
+  html[data-base-theme] .mult2d-note,
+  html[data-base-theme] .cp-section-label,
+  html[data-base-theme] .color-picker-hint,
+  html[data-base-theme] .custom-picker-lbl {
+    color: var(--text-secondary);
+  }
+  html[data-base-theme] .tog-row,
+  html[data-base-theme] .color-picker-panel {
+    border-color: var(--border);
+  }
+  html[data-base-theme] .prog-bar,
+  html[data-base-theme] .dash-xp-bar-bg,
+  html[data-base-theme] .daily-goal-bar-bg,
+  html[data-base-theme] .profile-bar-bg,
+  html[data-base-theme] .pb-xp-bar-bg {
+    background: var(--bar-bg);
+  }
+  html[data-base-theme] .prog-fill,
+  html[data-base-theme] .dash-xp-bar-fill,
+  html[data-base-theme] .daily-goal-bar-fill,
+  html[data-base-theme] .profile-bar-fill,
+  html[data-base-theme] .pb-xp-bar-fill {
+    background: linear-gradient(90deg, var(--acc-lo), var(--acc));
+  }
+  html[data-base-theme] .ans-input.correct,
+  html[data-base-theme] .pick-btn.correct,
+  html[data-base-theme] .pick-btn.reveal,
+  html[data-base-theme] .fb-ok,
+  html[data-base-theme] .daily-goal-done-badge,
+  html[data-base-theme] .dash-session-pct.good {
+    background: var(--ok-bg);
+    border-color: var(--ok-bd);
+    color: var(--ok-text);
+  }
+  html[data-base-theme] .ans-input.wrong,
+  html[data-base-theme] .pick-btn.wrong,
+  html[data-base-theme] .fb-no,
+  html[data-base-theme] .dash-session-pct.bad {
+    background: var(--err-bg);
+    border-color: var(--err);
+    color: var(--text-primary);
+  }
+  html[data-base-theme="light"] .welcome-icon,
+  html[data-base-theme="light"] .back-btn svg {
+    filter: none;
+  }
+
+  html[data-base-theme="light"] {
+    --light-control-bg: var(--inp);
+    --light-control-bg-hover: var(--hov);
+    --light-control-border: var(--border-strong);
+    --light-control-border-strong: color-mix(in srgb, var(--border-strong), var(--text-primary) 28%);
+  }
+  html[data-base-theme="light"] body::before {
+    opacity: 0.62;
+  }
+  html[data-base-theme="light"] body::after {
+    opacity: 0.48;
+  }
+  html[data-base-theme="light"] .app {
+    border-color: var(--border);
+  }
+  html[data-base-theme="light"] .setup-body,
+  html[data-base-theme="light"] .card,
+  html[data-base-theme="light"] .q-card,
+  html[data-base-theme="light"] .res-cw-card,
+  html[data-base-theme="light"] .review-wrap,
+  html[data-base-theme="light"] .daily-goal-card,
+  html[data-base-theme="light"] .weekly-summary-card,
+  html[data-base-theme="light"] .session-summary-card,
+  html[data-base-theme="light"] .profile-stat-card,
+  html[data-base-theme="light"] .profile-sessions,
+  html[data-base-theme="light"] .dash-stat,
+  html[data-base-theme="light"] .dash-recent,
+  html[data-base-theme="light"] .dash-xp-row,
+  html[data-base-theme="light"] .dash-profile-panel,
+  html[data-base-theme="light"] .improve-banner,
+  html[data-base-theme="light"] .bento-cell,
+  html[data-base-theme="light"] .pb-c,
+  html[data-base-theme="light"] .pb-xp-card {
+    background: var(--surface-glass);
+    border-color: var(--border);
+  }
+  html[data-base-theme="light"] .num-inp,
+  html[data-base-theme="light"] .ans-input,
+  html[data-base-theme="light"] .welcome-input,
+  html[data-base-theme="light"] .goal-edit-input,
+  html[data-base-theme="light"] .select-trigger {
+    background: var(--light-control-bg);
+    border-color: var(--light-control-border);
+    color: var(--text-primary);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.72);
+  }
+  html[data-base-theme="light"] .num-inp:hover,
+  html[data-base-theme="light"] .ans-input:hover,
+  html[data-base-theme="light"] .welcome-input:hover,
+  html[data-base-theme="light"] .goal-edit-input:hover,
+  html[data-base-theme="light"] .select-trigger:hover {
+    background: var(--light-control-bg-hover);
+    border-color: var(--light-control-border-strong);
+  }
+  html[data-base-theme="light"] .type-btn,
+  html[data-base-theme="light"] .timer-opt,
+  html[data-base-theme="light"] .diff-btn,
+  html[data-base-theme="light"] .pick-btn,
+  html[data-base-theme="light"] .theme-opt-btn {
+    background: var(--hov);
+    border-color: var(--light-control-border);
+    color: var(--text-secondary);
+  }
+  html[data-base-theme="light"] .type-btn:hover,
+  html[data-base-theme="light"] .timer-opt:hover,
+  html[data-base-theme="light"] .diff-btn:hover,
+  html[data-base-theme="light"] .pick-btn:hover,
+  html[data-base-theme="light"] .theme-opt-btn:hover {
+    background: var(--light-control-bg-hover);
+    border-color: var(--light-control-border-strong);
+    color: var(--text-primary);
+  }
+  html[data-base-theme="light"] .type-btn.active,
+  html[data-base-theme="light"] .timer-opt.active,
+  html[data-base-theme="light"] .diff-btn.active,
+  html[data-base-theme="light"] .theme-opt-btn.active {
+    background: color-mix(in srgb, var(--acc), var(--surf) 74%);
+    border-color: color-mix(in srgb, var(--acc), var(--text-primary) 26%);
+    color: var(--acc-vlo);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.8), 0 0 0 1px color-mix(in srgb, var(--acc), transparent 82%);
+  }
+  html[data-base-theme="light"] .theme-opts {
+    background: var(--inp);
+    border-color: var(--border);
+  }
+  html[data-base-theme="light"] .toggle .tslider {
+    background: var(--inp);
+    border: 1px solid var(--border-strong);
+    box-shadow: inset 0 1px 2px color-mix(in srgb, var(--text-primary), transparent 90%);
+  }
+  html[data-base-theme="light"] .toggle .tslider::before {
+    background: var(--surf);
+    box-shadow: 0 1px 4px color-mix(in srgb, var(--text-primary), transparent 78%);
+  }
+  html[data-base-theme="light"] .toggle input:checked + .tslider {
+    background: color-mix(in srgb, var(--acc), var(--surf) 48%);
+    border-color: color-mix(in srgb, var(--acc), var(--text-primary) 24%);
+    box-shadow: inset 0 1px 2px color-mix(in srgb, var(--text-primary), transparent 92%), 0 0 0 2px color-mix(in srgb, var(--acc), transparent 80%);
+  }
+
+
+  html[data-base-theme="light"] .milestone-badge {
+    background: var(--surface-glass);
+    border-color: var(--border);
+    box-shadow: var(--shadow-card);
+    opacity: 1;
+    filter: none;
+  }
+  html[data-base-theme="light"] .milestone-badge-icon {
+    opacity: 0.84;
+  }
+  html[data-base-theme="light"] .milestone-badge-name {
+    color: var(--text-secondary);
+  }
+  html[data-base-theme="light"] .milestone-badge-val {
+    color: var(--text-muted);
+  }
+  html[data-base-theme="light"] .milestone-badge.unlocked {
+    background: color-mix(in srgb, var(--acc), var(--surface-glass) 90%);
+    border-color: color-mix(in srgb, var(--acc), var(--border-strong) 48%);
+  }
+  html[data-base-theme="light"] .milestone-badge.unlocked .milestone-badge-name {
+    color: var(--acc-vlo);
+  }
+  html[data-base-theme="light"] .milestone-badge.unlocked .milestone-badge-val {
+    color: var(--text-secondary);
+  }
+
+
+  html[data-base-theme="light"] .setup-header h1,
+  html[data-base-theme="light"] .dash-name,
+  html[data-base-theme="light"] .welcome-heading,
+  html[data-base-theme="light"] .q-main,
+  html[data-base-theme="light"] .stat-v,
+  html[data-base-theme="light"] .pb-v,
+  html[data-base-theme="light"] .res-title,
+  html[data-base-theme="light"] .review-title,
+  html[data-base-theme="light"] .field-label,
+  html[data-base-theme="light"] .tog-label,
+  html[data-base-theme="light"] .bento-tog-label,
+  html[data-base-theme="light"] .daily-goal-label,
+  html[data-base-theme="light"] .dash-session-score {
+    color: var(--text-primary);
+  }
+  html[data-base-theme="light"] .setup-header p,
+  html[data-base-theme="light"] .dash-greeting,
+  html[data-base-theme="light"] .dash-tagline,
+  html[data-base-theme="light"] .bento-range-lbl,
+  html[data-base-theme="light"] .bento-tog-sub,
+  html[data-base-theme="light"] .unlimited-label,
+  html[data-base-theme="light"] .unlimited-row,
+  html[data-base-theme="light"] .dash-session-date,
+  html[data-base-theme="light"] .dash-empty,
+  html[data-base-theme="light"] .stat-l,
+  html[data-base-theme="light"] .pb-l,
+  html[data-base-theme="light"] .pb-xp-lbl,
+  html[data-base-theme="light"] .res-cw-lbl,
+  html[data-base-theme="light"] .mult2d-note,
+  html[data-base-theme="light"] .welcome-quote,
+  html[data-base-theme="light"] .q-number,
+  html[data-base-theme="light"] .q-sub,
+  html[data-base-theme="light"] .timer-label,
+  html[data-base-theme="light"] .tables-select-btn,
+  html[data-base-theme="light"] .erase-btn,
+  html[data-base-theme="light"] .export-btn {
+    color: var(--text-secondary);
+  }
+  html[data-base-theme="light"] .card-title,
+  html[data-base-theme="light"] .bento-label,
+  html[data-base-theme="light"] .dash-section-title,
+  html[data-base-theme="light"] .profile-acc-label,
+  html[data-base-theme="light"] .custom-pickers-label {
+    color: var(--text-secondary);
+  }
+  html[data-base-theme="light"] .dash-section-title::after {
+    background: var(--border);
+  }
+  html[data-base-theme="light"] .dash-name span,
+  html[data-base-theme="light"] .dash-stat-val,
+  html[data-base-theme="light"] .daily-goal-count,
+  html[data-base-theme="light"] .pb-new {
+    color: var(--acc-vlo);
+  }
+  /* XP level badge: invert for light backgrounds so it stays visible */
+  html[data-base-theme="light"] .dash-xp-level {
+    background: color-mix(in srgb, var(--acc-vlo), transparent 82%);
+    border-color: color-mix(in srgb, var(--acc-vlo), transparent 50%);
+    color: var(--acc-vlo);
+    box-shadow: none;
+  }
+  html[data-base-theme="light"] .dash-xp-title {
+    color: var(--text-primary);
+  }
+  html[data-base-theme="light"] .dash-xp-sub {
+    color: var(--text-secondary);
+  }
+  html[data-base-theme="light"] .dash-xp-bar-bg {
+    background: color-mix(in srgb, var(--acc-vlo), transparent 85%);
+  }
+  html[data-base-theme="light"] .dash-xp-bar-fill {
+    background: linear-gradient(90deg, var(--acc-lo), var(--acc-vlo));
+  }
+
+  html[data-base-theme="light"] .dash-session {
+    background: var(--surface-glass);
+    border-color: var(--border);
+  }
+  html[data-base-theme="light"] .dash-session + .dash-session {
+    border-top-color: var(--border);
+  }
+  html[data-base-theme="light"] .dash-session-score[style] {
+    color: var(--text-secondary) !important;
+  }
+  html[data-base-theme="light"] .dash-session-pct.good {
+    background: color-mix(in srgb, var(--ok-bg), var(--surf) 30%);
+    color: var(--ok-text);
+    border: 1px solid var(--ok-bd);
+  }
+  html[data-base-theme="light"] .dash-session-pct.bad {
+    background: var(--err-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--err);
+  }
+  html[data-base-theme="light"] .back-btn,
+  html[data-base-theme="light"] .dash-profile-btn {
+    background: var(--inp);
+    border-color: var(--border);
+    color: var(--text-secondary);
+  }
+  html[data-base-theme="light"] .back-btn:hover,
+  html[data-base-theme="light"] .dash-profile-btn:hover {
+    background: var(--hov);
+    border-color: var(--border-strong);
+    color: var(--text-primary);
+  }
+  html[data-base-theme="light"] .badge-sq {
+    background: var(--inp);
+    color: var(--text-primary);
+    border-color: var(--border);
+  }
+  html[data-base-theme="light"] .q-pill,
+  html[data-base-theme="light"] .score-pill {
+    background: var(--inp);
+    color: var(--text-secondary);
+    border-color: var(--border);
+  }
+  html[data-base-theme="light"] .q-pill span {
+    color: var(--text-primary);
+  }
+  html[data-base-theme="light"] #customTimerInput,
+  html[data-base-theme="light"] #timedCustomMinsInput {
+    background: var(--inp) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-strong) !important;
+  }
+  html[data-base-theme="light"] .bento-label svg,
+  html[data-base-theme="light"] .card-title svg,
+  html[data-base-theme="light"] .dash-section-title svg {
+    color: var(--text-secondary);
+    stroke: currentColor;
+  }
+  html[data-base-theme="light"] .bento-cell,
+  html[data-base-theme="light"] .dash-session,
+  html[data-base-theme="light"] .setup-header,
+  html[data-base-theme="light"] .dash-header {
+    color: var(--text-primary);
+  }
+
+
+  html[data-base-theme="light"] .q-expr,
+  html[data-base-theme="light"] #qExpr,
+  html[data-base-theme="light"] .big-sub,
+  html[data-base-theme="light"] .review-head,
+  html[data-base-theme="light"] .review-scroll,
+  html[data-base-theme="light"] .review-scroll *,
+  html[data-base-theme="light"] #reviewList,
+  html[data-base-theme="light"] #reviewList * {
+    color: var(--text-primary);
+  }
+  html[data-base-theme="light"] .q-sub,
+  html[data-base-theme="light"] #qSub,
+  html[data-base-theme="light"] .hint-reveal,
+  html[data-base-theme="light"] .session-nudge,
+  html[data-base-theme="light"] #sessionNudge,
+  html[data-base-theme="light"] #sessionNudgeText {
+    color: var(--text-secondary);
+  }
+  html[data-base-theme="light"] .q-card {
+    background: var(--surface-glass);
+    border-color: var(--border);
+  }
+  html[data-base-theme="light"] .q-card .q-badge {
+    background: var(--inp);
+    color: var(--text-secondary);
+    border-color: var(--border);
+  }
+  html[data-base-theme="light"] .hint-btn,
+  html[data-base-theme="light"] .check-btn,
+  html[data-base-theme="light"] .again-btn,
+  html[data-base-theme="light"] .home-btn,
+  html[data-base-theme="light"] .export-btn {
+    background: var(--inp);
+    color: var(--text-primary);
+    border-color: var(--border-strong);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.68);
+    text-shadow: none;
+  }
+  html[data-base-theme="light"] .hint-btn:hover:not(:disabled),
+  html[data-base-theme="light"] .check-btn:hover:not(:disabled),
+  html[data-base-theme="light"] .again-btn:hover,
+  html[data-base-theme="light"] .home-btn:hover,
+  html[data-base-theme="light"] .export-btn:hover {
+    background: var(--hov);
+    color: var(--text-primary);
+    border-color: var(--light-control-border-strong);
+    box-shadow: var(--shadow-card);
+  }
+  html[data-base-theme="light"] .check-btn:not(:disabled),
+  html[data-base-theme="light"] .again-btn {
+    background: color-mix(in srgb, var(--acc), var(--surf) 76%);
+    color: var(--acc-vlo);
+    border-color: color-mix(in srgb, var(--acc), var(--text-primary) 28%);
+    font-weight: 700;
+  }
+  html[data-base-theme="light"] .check-btn:disabled,
+  html[data-base-theme="light"] .hint-btn:disabled {
+    opacity: 1;
+    background: var(--inp);
+    color: var(--text-muted);
+    border-color: var(--border);
+  }
+  html[data-base-theme="light"] .check-btn.is-next {
+    background: var(--inp);
+    color: var(--text-primary);
+    border-color: var(--border-strong);
+  }
+  html[data-base-theme="light"] .session-nudge {
+    background: color-mix(in srgb, var(--acc), var(--surface-glass) 88%);
+    border: 1px solid color-mix(in srgb, var(--acc), var(--border-strong) 48%);
+    color: var(--text-primary);
+  }
+  html[data-base-theme="light"] .session-nudge-icon {
+    color: var(--acc-vlo);
+  }
+  html[data-base-theme="light"] .profile-header-edit,
+  html[data-base-theme="light"] .profile-header .back-btn {
+    background: var(--p3);
+    border-color: var(--border-strong);
+    color: var(--text-primary);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.58);
+  }
+  html[data-base-theme="light"] .profile-header-edit:hover,
+  html[data-base-theme="light"] .profile-header .back-btn:hover {
+    background: var(--text-secondary);
+    border-color: var(--text-secondary);
+    color: var(--surf);
+  }
+  html[data-base-theme="light"] .profile-header .back-btn svg {
+    stroke: currentColor;
+    color: inherit;
+  }
+  html[data-base-theme="light"] .res-cw-card,
+  html[data-base-theme="light"] .review-wrap,
+  html[data-base-theme="light"] .session-nudge {
+    box-shadow: var(--shadow-card);
+  }
+  html[data-base-theme="light"] .res-cw-lbl,
+  html[data-base-theme="light"] .review-head,
+  html[data-base-theme="light"] .session-nudge {
+    opacity: 1;
+  }
+
+
+  html[data-base-theme="light"] .app,
+  html[data-base-theme="light"] .app * {
+    text-shadow: none;
+  }
+  html[data-base-theme="light"] .app {
+    color: var(--text-primary);
+  }
+  html[data-base-theme="light"] .setup-header h1,
+  html[data-base-theme="light"] .dash-name,
+  html[data-base-theme="light"] .profile-header-name,
+  html[data-base-theme="light"] .welcome-heading,
+  html[data-base-theme="light"] .res-title,
+  html[data-base-theme="light"] .big-num,
+  html[data-base-theme="light"] .stat-v,
+  html[data-base-theme="light"] .pb-v,
+  html[data-base-theme="light"] .profile-stat-val,
+  html[data-base-theme="light"] .dash-stat-val,
+  html[data-base-theme="light"] .review-head,
+  html[data-base-theme="light"] .review-title {
+    color: var(--text-primary);
+  }
+  html[data-base-theme="light"] .setup-header p,
+  html[data-base-theme="light"] .dash-greeting,
+  html[data-base-theme="light"] .dash-tagline,
+  html[data-base-theme="light"] .profile-header-since,
+  html[data-base-theme="light"] .field-label,
+  html[data-base-theme="light"] .card-title,
+  html[data-base-theme="light"] .bento-label,
+  html[data-base-theme="light"] .bento-range-lbl,
+  html[data-base-theme="light"] .tog-label,
+  html[data-base-theme="light"] .bento-tog-label,
+  html[data-base-theme="light"] .stat-l,
+  html[data-base-theme="light"] .pb-l,
+  html[data-base-theme="light"] .profile-stat-lbl,
+  html[data-base-theme="light"] .milestone-badge-name,
+  html[data-base-theme="light"] .milestone-badge-val,
+  html[data-base-theme="light"] .dash-session-date,
+  html[data-base-theme="light"] .dash-session-score,
+  html[data-base-theme="light"] .res-cw-lbl,
+  html[data-base-theme="light"] .q-sub,
+  html[data-base-theme="light"] .hint-reveal,
+  html[data-base-theme="light"] .session-nudge {
+    color: var(--text-secondary);
+    opacity: 1;
+  }
+  html[data-base-theme="light"] .q-expr,
+  html[data-base-theme="light"] #qExpr {
+    color: var(--acc-vlo);
+    opacity: 1;
+  }
+  html[data-theme="default"][data-base-theme="light"] .setup-header,
+  html[data-theme="default"][data-base-theme="light"] .dash-header,
+  html[data-theme="default"][data-base-theme="light"] .profile-header,
+  html[data-theme="default"][data-base-theme="light"] .test-top,
+  html[data-theme="default"][data-base-theme="light"] .setup-body,
+  html[data-theme="default"][data-base-theme="light"] .card,
+  html[data-theme="default"][data-base-theme="light"] .q-card,
+  html[data-theme="default"][data-base-theme="light"] .res-cw-card,
+  html[data-theme="default"][data-base-theme="light"] .review-wrap,
+  html[data-theme="default"][data-base-theme="light"] .daily-goal-card,
+  html[data-theme="default"][data-base-theme="light"] .weekly-summary-card,
+  html[data-theme="default"][data-base-theme="light"] .session-summary-card,
+  html[data-theme="default"][data-base-theme="light"] .profile-stat-card,
+  html[data-theme="default"][data-base-theme="light"] .profile-sessions,
+  html[data-theme="default"][data-base-theme="light"] .dash-stat,
+  html[data-theme="default"][data-base-theme="light"] .dash-recent,
+  html[data-theme="default"][data-base-theme="light"] .dash-xp-row,
+  html[data-theme="default"][data-base-theme="light"] .dash-session,
+  html[data-theme="default"][data-base-theme="light"] .bento-cell,
+  html[data-theme="default"][data-base-theme="light"] .pb-c,
+  html[data-theme="default"][data-base-theme="light"] .pb-xp-card,
+  html[data-theme="default"][data-base-theme="light"] .milestone-badge {
+    border-color: color-mix(in srgb, var(--border), transparent 34%);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.88),
+      inset 0 0 0 1px rgba(255,255,255,0.42),
+      0 1px 2px rgba(48,45,39,0.08),
+      0 10px 24px rgba(48,45,39,0.12);
+  }
+  html[data-theme="default"][data-base-theme="light"] .num-inp,
+  html[data-theme="default"][data-base-theme="light"] .ans-input,
+  html[data-theme="default"][data-base-theme="light"] .welcome-input,
+  html[data-theme="default"][data-base-theme="light"] .goal-edit-input,
+  html[data-theme="default"][data-base-theme="light"] .type-btn,
+  html[data-theme="default"][data-base-theme="light"] .timer-opt,
+  html[data-theme="default"][data-base-theme="light"] .diff-btn,
+  html[data-theme="default"][data-base-theme="light"] .pick-btn,
+  html[data-theme="default"][data-base-theme="light"] .theme-opt-btn,
+  html[data-theme="default"][data-base-theme="light"] .q-pill,
+  html[data-theme="default"][data-base-theme="light"] .score-pill {
+    border-color: color-mix(in srgb, var(--border-strong), transparent 20%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.72), 0 1px 2px rgba(48,45,39,0.06);
+  }
+  html[data-base-theme="light"] .back-btn,
+  html[data-base-theme="light"] .dash-profile-btn,
+  html[data-base-theme="light"] .profile-header .back-btn {
+    background: var(--text-secondary);
+    border-color: color-mix(in srgb, var(--text-secondary), transparent 34%);
+    color: var(--surf);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 1px 2px rgba(48,45,39,0.12);
+  }
+  html[data-base-theme="light"] .back-btn svg,
+  html[data-base-theme="light"] .dash-profile-btn svg,
+  html[data-base-theme="light"] .welcome-icon {
+    color: var(--surf);
+    stroke: currentColor;
+    opacity: 1;
+  }
+  html[data-base-theme="light"] .back-btn:hover,
+  html[data-base-theme="light"] .dash-profile-btn:hover,
+  html[data-base-theme="light"] .profile-header .back-btn:hover {
+    background: var(--text-primary);
+    border-color: var(--text-primary);
+    color: var(--surf);
+  }
+  html[data-base-theme="light"] .hint-btn,
+  html[data-base-theme="light"] .check-btn,
+  html[data-base-theme="light"] .again-btn,
+  html[data-base-theme="light"] .home-btn,
+  html[data-base-theme="light"] .export-btn,
+  html[data-base-theme="light"] .profile-header-edit {
+    color: var(--text-primary);
+    opacity: 1;
+  }
+  html[data-base-theme="light"] .check-btn:not(:disabled),
+  html[data-base-theme="light"] .again-btn {
+    background: color-mix(in srgb, var(--acc), var(--surf) 70%);
+    color: var(--acc-vlo);
+    border-color: color-mix(in srgb, var(--acc), var(--text-primary) 20%);
+  }
+
+
+  html[data-base-theme="light"] .q-timer-chip,
+  html[data-base-theme="light"] #timerZone,
+  html[data-base-theme="light"] #stopwatchZone,
+  html[data-base-theme="light"] #timedChip {
+    background: var(--surface-glass);
+    border: 1px solid color-mix(in srgb, var(--border-strong), transparent 18%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.82), 0 1px 2px rgba(48,45,39,0.08);
+    color: var(--acc-vlo);
+  }
+  html[data-base-theme="light"] .timer-secs,
+  html[data-base-theme="light"] .stopwatch-num,
+  html[data-base-theme="light"] #timedChipLabel {
+    color: var(--acc-vlo);
+    opacity: 1;
+  }
+  html[data-base-theme="light"] .timer-arc-bg {
+    stroke: var(--bar-bg);
+    opacity: 1;
+  }
+  html[data-base-theme="light"] .timer-arc-fill {
+    stroke: var(--acc-vlo);
+    opacity: 0.9;
+  }
+  html[data-base-theme="light"] .q-timer-chip.urgent .timer-secs,
+  html[data-base-theme="light"] .q-timer-chip.urgent .timer-arc-fill {
+    color: #ad2f36;
+    stroke: #ad2f36;
+    opacity: 1;
+  }
+  html[data-base-theme="light"] .practice-mode-card {
+    background: var(--surface-glass);
+    border-color: color-mix(in srgb, var(--border), transparent 18%);
+    box-shadow: var(--shadow-card);
+  }
+  html[data-base-theme="light"] .practice-mode-title,
+  html[data-base-theme="light"] .session-summary-label,
+  html[data-base-theme="light"] .improve-banner-title {
+    color: var(--text-primary);
+    opacity: 1;
+  }
+  html[data-base-theme="light"] .practice-mode-sub,
+  html[data-base-theme="light"] .profile-danger-label,
+  html[data-base-theme="light"] .session-summary-title,
+  html[data-base-theme="light"] .session-summary-sub,
+  html[data-base-theme="light"] .session-summary-streak,
+  html[data-base-theme="light"] .improve-banner-sub {
+    color: var(--text-secondary);
+    opacity: 1;
+  }
+  html[data-base-theme="light"] .session-summary-score,
+  html[data-base-theme="light"] .session-summary-xp,
+  html[data-base-theme="light"] .goal-edit-btn,
+  html[data-base-theme="light"] .goal-edit-btn:hover {
+    color: var(--acc-vlo);
+    opacity: 1;
+  }
+  html[data-base-theme="light"] .session-summary-xp {
+    background: color-mix(in srgb, var(--acc), var(--surf) 82%);
+    border-color: color-mix(in srgb, var(--acc), var(--text-primary) 24%);
+  }
+  html[data-base-theme="light"] .improve-banner {
+    background: var(--surface-glass);
+    border-color: color-mix(in srgb, var(--border), transparent 20%);
+    box-shadow: var(--shadow-card);
+  }
+  html[data-base-theme="light"] .profile-danger {
+    background: color-mix(in srgb, var(--err-bg), var(--surface-glass) 58%);
+    border-color: color-mix(in srgb, var(--err), transparent 62%);
+  }
+
+
+  html[data-base-theme="light"] .q-timer-chip,
+  html[data-base-theme="light"] #timerZone,
+  html[data-base-theme="light"] #stopwatchZone,
+  html[data-base-theme="light"] #timedChip {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+  }
+  html[data-base-theme="light"] .focus-chip,
+  html[data-base-theme="light"] .focus-all-btn {
+    background: var(--inp);
+    border-color: color-mix(in srgb, var(--border-strong), transparent 14%);
+    color: var(--text-primary);
+    opacity: 1;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.72), 0 1px 2px rgba(48,45,39,0.06);
+  }
+  html[data-base-theme="light"] .focus-chip:hover,
+  html[data-base-theme="light"] .focus-all-btn:hover {
+    background: var(--hov);
+    border-color: var(--border-strong);
+    color: var(--text-primary);
+  }
+  html[data-base-theme="light"] .focus-chip.selected {
+    background: color-mix(in srgb, var(--acc), var(--surf) 76%);
+    border-color: color-mix(in srgb, var(--acc), var(--text-primary) 24%);
+    color: var(--acc-vlo);
+    font-weight: 800;
+  }
+  html[data-base-theme="light"] .bento-cell.green,
+  html[data-base-theme="light"] .bento-cell.accent {
+    color: var(--text-primary);
+  }
+  html[data-base-theme="light"] .bento-cell.green .bento-label,
+  html[data-base-theme="light"] .bento-cell.accent .bento-label {
+    color: var(--text-secondary);
+  }
+
+
+  html[data-base-theme] .pick-btn:hover:not(:disabled) {
+    background: var(--hov);
+    border-color: var(--border-strong);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-card);
+  }
+  html[data-base-theme] .pick-btn.correct,
+  html[data-base-theme] .pick-btn.reveal {
+    background: var(--ok-bg);
+    border-color: var(--ok-bd);
+    color: var(--ok-text);
+    box-shadow: none;
+  }
+  html[data-base-theme] .pick-btn.wrong {
+    background: var(--err-bg);
+    border-color: var(--err);
+    color: var(--text-primary);
+    box-shadow: none;
+  }
+
+
+  html[data-theme="minimal"] .timed-range {
+    box-shadow: none;
+  }
+  html[data-base-theme="light"] .timed-range {
+    box-shadow: inset 0 1px 2px rgba(48,45,39,0.16), 0 1px 0 rgba(255,255,255,0.74);
+  }
+
+  html[data-theme="minimal"][data-base-theme] body::before,
+  html[data-theme="minimal"][data-base-theme] body::after {
+    display: none;
+  }
+  html[data-theme="minimal"][data-base-theme] .app,
+  html[data-theme="minimal"][data-base-theme] .setup-header,
+  html[data-theme="minimal"][data-base-theme] .dash-header,
+  html[data-theme="minimal"][data-base-theme] .profile-header,
+  html[data-theme="minimal"][data-base-theme] .test-top,
+  html[data-theme="minimal"][data-base-theme] .setup-body,
+  html[data-theme="minimal"][data-base-theme] .card,
+  html[data-theme="minimal"][data-base-theme] .q-card,
+  html[data-theme="minimal"][data-base-theme] .res-cw-card,
+  html[data-theme="minimal"][data-base-theme] .review-wrap,
+  html[data-theme="minimal"][data-base-theme] .daily-goal-card,
+  html[data-theme="minimal"][data-base-theme] .weekly-summary-card,
+  html[data-theme="minimal"][data-base-theme] .session-summary-card,
+  html[data-theme="minimal"][data-base-theme] .profile-stat-card,
+  html[data-theme="minimal"][data-base-theme] .dash-stat,
+  html[data-theme="minimal"][data-base-theme] .dash-recent,
+  html[data-theme="minimal"][data-base-theme] .dash-xp-row,
+  html[data-theme="minimal"][data-base-theme] .dash-profile-panel,
+  html[data-theme="minimal"][data-base-theme] .improve-banner,
+  html[data-theme="minimal"][data-base-theme] .bento-cell,
+  html[data-theme="minimal"][data-base-theme] .pb-c,
+  html[data-theme="minimal"][data-base-theme] .pb-xp-card {
+    box-shadow: none;
+  }
+
 
   /* ── Color Picker UI ─────────────────────────────────────── */
   .color-picker-panel { padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 10px; }
@@ -4268,6 +5244,986 @@ select:focus {
     border: 1px solid color-mix(in srgb, var(--acc), transparent 70%);
   }
 
+
+  /* ═══════════════════════════════════════════════════════
+     DASHBOARD REDESIGN — visual overrides (all token-based)
+  ════════════════════════════════════════════════════════ */
+
+  /* ── Weekly Summary: thin cylindrical bars, hide stat grid ── */
+  .weekly-sparkline {
+    height: 118px !important;
+    gap: 8px !important;
+    align-items: stretch !important;
+    padding: 12px 14px 12px 8px !important;
+    position: relative !important;
+  }
+  .sparkline-y-axis {
+    width: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 2px 0 14px;
+    font-size: 8px;
+    font-weight: 700;
+    color: rgba(239,248,226,0.32);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .sparkline-plot {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+  }
+  .sparkline-grid {
+    position: absolute;
+    inset: 2px 0 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .sparkline-grid span {
+    height: 1px;
+    background: rgba(239,248,226,0.10);
+  }
+  .sparkline-day {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 4px !important;
+    flex: 1 !important;
+    height: 100% !important;
+    position: relative !important;
+    z-index: 1 !important;
+  }
+  .sparkline-bar {
+    width: 7px !important;
+    border-radius: 99px !important;
+    min-height: 4px !important;
+    transition: height 0.4s cubic-bezier(0.22,1,0.36,1);
+  }
+  .sparkline-bar.today {
+    box-shadow: 0 0 8px color-mix(in srgb, var(--acc), transparent 45%) !important;
+  }
+  .sparkline-label {
+    font-size: 9px !important;
+    line-height: 10px !important;
+    text-transform: none !important;
+  }
+  .weekly-summary-stats { display: none !important; }
+
+  /* ── Daily Goal Card Redesign ── */
+  .daily-goal-label {
+    font-size: clamp(12px,2.8vw,13px) !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    color: rgba(239,248,226,0.7) !important;
+    font-weight: 700 !important;
+    gap: 0 !important;
+  }
+  .daily-goal-top {
+    align-items: center !important;
+  }
+  .daily-goal-count {
+    font-size: clamp(26px,6vw,34px) !important;
+    font-weight: 900 !important;
+    color: #eff8e2 !important;
+    line-height: 1.1 !important;
+    letter-spacing: -0.5px !important;
+  }
+  .daily-goal-count span { color: var(--acc); }
+  .daily-goal-bar-bg { height: 5px !important; }
+  .daily-goal-status {
+    font-size: clamp(11px,2.5vw,12px);
+    color: rgba(239,248,226,0.35);
+    font-weight: 400;
+    margin-top: -2px;
+  }
+  .daily-goal-card {
+    padding: 14px 16px !important;
+    gap: 8px !important;
+  }
+  .daily-goal-label {
+    font-size: clamp(11px,2.5vw,12px) !important;
+  }
+  .goal-edit-btn {
+    font-size: 10px !important;
+  }
+  .daily-goal-count {
+    font-size: clamp(22px,5.2vw,29px) !important;
+    line-height: 1.05 !important;
+    letter-spacing: -0.35px !important;
+  }
+  .daily-goal-status {
+    font-size: clamp(10px,2.25vw,11px) !important;
+    line-height: 1.25 !important;
+    margin-top: 0 !important;
+  }
+  .daily-goal-done-badge {
+    padding: 6px 10px !important;
+    font-size: clamp(10px,2.25vw,11px) !important;
+    line-height: 1.2 !important;
+  }
+
+  /* ── XP / Level Row Redesign ── */
+  .dash-xp-row {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 14px !important;
+    padding: 14px 16px !important;
+  }
+  .dash-xp-left { display: none !important; }
+  .dash-xp-level {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: clamp(11px,2.6vw,13px) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: color-mix(in srgb, var(--p4), transparent 30%) !important;
+    border: 2px solid color-mix(in srgb, var(--acc), transparent 62%) !important;
+    border-radius: 50% !important;
+    line-height: 1 !important;
+    flex-shrink: 0 !important;
+    clip-path: none !important;
+    box-shadow: 0 0 12px color-mix(in srgb, var(--acc), transparent 80%) !important;
+    color: var(--acc) !important;
+    font-weight: 800 !important;
+  }
+  .dash-xp-info {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+  .dash-xp-title {
+    font-size: clamp(13px,3vw,15px) !important;
+    font-weight: 700 !important;
+    color: #eff8e2 !important;
+  }
+  .dash-xp-sub {
+    font-size: clamp(11px,2.5vw,12px) !important;
+    color: rgba(239,248,226,0.4) !important;
+    margin-top: 0 !important;
+  }
+  .dash-xp-bar-wrap {
+    max-width: 100% !important;
+    flex: none !important;
+    width: 100% !important;
+    margin-top: 5px !important;
+  }
+  .dash-xp-bar-bg { height: 5px !important; }
+
+  /* ── Today Stat Cards Redesign ── */
+  .dash-stat {
+    padding: 14px 12px !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    flex-direction: column !important;
+  }
+  .dash-stat-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--acc), transparent 88%);
+    border: 1px solid color-mix(in srgb, var(--acc), transparent 75%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .dash-stat-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    width: 100%;
+  }
+  .dash-stat-val {
+    font-size: clamp(24px,5.5vw,36px) !important;
+    line-height: 1.05 !important;
+    text-align: left !important;
+  }
+  .dash-stat-lbl { text-align: left !important; }
+  .dash-stat-sub {
+    font-size: clamp(9px,2vw,10px);
+    color: rgba(239,248,226,0.28);
+    font-weight: 400;
+    margin-top: 3px;
+    line-height: 1.3;
+  }
+
+  /* ── Recent Sessions: header + collapse ── */
+  .dash-recent-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2px;
+  }
+  .dash-recent-header-title {
+    font-size: clamp(10px,2.2vw,11px);
+    font-weight: 700;
+    color: rgba(239,248,226,0.35);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+  }
+  .dash-recent-header-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: color-mix(in srgb, var(--acc), transparent 86%);
+  }
+  .dash-view-all-btn {
+    font-size: clamp(10px,2.5vw,11px);
+    font-weight: 600;
+    color: var(--acc);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    padding: 0;
+    opacity: 0.75;
+    transition: opacity 0.15s;
+    flex-shrink: 0;
+  }
+  .dash-view-all-btn:hover { opacity: 1; }
+
+  /* Collapsed state: show only first session */
+  .dash-recent.collapsed .dash-session:nth-child(n+2) { display: none; }
+
+
+
+  /* Premium layered light theme: token-only depth and hierarchy pass */
+  html[data-base-theme="light"] {
+    --surface-page: var(--p0);
+    --surface-section: var(--p1);
+    --surface-raised: var(--p2);
+    --surface-selected: var(--p3);
+    --surface-soft: var(--p1);
+    --surface-glass: var(--surface-raised);
+    --subtle-border: var(--border);
+    --shadow-small: 0 1px 1px rgba(48,45,39,0.05), 0 4px 10px rgba(48,45,39,0.08), inset 0 1px 0 rgba(255,255,255,0.82);
+    --shadow-hover: 0 1px 2px rgba(48,45,39,0.07), 0 8px 16px rgba(48,45,39,0.12), inset 0 1px 0 rgba(255,255,255,0.9);
+    --shadow-inset: inset 0 2px 4px rgba(48,45,39,0.11), inset 0 -1px 0 rgba(255,255,255,0.70);
+    --light-raised-gradient: linear-gradient(180deg, var(--surface-selected) 0%, var(--surface-raised) 100%);
+    --light-section-gradient: linear-gradient(180deg, color-mix(in srgb, var(--surface-raised), var(--surface-section) 58%) 0%, var(--surface-section) 100%);
+    --light-accent-surface: color-mix(in srgb, var(--acc), var(--surface-selected) 76%);
+    --light-accent-text: color-mix(in srgb, var(--acc-vlo), #061004 46%);
+    --light-action-tone: color-mix(in srgb, var(--acc-vlo), #061004 56%);
+    --light-soft-ink: color-mix(in srgb, var(--text-primary), var(--surface-page) 14%);
+    --light-shadow-ink: #302d27;
+    --light-separation-border: color-mix(in srgb, var(--text-primary), transparent 88%);
+    --light-recessed-tint: color-mix(in srgb, var(--text-primary), transparent 90%);
+  }
+
+  html[data-base-theme="light"] body {
+    background: var(--surface-page);
+  }
+  html[data-base-theme="light"] body::before {
+    background:
+      radial-gradient(ellipse 62% 54% at 18% 10%, color-mix(in srgb, var(--surface-selected), transparent 48%) 0%, transparent 68%),
+      radial-gradient(ellipse 52% 46% at 86% 92%, color-mix(in srgb, var(--surface-section), transparent 24%) 0%, transparent 68%),
+      radial-gradient(ellipse 30% 26% at 76% 18%, color-mix(in srgb, var(--acc), transparent 94%) 0%, transparent 62%);
+    opacity: 0.48;
+  }
+  html[data-base-theme="light"] body::after {
+    background:
+      radial-gradient(ellipse 34% 28% at 92% 30%, color-mix(in srgb, var(--acc-2), transparent 96%) 0%, transparent 58%),
+      radial-gradient(ellipse 32% 28% at 10% 76%, color-mix(in srgb, var(--surface-selected), transparent 62%) 0%, transparent 58%);
+    opacity: 0.34;
+  }
+  html[data-base-theme="light"] .app {
+    background: linear-gradient(160deg, var(--surface-section) 0%, var(--surface-page) 100%);
+    border-color: var(--light-separation-border);
+    box-shadow: var(--shadow-app);
+  }
+
+  html[data-base-theme="light"] .setup-header,
+  html[data-base-theme="light"] .dash-header,
+  html[data-base-theme="light"] .profile-header,
+  html[data-base-theme="light"] .test-top,
+  html[data-base-theme="light"] .setup-body,
+  html[data-base-theme="light"] .dash-recent,
+  html[data-base-theme="light"] .profile-sessions,
+  html[data-base-theme="light"] .dash-profile-panel,
+  html[data-base-theme="light"] .improve-banner,
+  html[data-base-theme="light"] .theme-opts,
+  html[data-base-theme="light"] .practice-mode-card {
+    background: var(--light-section-gradient);
+    border-color: color-mix(in srgb, var(--subtle-border), transparent 34%);
+    box-shadow: var(--shadow-small);
+  }
+
+  html[data-base-theme="light"] .card,
+  html[data-base-theme="light"] .q-card,
+  html[data-base-theme="light"] .res-cw-card,
+  html[data-base-theme="light"] .daily-goal-card,
+  html[data-base-theme="light"] .weekly-summary-card,
+  html[data-base-theme="light"] .session-summary-card,
+  html[data-base-theme="light"] .profile-stat-card,
+  html[data-base-theme="light"] .dash-stat,
+  html[data-base-theme="light"] .dash-xp-row,
+  html[data-base-theme="light"] .bento-cell,
+  html[data-base-theme="light"] .pb-c,
+  html[data-base-theme="light"] .pb-xp-card,
+  html[data-base-theme="light"] .milestone-badge,
+  html[data-base-theme="light"] #timedStatRow .stat-c {
+    background: var(--light-raised-gradient);
+    border-color: color-mix(in srgb, var(--subtle-border), transparent 52%);
+    box-shadow: var(--shadow-small);
+  }
+
+  html[data-theme="default"][data-base-theme="light"] .card:hover,
+  html[data-theme="default"][data-base-theme="light"] .q-card:hover,
+  html[data-theme="default"][data-base-theme="light"] .daily-goal-card:hover,
+  html[data-theme="default"][data-base-theme="light"] .weekly-summary-card:hover,
+  html[data-theme="default"][data-base-theme="light"] .profile-stat-card:hover,
+  html[data-theme="default"][data-base-theme="light"] .dash-stat:hover,
+  html[data-theme="default"][data-base-theme="light"] .bento-cell:hover,
+  html[data-theme="default"][data-base-theme="light"] .pb-c:hover,
+  html[data-theme="default"][data-base-theme="light"] .milestone-badge:hover {
+    box-shadow: var(--shadow-hover);
+  }
+
+  html[data-base-theme="light"] .num-inp,
+  html[data-base-theme="light"] .ans-input,
+  html[data-base-theme="light"] .welcome-input,
+  html[data-base-theme="light"] .goal-edit-input,
+  html[data-base-theme="light"] .profile-input,
+  html[data-base-theme="light"] .select-trigger,
+  html[data-base-theme="light"] #customTimerInput,
+  html[data-base-theme="light"] #timedCustomMinsInput {
+    background: var(--light-raised-gradient) !important;
+    border-color: color-mix(in srgb, var(--subtle-border), transparent 38%) !important;
+    color: var(--text-primary) !important;
+    box-shadow: var(--shadow-small) !important;
+  }
+  html[data-base-theme="light"] .num-inp:hover,
+  html[data-base-theme="light"] .ans-input:hover,
+  html[data-base-theme="light"] .welcome-input:hover,
+  html[data-base-theme="light"] .goal-edit-input:hover,
+  html[data-base-theme="light"] .profile-input:hover,
+  html[data-base-theme="light"] .select-trigger:hover {
+    background: var(--surface-selected) !important;
+    box-shadow: var(--shadow-hover) !important;
+  }
+  html[data-base-theme="light"] .num-inp:focus,
+  html[data-base-theme="light"] .ans-input:focus,
+  html[data-base-theme="light"] .welcome-input:focus,
+  html[data-base-theme="light"] .goal-edit-input:focus,
+  html[data-base-theme="light"] .profile-input:focus,
+  html[data-base-theme="light"] .select-trigger:focus {
+    background: var(--surface-selected) !important;
+    border-color: color-mix(in srgb, var(--acc), transparent 38%) !important;
+    box-shadow: var(--shadow-hover), var(--focus-ring) !important;
+  }
+
+  html[data-base-theme="light"] #s-setup .num-inp,
+  html[data-base-theme="light"] #s-setup .bento-q-inp,
+  html[data-base-theme="light"] #s-setup #customTimerInput,
+  html[data-base-theme="light"] #s-setup #timedCustomMinsInput,
+  html[data-base-theme="light"] #s-setup .select-trigger {
+    background: color-mix(in srgb, var(--surface-page), var(--surface-section) 42%) !important;
+    border-color: color-mix(in srgb, var(--light-soft-ink), transparent 86%) !important;
+    color: var(--light-soft-ink) !important;
+    box-shadow:
+      inset 0 2px 4px color-mix(in srgb, var(--light-shadow-ink, #302d27), transparent 86%),
+      inset 0 -1px 0 rgba(255,255,255,0.72) !important;
+  }
+  html[data-base-theme="light"] #s-setup .num-inp:hover,
+  html[data-base-theme="light"] #s-setup .bento-q-inp:hover,
+  html[data-base-theme="light"] #s-setup #customTimerInput:hover,
+  html[data-base-theme="light"] #s-setup #timedCustomMinsInput:hover,
+  html[data-base-theme="light"] #s-setup .select-trigger:hover {
+    background: color-mix(in srgb, var(--surface-selected), var(--surface-section) 54%) !important;
+    box-shadow:
+      inset 0 2px 5px color-mix(in srgb, var(--light-shadow-ink, #302d27), transparent 84%),
+      inset 0 -1px 0 rgba(255,255,255,0.78) !important;
+  }
+  html[data-base-theme="light"] #s-setup .num-inp:focus,
+  html[data-base-theme="light"] #s-setup .bento-q-inp:focus,
+  html[data-base-theme="light"] #s-setup #customTimerInput:focus,
+  html[data-base-theme="light"] #s-setup #timedCustomMinsInput:focus,
+  html[data-base-theme="light"] #s-setup .select-trigger:focus {
+    background: color-mix(in srgb, var(--surface-selected), var(--surface-section) 38%) !important;
+    border-color: color-mix(in srgb, var(--light-action-tone), transparent 50%) !important;
+    box-shadow:
+      inset 0 2px 5px color-mix(in srgb, var(--light-shadow-ink, #302d27), transparent 82%),
+      inset 0 -1px 0 rgba(255,255,255,0.82),
+      0 0 0 3px color-mix(in srgb, var(--acc), transparent 82%) !important;
+  }
+
+  html[data-base-theme="light"] .type-btn,
+  html[data-base-theme="light"] .timer-opt,
+  html[data-base-theme="light"] .diff-btn,
+  html[data-base-theme="light"] .pick-btn,
+  html[data-base-theme="light"] .theme-opt-btn,
+  html[data-base-theme="light"] .tables-select-btn,
+  html[data-base-theme="light"] .focus-chip,
+  html[data-base-theme="light"] .focus-all-btn,
+  html[data-base-theme="light"] .back-btn,
+  html[data-base-theme="light"] .dash-profile-btn,
+  html[data-base-theme="light"] .profile-header-edit,
+  html[data-base-theme="light"] .hint-btn,
+  html[data-base-theme="light"] .home-btn,
+  html[data-base-theme="light"] .export-btn {
+    background: var(--light-raised-gradient);
+    border-color: color-mix(in srgb, var(--subtle-border), transparent 48%);
+    color: var(--text-secondary);
+    box-shadow: var(--shadow-small);
+    text-shadow: none;
+  }
+  html[data-base-theme="light"] .type-btn:hover,
+  html[data-base-theme="light"] .timer-opt:hover,
+  html[data-base-theme="light"] .diff-btn:hover,
+  html[data-base-theme="light"] .pick-btn:hover:not(:disabled),
+  html[data-base-theme="light"] .theme-opt-btn:hover,
+  html[data-base-theme="light"] .tables-select-btn:hover,
+  html[data-base-theme="light"] .focus-chip:hover,
+  html[data-base-theme="light"] .focus-all-btn:hover,
+  html[data-base-theme="light"] .back-btn:hover,
+  html[data-base-theme="light"] .dash-profile-btn:hover,
+  html[data-base-theme="light"] .profile-header-edit:hover,
+  html[data-base-theme="light"] .hint-btn:hover:not(:disabled),
+  html[data-base-theme="light"] .home-btn:hover,
+  html[data-base-theme="light"] .export-btn:hover {
+    background: var(--surface-selected);
+    border-color: color-mix(in srgb, var(--border-strong), transparent 28%);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-hover);
+  }
+
+  html[data-base-theme="light"] .type-btn.active,
+  html[data-base-theme="light"] .timer-opt.active,
+  html[data-base-theme="light"] .diff-btn.active,
+  html[data-base-theme="light"] .theme-opt-btn.active,
+  html[data-base-theme="light"] .focus-chip.selected,
+  html[data-base-theme="light"] .milestone-badge.unlocked,
+  html[data-base-theme="light"] .session-summary-xp {
+    background: var(--light-accent-surface);
+    border-color: color-mix(in srgb, var(--acc), transparent 42%);
+    color: var(--light-accent-text);
+    box-shadow: var(--shadow-hover);
+    font-weight: 800;
+  }
+
+  html[data-base-theme="light"] .back-btn,
+  html[data-base-theme="light"] .dash-profile-btn,
+  html[data-base-theme="light"] .profile-header .back-btn {
+    background: var(--light-raised-gradient) !important;
+    border-color: var(--light-separation-border) !important;
+    color: var(--light-soft-ink) !important;
+    box-shadow: var(--shadow-small) !important;
+  }
+  html[data-base-theme="light"] .back-btn svg,
+  html[data-base-theme="light"] .dash-profile-btn svg,
+  html[data-base-theme="light"] .profile-header .back-btn svg {
+    color: var(--light-soft-ink);
+    stroke: currentColor;
+    opacity: 0.86;
+  }
+  html[data-base-theme="light"] .profile-header .back-btn:hover,
+  html[data-base-theme="light"] .back-btn:hover,
+  html[data-base-theme="light"] .dash-profile-btn:hover {
+    background: var(--surface-selected) !important;
+    color: var(--light-soft-ink) !important;
+    box-shadow: var(--shadow-hover) !important;
+  }
+
+  html[data-base-theme="light"] .check-btn:not(:disabled),
+  html[data-base-theme="light"] .again-btn,
+  html[data-base-theme="light"] .welcome-btn,
+  html[data-base-theme="light"] .dash-start-btn,
+  html[data-base-theme="light"] .bento-start,
+  html[data-base-theme="light"] .cp-done-btn {
+    background: linear-gradient(180deg, var(--acc-hi) 0%, var(--acc) 100%);
+    border-color: color-mix(in srgb, var(--acc-lo), transparent 36%);
+    color: var(--btn-txt);
+    box-shadow: 0 1px 1px color-mix(in srgb, var(--acc-vlo), transparent 78%), 0 6px 14px color-mix(in srgb, var(--acc), transparent 76%), inset 0 1px 0 rgba(255,255,255,0.34);
+  }
+  html[data-base-theme="light"] .check-btn:not(:disabled):hover,
+  html[data-base-theme="light"] .again-btn:hover,
+  html[data-base-theme="light"] .welcome-btn:hover,
+  html[data-base-theme="light"] .dash-start-btn:hover,
+  html[data-base-theme="light"] .bento-start:hover,
+  html[data-base-theme="light"] .cp-done-btn:hover {
+    box-shadow: 0 1px 2px color-mix(in srgb, var(--acc-vlo), transparent 72%), 0 9px 18px color-mix(in srgb, var(--acc), transparent 70%), inset 0 1px 0 rgba(255,255,255,0.42);
+    opacity: 1;
+  }
+  html[data-base-theme="light"] .check-btn:disabled,
+  html[data-base-theme="light"] .hint-btn:disabled {
+    background: var(--surface-section);
+    color: var(--text-muted);
+    border-color: color-mix(in srgb, var(--subtle-border), transparent 42%);
+    box-shadow: var(--shadow-inset);
+  }
+
+  html[data-base-theme="light"] .toggle .tslider,
+  html[data-base-theme="light"] .unlimited-tog-pill {
+    background: var(--surface-section);
+    border-color: color-mix(in srgb, var(--subtle-border), transparent 28%);
+    box-shadow: var(--shadow-inset);
+  }
+  html[data-base-theme="light"] .toggle .tslider::before,
+  html[data-base-theme="light"] .unlimited-tog-pill::after {
+    background: var(--surface-selected);
+    box-shadow: var(--shadow-small);
+  }
+  html[data-base-theme="light"] .toggle input:checked + .tslider,
+  html[data-base-theme="light"] .unlimited-tog-label input:checked + .unlimited-tog-pill {
+    background: linear-gradient(180deg, var(--acc-hi) 0%, var(--acc) 100%) !important;
+    border-color: color-mix(in srgb, var(--acc-lo), transparent 34%) !important;
+    box-shadow: var(--shadow-small) !important;
+  }
+  html[data-base-theme="light"] .unlimited-tog-label input:checked + .unlimited-tog-pill::after {
+    transform: translateX(16px);
+    background: var(--surface-selected) !important;
+    box-shadow: var(--shadow-small) !important;
+  }
+  html[data-base-theme="light"] .unlimited-tog-label input:checked ~ span,
+  html[data-base-theme="light"] .unlimited-tog-label:has(input:checked) {
+    color: var(--light-action-tone) !important;
+  }
+
+  html[data-base-theme="light"] .prog-bar,
+  html[data-base-theme="light"] .dash-xp-bar-bg,
+  html[data-base-theme="light"] .daily-goal-bar-bg,
+  html[data-base-theme="light"] .profile-bar-bg,
+  html[data-base-theme="light"] .pb-xp-bar-bg,
+  html[data-base-theme="light"] .timed-range {
+    background: var(--surface-section);
+    box-shadow: var(--shadow-inset);
+    border-color: transparent;
+  }
+  html[data-base-theme="light"] .prog-fill,
+  html[data-base-theme="light"] .dash-xp-bar-fill,
+  html[data-base-theme="light"] .daily-goal-bar-fill,
+  html[data-base-theme="light"] .profile-bar-fill,
+  html[data-base-theme="light"] .pb-xp-bar-fill {
+    background: linear-gradient(90deg, var(--acc-lo), var(--acc));
+    box-shadow: 0 1px 2px color-mix(in srgb, var(--acc-vlo), transparent 72%), inset 0 1px 0 rgba(255,255,255,0.34);
+  }
+
+  html[data-base-theme="light"] .review-wrap,
+  html[data-base-theme="light"] .review-scroll,
+  html[data-base-theme="light"] #reviewList,
+  html[data-base-theme="light"] .dash-session,
+  html[data-base-theme="light"] .dash-session + .dash-session,
+  html[data-base-theme="light"] .profile-danger {
+    background: var(--surface-section);
+    border-color: color-mix(in srgb, var(--subtle-border), transparent 60%);
+    box-shadow: var(--shadow-inset);
+  }
+  html[data-base-theme="light"] .dash-session-pct.good,
+  html[data-base-theme="light"] .fb-ok {
+    background: color-mix(in srgb, var(--ok-bg), var(--surface-selected) 42%);
+    color: var(--ok-text);
+    border-color: color-mix(in srgb, var(--ok-bd), transparent 36%);
+  }
+  html[data-base-theme="light"] .dash-session-pct.bad,
+  html[data-base-theme="light"] .fb-no {
+    background: color-mix(in srgb, var(--err-bg), var(--surface-selected) 42%);
+    color: var(--text-primary);
+    border-color: color-mix(in srgb, var(--err), transparent 52%);
+  }
+  html[data-base-theme="light"] .ans-split-overlay .split-sep,
+  html[data-base-theme="light"] .res-cw-divider {
+    background: color-mix(in srgb, var(--light-soft-ink), transparent 62%);
+  }
+  html[data-base-theme="light"] .res-cw-divider {
+    width: 1px;
+    margin: 12px 0;
+  }
+  html[data-base-theme="light"] .review-head {
+    color: var(--light-soft-ink);
+    border-bottom: 1px solid color-mix(in srgb, var(--light-soft-ink), transparent 84%);
+  }
+  html[data-base-theme="light"] .review-item {
+    border-bottom-color: color-mix(in srgb, var(--light-soft-ink), transparent 86%);
+  }
+  html[data-base-theme="light"] .review-item:last-child {
+    border-bottom: none;
+  }
+  html[data-base-theme="light"] .ri-q,
+  html[data-base-theme="light"] .ri-a {
+    color: var(--light-soft-ink);
+  }
+  html[data-base-theme="light"] .ri-ok {
+    color: var(--light-action-tone);
+  }
+  html[data-base-theme="light"] .ri-no {
+    color: color-mix(in srgb, var(--err), #1d1612 16%);
+  }
+  html[data-base-theme="light"] .chart-wrap {
+    background: color-mix(in srgb, var(--light-soft-ink), transparent 92%);
+    border: 1px solid color-mix(in srgb, var(--light-soft-ink), transparent 84%);
+    box-shadow: var(--shadow-inset);
+  }
+  html[data-base-theme="light"] .chart-title,
+  html[data-base-theme="light"] .chart-row-label,
+  html[data-base-theme="light"] .chart-row-pct {
+    color: var(--light-soft-ink);
+  }
+  html[data-base-theme="light"] .chart-row-bar-bg {
+    background: color-mix(in srgb, var(--light-soft-ink), transparent 82%);
+    box-shadow: var(--shadow-inset);
+  }
+  html[data-base-theme="light"] .chart-row-bar-bg::before {
+    background:
+      linear-gradient(90deg, transparent calc(50% - 0.5px), color-mix(in srgb, var(--light-soft-ink), transparent 82%) calc(50% - 0.5px), color-mix(in srgb, var(--light-soft-ink), transparent 82%) calc(50% + 0.5px), transparent calc(50% + 0.5px)),
+      linear-gradient(90deg, color-mix(in srgb, var(--light-soft-ink), transparent 84%) 1px, transparent 1px),
+      linear-gradient(270deg, color-mix(in srgb, var(--light-soft-ink), transparent 84%) 1px, transparent 1px);
+  }
+  html[data-base-theme="light"] .chart-row-bar-fill.sq,
+  html[data-base-theme="light"] .chart-row-bar-fill.cu {
+    background: linear-gradient(90deg, var(--acc-lo), var(--acc));
+    box-shadow: 0 1px 2px color-mix(in srgb, var(--acc-vlo), transparent 72%), inset 0 1px 0 rgba(255,255,255,0.34);
+  }
+  html[data-base-theme="light"] .chart-axis-scale {
+    color: color-mix(in srgb, var(--light-soft-ink), transparent 28%);
+  }
+
+  html[data-base-theme="light"] #weeklySparkline {
+    background: var(--light-recessed-tint);
+    border: 1px solid var(--light-separation-border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-inset);
+  }
+  html[data-base-theme="light"] #weeklySparkline .sparkline-bar,
+  html[data-base-theme="light"] #weeklySparkline .sparkline-dot,
+  html[data-base-theme="light"] #weeklySparkline [style*="background"] {
+    background-color: color-mix(in srgb, var(--acc), var(--light-action-tone) 16%) !important;
+  }
+  html[data-base-theme="light"] #weeklySparkline .sparkline-day,
+  html[data-base-theme="light"] #weeklySparkline .sparkline-label {
+    color: color-mix(in srgb, var(--text-primary), transparent 34%);
+  }
+  html[data-base-theme="light"] #weeklySparkline .sparkline-y-axis {
+    color: color-mix(in srgb, var(--light-soft-ink), transparent 30%);
+  }
+  html[data-base-theme="light"] #weeklySparkline .sparkline-grid span {
+    background: color-mix(in srgb, var(--light-soft-ink), transparent 84%);
+  }
+
+  html[data-base-theme="light"] .setup-header h1,
+  html[data-base-theme="light"] .dash-name,
+  html[data-base-theme="light"] .profile-header-name,
+  html[data-base-theme="light"] .welcome-heading,
+  html[data-base-theme="light"] .res-title,
+  html[data-base-theme="light"] .big-num,
+  html[data-base-theme="light"] .stat-v,
+  html[data-base-theme="light"] .pb-v,
+  html[data-base-theme="light"] .profile-stat-val,
+  html[data-base-theme="light"] .dash-stat-val,
+  html[data-base-theme="light"] .review-title,
+  html[data-base-theme="light"] .q-main {
+    color: var(--text-primary);
+  }
+  html[data-base-theme="light"] .dash-name span,
+  html[data-base-theme="light"] .dash-stat-val,
+  html[data-base-theme="light"] .daily-goal-count,
+  html[data-base-theme="light"] .pb-new,
+  html[data-base-theme="light"] .q-expr,
+  html[data-base-theme="light"] #qExpr,
+  html[data-base-theme="light"] .timer-secs,
+  html[data-base-theme="light"] .stopwatch-num {
+    color: var(--light-action-tone);
+  }
+  html[data-base-theme="light"] .dash-view-all-btn,
+  html[data-base-theme="light"] .goal-edit-btn,
+  html[data-base-theme="light"] .goal-edit-btn:hover,
+  html[data-base-theme="light"] .dash-name span,
+  html[data-base-theme="light"] .dash-stat-val,
+  html[data-base-theme="light"] .daily-goal-count,
+  html[data-base-theme="light"] .daily-goal-count span,
+  html[data-base-theme="light"] .pb-new {
+    color: var(--light-action-tone);
+  }
+  html[data-base-theme="light"] .daily-goal-label {
+    color: var(--light-soft-ink) !important;
+  }
+  html[data-base-theme="light"] .daily-goal-status,
+  html[data-base-theme="light"] .daily-goal-done-badge,
+  html[data-base-theme="light"] .daily-goal-done-badge * {
+    color: var(--light-soft-ink) !important;
+  }
+  html[data-base-theme="light"] .session-summary-close {
+    color: var(--light-soft-ink) !important;
+    background: var(--surface-raised);
+    border-color: var(--light-separation-border);
+  }
+  html[data-base-theme="light"] .goal-count-sep {
+    color: var(--light-action-tone) !important;
+  }
+  html[data-base-theme="light"] .type-btn.active,
+  html[data-base-theme="light"] .timer-opt.active,
+  html[data-base-theme="light"] .diff-btn.active,
+  html[data-base-theme="light"] .theme-opt-btn.active,
+  html[data-base-theme="light"] .tables-select-btn.active,
+  html[data-base-theme="light"] .focus-chip.selected,
+  html[data-base-theme="light"] .select-option.active,
+  html[data-base-theme="light"] .badge-cu,
+  html[data-base-theme="light"] .fb-ok,
+  html[data-base-theme="light"] .ans-input.correct,
+  html[data-base-theme="light"] .ans-input-wrap::after,
+  html[data-base-theme="light"] .ans-split-overlay .split-correct-val,
+  html[data-base-theme="light"] .pick-btn.correct,
+  html[data-base-theme="light"] .session-summary-score,
+  html[data-base-theme="light"] .session-summary-xp,
+  html[data-base-theme="light"] .dash-view-all-btn,
+  html[data-base-theme="light"] .goal-edit-btn,
+  html[data-base-theme="light"] .goal-edit-btn:hover,
+  html[data-base-theme="light"] .dash-name span,
+  html[data-base-theme="light"] .dash-stat-val,
+  html[data-base-theme="light"] .daily-goal-count,
+  html[data-base-theme="light"] .daily-goal-count span,
+  html[data-base-theme="light"] .pb-new,
+  html[data-base-theme="light"] .pb-xp-val,
+  html[data-base-theme="light"] .res-cw-ok,
+  html[data-base-theme="light"] .sv-ok,
+  html[data-base-theme="light"] .ri-ok,
+  html[data-base-theme="light"] .q-expr,
+  html[data-base-theme="light"] #qExpr,
+  html[data-base-theme="light"] .timer-secs,
+  html[data-base-theme="light"] .stopwatch-num,
+  html[data-base-theme="light"] .dash-xp-title,
+  html[data-base-theme="light"] .dash-xp-level,
+  html[data-base-theme="light"] .weekly-stat-val,
+  html[data-base-theme="light"] .xp-pill,
+  html[data-base-theme="light"] .milestone-badge.unlocked .milestone-badge-name,
+  html[data-base-theme="light"] .milestone-badge-val,
+  html[data-base-theme="light"] .daily-challenge-badge.avail,
+  html[data-base-theme="light"] .dc-tab-day,
+  html[data-base-theme="light"] .dc-tab-mon,
+  html[data-base-theme="light"] .dc-chevron,
+  html[data-base-theme="light"] .dash-session-pct.good,
+  html[data-base-theme="light"] .profile-stat-val,
+  html[data-base-theme="light"] .profile-acc-val,
+  html[data-base-theme="light"] .profile-name-edit button,
+  html[data-base-theme="light"] .practice-mode-active-badge,
+  html[data-base-theme="light"] .profile-save-btn,
+  html[data-base-theme="light"] .xp-float,
+  html[data-base-theme="light"] .levelup-modal-level,
+  html[data-base-theme="light"] .timed-result-num,
+  html[data-base-theme="light"] .timed-result-stat-num {
+    color: var(--light-action-tone) !important;
+    text-shadow: none !important;
+  }
+  html[data-base-theme="light"] .goal-count-unit {
+    color: var(--light-soft-ink) !important;
+  }
+  html[data-base-theme="light"] .daily-goal-count {
+    text-shadow: 0 1px 0 rgba(255,255,255,0.72);
+  }
+  html[data-base-theme="light"] .dash-xp-info {
+    color: var(--light-soft-ink);
+  }
+  html[data-base-theme="light"] .dash-xp-info * {
+    color: var(--light-soft-ink);
+  }
+  html[data-base-theme="light"] .dash-xp-title {
+    color: var(--light-action-tone) !important;
+    opacity: 1;
+  }
+  html[data-base-theme="light"] .dash-xp-sub {
+    color: var(--light-soft-ink) !important;
+    opacity: 0.86;
+  }
+  html[data-base-theme="light"] .dash-xp-level {
+    color: var(--light-action-tone);
+    border-color: color-mix(in srgb, var(--acc), transparent 38%);
+  }
+  html[data-base-theme="light"] .dash-session-date,
+  html[data-base-theme="light"] .dash-session-score,
+  html[data-base-theme="light"] .dash-session-score[style] {
+    color: var(--light-soft-ink) !important;
+  }
+  html[data-base-theme="light"] .dash-session-pct {
+    color: var(--light-soft-ink);
+  }
+  html[data-base-theme="light"] .unlimited-row,
+  html[data-base-theme="light"] .unlimited-label,
+  html[data-base-theme="light"] .unlimited-tog-label,
+  html[data-base-theme="light"] .unlimited-tog-label * {
+    color: var(--light-soft-ink) !important;
+  }
+  html[data-base-theme="light"] .dash-stat-sub,
+  html[data-base-theme="light"] .dash-stat-body,
+  html[data-base-theme="light"] .dash-stat-body * {
+    color: color-mix(in srgb, var(--light-soft-ink), transparent 16%);
+  }
+  html[data-base-theme="light"] .dash-stat-val {
+    color: var(--light-action-tone);
+  }
+  html[data-base-theme="light"] #weaknessWrap,
+  html[data-base-theme="light"] #weaknessWrap *,
+  html[data-base-theme="light"] #weaknessList,
+  html[data-base-theme="light"] #weaknessList * {
+    color: var(--light-soft-ink) !important;
+  }
+  html[data-base-theme="light"] #weaknessList span {
+    background: color-mix(in srgb, var(--err-bg), var(--surface-selected) 48%) !important;
+    border-color: color-mix(in srgb, var(--err), transparent 72%) !important;
+  }
+  html[data-base-theme="light"] #timedSliderWrap .timed-slider-label,
+  html[data-base-theme="light"] #timedSliderWrap .timed-slider-val,
+  html[data-base-theme="light"] #timedSliderWrap .timed-tick,
+  html[data-base-theme="light"] #timedSliderWrap .timed-tick.active-tick {
+    color: var(--light-soft-ink) !important;
+    text-shadow: none !important;
+  }
+  html[data-base-theme="light"] #timedSliderWrap .timed-tick {
+    opacity: 0.64;
+  }
+  html[data-base-theme="light"] #timedSliderWrap .timed-tick.active-tick,
+  html[data-base-theme="light"] #timedSliderWrap .timed-slider-val {
+    opacity: 1;
+  }
+  html[data-base-theme="light"] .card-title,
+  html[data-base-theme="light"] .bento-label,
+  html[data-base-theme="light"] .dash-section-title,
+  html[data-base-theme="light"] .dash-recent-header-title,
+  html[data-base-theme="light"] .daily-goal-label,
+  html[data-base-theme="light"] .chart-title,
+  html[data-base-theme="light"] .review-head,
+  html[data-base-theme="light"] .weekly-summary-title,
+  html[data-base-theme="light"] .session-summary-title,
+  html[data-base-theme="light"] .improve-banner-title,
+  html[data-base-theme="light"] .practice-mode-title,
+  html[data-base-theme="light"] .profile-acc-label,
+  html[data-base-theme="light"] .custom-pickers-label,
+  html[data-base-theme="light"] .cp-section-label {
+    color: var(--light-soft-ink) !important;
+  }
+  html[data-base-theme="light"] .dash-section-title::after,
+  html[data-base-theme="light"] .dash-recent-header-title::after {
+    background: color-mix(in srgb, var(--light-soft-ink), transparent 84%) !important;
+  }
+  html[data-base-theme="light"] .setup-header,
+  html[data-base-theme="light"] .dash-header,
+  html[data-base-theme="light"] .profile-header {
+    border-color: var(--light-separation-border);
+    box-shadow: var(--shadow-hover);
+  }
+  html[data-theme="default"][data-base-theme="light"] #s-dashboard .dash-header {
+    border-color: color-mix(in srgb, var(--acc), var(--light-separation-border) 72%);
+    box-shadow:
+      0 1px 1px rgba(255,255,255,0.74) inset,
+      0 2px 5px color-mix(in srgb, var(--light-shadow-ink), transparent 88%),
+      0 14px 28px color-mix(in srgb, var(--light-shadow-ink), transparent 84%),
+      0 28px 48px color-mix(in srgb, var(--acc-vlo), transparent 88%);
+  }
+  html[data-base-theme="light"] .card,
+  html[data-base-theme="light"] .q-card,
+  html[data-base-theme="light"] .res-cw-card,
+  html[data-base-theme="light"] .review-wrap,
+  html[data-base-theme="light"] .daily-goal-card,
+  html[data-base-theme="light"] .weekly-summary-card,
+  html[data-base-theme="light"] .session-summary-card,
+  html[data-base-theme="light"] .profile-stat-card,
+  html[data-base-theme="light"] .dash-stat,
+  html[data-base-theme="light"] .dash-recent,
+  html[data-base-theme="light"] .dash-session,
+  html[data-base-theme="light"] .dash-xp-row,
+  html[data-base-theme="light"] .bento-cell,
+  html[data-base-theme="light"] .pb-c,
+  html[data-base-theme="light"] .pb-xp-card,
+  html[data-base-theme="light"] .milestone-badge {
+    border-color: var(--light-separation-border);
+  }
+
+  html[data-theme="minimal"][data-base-theme="light"] {
+    --surface-page: var(--p0);
+    --surface-section: color-mix(in srgb, var(--p1), var(--p0) 42%);
+    --surface-raised: color-mix(in srgb, var(--p2), var(--p1) 56%);
+    --surface-selected: color-mix(in srgb, var(--p3), var(--p2) 50%);
+    --shadow-small: 0 1px 1px rgba(48,45,39,0.025), inset 0 1px 0 rgba(255,255,255,0.42);
+    --shadow-hover: 0 1px 2px rgba(48,45,39,0.04), inset 0 1px 0 rgba(255,255,255,0.48);
+    --shadow-inset: inset 0 1px 2px rgba(48,45,39,0.07), inset 0 -1px 0 rgba(255,255,255,0.38);
+    --light-raised-gradient: var(--surface-raised);
+    --light-section-gradient: var(--surface-section);
+  }
+  html[data-theme="minimal"][data-base-theme="light"] body::before,
+  html[data-theme="minimal"][data-base-theme="light"] body::after {
+    display: none;
+  }
+  html[data-theme="minimal"][data-base-theme="light"] .app {
+    background: var(--surface-page);
+    border-color: var(--light-separation-border);
+    box-shadow: none;
+  }
+  html[data-theme="minimal"][data-base-theme="light"] .setup-header,
+  html[data-theme="minimal"][data-base-theme="light"] .dash-header,
+  html[data-theme="minimal"][data-base-theme="light"] .profile-header,
+  html[data-theme="minimal"][data-base-theme="light"] .test-top,
+  html[data-theme="minimal"][data-base-theme="light"] .setup-body,
+  html[data-theme="minimal"][data-base-theme="light"] .dash-recent,
+  html[data-theme="minimal"][data-base-theme="light"] .profile-sessions,
+  html[data-theme="minimal"][data-base-theme="light"] .dash-profile-panel,
+  html[data-theme="minimal"][data-base-theme="light"] .improve-banner {
+    background: var(--surface-section);
+    border-color: var(--light-separation-border);
+    box-shadow: none;
+  }
+  html[data-theme="minimal"][data-base-theme="light"] .card,
+  html[data-theme="minimal"][data-base-theme="light"] .q-card,
+  html[data-theme="minimal"][data-base-theme="light"] .res-cw-card,
+  html[data-theme="minimal"][data-base-theme="light"] .review-wrap,
+  html[data-theme="minimal"][data-base-theme="light"] .daily-goal-card,
+  html[data-theme="minimal"][data-base-theme="light"] .weekly-summary-card,
+  html[data-theme="minimal"][data-base-theme="light"] .session-summary-card,
+  html[data-theme="minimal"][data-base-theme="light"] .profile-stat-card,
+  html[data-theme="minimal"][data-base-theme="light"] .dash-stat,
+  html[data-theme="minimal"][data-base-theme="light"] .dash-xp-row,
+  html[data-theme="minimal"][data-base-theme="light"] .bento-cell,
+  html[data-theme="minimal"][data-base-theme="light"] .pb-c,
+  html[data-theme="minimal"][data-base-theme="light"] .pb-xp-card {
+    background: var(--surface-raised);
+    border-color: var(--light-separation-border);
+    box-shadow: var(--shadow-small);
+  }
+  html[data-theme="minimal"][data-base-theme="light"] .num-inp,
+  html[data-theme="minimal"][data-base-theme="light"] .ans-input,
+  html[data-theme="minimal"][data-base-theme="light"] .welcome-input,
+  html[data-theme="minimal"][data-base-theme="light"] .goal-edit-input,
+  html[data-theme="minimal"][data-base-theme="light"] .profile-input,
+  html[data-theme="minimal"][data-base-theme="light"] .select-trigger,
+  html[data-theme="minimal"][data-base-theme="light"] .type-btn,
+  html[data-theme="minimal"][data-base-theme="light"] .timer-opt,
+  html[data-theme="minimal"][data-base-theme="light"] .diff-btn,
+  html[data-theme="minimal"][data-base-theme="light"] .pick-btn,
+  html[data-theme="minimal"][data-base-theme="light"] .theme-opt-btn {
+    background: var(--surface-raised) !important;
+    box-shadow: var(--shadow-small) !important;
+  }
+  html[data-theme="minimal"][data-base-theme="light"] .num-inp:hover,
+  html[data-theme="minimal"][data-base-theme="light"] .ans-input:hover,
+  html[data-theme="minimal"][data-base-theme="light"] .welcome-input:hover,
+  html[data-theme="minimal"][data-base-theme="light"] .goal-edit-input:hover,
+  html[data-theme="minimal"][data-base-theme="light"] .profile-input:hover,
+  html[data-theme="minimal"][data-base-theme="light"] .select-trigger:hover,
+  html[data-theme="minimal"][data-base-theme="light"] .type-btn:hover,
+  html[data-theme="minimal"][data-base-theme="light"] .timer-opt:hover,
+  html[data-theme="minimal"][data-base-theme="light"] .diff-btn:hover,
+  html[data-theme="minimal"][data-base-theme="light"] .pick-btn:hover:not(:disabled),
+  html[data-theme="minimal"][data-base-theme="light"] .theme-opt-btn:hover {
+    background: var(--surface-selected) !important;
+    box-shadow: var(--shadow-hover) !important;
+  }
+
   </style>
 </head>
 <body>
@@ -4314,15 +6270,15 @@ select:focus {
         </button>
       </div>
       <div class="dash-header-actions">
-        <button class="dash-start-btn" onclick="show('s-setup')">Start Practice →</button>
+        <button class="dash-start-btn" onclick="show('s-setup')">⚡ Start Practice</button>
       </div>
     </div>
 
     <!-- Session Summary Card (last session stats, shown on return to dashboard) -->
     <div class="session-summary-card" id="sessionSummaryCard">
       <div class="session-summary-header">
-        <span class="session-summary-title">Last session</span>
-        <button class="session-summary-close" onclick="dismissSessionSummary()">✕</button>
+        <span class="session-summary-title">Recent Session</span>
+        <button class="session-summary-close" onclick="dismissSessionSummary()">×</button>
       </div>
       <div class="session-summary-row">
         <div class="session-summary-score" id="sscScore">—</div>
@@ -4346,13 +6302,15 @@ select:focus {
       </div>
     </div>
 
+    <!-- Weekly Summary + Daily Goal: side by side -->
+    <div class="week-goal-row">
+
     <!-- Weekly Summary Card -->
     <div class="weekly-summary-card show" id="weeklySummaryCard">
-      <div class="weekly-summary-title" onclick="toggleWeeklySummary()">
-        <span>📅 Last week</span>
-        <span class="weekly-chevron" id="weeklyChevron">▸</span>
+      <div class="weekly-summary-title">
+        <span>This Week</span>
       </div>
-      <div class="weekly-summary-body" id="weeklySummaryBody">
+      <div class="weekly-summary-body open" id="weeklySummaryBody">
         <div class="weekly-summary-stats">
           <div class="weekly-stat"><div class="weekly-stat-val" id="wkQs">—</div><div class="weekly-stat-lbl">Questions</div></div>
           <div class="weekly-stat"><div class="weekly-stat-val" id="wkAcc">—</div><div class="weekly-stat-lbl">Accuracy</div></div>
@@ -4361,6 +6319,26 @@ select:focus {
         <div class="weekly-sparkline" id="weeklySparkline"></div>
       </div>
     </div>
+
+    <!-- Daily Goal Card -->
+    <div class="daily-goal-card">
+      <div class="daily-goal-top">
+        <div class="daily-goal-label">Daily Goal</div>
+        <button class="goal-edit-btn" onclick="toggleGoalEdit()">edit</button>
+      </div>
+      <div class="daily-goal-count"><span id="goalDoneCount">0</span><span class="goal-count-sep"> / </span><span id="goalTargetCount">20</span><span class="goal-count-unit"> Qs</span></div>
+      <div class="daily-goal-bar-bg">
+        <div class="daily-goal-bar-fill" id="dailyGoalFill" style="width:0%"></div>
+      </div>
+      <div class="daily-goal-status">Keep going — you're on track!</div>
+      <div class="daily-goal-done-badge" id="goalDoneBadge">🏅 Daily goal complete!</div>
+      <div class="goal-edit-row" id="goalEditRow">
+        <input type="number" class="goal-edit-input" id="goalEditInput" min="5" max="200" step="5" placeholder="e.g. 20">
+        <button class="goal-edit-save" onclick="saveGoalEdit()">Save</button>
+      </div>
+    </div>
+
+    </div><!-- /week-goal-row -->
 
     <!-- Improvement Banner (shown when user beats their avg) -->
     <div class="improve-banner" id="improveBanner">
@@ -4371,34 +6349,16 @@ select:focus {
       </div>
     </div>
 
-    <!-- Daily Goal Card -->
-    <div class="daily-goal-card">
-      <div class="daily-goal-top">
-        <div class="daily-goal-label">🎯 Daily Goal <button class="goal-edit-btn" onclick="toggleGoalEdit()">edit</button></div>
-        <div class="daily-goal-count"><span id="goalDoneCount">0</span> / <span id="goalTargetCount">20</span> Qs</div>
-      </div>
-      <div class="daily-goal-bar-bg">
-        <div class="daily-goal-bar-fill" id="dailyGoalFill" style="width:0%"></div>
-      </div>
-      <div class="daily-goal-done-badge" id="goalDoneBadge">🏅 Daily goal complete!</div>
-      <div class="goal-edit-row" id="goalEditRow">
-        <input type="number" class="goal-edit-input" id="goalEditInput" min="5" max="200" step="5" placeholder="e.g. 20">
-        <button class="goal-edit-save" onclick="saveGoalEdit()">Save</button>
-      </div>
-    </div>
-
     <!-- XP / Level Row -->
     <div class="dash-xp-row">
-      <div class="dash-xp-left">
-        <div class="dash-xp-level" id="dashXpLevel">Lv 1</div>
-        <div class="dash-xp-info">
-          <div class="dash-xp-title" id="dashXpTitle">Beginner</div>
-          <div class="dash-xp-sub" id="dashXpSub">0 XP total</div>
-        </div>
-      </div>
-      <div class="dash-xp-bar-wrap">
-        <div class="dash-xp-bar-bg">
-          <div class="dash-xp-bar-fill" id="dashXpBar" style="width:0%"></div>
+      <div class="dash-xp-level" id="dashXpLevel">Lv 1</div>
+      <div class="dash-xp-info">
+        <div class="dash-xp-title" id="dashXpTitle">Beginner</div>
+        <div class="dash-xp-sub" id="dashXpSub">0 XP to next level</div>
+        <div class="dash-xp-bar-wrap">
+          <div class="dash-xp-bar-bg">
+            <div class="dash-xp-bar-fill" id="dashXpBar" style="width:0%"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -4407,22 +6367,37 @@ select:focus {
     <div class="dash-section-title">Today</div>
     <div class="dash-today">
       <div class="dash-stat">
-        <div class="dash-stat-val" id="dashTodaySessions">0</div>
-        <div class="dash-stat-lbl">Sessions</div>
+        <div class="dash-stat-icon">📅</div>
+        <div class="dash-stat-body">
+          <div class="dash-stat-val" id="dashTodaySessions">0</div>
+          <div class="dash-stat-lbl">Sessions</div>
+          <div class="dash-stat-sub">Keep going!</div>
+        </div>
       </div>
       <div class="dash-stat">
-        <div class="dash-stat-val" id="dashTodayAcc">—</div>
-        <div class="dash-stat-lbl">Accuracy</div>
+        <div class="dash-stat-icon">🎯</div>
+        <div class="dash-stat-body">
+          <div class="dash-stat-val" id="dashTodayAcc">—</div>
+          <div class="dash-stat-lbl">Accuracy</div>
+          <div class="dash-stat-sub">Stay consistent</div>
+        </div>
       </div>
       <div class="dash-stat">
-        <div class="dash-stat-val" id="dashDayStreak">—</div>
-        <div class="dash-stat-lbl">Day Streak 🔥</div>
+        <div class="dash-stat-icon">🔥</div>
+        <div class="dash-stat-body">
+          <div class="dash-stat-val" id="dashDayStreak">—</div>
+          <div class="dash-stat-lbl">Day Streak</div>
+          <div class="dash-stat-sub">Build momentum!</div>
+        </div>
       </div>
     </div>
 
     <!-- Recent sessions -->
-    <div class="dash-section-title">Recent sessions</div>
-    <div class="dash-recent" id="dashRecentList">
+    <div class="dash-recent-header">
+      <div class="dash-recent-header-title">Recent Sessions</div>
+      <button class="dash-view-all-btn" id="dashViewAllBtn" onclick="toggleDashRecentSessions(this)">View All</button>
+    </div>
+    <div class="dash-recent collapsed" id="dashRecentList">
       <div class="dash-empty">No sessions yet — start your first quiz!</div>
     </div>
   </div>
@@ -4522,7 +6497,15 @@ select:focus {
     <div class="dash-section-title">Appearance</div>
     <div class="card" style="margin-bottom:10px;">
       <div class="theme-switcher">
-        <span class="theme-switcher-label">Theme</span>
+        <span class="theme-switcher-label">Base theme</span>
+        <div class="theme-opts" id="baseThemeOpts">
+          <button class="theme-opt-btn active" id="baseThemeOptVibrant" onclick="setBaseTheme('vibrant')">Vibrant</button>
+          <button class="theme-opt-btn" id="baseThemeOptDark" onclick="setBaseTheme('dark')">Dark</button>
+          <button class="theme-opt-btn" id="baseThemeOptLight" onclick="setBaseTheme('light')">Classic Light</button>
+        </div>
+      </div>
+      <div class="theme-switcher" style="margin-bottom:0">
+        <span class="theme-switcher-label">Style</span>
         <div class="theme-opts" id="themeOpts">
           <button class="theme-opt-btn active" id="themeOptDefault" onclick="setTheme('default')">Default</button>
           <button class="theme-opt-btn" id="themeOptMinimal" onclick="setTheme('minimal')">Minimal</button>
@@ -4588,14 +6571,14 @@ select:focus {
               <button class="custom-color-btn" onclick="openCustomPicker('base', this)" title="Pick base colour">
                 <span id="baseBtnSwatch" style="background:#3d0a57"></span>
               </button>
-              <span class="custom-picker-lbl">Base</span>
+              <span class="custom-picker-lbl" id="baseColorPickerLbl">Base Color</span>
             </div>
           </div>
         </div>
         <!-- Hidden inputs keep applyCustomColors() working -->
         <input type="color" id="colorPickAccent" value="#B8D45C" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none">
         <input type="color" id="colorPickBase" value="#3d0a57" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none">
-        <p class="color-picker-hint">Tap a theme · or tap circles to build your own</p>
+        <p class="color-picker-hint">Vibrant uses custom base colors. Neutral themes use analogous accents on fixed backgrounds.</p>
       </div>
     </div>
 
@@ -4751,7 +6734,7 @@ select:focus {
         <div class="timer-grid" id="timerGrid">
           <button class="timer-opt" data-value="off" onclick="setTimerOpt(this)">Off</button>
           <button class="timer-opt active" data-value="fixed" onclick="setTimerOpt(this)">7s</button>
-          <button class="timer-opt" data-value="custom" onclick="setTimerOpt(this)">Custom Timer</button>
+          <button class="timer-opt" data-value="custom" onclick="setTimerOpt(this)">Custom</button>
           <button class="timer-opt" data-value="stopwatch" onclick="setTimerOpt(this)">⏱ Stopwatch</button>
           <button class="timer-opt" data-value="timed" onclick="setTimerOpt(this)" style="grid-column:1/-1;">⚡ Timed Mode</button>
         </div>
@@ -4850,7 +6833,7 @@ select:focus {
       <span class="wp-count" id="weakCountBadge">0 weak</span>
     </button>
 
-    <button class="bento-start" onclick="startTest()">Start test →</button>
+    <button class="bento-start" onclick="startTest()"><span class="bento-start-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M8.25 5.75v12.5c0 .64.7 1.03 1.25.69l9.35-5.82a1.32 1.32 0 0 0 0-2.24L9.5 5.06c-.55-.34-1.25.05-1.25.69z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></span><span>Start test</span></button>
   </div>
 
   <!-- TEST SCREEN -->
@@ -5059,6 +7042,7 @@ select:focus {
         <div class="chart-row-bar-bg"><div class="chart-row-bar-fill cu" id="chartCuBar"></div></div>
         <span class="chart-row-pct" id="chartCuVal">—</span>
       </div>
+      <div class="chart-axis" aria-hidden="true"><span></span><div class="chart-axis-scale"><span>0</span><span>50</span><span>100</span></div><span></span></div>
     </div>
 
     <div class="res-bento">
@@ -5120,6 +7104,7 @@ select:focus {
 </div><!-- .app -->
 </div><!-- .page-wrap -->
 
+<button class="bento-start" id="floatingStartBtn" onclick="startTest()"><span class="bento-start-icon" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M8.25 5.75v12.5c0 .64.7 1.03 1.25.69l9.35-5.82a1.32 1.32 0 0 0 0-2.24L9.5 5.06c-.55-.34-1.25.05-1.25.69z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></span><span>Start test</span></button>
 
 <!-- ── Custom Color Picker Modal ──────────────────────────────── -->
 <div id="customPickerModal">
@@ -5249,6 +7234,7 @@ function setMultType(btn){
   function show(id){
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
+    document.body.dataset.activeScreen = id;
   }
   function setType(t){
     qType = t;
@@ -5558,37 +7544,33 @@ function setMultType(btn){
       }
 
     } else if(type === 'square'){
-      // Adjacent squares — always close, always deceptive
-      const adjacent = [];
-      for(let d = 1; d <= 10; d++){
-        adjacent.push((n + d) * (n + d));
-        if(n - d > 0) adjacent.push((n - d) * (n - d));
+      const seenBases = new Set([n]);
+      const addSquareBase = (k) => {
+        if(k > 0 && !seenBases.has(k)){
+          seenBases.add(k);
+          candidates.push(k * k);
+        }
+      };
+      const unit = n % 10;
+      if(n >= 10 && unit !== 0){
+        const mirror = n + (10 - 2 * unit);
+        if(Math.floor(mirror / 10) === Math.floor(n / 10)){
+          addSquareBase(mirror);
+        }
       }
-      adjacent.sort((a, b) => Math.abs(a - correct) - Math.abs(b - correct));
-
-      // One same-unit-digit square (only if within 3× the correct value — avoids huge outliers for small n)
-      const unitTarget = (n * n) % 10;
-      const sameUnit = [];
-      for(let k = Math.max(2, n - 20); k <= n + 20; k++){
-        const sq = k * k;
-        if(k !== n && sq % 10 === unitTarget && sq >= correct / 3 && sq <= correct * 3) sameUnit.push(sq);
+      [n - 2, n - 1, n + 1, n + 2].forEach(addSquareBase);
+      for(const o of [1, -1, 2, -2]){
+        if(correct + o > 0) candidates.push(correct + o);
       }
-      sameUnit.sort((a, b) => Math.abs(a - correct) - Math.abs(b - correct));
-      if(sameUnit.length) candidates.push(sameUnit[0]);
-
-      candidates.push(...adjacent);
 
     } else if(type === 'cube'){
-      // Cube unit digits are 1-to-1 (each maps to exactly one cube unit digit),
-      // so same-unit cubes are always 10 steps away — far too large a gap to be plausible.
-      // Adjacent cubes are naturally tight and genuinely hard to distinguish.
-      const adjacent = [];
-      for(let d = 1; d <= 7; d++){
-        adjacent.push((n + d) * (n + d) * (n + d));
-        if(n - d > 0) adjacent.push((n - d) * (n - d) * (n - d));
+      const nearbyBases = [n - 2, n - 1, n + 1, n + 2].filter(k => k > 0);
+      for(const k of nearbyBases){
+        candidates.push(k * k * k);
       }
-      adjacent.sort((a, b) => Math.abs(a - correct) - Math.abs(b - correct));
-      candidates.push(...adjacent);
+      for(const o of [1, -1, 2, -2]){
+        if(correct + o > 0) candidates.push(correct + o);
+      }
     }
 
     // Build final set of 4 (correct + 3 unique distractors)
@@ -6318,10 +8300,24 @@ function onTimedSliderChange(slider) {
     t.classList.toggle('active-tick', i === idx);
   });
   // update slider gradient
-  const pct = (idx / 6) * 100;
-  const sliderAcc = getComputedStyle(document.documentElement).getPropertyValue('--acc').trim() || '#B8D45C';
-  const sliderBg = getComputedStyle(document.documentElement).getPropertyValue('--p4').trim() || 'rgba(87,50,128,0.4)';
-  slider.style.background = `linear-gradient(90deg, ${sliderAcc} ${pct}%, color-mix(in srgb, ${sliderBg}, transparent 70%) ${pct}%)`;
+  paintTimedSlider(slider);
+}
+
+function paintTimedSlider(slider) {
+  if(!slider) return;
+  const max = parseFloat(slider.max || '6') || 6;
+  const min = parseFloat(slider.min || '0') || 0;
+  const val = parseFloat(slider.value || '0');
+  const pct = ((val - min) / (max - min)) * 100;
+  const styles = getComputedStyle(document.documentElement);
+  const sliderAcc = styles.getPropertyValue('--acc').trim() || '#B8D45C';
+  const sliderBase = styles.getPropertyValue('--p0').trim() || 'rgba(20,20,24,0.8)';
+  const sliderSurface = styles.getPropertyValue('--surf').trim() || sliderBase;
+  slider.style.background = `linear-gradient(90deg, ${sliderAcc} ${pct}%, color-mix(in srgb, ${sliderBase}, ${sliderSurface} 42%) ${pct}%)`;
+}
+
+function refreshTimedSliderVisual() {
+  paintTimedSlider(document.getElementById('timedDurationSlider'));
 }
 
 function onTimedCustomMinsChange(input) {
@@ -8310,11 +10306,15 @@ showProfile = function() {
 // ── CUSTOM COLOUR THEME ──
 const COLOR_THEME_KEY   = 'quiz_custom_colors';
 const COLOR_ENABLED_KEY = 'quiz_custom_colors_on';
+const BASE_THEME_KEY    = 'quiz_base_theme';
 const CC_VARS = [
   '--p0','--p1','--p2','--p3','--p4','--p5','--p6','--p7',
-  '--acc','--acc-hi','--acc-lo','--acc-vlo','--btn-txt',
+  '--acc','--acc-hi','--acc-lo','--acc-vlo','--acc-2','--acc-2-hi','--btn-txt',
   '--bg','--app-bg','--surf','--surf-d','--inp','--hov','--bar-bg',
-  '--ok-bg','--ok-fb','--ok-bd','--no-bd'
+  '--ok','--ok-text','--ok-bg','--ok-fb','--ok-bd','--err','--err-bg','--no-bd',
+  '--text-primary','--text-secondary','--text-muted','--border','--border-strong',
+  '--surface-glass','--surface-raised','--surface-soft','--app-gradient','--header-gradient',
+  '--shadow-app','--shadow-card','--focus-ring'
 ];
 
 function hexToHSL(hex) {
@@ -8354,63 +10354,194 @@ function getLuminance(hex) {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
-function generateCustomPalette(accentHex, baseHex) {
+
+function normalizeHex(hex, fallback) {
+  if (typeof hex !== 'string') return fallback;
+  let v = hex.trim();
+  if (!v.startsWith('#')) v = '#' + v;
+  if (/^#[0-9a-fA-F]{3}$/.test(v)) {
+    v = '#' + v.slice(1).split('').map(c => c + c).join('');
+  }
+  return /^#[0-9a-fA-F]{6}$/.test(v) ? v : fallback;
+}
+
+function getSavedBaseTheme() {
+  try {
+    const saved = localStorage.getItem(BASE_THEME_KEY);
+    if (saved === 'vibrant' || saved === 'dark' || saved === 'light') return saved;
+    localStorage.setItem(BASE_THEME_KEY, 'vibrant');
+  } catch(e) {}
+  return 'vibrant';
+}
+
+function buildAccentFamily(accentHex, baseTheme, hueShift = 0) {
+  const safeHex = normalizeHex(accentHex, '#B8D45C');
+  const [rawH, s0, l0] = hexToHSL(safeHex);
+  const h = ((s0 < 8 ? 215 : rawH) + hueShift + 360) % 360;
+  const s = baseTheme === 'light' ? clampN(s0 + 12, 54, 88) : clampN(s0, 38, 86);
+  const l = baseTheme === 'light' ? clampN(l0 - 8, 28, 42) : clampN(l0, 52, 68);
+  const acc = hslToHex(h, s, l);
+  return {
+    acc,
+    hi: hslToHex(h, clampN(s - 4, 30, 82), baseTheme === 'light' ? clampN(l + 10, 44, 62) : clampN(l + 8, 58, 76)),
+    lo: hslToHex(h, clampN(s + 4, 42, 90), baseTheme === 'light' ? clampN(l - 12, 24, 42) : clampN(l - 14, 36, 54)),
+    vlo: hslToHex(h, clampN(s + 2, 36, 86), baseTheme === 'light' ? clampN(l - 20, 18, 34) : clampN(l - 24, 24, 42)),
+  };
+}
+
+
+function buildVibrantCustomPalette(accentHex, baseHex) {
   const [aH, aS0, aL0] = hexToHSL(accentHex);
   const [bH, bS0, bL0] = hexToHSL(baseHex);
 
-  // ── Original palette lightness & saturation progressions (exact) ──
-  const baseLightnesses = [4, 9, 14, 19, 35, 42, 46, 69];  // p0-p7
-  const accentLightnesses = [32, 43, 60, 64];              // accVlo, accLo, acc, accHi
+  const baseLightnesses = [4, 9, 14, 19, 35, 42, 46, 69];
+  const accentLightnesses = [32, 43, 60, 64];
   const baseSaturations = [100, 92, 72, 79, 44, 43, 42, 9];
   const accentSaturations = [54, 54, 58, 58];
-
-  // ── Preserve original saturation structure by scaling relative to original base/accent ──
-  // Original defaults: purple base #3d0a57 (S:79%), lime accent #B8D45C (S:58%)
-  const origBaseS = 79;  // original base color saturation
-  const origAccS = 58;   // original accent color saturation
-
-  // User's input saturation (before clamping)
+  const origBaseS = 79;
+  const origAccS = 58;
   const aS = clampN(aS0, 30, 100);
   const bS = clampN(bS0, 20, 100);
-
-  // Scale saturation progression by user's relative saturation level
-  // E.g., if user picks S=50% but original was 79%, scale factors = 50/79 ≈ 0.63
   const baseScaleFactor = bS / origBaseS;
   const accentScaleFactor = aS / origAccS;
 
-  // Generate 8 base shades with exact lightness progression, scaled saturation
   const baseShades = baseLightnesses.map((l, i) => {
-    let s = baseSaturations[i] * baseScaleFactor;
+    const s = baseSaturations[i] * baseScaleFactor;
     return hslToHex(bH, clampN(Math.round(s), 5, 100), l);
   });
   const [p0, p1, p2, p3, p4, p5, p6, p7] = baseShades;
-
-  // Generate 4 accent shades with exact lightness, scaled saturation
   const accentShades = accentLightnesses.map((l, i) => {
-    let s = accentSaturations[i] * accentScaleFactor;
+    const s = accentSaturations[i] * accentScaleFactor;
     return hslToHex(aH, clampN(Math.round(s), 20, 100), l);
   });
   const [accVlo, accLo, acc, accHi] = accentShades;
-
-  // ── Correct-state tints (using accent hue, very dark lightness) ──
   const okBg = hslToHex(aH, clampN(Math.round(aS * 0.70), 15, 60), 6);
   const okFb = hslToHex(aH, clampN(Math.round(aS * 0.55), 12, 50), 3);
-
-  // Button text: dark on bright accent, light on dark accent
   const btnTxt = getLuminance(acc) > 0.22 ? '#0d0015' : '#eff8e2';
 
+  // Derive --acc-2 from the base hue at a mid-lightness so it reads as a
+  // visible secondary colour against the dark p-shade backgrounds.
+  const baseAccS = clampN(Math.round(bS * 0.65), 28, 88);
+  const acc2    = hslToHex(bH, baseAccS, clampN(bL0 + 28, 44, 68));
+  const acc2Hi  = hslToHex(bH, clampN(baseAccS - 6, 22, 80), clampN(bL0 + 38, 54, 76));
+
   return {
-    // Base shade palette — lightness exact, saturation scaled proportionally
     '--p0': p0, '--p1': p1, '--p2': p2, '--p3': p3,
     '--p4': p4, '--p5': p5, '--p6': p6, '--p7': p7,
-    // Accent family
     '--acc': acc, '--acc-hi': accHi, '--acc-lo': accLo, '--acc-vlo': accVlo,
-    '--btn-txt': btnTxt,
-    // Semantic aliases
+    '--acc-2': acc2, '--acc-2-hi': acc2Hi, '--btn-txt': btnTxt,
     '--bg': p0, '--app-bg': p1, '--surf': p4, '--surf-d': p3,
     '--inp': p2, '--hov': p5, '--bar-bg': p2,
     '--ok-bg': okBg, '--ok-fb': okFb, '--ok-bd': okFb, '--no-bd': p3,
   };
+}
+
+function buildNeutralPalette(baseTheme, accentHex, secondaryHex) {
+  const accent = buildAccentFamily(accentHex, baseTheme);
+  const secondary = buildAccentFamily(accentHex, baseTheme, baseTheme === 'light' ? 24 : -24);
+  const dark = baseTheme !== 'light';
+  const base = dark
+    ? {
+        p: ['#101114','#17191d','#202329','#2a2e34','#343941','#424851','#565d66','#a8adb4'],
+        text: '#f3f1eb', sub: '#b7b3aa', muted: '#86827a',
+        border: 'rgba(255,255,255,0.10)', borderStrong: 'rgba(255,255,255,0.18)',
+        ok: '#46b86a', okText: '#eaffef', okBg: '#12281a', okFb: '#0d2114', okBd: '#2f7d46',
+        err: '#e06161', errBg: 'rgba(224,97,97,0.14)',
+        shadowApp: '0 26px 70px rgba(0,0,0,0.50), inset 0 1px 0 rgba(255,255,255,0.06)',
+        shadowCard: '0 12px 28px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.05)',
+      }
+    : {
+        p: ['#ece9e1','#f1eee7','#f6f4ee','#fbfaf7','#fbfaf7','#f6f4ee','#d7d1c5','#504b43'],
+        text: '#171817', sub: '#44433f', muted: '#69645b',
+        border: 'rgba(48,45,39,0.08)', borderStrong: 'rgba(48,45,39,0.16)',
+        ok: '#287d47', okText: '#12371f', okBg: '#e2f2e7', okFb: '#d7eadf', okBd: '#78b88c',
+        err: '#bd4545', errBg: 'rgba(189,69,69,0.12)',
+        shadowApp: '0 1px 2px rgba(48,45,39,0.07), 0 8px 20px rgba(48,45,39,0.10), inset 0 1px 0 rgba(255,255,255,0.82)',
+        shadowCard: '0 1px 1px rgba(48,45,39,0.06), 0 5px 12px rgba(48,45,39,0.10), inset 0 1px 0 rgba(255,255,255,0.86)',
+      };
+  const [p0,p1,p2,p3,p4,p5,p6,p7] = base.p;
+  const btnTxt = getLuminance(accent.acc) > 0.38 ? '#101114' : '#ffffff';
+  return {
+    '--p0': p0, '--p1': p1, '--p2': p2, '--p3': p3,
+    '--p4': p4, '--p5': p5, '--p6': p6, '--p7': p7,
+    '--acc': accent.acc, '--acc-hi': accent.hi, '--acc-lo': accent.lo, '--acc-vlo': accent.vlo,
+    '--acc-2': secondary.acc, '--acc-2-hi': secondary.hi, '--btn-txt': btnTxt,
+    '--bg': p0, '--app-bg': p1,
+    '--surface-raised': dark ? p4 : p2,
+    '--surf': dark ? p4 : p2,
+    '--surf-d': dark ? p3 : p1,
+    '--inp': dark ? p2 : p2,
+    '--hov': dark ? p5 : p3,
+    '--bar-bg': dark ? p2 : p1,
+    ...(dark ? {} : {
+      '--surface-page': p0,
+      '--surface-section': p1,
+      '--surface-raised': p2,
+      '--surface-selected': p3,
+    }),
+    '--ok': base.ok, '--ok-text': base.okText, '--ok-bg': base.okBg, '--ok-fb': base.okFb, '--ok-bd': base.okBd,
+    '--err': base.err, '--err-bg': base.errBg, '--no-bd': base.err,
+    '--text-primary': base.text, '--text-secondary': base.sub, '--text-muted': base.muted,
+    '--border': base.border, '--border-strong': base.borderStrong,
+    '--surface-glass': dark ? 'color-mix(in srgb, var(--surf), transparent 8%)' : 'var(--surface-raised)',
+    '--surface-soft': dark ? p2 : p1,
+    ...(dark ? {} : {
+      '--shadow-small': '0 1px 1px rgba(48,45,39,0.05), 0 4px 10px rgba(48,45,39,0.08), inset 0 1px 0 rgba(255,255,255,0.82)',
+      '--shadow-hover': '0 1px 2px rgba(48,45,39,0.07), 0 8px 16px rgba(48,45,39,0.12), inset 0 1px 0 rgba(255,255,255,0.9)',
+      '--shadow-inset': 'inset 0 2px 4px rgba(48,45,39,0.11), inset 0 -1px 0 rgba(255,255,255,0.70)',
+    }),
+    '--app-gradient': dark
+      ? 'linear-gradient(160deg, color-mix(in srgb, var(--p4), transparent 90%) 0%, color-mix(in srgb, var(--p0), transparent 55%) 100%)'
+      : 'linear-gradient(160deg, #fbfaf6 0%, #eeeae1 100%)',
+    '--header-gradient': dark
+      ? 'linear-gradient(145deg, color-mix(in srgb, var(--p5), transparent 72%) 0%, color-mix(in srgb, var(--p2), transparent 22%) 100%)'
+      : 'linear-gradient(145deg, #fbfaf6 0%, #e8e2d6 100%)',
+    '--shadow-app': base.shadowApp,
+    '--shadow-card': base.shadowCard,
+    '--focus-ring': `0 0 0 3px color-mix(in srgb, ${accent.acc}, transparent ${dark ? '76%' : '66%'})`,
+  };
+}
+
+function applyPaletteVars(palette) {
+  const html = document.documentElement;
+  Object.entries(palette).forEach(([k, v]) => html.style.setProperty(k, v));
+  if (typeof refreshTimedSliderVisual === 'function') requestAnimationFrame(refreshTimedSliderVisual);
+}
+
+function getCurrentColorPicks() {
+  return {
+    accent: normalizeHex(document.getElementById('colorPickAccent')?.value, '#B8D45C'),
+    base: normalizeHex(document.getElementById('colorPickBase')?.value, '#3d0a57'),
+  };
+}
+
+function applyBaseThemeTokens() {
+  const html = document.documentElement;
+  const baseTheme = getSavedBaseTheme();
+  const { accent, base } = getCurrentColorPicks();
+  const customOn = (() => { try { return localStorage.getItem(COLOR_ENABLED_KEY) === '1'; } catch(e) { return false; } })();
+  if (baseTheme === 'vibrant') {
+    html.removeAttribute('data-base-theme');
+    if (!customOn) {
+      CC_VARS.forEach(k => html.style.removeProperty(k));
+    }
+    return;
+  }
+  html.setAttribute('data-base-theme', baseTheme);
+  const palette = buildNeutralPalette(baseTheme, customOn ? accent : '#B8D45C', customOn ? base : '#8fb7ff');
+  applyPaletteVars(palette);
+  if (html.getAttribute('data-theme') === 'minimal') {
+    html.style.setProperty('--surf',   palette['--p2']);
+    html.style.setProperty('--surf-d', palette['--p1']);
+    html.style.setProperty('--hov',    palette['--p3']);
+    html.style.setProperty('--bar-bg', palette['--p2']);
+  }
+}
+
+function generateCustomPalette(accentHex, baseHex) {
+  const baseTheme = getSavedBaseTheme();
+  if (baseTheme === 'vibrant') return buildVibrantCustomPalette(accentHex, baseHex);
+  return buildNeutralPalette(baseTheme, accentHex, baseHex);
 }
 
 function applyPreset(btn) {
@@ -8425,17 +10556,37 @@ function applyPreset(btn) {
 function syncColorSwatches() {
   const acc  = document.getElementById('colorPickAccent')?.value;
   const base = document.getElementById('colorPickBase')?.value;
-  // Update custom button swatches
   const aBtn = document.getElementById('accentBtnSwatch');
   const bBtn = document.getElementById('baseBtnSwatch');
   if (aBtn && acc)  aBtn.style.background = acc;
   if (bBtn && base) bBtn.style.background = base;
-  // Highlight matching preset
+  syncAnalogousAccentSwatch();
   document.querySelectorAll('.preset-card').forEach(btn => {
     const match = btn.dataset.accent?.toLowerCase() === acc?.toLowerCase()
                && btn.dataset.base?.toLowerCase()   === base?.toLowerCase();
     btn.classList.toggle('active', match);
   });
+}
+
+function getAnalogousAccentHex(accentHex, baseTheme) {
+  if (baseTheme === 'vibrant') return normalizeHex(document.getElementById('colorPickBase')?.value, '#3d0a57');
+  return buildAccentFamily(accentHex, baseTheme, baseTheme === 'light' ? 24 : -24).acc;
+}
+
+function syncBaseColorLabel() {
+  const baseTheme = getSavedBaseTheme();
+  const lbl = document.getElementById('baseColorPickerLbl');
+  if (lbl) lbl.textContent = baseTheme === 'vibrant' ? 'Base Color' : 'Accent 2';
+}
+
+function syncAnalogousAccentSwatch() {
+  syncBaseColorLabel();
+  const baseTheme = getSavedBaseTheme();
+  if (baseTheme === 'vibrant') return;
+  const acc = normalizeHex(document.getElementById('colorPickAccent')?.value, '#B8D45C');
+  const analog = getAnalogousAccentHex(acc, baseTheme);
+  const bBtn = document.getElementById('baseBtnSwatch');
+  if (bBtn) bBtn.style.background = analog;
 }
 
 // ── Custom Colour Picker (in-app, no native OS picker) ───────────────────
@@ -8507,15 +10658,16 @@ function updateHueThumb() {
 }
 
 function updateCPLive() {
-  const hex = hsvToHex(_cpH, _cpS, _cpV);
-  // Update preview swatch
+  let hex = hsvToHex(_cpH, _cpS, _cpV);
+  const baseTheme = getSavedBaseTheme();
+  if (_cpTarget !== 'accent' && baseTheme !== 'vibrant') {
+    hex = getAnalogousAccentHex(document.getElementById('colorPickAccent')?.value || '#B8D45C', baseTheme);
+  }
   const prev = document.getElementById('cpPreviewSwatch');
   if (prev) prev.style.background = hex;
-  // Update hex field (only if not focused)
   const hexInp = document.getElementById('cpHexInput');
   if (hexInp && document.activeElement !== hexInp)
     hexInp.value = hex.replace('#','').toUpperCase();
-  // Push to hidden inputs + apply palette
   const inputId = _cpTarget === 'accent' ? 'colorPickAccent' : 'colorPickBase';
   const inp = document.getElementById(inputId);
   if (inp) inp.value = hex;
@@ -8566,8 +10718,9 @@ function openCustomPicker(target, triggerEl) {
     : document.getElementById('colorPickBase')?.value) || '#B8D45C';
   const [h,s,v] = hexToHSV(hex);
   _cpH=h; _cpS=s; _cpV=v;
+  const _isVibrant = getSavedBaseTheme() === 'vibrant';
   document.getElementById('cpTitle').textContent =
-    target === 'accent' ? 'Accent Color' : 'Base Color';
+    target === 'accent' ? 'Accent Color' : (_isVibrant ? 'Base Color' : 'Accent 2 Color');
   const hexInp = document.getElementById('cpHexInput');
   if (hexInp) hexInp.value = hex.replace('#','').toUpperCase();
   updateHueThumb();
@@ -8687,23 +10840,23 @@ function applyCustomColors() {
   syncColorSwatches();
   const palette = generateCustomPalette(accentHex, baseHex);
   const html = document.documentElement;
-  Object.entries(palette).forEach(([k, v]) => html.style.setProperty(k, v));
-  // Inline styles override CSS attribute-selector rules, so when minimal mode is
-  // active we must explicitly re-apply the darker surface values here.
+  applyPaletteVars(palette);
   if (html.getAttribute('data-theme') === 'minimal') {
     html.style.setProperty('--surf',   palette['--p2']);
     html.style.setProperty('--surf-d', palette['--p1']);
     html.style.setProperty('--hov',    palette['--p3']);
-    html.style.setProperty('--bar-bg', palette['--p1']);
+    html.style.setProperty('--bar-bg', palette['--p2']);
   }
   html.setAttribute('data-custom-color', 'active');
   localStorage.setItem(COLOR_THEME_KEY, JSON.stringify({ accent: accentHex, base: baseHex }));
+  syncAnalogousAccentSwatch();
 }
 
 function clearCustomColors() {
   const html = document.documentElement;
   CC_VARS.forEach(k => html.style.removeProperty(k));
   html.removeAttribute('data-custom-color');
+  applyBaseThemeTokens();
 }
 
 function setCustomColorEnabled(enabled) {
@@ -8732,18 +10885,46 @@ function initCustomColors() {
     } catch(e) { localStorage.removeItem(COLOR_THEME_KEY); }
   }
   syncColorSwatches(); // also marks matching preset as active
+  syncBaseColorLabel(); // set correct label for current base theme
   // Restore enabled/disabled state (persists across refreshes)
   if (localStorage.getItem(COLOR_ENABLED_KEY) === '1') {
     setCustomColorEnabled(true);
   }
 }
 
-// ── THEME SYSTEM ──
+// THEME SYSTEM
 const THEME_KEY = 'quiz_theme';
 
 function initTheme() {
+  const baseTheme = getSavedBaseTheme();
   const saved = localStorage.getItem(THEME_KEY) || 'default';
+  applyBaseTheme(baseTheme, false);
   applyTheme(saved, false);
+}
+
+function setBaseTheme(baseTheme) {
+  const next = baseTheme === 'light' ? 'light' : (baseTheme === 'dark' ? 'dark' : 'vibrant');
+  localStorage.setItem(BASE_THEME_KEY, next);
+  applyBaseTheme(next, true);
+}
+
+function applyBaseTheme(baseTheme, animate) {
+  const html = document.documentElement;
+  const next = baseTheme === 'light' ? 'light' : (baseTheme === 'dark' ? 'dark' : 'vibrant');
+  html.setAttribute('data-base-theme', next);
+  applyBaseThemeTokens();
+  if (localStorage.getItem(COLOR_ENABLED_KEY) === '1') {
+    applyCustomColors();
+  }
+  const btnVibrant = document.getElementById('baseThemeOptVibrant');
+  const btnDark = document.getElementById('baseThemeOptDark');
+  const btnLight = document.getElementById('baseThemeOptLight');
+  if (btnVibrant && btnDark && btnLight) {
+    btnVibrant.classList.toggle('active', next === 'vibrant');
+    btnDark.classList.toggle('active', next === 'dark');
+    btnLight.classList.toggle('active', next === 'light');
+  }
+  syncAnalogousAccentSwatch();
 }
 
 function setTheme(theme) {
@@ -8753,18 +10934,16 @@ function setTheme(theme) {
 
 function applyTheme(theme, animate) {
   const html = document.documentElement;
-  // Save custom color state before theme switch
-  const hadCustomColors = localStorage.getItem(COLOR_ENABLED_KEY) === '1';
   if (theme === 'minimal') {
     html.setAttribute('data-theme', 'minimal');
   } else {
     html.removeAttribute('data-theme');
+    theme = 'default';
   }
-  // Restore custom colors after theme switch
-  if (hadCustomColors) {
+  applyBaseThemeTokens();
+  if (localStorage.getItem(COLOR_ENABLED_KEY) === '1') {
     applyCustomColors();
   }
-  // Sync button states
   const btnDefault = document.getElementById('themeOptDefault');
   const btnMinimal = document.getElementById('themeOptMinimal');
   if (btnDefault && btnMinimal) {
@@ -9042,26 +11221,41 @@ function recordDailyXP() {
 function renderWeeklySparkline(history) {
   const wrap = document.getElementById('weeklySparkline');
   if (!wrap) return;
-  const days = [];
   const labels = ['Mo','Tu','We','Th','Fr','Sa','Su'];
   const today = new Date();
   const todayStr = today.toDateString();
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date(today); d.setDate(today.getDate() - i);
+
+  // Find Monday of current week
+  const dayOfWeek = today.getDay(); // 0=Sun
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+  monday.setHours(0,0,0,0);
+
+  const days = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
     const dStr = d.toDateString();
     const qs = history
       .filter(h => new Date(h.date).toDateString() === dStr)
       .reduce((s,h) => s + (h.total||0), 0);
-    days.push({ label: labels[d.getDay() === 0 ? 6 : d.getDay()-1], qs, isToday: dStr === todayStr });
+    days.push({ label: labels[i], qs, isToday: dStr === todayStr, isFuture: d > today });
   }
   const maxQs = Math.max(...days.map(d=>d.qs), 1);
-  wrap.innerHTML = days.map(d => {
-    const h = Math.max(4, Math.round((d.qs / maxQs) * 36));
+  const midQs = Math.max(0, Math.round(maxQs / 2));
+  const dayMarkup = days.map(d => {
+    const h = d.qs === 0 ? 3 : Math.max(8, Math.round((d.qs / maxQs) * 64));
+    const dimmed = (d.qs === 0 || d.isFuture) ? ' style="opacity:0.18"' : '';
     return `<div class="sparkline-day">
-      <div class="sparkline-bar${d.isToday?' today':''}" style="height:${h}px;" title="${d.qs} questions"></div>
+      <div class="sparkline-bar${d.isToday?' today':''}" style="height:${h}px;"${dimmed} title="${d.qs} questions"></div>
       <div class="sparkline-label">${d.label}</div>
     </div>`;
   }).join('');
+  wrap.innerHTML = `<div class="sparkline-y-axis" aria-hidden="true"><span>${maxQs}</span><span>${midQs}</span><span>0</span></div>
+    <div class="sparkline-plot">
+      <div class="sparkline-grid" aria-hidden="true"><span></span><span></span><span></span></div>
+      ${dayMarkup}
+    </div>`;
 }
 
 function toggleWeeklySummary() {
@@ -9082,35 +11276,33 @@ function renderWeeklySummary() {
   // Always render sparkline (shows current week activity)
   renderWeeklySparkline(history);
 
-  // Compute last week's window
-  const prevWeekEnd = new Date(today);
-  prevWeekEnd.setDate(today.getDate() - today.getDay() + (today.getDay()===0?-6:1) - 1);
-  prevWeekEnd.setHours(23,59,59,999);
-  const prevWeekStart = new Date(prevWeekEnd);
-  prevWeekStart.setDate(prevWeekEnd.getDate() - 6);
-  prevWeekStart.setHours(0,0,0,0);
+  // Compute current week's window (Mon–today)
+  const dayOfWeek = today.getDay();
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+  monday.setHours(0,0,0,0);
+  const weekEnd = new Date(today); weekEnd.setHours(23,59,59,999);
 
   const lastWeekSessions = history.filter(h => {
     const d = new Date(h.date);
-    return d >= prevWeekStart && d <= prevWeekEnd;
+    return d >= monday && d <= weekEnd;
   });
 
   if (lastWeekSessions.length) {
     const totalQs     = lastWeekSessions.reduce((s,h) => s+(h.total||0), 0);
     const totalCorrect= lastWeekSessions.reduce((s,h) => s+(h.correct||0), 0);
     const acc         = totalQs ? Math.round(totalCorrect/totalQs*100) : 0;
-    // Sum XP stored per session (new sessions have h.xp; old ones default to 0)
     const xpGained    = lastWeekSessions.reduce((s,h) => s+(h.xp||0), 0);
     document.getElementById('wkQs').textContent  = totalQs;
     document.getElementById('wkAcc').textContent = acc ? acc+'%' : '—';
-    document.getElementById('wkXP').textContent  = xpGained;
+    document.getElementById('wkXP').textContent  = xpGained ? xpGained : '0';
   } else {
-    document.getElementById('wkQs').textContent  = '—';
+    document.getElementById('wkQs').textContent  = '0';
     document.getElementById('wkAcc').textContent = '—';
-    document.getElementById('wkXP').textContent  = '—';
+    document.getElementById('wkXP').textContent  = '0';
   }
 
-  // Always show the card; body starts collapsed (controlled by CSS default)
+  // Always show the card
   card.classList.add('show');
 }
 
@@ -9293,8 +11485,15 @@ showDashboard = function() {
   recordDailyXP();
 };
 
-initCustomColors();
+function toggleDashRecentSessions(btn) {
+  const list = document.getElementById('dashRecentList');
+  if (!list) return;
+  const isCollapsed = list.classList.toggle('collapsed');
+  if (btn) btn.textContent = isCollapsed ? 'View All' : 'Show Less';
+}
+
 initTheme();
+initCustomColors();
 
 // ── Init routing — runs LAST so all showDashboard patches are applied ──
 (function init() {
@@ -9302,6 +11501,7 @@ initTheme();
   if (!profile.name) {
     document.getElementById('s-welcome').classList.add('active');
     document.getElementById('s-setup').classList.remove('active');
+    document.body.dataset.activeScreen = 's-welcome';
     document.getElementById('welcomeQuote').textContent = QUOTES[Math.floor(Math.random()*QUOTES.length)];
   } else {
     document.getElementById('s-setup').classList.remove('active');
