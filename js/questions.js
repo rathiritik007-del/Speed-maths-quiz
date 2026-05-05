@@ -1447,12 +1447,44 @@ function eraseHistoryConfirm() {
   renderHistory();
 }
 
+function saveSessionToSupabase(session) {
+  try {
+    const client = window.supabaseClient;
+    const user = window.authState && window.authState.user;
+    if (!client || !user || !user.id) return;
+
+    const request = client.from('sessions').insert({
+      user_id: user.id,
+      total_questions: session.total,
+      correct_answers: session.score,
+      accuracy: session.pct,
+      time_taken_seconds: null,
+      mode: session.timed ? 'timed' : 'practice',
+      raw_data: session
+    });
+
+    if (request && typeof request.then === 'function') {
+      request.then(({ error }) => {
+        if (error) console.warn('Supabase session save failed:', error.message || error);
+      }).catch(error => {
+        console.warn('Supabase session save failed:', error.message || error);
+      });
+    }
+  } catch (error) {
+    console.warn('Supabase session save failed:', error.message || error);
+  }
+}
+
 function saveHistory(score, total, pct, xp) {
   let history = [];
   try { history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch(e) {}
-  history.unshift({ score, total, correct: score, pct, xp: xp || 0, date: new Date().toISOString(), timed: isTimedMode ? timedDuration : null });
+  const session = { score, total, correct: score, pct, xp: xp || 0, date: new Date().toISOString(), timed: isTimedMode ? timedDuration : null };
+  history.unshift(session);
   history = history.slice(0, MAX_HISTORY);
-  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); } catch(e) {}
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    saveSessionToSupabase(session);
+  } catch(e) {}
 }
 
 function renderHistory() {
@@ -2120,8 +2152,8 @@ showProfile = function() {
 
 // ── Hook into saveHistory to trigger milestone checks ──
 const _origSaveHistory = saveHistory;
-saveHistory = function(s, total, pct) {
-  _origSaveHistory(s, total, pct);
+saveHistory = function(s, total, pct, xp) {
+  _origSaveHistory(s, total, pct, xp);
   if (isPracticeMode()) return;
   const history = getSessionHistory();
   const pb      = getPB();
