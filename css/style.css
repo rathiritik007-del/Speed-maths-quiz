@@ -450,7 +450,7 @@
       position: absolute;
       top: 0; left: 15%; right: 15%;
       height: 1px;
-      background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--acc),0.4), transparent);
+      background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--acc), transparent 60%), transparent);
       pointer-events: none;
     }
     .card-title {
@@ -784,7 +784,7 @@
       position: absolute;
       top: 0; left: 20%; right: 20%;
       height: 1px;
-      background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--acc),0.55), transparent);
+      background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--acc), transparent 45%), transparent);
       pointer-events: none;
     }
     .q-badge {
@@ -2229,7 +2229,7 @@ select:focus {
       content: '';
       position: absolute;
       top: 0; left: 8%; right: 8%; height: 1px;
-      background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--acc),0.8) 50%, transparent);
+      background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--acc), transparent 20%) 50%, transparent);
     }
     .dash-greeting {
       font-size: clamp(11px, 2.5vw, 13px);
@@ -3527,7 +3527,7 @@ select:focus {
       content: '';
       position: absolute;
       top: 0; left: 8%; right: 8%; height: 1px;
-      background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--acc),0.8) 50%, transparent);
+      background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--acc), transparent 20%) 50%, transparent);
     }
     .profile-avatar {
       width: 64px; height: 64px;
