@@ -1,0 +1,2352 @@
+:root {
+      /* ── Accent family ── */
+      --acc:     #B8D45C;   /* primary accent */
+      --acc-hi:  #C5D86D;   /* accent highlight / slider knob */
+      --acc-lo:  #7BA832;   /* accent dark / gradient start */
+      --acc-vlo: #5a7d25;   /* accent very dark */
+
+      /* ── Base shade family: p0 darkest → p7 muted ── */
+      --p0: #0d0015;   /* page body bg */
+      --p1: #23022e;   /* deep bg / toggle unchecked */
+      --p2: #2d0a3d;   /* dark surface / cards */
+      --p3: #3d0a57;   /* medium-dark surface / inputs */
+      --p4: #573280;   /* medium surface / toggle checked */
+      --p5: #6b3d9a;   /* button gradients / lighter */
+      --p6: #7b44a8;   /* focus rings */
+      --p7: #ada8b6;   /* muted / wrong color */
+
+      /* ── Semantic aliases (auto-cascade when p0–p7 are overridden) ── */
+      --bg:     var(--p0);
+      --app-bg: var(--p1);
+      --surf:   var(--p4);
+      --surf-d: var(--p3);
+      --inp:    var(--p2);
+      --hov:    var(--p5);
+      --bar-bg: var(--p2);
+      --ok-bg:  #141f06;
+      --ok-fb:  #0a1a03;
+      --ok-bd:  #0d1a03;
+      --no-bd:  var(--p3);
+      --btn-txt: #0d0015;
+
+      /* Neutral theme architecture tokens */
+      --acc-2: #8fb7ff;
+      --acc-2-hi: #b5ccff;
+      --text-primary: #f4f2ea;
+      --text-secondary: #b8b4aa;
+      --text-muted: #858078;
+      --border: rgba(255,255,255,0.10);
+      --border-strong: rgba(255,255,255,0.18);
+      --surface-glass: color-mix(in srgb, var(--surf), transparent 8%);
+      --surface-raised: var(--p4);
+      --surface-soft: var(--p2);
+      --app-gradient: linear-gradient(160deg, color-mix(in srgb, var(--p4), transparent 90%) 0%, color-mix(in srgb, var(--p0), transparent 55%) 100%);
+      --header-gradient: linear-gradient(145deg, color-mix(in srgb, var(--p5), transparent 72%) 0%, color-mix(in srgb, var(--p2), transparent 22%) 100%);
+      --shadow-app: 0 26px 70px rgba(0,0,0,0.55), inset 0 1px 0 var(--border);
+      --shadow-card: 0 12px 28px rgba(0,0,0,0.24), inset 0 1px 0 var(--border);
+      --focus-ring: 0 0 0 3px color-mix(in srgb, var(--acc), transparent 78%);
+      --ok: #46b86a;
+      --ok-text: #eaffef;
+      --err: #e06161;
+      --err-bg: rgba(224,97,97,0.14);
+    }
+
+html[data-theme="minimal"] {
+    --surf:   var(--p2);   /* #2d0a3d — dark card surface (was medium #573280) */
+    --surf-d: var(--p1);   /* #23022e — deeper secondary surface */
+    --hov:    var(--p3);   /* #3d0a57 — hover highlight */
+    --bar-bg: var(--p1);   /* #23022e — progress bar troughs */
+  }
+
+  /* 1. Kill every backdrop-filter site-wide */
+  html[data-theme="minimal"] * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* 2. Remove animated background blobs */
+  html[data-theme="minimal"] body::before,
+  html[data-theme="minimal"] body::after { display: none; }
+
+  /* 3. App shell */
+  html[data-theme="minimal"] .app {
+    background: var(--app-bg);
+    box-shadow: none;
+    border-color: color-mix(in srgb, var(--acc), transparent 85%);
+  }
+  html[data-theme="minimal"] .app::before,
+  html[data-theme="minimal"] .app::after { display: none; }
+
+  /* 4. Setup header / dash header / profile header — solid surface */
+  html[data-theme="minimal"] .setup-header,
+  html[data-theme="minimal"] .dash-header,
+  html[data-theme="minimal"] .profile-header {
+    background: var(--surf);
+    box-shadow: none;
+    border-color: color-mix(in srgb, var(--acc), transparent 88%);
+  }
+  html[data-theme="minimal"] .setup-header::before,
+  html[data-theme="minimal"] .setup-header::after,
+  html[data-theme="minimal"] .dash-header::before,
+  html[data-theme="minimal"] .profile-header::before { display: none; }
+
+  /* 5. Setup body */
+  html[data-theme="minimal"] .setup-body {
+    background: var(--surf-d);
+    box-shadow: none;
+  }
+
+  /* 6. Cards */
+  html[data-theme="minimal"] .card,
+  html[data-theme="minimal"] .q-card,
+  html[data-theme="minimal"] .res-cw-card,
+  html[data-theme="minimal"] .review-wrap,
+  html[data-theme="minimal"] .daily-goal-card,
+  html[data-theme="minimal"] .profile-stat-card,
+  html[data-theme="minimal"] .pb-c,
+  html[data-theme="minimal"] .pb-xp-card {
+    background: var(--surf);
+    box-shadow: none;
+  }
+  html[data-theme="minimal"] .q-timer-chip {
+    background: none;
+    box-shadow: none;
+  }
+  html[data-theme="minimal"] #timedStatRow .stat-c {
+    background: var(--surf);
+    border-color: rgba(255,255,255,0.07);
+  }
+  html[data-theme="minimal"] .card::before,
+  html[data-theme="minimal"] .q-card::before,
+  html[data-theme="minimal"] .card::after,
+  html[data-theme="minimal"] .q-card::after { display: none; }
+
+  /* 7. Answer input */
+  html[data-theme="minimal"] .ans-input {
+    background: var(--inp);
+    box-shadow: none;
+  }
+  html[data-theme="minimal"] .ans-input:focus {
+    box-shadow: none;
+    border-color: var(--p6);
+  }
+  html[data-theme="minimal"] .ans-input.correct {
+    background: var(--ok-bg);
+    border-color: var(--acc);
+    box-shadow: none;
+  }
+  html[data-theme="minimal"] .ans-input.wrong { box-shadow: none; }
+
+  /* 8. Pick-mode buttons */
+  html[data-theme="minimal"] .pick-btn {
+    background: var(--surf);
+    box-shadow: none;
+  }
+  html[data-theme="minimal"] .pick-btn:hover:not(:disabled) {
+    background: var(--hov);
+    box-shadow: none;
+  }
+  html[data-theme="minimal"] .pick-btn.correct,
+  html[data-theme="minimal"] .pick-btn.reveal  { background: var(--ok-bg); border-color: var(--ok-bd); color: var(--ok-text); box-shadow: none; }
+  html[data-theme="minimal"] .pick-btn.wrong   { background: var(--err-bg); border-color: var(--err); color: var(--text-primary); box-shadow: none; }
+
+  /* 9. Buttons */
+  html[data-theme="minimal"] .again-btn,
+  html[data-theme="minimal"] .again-btn:hover { box-shadow: none; }
+  html[data-theme="minimal"] .type-btn.active { box-shadow: none; }
+
+  /* 10. Text glows */
+  html[data-theme="minimal"] .big-num  { text-shadow: none; }
+  html[data-theme="minimal"] .pb-new   { text-shadow: none; }
+
+  /* 11. Timed mode bar */
+  html[data-theme="minimal"] .timed-mode-bar { background: var(--surf); box-shadow: none; }
+
+  /* ── Welcome screen ── */
+  html[data-theme="minimal"] .welcome-input {
+    background: var(--inp);
+    box-shadow: none;
+  }
+  html[data-theme="minimal"] .welcome-input:focus { box-shadow: none; }
+  html[data-theme="minimal"] .welcome-icon { filter: none; }
+  html[data-theme="minimal"] .welcome-btn,
+  html[data-theme="minimal"] .welcome-btn:hover { box-shadow: none; }
+
+  /* ── Test screen header / quiz elements ── */
+  html[data-theme="minimal"] .test-top {
+    background: var(--surf);
+  }
+  html[data-theme="minimal"] .q-pill {
+    background: var(--p3);
+    border-color: rgba(255,255,255,0.08);
+  }
+  html[data-theme="minimal"] .score-pill {
+    background: var(--p2);
+  }
+  html[data-theme="minimal"] .prog-bar {
+    background: var(--surf);
+  }
+  html[data-theme="minimal"] .num-inp {
+    background: var(--inp);
+    box-shadow: none;
+  }
+  html[data-theme="minimal"] .fb-ok {
+    background: var(--ok-fb);
+    border-color: color-mix(in srgb, var(--acc), transparent 65%);
+  }
+  html[data-theme="minimal"] .fb-no {
+    background: var(--surf-d);
+    border-color: rgba(255,82,82,0.3);
+  }
+  html[data-theme="minimal"] .timer-opt.active { box-shadow: none; }
+  html[data-theme="minimal"] .type-btn.active  { box-shadow: none; }
+  html[data-theme="minimal"] .diff-btn.active  { background: var(--p2); box-shadow: none; }
+
+  /* ── Dashboard screen ── */
+  html[data-theme="minimal"] .dash-stat,
+  html[data-theme="minimal"] .dash-recent,
+  html[data-theme="minimal"] .dash-xp-row,
+  html[data-theme="minimal"] .dash-profile-panel,
+  html[data-theme="minimal"] .improve-banner {
+    background: var(--surf);
+    box-shadow: none;
+  }
+  html[data-theme="minimal"] .dash-profile-btn {
+    background: var(--surf);
+    box-shadow: none;
+  }
+  html[data-theme="minimal"] .dash-profile-btn:hover { background: var(--hov); }
+  html[data-theme="minimal"] .dash-start-btn { box-shadow: none; }
+  html[data-theme="minimal"] .dash-session-pct.good { background: var(--ok-bd); }
+  html[data-theme="minimal"] .dash-session-pct.bad  { background: var(--surf-d); }
+  html[data-theme="minimal"] .dash-xp-bar-bg        { background: var(--bar-bg); }
+  html[data-theme="minimal"] .daily-goal-done-badge { background: var(--ok-bd); }
+  html[data-theme="minimal"] .goal-edit-input       { background: var(--inp); box-shadow: none; }
+
+  /* ── Bento grid (results screen) ── */
+  html[data-theme="minimal"] .bento-cell.accent,
+  html[data-theme="minimal"] .bento-cell.green { background: var(--surf); }
+
+  /* ── XP / streak bars ── */
+  html[data-theme="minimal"] .pb-xp-bar-bg { background: var(--bar-bg); }
+
+  /* ── Spaced-repetition retry badge ── */
+  html[data-theme="minimal"] .retry-badge { background: var(--surf); }
+
+  /* ── Daily challenge slide-in ── */
+  html[data-theme="minimal"] .daily-challenge-btn {
+    background: var(--app-bg);
+    box-shadow: none;
+  }
+  html[data-theme="minimal"] .dc-tab,
+  html[data-theme="minimal"] .daily-challenge-btn:hover .dc-tab,
+  html[data-theme="minimal"] .daily-challenge-btn.dc-open .dc-tab {
+    background: var(--surf);
+  }
+
+  /* ── End-session floating button ── */
+  html[data-theme="minimal"] #endSessionBtn { background: var(--surf); box-shadow: none; }
+
+  /* ── Glow removal: box-shadows ── */
+  html[data-theme="minimal"] .num-inp:focus          { box-shadow: none; }
+  html[data-theme="minimal"] .toggle input:checked + .tslider { box-shadow: none; }
+  html[data-theme="minimal"] .res-cw-card            { box-shadow: none; }
+  html[data-theme="minimal"] .review-wrap            { box-shadow: none; }
+  html[data-theme="minimal"] .check-btn,
+  html[data-theme="minimal"] .check-btn:hover        { box-shadow: none; }
+  html[data-theme="minimal"] .select-trigger         { box-shadow: none; }
+  html[data-theme="minimal"] .bento-start,
+  html[data-theme="minimal"] .bento-start:hover      { box-shadow: none; }
+  html[data-theme="minimal"] .daily-challenge-btn,
+  html[data-theme="minimal"] .daily-challenge-btn.dc-open { box-shadow: none !important; }
+
+  /* ── Glow removal: text-shadows ── */
+  html[data-theme="minimal"] .timed-mode-countdown      { text-shadow: none; }
+  html[data-theme="minimal"] .timed-mode-countdown.urgent { text-shadow: none; }
+  html[data-theme="minimal"] .timed-result-num          { text-shadow: none; }
+  html[data-theme="minimal"] .gameover-score            { text-shadow: none; }
+  html[data-theme="minimal"] .big-pct                   { text-shadow: none; }
+  html[data-theme="minimal"] .dc-streak-count           { text-shadow: none; }
+
+  /* ── Glow removal: filter ── */
+  html[data-theme="minimal"] .welcome-icon              { filter: none; }
+  html[data-theme="minimal"] .app::before               { filter: none; }
+
+  /* Neutral Base Theme Layer */
+  html[data-base-theme] {
+    color-scheme: dark;
+  }
+  html[data-base-theme="light"] {
+    color-scheme: light;
+  }
+  html[data-base-theme] body {
+    background: var(--bg);
+    color: var(--text-primary);
+  }
+  html[data-base-theme] body::before {
+    background:
+      radial-gradient(ellipse 70% 60% at 15% 10%, color-mix(in srgb, var(--p5), transparent 86%) 0%, transparent 66%),
+      radial-gradient(ellipse 55% 50% at 85% 90%, color-mix(in srgb, var(--p4), transparent 88%) 0%, transparent 66%),
+      radial-gradient(ellipse 36% 32% at 76% 18%, color-mix(in srgb, var(--acc), transparent 94%) 0%, transparent 62%);
+  }
+  html[data-base-theme] body::after {
+    background:
+      radial-gradient(ellipse 38% 32% at 92% 32%, color-mix(in srgb, var(--acc-2), transparent 96%) 0%, transparent 58%),
+      radial-gradient(ellipse 32% 28% at 12% 74%, color-mix(in srgb, var(--p5), transparent 92%) 0%, transparent 58%);
+  }
+  html[data-base-theme] .app {
+    background: var(--app-gradient);
+    border-color: var(--border);
+    box-shadow: var(--shadow-app);
+  }
+  html[data-base-theme] .app::before {
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--acc), transparent 72%), transparent);
+  }
+  html[data-base-theme] .app::after {
+    box-shadow: inset 0 0 45px color-mix(in srgb, var(--p6), transparent 94%);
+  }
+  html[data-base-theme] .setup-header,
+  html[data-base-theme] .dash-header,
+  html[data-base-theme] .profile-header,
+  html[data-base-theme] .test-top {
+    background: var(--header-gradient);
+    border-color: var(--border);
+    box-shadow: var(--shadow-card);
+  }
+  html[data-base-theme] .setup-header::before,
+  html[data-base-theme] .dash-header::before,
+  html[data-base-theme] .profile-header::before,
+  html[data-base-theme] .card::before,
+  html[data-base-theme] .q-card::before {
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--acc), transparent 76%), transparent);
+  }
+  html[data-base-theme] .setup-header::after {
+    background: radial-gradient(ellipse, color-mix(in srgb, var(--acc), transparent 94%) 0%, transparent 70%);
+  }
+  html[data-base-theme] .setup-body,
+  html[data-base-theme] .card,
+  html[data-base-theme] .q-card,
+  html[data-base-theme] .res-cw-card,
+  html[data-base-theme] .review-wrap,
+  html[data-base-theme] .daily-goal-card,
+  html[data-base-theme] .weekly-summary-card,
+  html[data-base-theme] .session-summary-card,
+  html[data-base-theme] .profile-stat-card,
+  html[data-base-theme] .profile-sessions,
+  html[data-base-theme] .dash-stat,
+  html[data-base-theme] .dash-recent,
+  html[data-base-theme] .dash-xp-row,
+  html[data-base-theme] .dash-profile-panel,
+  html[data-base-theme] .improve-banner,
+  html[data-base-theme] .bento-cell,
+  html[data-base-theme] .pb-c,
+  html[data-base-theme] .pb-xp-card,
+  html[data-base-theme] #timedStatRow .stat-c {
+    background: var(--surface-glass);
+    border-color: var(--border);
+    box-shadow: var(--shadow-card);
+  }
+  html[data-base-theme] .bento-cell.accent,
+  html[data-base-theme] .bento-cell.green {
+    background: color-mix(in srgb, var(--acc), var(--surface-raised) 88%);
+  }
+  html[data-base-theme] .num-inp,
+  html[data-base-theme] .ans-input,
+  html[data-base-theme] .welcome-input,
+  html[data-base-theme] .goal-edit-input,
+  html[data-base-theme] .select-trigger {
+    background: var(--inp);
+    color: var(--text-primary);
+    border-color: var(--border-strong);
+  }
+  html[data-base-theme] .num-inp:focus,
+  html[data-base-theme] .ans-input:focus,
+  html[data-base-theme] .welcome-input:focus,
+  html[data-base-theme] .goal-edit-input:focus {
+    border-color: var(--acc);
+    box-shadow: var(--focus-ring);
+  }
+  html[data-base-theme] .type-btn,
+  html[data-base-theme] .timer-opt,
+  html[data-base-theme] .diff-btn,
+  html[data-base-theme] .pick-btn,
+  html[data-base-theme] .theme-opt-btn {
+    color: var(--text-secondary);
+    border-color: var(--border);
+  }
+  html[data-base-theme] .theme-opts {
+    background: color-mix(in srgb, var(--inp), transparent 12%);
+    border: 1px solid var(--border);
+  }
+  html[data-base-theme] .type-btn.active,
+  html[data-base-theme] .timer-opt.active,
+  html[data-base-theme] .diff-btn.active,
+  html[data-base-theme] .theme-opt-btn.active {
+    color: var(--acc);
+    border-color: color-mix(in srgb, var(--acc), transparent 40%);
+    background: color-mix(in srgb, var(--acc), transparent 88%);
+  }
+  html[data-base-theme] .setup-header h1,
+  html[data-base-theme] .field-label,
+  html[data-base-theme] .tog-label,
+  html[data-base-theme] .theme-switcher-label,
+  html[data-base-theme] .q-main,
+  html[data-base-theme] .big-num,
+  html[data-base-theme] .dash-profile-name,
+  html[data-base-theme] .profile-header-name,
+  html[data-base-theme] .weekly-summary-title,
+  html[data-base-theme] .daily-goal-label,
+  html[data-base-theme] .dash-xp-title,
+  html[data-base-theme] .dash-section-title,
+  html[data-base-theme] .bento-value,
+  html[data-base-theme] .res-title,
+  html[data-base-theme] .review-title {
+    color: var(--text-primary);
+  }
+  html[data-base-theme] .setup-header p,
+  html[data-base-theme] .card-title,
+  html[data-base-theme] .bento-label,
+  html[data-base-theme] .dash-stat-lbl,
+  html[data-base-theme] .profile-stat-lbl,
+  html[data-base-theme] .dash-xp-sub,
+  html[data-base-theme] .profile-header-since,
+  html[data-base-theme] .weekly-stat-lbl,
+  html[data-base-theme] .timed-result-sub,
+  html[data-base-theme] .mult2d-note,
+  html[data-base-theme] .cp-section-label,
+  html[data-base-theme] .color-picker-hint,
+  html[data-base-theme] .custom-picker-lbl {
+    color: var(--text-secondary);
+  }
+  html[data-base-theme] .tog-row,
+  html[data-base-theme] .color-picker-panel {
+    border-color: var(--border);
+  }
+  html[data-base-theme] .prog-bar,
+  html[data-base-theme] .dash-xp-bar-bg,
+  html[data-base-theme] .daily-goal-bar-bg,
+  html[data-base-theme] .profile-bar-bg,
+  html[data-base-theme] .pb-xp-bar-bg {
+    background: var(--bar-bg);
+  }
+  html[data-base-theme] .prog-fill,
+  html[data-base-theme] .dash-xp-bar-fill,
+  html[data-base-theme] .daily-goal-bar-fill,
+  html[data-base-theme] .profile-bar-fill,
+  html[data-base-theme] .pb-xp-bar-fill {
+    background: linear-gradient(90deg, var(--acc-lo), var(--acc));
+  }
+  html[data-base-theme] .ans-input.correct,
+  html[data-base-theme] .pick-btn.correct,
+  html[data-base-theme] .pick-btn.reveal,
+  html[data-base-theme] .fb-ok,
+  html[data-base-theme] .daily-goal-done-badge,
+  html[data-base-theme] .dash-session-pct.good {
+    background: var(--ok-bg);
+    border-color: var(--ok-bd);
+    color: var(--ok-text);
+  }
+  html[data-base-theme] .ans-input.wrong,
+  html[data-base-theme] .pick-btn.wrong,
+  html[data-base-theme] .fb-no,
+  html[data-base-theme] .dash-session-pct.bad {
+    background: var(--err-bg);
+    border-color: var(--err);
+    color: var(--text-primary);
+  }
+  html[data-base-theme="light"] .welcome-icon,
+  html[data-base-theme="light"] .back-btn svg {
+    filter: none;
+  }
+
+  html[data-base-theme="light"] {
+    --light-control-bg: var(--inp);
+    --light-control-bg-hover: var(--hov);
+    --light-control-border: var(--border-strong);
+    --light-control-border-strong: color-mix(in srgb, var(--border-strong), var(--text-primary) 28%);
+  }
+  html[data-base-theme="light"] body::before {
+    opacity: 0.62;
+  }
+  html[data-base-theme="light"] body::after {
+    opacity: 0.48;
+  }
+  html[data-base-theme="light"] .app {
+    border-color: var(--border);
+  }
+  html[data-base-theme="light"] .setup-body,
+  html[data-base-theme="light"] .card,
+  html[data-base-theme="light"] .q-card,
+  html[data-base-theme="light"] .res-cw-card,
+  html[data-base-theme="light"] .review-wrap,
+  html[data-base-theme="light"] .daily-goal-card,
+  html[data-base-theme="light"] .weekly-summary-card,
+  html[data-base-theme="light"] .session-summary-card,
+  html[data-base-theme="light"] .profile-stat-card,
+  html[data-base-theme="light"] .profile-sessions,
+  html[data-base-theme="light"] .dash-stat,
+  html[data-base-theme="light"] .dash-recent,
+  html[data-base-theme="light"] .dash-xp-row,
+  html[data-base-theme="light"] .dash-profile-panel,
+  html[data-base-theme="light"] .improve-banner,
+  html[data-base-theme="light"] .bento-cell,
+  html[data-base-theme="light"] .pb-c,
+  html[data-base-theme="light"] .pb-xp-card {
+    background: var(--surface-glass);
+    border-color: var(--border);
+  }
+  html[data-base-theme="light"] .num-inp,
+  html[data-base-theme="light"] .ans-input,
+  html[data-base-theme="light"] .welcome-input,
+  html[data-base-theme="light"] .goal-edit-input,
+  html[data-base-theme="light"] .select-trigger {
+    background: var(--light-control-bg);
+    border-color: var(--light-control-border);
+    color: var(--text-primary);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.72);
+  }
+  html[data-base-theme="light"] .num-inp:hover,
+  html[data-base-theme="light"] .ans-input:hover,
+  html[data-base-theme="light"] .welcome-input:hover,
+  html[data-base-theme="light"] .goal-edit-input:hover,
+  html[data-base-theme="light"] .select-trigger:hover {
+    background: var(--light-control-bg-hover);
+    border-color: var(--light-control-border-strong);
+  }
+  html[data-base-theme="light"] .type-btn,
+  html[data-base-theme="light"] .timer-opt,
+  html[data-base-theme="light"] .diff-btn,
+  html[data-base-theme="light"] .pick-btn,
+  html[data-base-theme="light"] .theme-opt-btn {
+    background: var(--hov);
+    border-color: var(--light-control-border);
+    color: var(--text-secondary);
+  }
+  html[data-base-theme="light"] .type-btn:hover,
+  html[data-base-theme="light"] .timer-opt:hover,
+  html[data-base-theme="light"] .diff-btn:hover,
+  html[data-base-theme="light"] .pick-btn:hover,
+  html[data-base-theme="light"] .theme-opt-btn:hover {
+    background: var(--light-control-bg-hover);
+    border-color: var(--light-control-border-strong);
+    color: var(--text-primary);
+  }
+  html[data-base-theme="light"] .type-btn.active,
+  html[data-base-theme="light"] .timer-opt.active,
+  html[data-base-theme="light"] .diff-btn.active,
+  html[data-base-theme="light"] .theme-opt-btn.active {
+    background: color-mix(in srgb, var(--acc), var(--surf) 74%);
+    border-color: color-mix(in srgb, var(--acc), var(--text-primary) 26%);
+    color: var(--acc-vlo);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.8), 0 0 0 1px color-mix(in srgb, var(--acc), transparent 82%);
+  }
+  html[data-base-theme="light"] .theme-opts {
+    background: var(--inp);
+    border-color: var(--border);
+  }
+  html[data-base-theme="light"] .toggle .tslider {
+    background: var(--inp);
+    border: 1px solid var(--border-strong);
+    box-shadow: inset 0 1px 2px color-mix(in srgb, var(--text-primary), transparent 90%);
+  }
+  html[data-base-theme="light"] .toggle .tslider::before {
+    background: var(--surf);
+    box-shadow: 0 1px 4px color-mix(in srgb, var(--text-primary), transparent 78%);
+  }
+  html[data-base-theme="light"] .toggle input:checked + .tslider {
+    background: color-mix(in srgb, var(--acc), var(--surf) 48%);
+    border-color: color-mix(in srgb, var(--acc), var(--text-primary) 24%);
+    box-shadow: inset 0 1px 2px color-mix(in srgb, var(--text-primary), transparent 92%), 0 0 0 2px color-mix(in srgb, var(--acc), transparent 80%);
+  }
+
+
+  html[data-base-theme="light"] .milestone-badge {
+    background: var(--surface-glass);
+    border-color: var(--border);
+    box-shadow: var(--shadow-card);
+    opacity: 1;
+    filter: none;
+  }
+  html[data-base-theme="light"] .milestone-badge-icon {
+    opacity: 0.84;
+  }
+  html[data-base-theme="light"] .milestone-badge-name {
+    color: var(--text-secondary);
+  }
+  html[data-base-theme="light"] .milestone-badge-val {
+    color: var(--text-muted);
+  }
+  html[data-base-theme="light"] .milestone-badge.unlocked {
+    background: color-mix(in srgb, var(--acc), var(--surface-glass) 90%);
+    border-color: color-mix(in srgb, var(--acc), var(--border-strong) 48%);
+  }
+  html[data-base-theme="light"] .milestone-badge.unlocked .milestone-badge-name {
+    color: var(--acc-vlo);
+  }
+  html[data-base-theme="light"] .milestone-badge.unlocked .milestone-badge-val {
+    color: var(--text-secondary);
+  }
+
+
+  html[data-base-theme="light"] .setup-header h1,
+  html[data-base-theme="light"] .dash-name,
+  html[data-base-theme="light"] .welcome-heading,
+  html[data-base-theme="light"] .q-main,
+  html[data-base-theme="light"] .stat-v,
+  html[data-base-theme="light"] .pb-v,
+  html[data-base-theme="light"] .res-title,
+  html[data-base-theme="light"] .review-title,
+  html[data-base-theme="light"] .field-label,
+  html[data-base-theme="light"] .tog-label,
+  html[data-base-theme="light"] .bento-tog-label,
+  html[data-base-theme="light"] .daily-goal-label,
+  html[data-base-theme="light"] .dash-session-score {
+    color: var(--text-primary);
+  }
+  html[data-base-theme="light"] .setup-header p,
+  html[data-base-theme="light"] .dash-greeting,
+  html[data-base-theme="light"] .dash-tagline,
+  html[data-base-theme="light"] .bento-range-lbl,
+  html[data-base-theme="light"] .bento-tog-sub,
+  html[data-base-theme="light"] .unlimited-label,
+  html[data-base-theme="light"] .unlimited-row,
+  html[data-base-theme="light"] .dash-session-date,
+  html[data-base-theme="light"] .dash-empty,
+  html[data-base-theme="light"] .stat-l,
+  html[data-base-theme="light"] .pb-l,
+  html[data-base-theme="light"] .pb-xp-lbl,
+  html[data-base-theme="light"] .res-cw-lbl,
+  html[data-base-theme="light"] .mult2d-note,
+  html[data-base-theme="light"] .welcome-quote,
+  html[data-base-theme="light"] .q-number,
+  html[data-base-theme="light"] .q-sub,
+  html[data-base-theme="light"] .timer-label,
+  html[data-base-theme="light"] .tables-select-btn,
+  html[data-base-theme="light"] .erase-btn,
+  html[data-base-theme="light"] .export-btn {
+    color: var(--text-secondary);
+  }
+  html[data-base-theme="light"] .card-title,
+  html[data-base-theme="light"] .bento-label,
+  html[data-base-theme="light"] .dash-section-title,
+  html[data-base-theme="light"] .profile-acc-label,
+  html[data-base-theme="light"] .custom-pickers-label {
+    color: var(--text-secondary);
+  }
+  html[data-base-theme="light"] .dash-section-title::after {
+    background: var(--border);
+  }
+  html[data-base-theme="light"] .dash-name span,
+  html[data-base-theme="light"] .dash-stat-val,
+  html[data-base-theme="light"] .daily-goal-count,
+  html[data-base-theme="light"] .pb-new {
+    color: var(--acc-vlo);
+  }
+  /* XP level badge: invert for light backgrounds so it stays visible */
+  html[data-base-theme="light"] .dash-xp-level {
+    background: color-mix(in srgb, var(--acc-vlo), transparent 82%);
+    border-color: color-mix(in srgb, var(--acc-vlo), transparent 50%);
+    color: var(--acc-vlo);
+    box-shadow: none;
+  }
+  html[data-base-theme="light"] .dash-xp-title {
+    color: var(--text-primary);
+  }
+  html[data-base-theme="light"] .dash-xp-sub {
+    color: var(--text-secondary);
+  }
+  html[data-base-theme="light"] .dash-xp-bar-bg {
+    background: color-mix(in srgb, var(--acc-vlo), transparent 85%);
+  }
+  html[data-base-theme="light"] .dash-xp-bar-fill {
+    background: linear-gradient(90deg, var(--acc-lo), var(--acc-vlo));
+  }
+
+  html[data-base-theme="light"] .dash-session {
+    background: var(--surface-glass);
+    border-color: var(--border);
+  }
+  html[data-base-theme="light"] .dash-session + .dash-session {
+    border-top-color: var(--border);
+  }
+  html[data-base-theme="light"] .dash-session-score[style] {
+    color: var(--text-secondary) !important;
+  }
+  html[data-base-theme="light"] .dash-session-pct.good {
+    background: color-mix(in srgb, var(--ok-bg), var(--surf) 30%);
+    color: var(--ok-text);
+    border: 1px solid var(--ok-bd);
+  }
+  html[data-base-theme="light"] .dash-session-pct.bad {
+    background: var(--err-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--err);
+  }
+  html[data-base-theme="light"] .back-btn,
+  html[data-base-theme="light"] .dash-profile-btn {
+    background: var(--inp);
+    border-color: var(--border);
+    color: var(--text-secondary);
+  }
+  html[data-base-theme="light"] .back-btn:hover,
+  html[data-base-theme="light"] .dash-profile-btn:hover {
+    background: var(--hov);
+    border-color: var(--border-strong);
+    color: var(--text-primary);
+  }
+  html[data-base-theme="light"] .badge-sq {
+    background: var(--inp);
+    color: var(--text-primary);
+    border-color: var(--border);
+  }
+  html[data-base-theme="light"] .q-pill,
+  html[data-base-theme="light"] .score-pill {
+    background: var(--inp);
+    color: var(--text-secondary);
+    border-color: var(--border);
+  }
+  html[data-base-theme="light"] .q-pill span {
+    color: var(--text-primary);
+  }
+  html[data-base-theme="light"] #customTimerInput,
+  html[data-base-theme="light"] #timedCustomMinsInput {
+    background: var(--inp) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-strong) !important;
+  }
+  html[data-base-theme="light"] .bento-label svg,
+  html[data-base-theme="light"] .card-title svg,
+  html[data-base-theme="light"] .dash-section-title svg {
+    color: var(--text-secondary);
+    stroke: currentColor;
+  }
+  html[data-base-theme="light"] .bento-cell,
+  html[data-base-theme="light"] .dash-session,
+  html[data-base-theme="light"] .setup-header,
+  html[data-base-theme="light"] .dash-header {
+    color: var(--text-primary);
+  }
+
+
+  html[data-base-theme="light"] .q-expr,
+  html[data-base-theme="light"] #qExpr,
+  html[data-base-theme="light"] .big-sub,
+  html[data-base-theme="light"] .review-head,
+  html[data-base-theme="light"] .review-scroll,
+  html[data-base-theme="light"] .review-scroll *,
+  html[data-base-theme="light"] #reviewList,
+  html[data-base-theme="light"] #reviewList * {
+    color: var(--text-primary);
+  }
+  html[data-base-theme="light"] .q-sub,
+  html[data-base-theme="light"] #qSub,
+  html[data-base-theme="light"] .hint-reveal,
+  html[data-base-theme="light"] .session-nudge,
+  html[data-base-theme="light"] #sessionNudge,
+  html[data-base-theme="light"] #sessionNudgeText {
+    color: var(--text-secondary);
+  }
+  html[data-base-theme="light"] .q-card {
+    background: var(--surface-glass);
+    border-color: var(--border);
+  }
+  html[data-base-theme="light"] .q-card .q-badge {
+    background: var(--inp);
+    color: var(--text-secondary);
+    border-color: var(--border);
+  }
+  html[data-base-theme="light"] .hint-btn,
+  html[data-base-theme="light"] .check-btn,
+  html[data-base-theme="light"] .again-btn,
+  html[data-base-theme="light"] .home-btn,
+  html[data-base-theme="light"] .export-btn {
+    background: var(--inp);
+    color: var(--text-primary);
+    border-color: var(--border-strong);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.68);
+    text-shadow: none;
+  }
+  html[data-base-theme="light"] .hint-btn:hover:not(:disabled),
+  html[data-base-theme="light"] .check-btn:hover:not(:disabled),
+  html[data-base-theme="light"] .again-btn:hover,
+  html[data-base-theme="light"] .home-btn:hover,
+  html[data-base-theme="light"] .export-btn:hover {
+    background: var(--hov);
+    color: var(--text-primary);
+    border-color: var(--light-control-border-strong);
+    box-shadow: var(--shadow-card);
+  }
+  html[data-base-theme="light"] .check-btn:not(:disabled),
+  html[data-base-theme="light"] .again-btn {
+    background: color-mix(in srgb, var(--acc), var(--surf) 76%);
+    color: var(--acc-vlo);
+    border-color: color-mix(in srgb, var(--acc), var(--text-primary) 28%);
+    font-weight: 700;
+  }
+  html[data-base-theme="light"] .check-btn:disabled,
+  html[data-base-theme="light"] .hint-btn:disabled {
+    opacity: 1;
+    background: var(--inp);
+    color: var(--text-muted);
+    border-color: var(--border);
+  }
+  html[data-base-theme="light"] .check-btn.is-next {
+    background: var(--inp);
+    color: var(--text-primary);
+    border-color: var(--border-strong);
+  }
+  html[data-base-theme="light"] .session-nudge {
+    background: color-mix(in srgb, var(--acc), var(--surface-glass) 88%);
+    border: 1px solid color-mix(in srgb, var(--acc), var(--border-strong) 48%);
+    color: var(--text-primary);
+  }
+  html[data-base-theme="light"] .session-nudge-icon {
+    color: var(--acc-vlo);
+  }
+  html[data-base-theme="light"] .profile-header-edit,
+  html[data-base-theme="light"] .profile-header .back-btn {
+    background: var(--p3);
+    border-color: var(--border-strong);
+    color: var(--text-primary);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.58);
+  }
+  html[data-base-theme="light"] .profile-header-edit:hover,
+  html[data-base-theme="light"] .profile-header .back-btn:hover {
+    background: var(--text-secondary);
+    border-color: var(--text-secondary);
+    color: var(--surf);
+  }
+  html[data-base-theme="light"] .profile-header .back-btn svg {
+    stroke: currentColor;
+    color: inherit;
+  }
+  html[data-base-theme="light"] .res-cw-card,
+  html[data-base-theme="light"] .review-wrap,
+  html[data-base-theme="light"] .session-nudge {
+    box-shadow: var(--shadow-card);
+  }
+  html[data-base-theme="light"] .res-cw-lbl,
+  html[data-base-theme="light"] .review-head,
+  html[data-base-theme="light"] .session-nudge {
+    opacity: 1;
+  }
+
+
+  html[data-base-theme="light"] .app,
+  html[data-base-theme="light"] .app * {
+    text-shadow: none;
+  }
+  html[data-base-theme="light"] .app {
+    color: var(--text-primary);
+  }
+  html[data-base-theme="light"] .setup-header h1,
+  html[data-base-theme="light"] .dash-name,
+  html[data-base-theme="light"] .profile-header-name,
+  html[data-base-theme="light"] .welcome-heading,
+  html[data-base-theme="light"] .res-title,
+  html[data-base-theme="light"] .big-num,
+  html[data-base-theme="light"] .stat-v,
+  html[data-base-theme="light"] .pb-v,
+  html[data-base-theme="light"] .profile-stat-val,
+  html[data-base-theme="light"] .dash-stat-val,
+  html[data-base-theme="light"] .review-head,
+  html[data-base-theme="light"] .review-title {
+    color: var(--text-primary);
+  }
+  html[data-base-theme="light"] .setup-header p,
+  html[data-base-theme="light"] .dash-greeting,
+  html[data-base-theme="light"] .dash-tagline,
+  html[data-base-theme="light"] .profile-header-since,
+  html[data-base-theme="light"] .field-label,
+  html[data-base-theme="light"] .card-title,
+  html[data-base-theme="light"] .bento-label,
+  html[data-base-theme="light"] .bento-range-lbl,
+  html[data-base-theme="light"] .tog-label,
+  html[data-base-theme="light"] .bento-tog-label,
+  html[data-base-theme="light"] .stat-l,
+  html[data-base-theme="light"] .pb-l,
+  html[data-base-theme="light"] .profile-stat-lbl,
+  html[data-base-theme="light"] .milestone-badge-name,
+  html[data-base-theme="light"] .milestone-badge-val,
+  html[data-base-theme="light"] .dash-session-date,
+  html[data-base-theme="light"] .dash-session-score,
+  html[data-base-theme="light"] .res-cw-lbl,
+  html[data-base-theme="light"] .q-sub,
+  html[data-base-theme="light"] .hint-reveal,
+  html[data-base-theme="light"] .session-nudge {
+    color: var(--text-secondary);
+    opacity: 1;
+  }
+  html[data-base-theme="light"] .q-expr,
+  html[data-base-theme="light"] #qExpr {
+    color: var(--acc-vlo);
+    opacity: 1;
+  }
+  html[data-theme="default"][data-base-theme="light"] .setup-header,
+  html[data-theme="default"][data-base-theme="light"] .dash-header,
+  html[data-theme="default"][data-base-theme="light"] .profile-header,
+  html[data-theme="default"][data-base-theme="light"] .test-top,
+  html[data-theme="default"][data-base-theme="light"] .setup-body,
+  html[data-theme="default"][data-base-theme="light"] .card,
+  html[data-theme="default"][data-base-theme="light"] .q-card,
+  html[data-theme="default"][data-base-theme="light"] .res-cw-card,
+  html[data-theme="default"][data-base-theme="light"] .review-wrap,
+  html[data-theme="default"][data-base-theme="light"] .daily-goal-card,
+  html[data-theme="default"][data-base-theme="light"] .weekly-summary-card,
+  html[data-theme="default"][data-base-theme="light"] .session-summary-card,
+  html[data-theme="default"][data-base-theme="light"] .profile-stat-card,
+  html[data-theme="default"][data-base-theme="light"] .profile-sessions,
+  html[data-theme="default"][data-base-theme="light"] .dash-stat,
+  html[data-theme="default"][data-base-theme="light"] .dash-recent,
+  html[data-theme="default"][data-base-theme="light"] .dash-xp-row,
+  html[data-theme="default"][data-base-theme="light"] .dash-session,
+  html[data-theme="default"][data-base-theme="light"] .bento-cell,
+  html[data-theme="default"][data-base-theme="light"] .pb-c,
+  html[data-theme="default"][data-base-theme="light"] .pb-xp-card,
+  html[data-theme="default"][data-base-theme="light"] .milestone-badge {
+    border-color: color-mix(in srgb, var(--border), transparent 34%);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.88),
+      inset 0 0 0 1px rgba(255,255,255,0.42),
+      0 1px 2px rgba(48,45,39,0.08),
+      0 10px 24px rgba(48,45,39,0.12);
+  }
+  html[data-theme="default"][data-base-theme="light"] .num-inp,
+  html[data-theme="default"][data-base-theme="light"] .ans-input,
+  html[data-theme="default"][data-base-theme="light"] .welcome-input,
+  html[data-theme="default"][data-base-theme="light"] .goal-edit-input,
+  html[data-theme="default"][data-base-theme="light"] .type-btn,
+  html[data-theme="default"][data-base-theme="light"] .timer-opt,
+  html[data-theme="default"][data-base-theme="light"] .diff-btn,
+  html[data-theme="default"][data-base-theme="light"] .pick-btn,
+  html[data-theme="default"][data-base-theme="light"] .theme-opt-btn,
+  html[data-theme="default"][data-base-theme="light"] .q-pill,
+  html[data-theme="default"][data-base-theme="light"] .score-pill {
+    border-color: color-mix(in srgb, var(--border-strong), transparent 20%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.72), 0 1px 2px rgba(48,45,39,0.06);
+  }
+  html[data-base-theme="light"] .back-btn,
+  html[data-base-theme="light"] .dash-profile-btn,
+  html[data-base-theme="light"] .profile-header .back-btn {
+    background: var(--text-secondary);
+    border-color: color-mix(in srgb, var(--text-secondary), transparent 34%);
+    color: var(--surf);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 1px 2px rgba(48,45,39,0.12);
+  }
+  html[data-base-theme="light"] .back-btn svg,
+  html[data-base-theme="light"] .dash-profile-btn svg,
+  html[data-base-theme="light"] .welcome-icon {
+    color: var(--surf);
+    stroke: currentColor;
+    opacity: 1;
+  }
+  html[data-base-theme="light"] .back-btn:hover,
+  html[data-base-theme="light"] .dash-profile-btn:hover,
+  html[data-base-theme="light"] .profile-header .back-btn:hover {
+    background: var(--text-primary);
+    border-color: var(--text-primary);
+    color: var(--surf);
+  }
+  html[data-base-theme="light"] .hint-btn,
+  html[data-base-theme="light"] .check-btn,
+  html[data-base-theme="light"] .again-btn,
+  html[data-base-theme="light"] .home-btn,
+  html[data-base-theme="light"] .export-btn,
+  html[data-base-theme="light"] .profile-header-edit {
+    color: var(--text-primary);
+    opacity: 1;
+  }
+  html[data-base-theme="light"] .check-btn:not(:disabled),
+  html[data-base-theme="light"] .again-btn {
+    background: color-mix(in srgb, var(--acc), var(--surf) 70%);
+    color: var(--acc-vlo);
+    border-color: color-mix(in srgb, var(--acc), var(--text-primary) 20%);
+  }
+
+
+  html[data-base-theme="light"] .q-timer-chip,
+  html[data-base-theme="light"] #timerZone,
+  html[data-base-theme="light"] #stopwatchZone,
+  html[data-base-theme="light"] #timedChip {
+    background: var(--surface-glass);
+    border: 1px solid color-mix(in srgb, var(--border-strong), transparent 18%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.82), 0 1px 2px rgba(48,45,39,0.08);
+    color: var(--acc-vlo);
+  }
+  html[data-base-theme="light"] .timer-secs,
+  html[data-base-theme="light"] .stopwatch-num,
+  html[data-base-theme="light"] #timedChipLabel {
+    color: var(--acc-vlo);
+    opacity: 1;
+  }
+  html[data-base-theme="light"] .timer-arc-bg {
+    stroke: var(--bar-bg);
+    opacity: 1;
+  }
+  html[data-base-theme="light"] .timer-arc-fill {
+    stroke: var(--acc-vlo);
+    opacity: 0.9;
+  }
+  html[data-base-theme="light"] .q-timer-chip.urgent .timer-secs,
+  html[data-base-theme="light"] .q-timer-chip.urgent .timer-arc-fill {
+    color: #ad2f36;
+    stroke: #ad2f36;
+    opacity: 1;
+  }
+  html[data-base-theme="light"] .practice-mode-card {
+    background: var(--surface-glass);
+    border-color: color-mix(in srgb, var(--border), transparent 18%);
+    box-shadow: var(--shadow-card);
+  }
+  html[data-base-theme="light"] .practice-mode-title,
+  html[data-base-theme="light"] .session-summary-label,
+  html[data-base-theme="light"] .improve-banner-title {
+    color: var(--text-primary);
+    opacity: 1;
+  }
+  html[data-base-theme="light"] .practice-mode-sub,
+  html[data-base-theme="light"] .profile-danger-label,
+  html[data-base-theme="light"] .session-summary-title,
+  html[data-base-theme="light"] .session-summary-sub,
+  html[data-base-theme="light"] .session-summary-streak,
+  html[data-base-theme="light"] .improve-banner-sub {
+    color: var(--text-secondary);
+    opacity: 1;
+  }
+  html[data-base-theme="light"] .session-summary-score,
+  html[data-base-theme="light"] .session-summary-xp,
+  html[data-base-theme="light"] .goal-edit-btn,
+  html[data-base-theme="light"] .goal-edit-btn:hover {
+    color: var(--acc-vlo);
+    opacity: 1;
+  }
+  html[data-base-theme="light"] .session-summary-xp {
+    background: color-mix(in srgb, var(--acc), var(--surf) 82%);
+    border-color: color-mix(in srgb, var(--acc), var(--text-primary) 24%);
+  }
+  html[data-base-theme="light"] .improve-banner {
+    background: var(--surface-glass);
+    border-color: color-mix(in srgb, var(--border), transparent 20%);
+    box-shadow: var(--shadow-card);
+  }
+  html[data-base-theme="light"] .profile-danger {
+    background: color-mix(in srgb, var(--err-bg), var(--surface-glass) 58%);
+    border-color: color-mix(in srgb, var(--err), transparent 62%);
+  }
+
+
+  html[data-base-theme="light"] .q-timer-chip,
+  html[data-base-theme="light"] #timerZone,
+  html[data-base-theme="light"] #stopwatchZone,
+  html[data-base-theme="light"] #timedChip {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+  }
+  html[data-base-theme="light"] .focus-chip,
+  html[data-base-theme="light"] .focus-all-btn {
+    background: var(--inp);
+    border-color: color-mix(in srgb, var(--border-strong), transparent 14%);
+    color: var(--text-primary);
+    opacity: 1;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.72), 0 1px 2px rgba(48,45,39,0.06);
+  }
+  html[data-base-theme="light"] .focus-chip:hover,
+  html[data-base-theme="light"] .focus-all-btn:hover {
+    background: var(--hov);
+    border-color: var(--border-strong);
+    color: var(--text-primary);
+  }
+  html[data-base-theme="light"] .focus-chip.selected {
+    background: color-mix(in srgb, var(--acc), var(--surf) 76%);
+    border-color: color-mix(in srgb, var(--acc), var(--text-primary) 24%);
+    color: var(--acc-vlo);
+    font-weight: 800;
+  }
+  html[data-base-theme="light"] .bento-cell.green,
+  html[data-base-theme="light"] .bento-cell.accent {
+    color: var(--text-primary);
+  }
+  html[data-base-theme="light"] .bento-cell.green .bento-label,
+  html[data-base-theme="light"] .bento-cell.accent .bento-label {
+    color: var(--text-secondary);
+  }
+
+
+  html[data-base-theme] .pick-btn:hover:not(:disabled) {
+    background: var(--hov);
+    border-color: var(--border-strong);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-card);
+  }
+  html[data-base-theme] .pick-btn.correct,
+  html[data-base-theme] .pick-btn.reveal {
+    background: var(--ok-bg);
+    border-color: var(--ok-bd);
+    color: var(--ok-text);
+    box-shadow: none;
+  }
+  html[data-base-theme] .pick-btn.wrong {
+    background: var(--err-bg);
+    border-color: var(--err);
+    color: var(--text-primary);
+    box-shadow: none;
+  }
+
+
+  html[data-theme="minimal"] .timed-range {
+    box-shadow: none;
+  }
+  html[data-base-theme="light"] .timed-range {
+    box-shadow: inset 0 1px 2px rgba(48,45,39,0.16), 0 1px 0 rgba(255,255,255,0.74);
+  }
+
+  html[data-theme="minimal"][data-base-theme] body::before,
+  html[data-theme="minimal"][data-base-theme] body::after {
+    display: none;
+  }
+  html[data-theme="minimal"][data-base-theme] .app,
+  html[data-theme="minimal"][data-base-theme] .setup-header,
+  html[data-theme="minimal"][data-base-theme] .dash-header,
+  html[data-theme="minimal"][data-base-theme] .profile-header,
+  html[data-theme="minimal"][data-base-theme] .test-top,
+  html[data-theme="minimal"][data-base-theme] .setup-body,
+  html[data-theme="minimal"][data-base-theme] .card,
+  html[data-theme="minimal"][data-base-theme] .q-card,
+  html[data-theme="minimal"][data-base-theme] .res-cw-card,
+  html[data-theme="minimal"][data-base-theme] .review-wrap,
+  html[data-theme="minimal"][data-base-theme] .daily-goal-card,
+  html[data-theme="minimal"][data-base-theme] .weekly-summary-card,
+  html[data-theme="minimal"][data-base-theme] .session-summary-card,
+  html[data-theme="minimal"][data-base-theme] .profile-stat-card,
+  html[data-theme="minimal"][data-base-theme] .dash-stat,
+  html[data-theme="minimal"][data-base-theme] .dash-recent,
+  html[data-theme="minimal"][data-base-theme] .dash-xp-row,
+  html[data-theme="minimal"][data-base-theme] .dash-profile-panel,
+  html[data-theme="minimal"][data-base-theme] .improve-banner,
+  html[data-theme="minimal"][data-base-theme] .bento-cell,
+  html[data-theme="minimal"][data-base-theme] .pb-c,
+  html[data-theme="minimal"][data-base-theme] .pb-xp-card {
+    box-shadow: none;
+  }
+
+
+  /* ── Color Picker UI ─────────────────────────────────────── */
+  .color-picker-panel { padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 10px; }
+
+  .cp-section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; color: rgba(239,248,226,0.3);
+    margin: 0 0 8px;
+  }
+
+  /* ── Preset cards: 4-column grid ── */
+  .preset-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .preset-card {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 8px 4px 7px;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    background: rgba(255,255,255,0.04);
+    cursor: pointer;
+    transition: all .18s cubic-bezier(.22,1,.36,1);
+    font-family: 'Inter', sans-serif;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .preset-card:active { transform: scale(.93); }
+  .preset-card.active {
+    border-color: rgba(255,255,255,.6);
+    background: rgba(255,255,255,.1);
+  }
+  /* diagonal-split swatch */
+  .preset-split {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.45);
+    flex-shrink: 0;
+    transition: box-shadow .15s;
+  }
+  .preset-card.active .preset-split {
+    box-shadow: 0 0 0 2.5px rgba(255,255,255,.7), 0 2px 10px rgba(0,0,0,.5);
+  }
+  .preset-card-name {
+    font-size: 10px; font-weight: 600;
+    color: rgba(239,248,226,.42);
+    letter-spacing: .02em; white-space: nowrap;
+  }
+  .preset-card.active .preset-card-name { color: rgba(239,248,226,.9); }
+
+  /* ── Custom color buttons row ── */
+  .custom-pickers-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 0 4px;
+    border-top: 1px solid rgba(255,255,255,.06);
+  }
+  .custom-pickers-label {
+    font-size: 11px; font-weight: 600;
+    color: rgba(239,248,226,.3);
+    text-transform: uppercase; letter-spacing: .07em;
+    flex: 1;
+  }
+  .custom-color-btns { display: flex; gap: 10px; }
+  .custom-color-btn-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .custom-color-btn {
+    width: 44px; height: 44px; border-radius: 50%;
+    border: 2.5px solid rgba(255,255,255,.22);
+    cursor: pointer; padding: 0; overflow: hidden;
+    transition: transform .15s, border-color .15s, box-shadow .15s;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .custom-color-btn span { display: block; width: 100%; height: 100%; }
+  .custom-color-btn:hover { transform: scale(1.08); border-color: rgba(255,255,255,.55); box-shadow: 0 0 14px rgba(255,255,255,.12); }
+  .custom-color-btn:active { transform: scale(.93); }
+  .custom-picker-lbl {
+    font-size: 10px; font-weight: 600; color: rgba(239,248,226,.35);
+    text-transform: uppercase; letter-spacing: .06em;
+  }
+  .color-picker-hint {
+    font-size: 10px; color: rgba(239,248,226,.2);
+    text-align: center; margin-top: 6px; line-height: 1.4;
+  }
+
+  /* ── Custom Picker Popover ── */
+  #customPickerModal {
+    position: fixed; z-index: 9990;
+    display: none; pointer-events: none;
+    inset: 0;
+  }
+  #customPickerModal.open { display: block; pointer-events: auto; }
+  #cpOverlay {
+    position: absolute; inset: 0;
+    background: transparent;
+  }
+  #cpPanel {
+    position: absolute;
+    width: min(260px, calc(100vw - 16px));
+    max-height: calc(100dvh - 80px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    background: linear-gradient(160deg, var(--p2) 0%, var(--p1) 100%);
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 16px;
+    padding: 12px 12px 14px;
+    padding-bottom: max(14px, env(safe-area-inset-bottom, 14px));
+    box-shadow: 0 12px 40px rgba(0,0,0,.75), 0 2px 8px rgba(0,0,0,.4);
+    font-family: 'Inter', sans-serif;
+    z-index: 1;
+  }
+  /* arrow: points down by default, up when data-arrow="up" */
+  #cpPanel::after {
+    content: '';
+    position: absolute; left: var(--arrow-left, 50%);
+    transform: translateX(-50%);
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    /* default = arrow down */
+    bottom: -8px; top: auto;
+    border-top: 8px solid var(--p2);
+    border-bottom: none;
+  }
+  #cpPanel[data-arrow="up"]::after {
+    top: -8px; bottom: auto;
+    border-bottom: 8px solid var(--p2);
+    border-top: none;
+  }
+  .cp-header {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+  }
+  .cp-title {
+    font-size: 13px; font-weight: 700; color: #eff8e2; flex: 1;
+  }
+  .cp-preview-swatch {
+    width: 22px; height: 22px; border-radius: 6px;
+    border: 2px solid rgba(255,255,255,.2);
+    flex-shrink: 0;
+    transition: background .1s;
+  }
+  .cp-close-btn {
+    width: 24px; height: 24px; border-radius: 7px;
+    border: none; background: rgba(255,255,255,.08);
+    color: rgba(239,248,226,.6); font-size: 13px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s;
+    touch-action: manipulation;
+  }
+  .cp-close-btn:hover { background: rgba(255,255,255,.15); color: #eff8e2; }
+  /* 2-D saturation/value canvas */
+  #cpCanvas {
+    display: block; width: 100%;
+    height: clamp(100px, 28vw, 130px);
+    border-radius: 8px; cursor: crosshair;
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+    margin-bottom: 9px;
+  }
+  /* Hue slider */
+  .cp-hue-track {
+    position: relative; height: 16px; border-radius: 8px;
+    background: linear-gradient(to right,
+      hsl(0,100%,50%), hsl(30,100%,50%), hsl(60,100%,50%),
+      hsl(90,100%,50%), hsl(120,100%,50%), hsl(150,100%,50%),
+      hsl(180,100%,50%), hsl(210,100%,50%), hsl(240,100%,50%),
+      hsl(270,100%,50%), hsl(300,100%,50%), hsl(330,100%,50%), hsl(360,100%,50%));
+    margin-bottom: 10px; cursor: pointer; touch-action: none;
+  }
+  .cp-hue-thumb {
+    position: absolute; top: 50%; width: 16px; height: 16px;
+    border-radius: 50%; border: 2.5px solid #fff;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 1px 5px rgba(0,0,0,.5);
+    pointer-events: none; transition: left .05s linear;
+  }
+  /* Hex input row */
+  .cp-hex-row {
+    display: flex; align-items: center; gap: 5px;
+  }
+  .cp-hex-hash {
+    font-size: 13px; font-weight: 700; color: rgba(239,248,226,.4); flex-shrink: 0;
+  }
+  .cp-hex-input {
+    flex: 1; min-width: 0;
+    background: rgba(0,0,0,.3);
+    border: 1px solid rgba(255,255,255,.1); border-radius: 7px;
+    color: #eff8e2; font-size: 16px; font-weight: 600;
+    font-family: monospace; padding: 5px 8px; letter-spacing: .06em;
+    text-transform: uppercase; outline: none;
+  }
+  .cp-hex-input:focus { border-color: var(--acc); }
+  .cp-done-btn {
+    flex-shrink: 0;
+    padding: 5px 12px; border-radius: 7px;
+    background: var(--acc); color: var(--btn-txt, #1a2600);
+    font-size: 12px; font-weight: 700; border: none; cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: opacity .15s;
+    touch-action: manipulation;
+  }
+  .cp-done-btn:hover { opacity: .88; }
+
+  /* Theme switcher pill */
+  .theme-switcher {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 12px;
+  }
+  .theme-switcher-label {
+    font-size: clamp(13px,3.5vw,15px);
+    color: #eff8e2;
+    flex: 1;
+  }
+  .theme-opts {
+    display: flex;
+    gap: 4px;
+    background: rgba(0,0,0,0.25);
+    border-radius: 10px;
+    padding: 3px;
+  }
+  .theme-opt-btn {
+    padding: 5px 12px;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: rgba(239,248,226,0.45);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+  }
+  .theme-opt-btn.active {
+    background: color-mix(in srgb, var(--acc), transparent 85%);
+    color: var(--acc);
+    border: 1px solid color-mix(in srgb, var(--acc), transparent 70%);
+  }
+
+
+  /* ═══════════════════════════════════════════════════════
+     DASHBOARD REDESIGN — visual overrides (all token-based)
+  ════════════════════════════════════════════════════════ */
+
+  /* ── Weekly Summary: thin cylindrical bars, hide stat grid ── */
+  .weekly-sparkline {
+    height: 118px !important;
+    gap: 8px !important;
+    align-items: stretch !important;
+    padding: 12px 14px 12px 8px !important;
+    position: relative !important;
+  }
+  .sparkline-y-axis {
+    width: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 2px 0 14px;
+    font-size: 8px;
+    font-weight: 700;
+    color: rgba(239,248,226,0.32);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .sparkline-plot {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+  }
+  .sparkline-grid {
+    position: absolute;
+    inset: 2px 0 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .sparkline-grid span {
+    height: 1px;
+    background: rgba(239,248,226,0.10);
+  }
+  .sparkline-day {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 4px !important;
+    flex: 1 !important;
+    height: 100% !important;
+    position: relative !important;
+    z-index: 1 !important;
+  }
+  .sparkline-bar {
+    width: 7px !important;
+    border-radius: 99px !important;
+    min-height: 4px !important;
+    transition: height 0.4s cubic-bezier(0.22,1,0.36,1);
+  }
+  .sparkline-bar.today {
+    box-shadow: 0 0 8px color-mix(in srgb, var(--acc), transparent 45%) !important;
+  }
+  .sparkline-label {
+    font-size: 9px !important;
+    line-height: 10px !important;
+    text-transform: none !important;
+  }
+  .weekly-summary-stats { display: none !important; }
+
+  /* ── Daily Goal Card Redesign ── */
+  .daily-goal-label {
+    font-size: clamp(12px,2.8vw,13px) !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    color: rgba(239,248,226,0.7) !important;
+    font-weight: 700 !important;
+    gap: 0 !important;
+  }
+  .daily-goal-top {
+    align-items: center !important;
+  }
+  .daily-goal-count {
+    font-size: clamp(26px,6vw,34px) !important;
+    font-weight: 900 !important;
+    color: #eff8e2 !important;
+    line-height: 1.1 !important;
+    letter-spacing: -0.5px !important;
+  }
+  .daily-goal-count span { color: var(--acc); }
+  .daily-goal-bar-bg { height: 5px !important; }
+  .daily-goal-status {
+    font-size: clamp(11px,2.5vw,12px);
+    color: rgba(239,248,226,0.35);
+    font-weight: 400;
+    margin-top: -2px;
+  }
+  .daily-goal-card {
+    padding: 14px 16px !important;
+    gap: 8px !important;
+  }
+  .daily-goal-label {
+    font-size: clamp(11px,2.5vw,12px) !important;
+  }
+  .goal-edit-btn {
+    font-size: 10px !important;
+  }
+  .daily-goal-count {
+    font-size: clamp(22px,5.2vw,29px) !important;
+    line-height: 1.05 !important;
+    letter-spacing: -0.35px !important;
+  }
+  .daily-goal-status {
+    font-size: clamp(10px,2.25vw,11px) !important;
+    line-height: 1.25 !important;
+    margin-top: 0 !important;
+  }
+  .daily-goal-done-badge {
+    padding: 6px 10px !important;
+    font-size: clamp(10px,2.25vw,11px) !important;
+    line-height: 1.2 !important;
+  }
+
+  /* ── XP / Level Row Redesign ── */
+  .dash-xp-row {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 14px !important;
+    padding: 14px 16px !important;
+  }
+  .dash-xp-left { display: none !important; }
+  .dash-xp-level {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: clamp(11px,2.6vw,13px) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: color-mix(in srgb, var(--p4), transparent 30%) !important;
+    border: 2px solid color-mix(in srgb, var(--acc), transparent 62%) !important;
+    border-radius: 50% !important;
+    line-height: 1 !important;
+    flex-shrink: 0 !important;
+    clip-path: none !important;
+    box-shadow: 0 0 12px color-mix(in srgb, var(--acc), transparent 80%) !important;
+    color: var(--acc) !important;
+    font-weight: 800 !important;
+  }
+  .dash-xp-info {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+  .dash-xp-title {
+    font-size: clamp(13px,3vw,15px) !important;
+    font-weight: 700 !important;
+    color: #eff8e2 !important;
+  }
+  .dash-xp-sub {
+    font-size: clamp(11px,2.5vw,12px) !important;
+    color: rgba(239,248,226,0.4) !important;
+    margin-top: 0 !important;
+  }
+  .dash-xp-bar-wrap {
+    max-width: 100% !important;
+    flex: none !important;
+    width: 100% !important;
+    margin-top: 5px !important;
+  }
+  .dash-xp-bar-bg { height: 5px !important; }
+
+  /* ── Today Stat Cards Redesign ── */
+  .dash-stat {
+    padding: 14px 12px !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    flex-direction: column !important;
+  }
+  .dash-stat-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--acc), transparent 88%);
+    border: 1px solid color-mix(in srgb, var(--acc), transparent 75%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .dash-stat-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    width: 100%;
+  }
+  .dash-stat-val {
+    font-size: clamp(24px,5.5vw,36px) !important;
+    line-height: 1.05 !important;
+    text-align: left !important;
+  }
+  .dash-stat-lbl { text-align: left !important; }
+  .dash-stat-sub {
+    font-size: clamp(9px,2vw,10px);
+    color: rgba(239,248,226,0.28);
+    font-weight: 400;
+    margin-top: 3px;
+    line-height: 1.3;
+  }
+
+  /* ── Recent Sessions: header + collapse ── */
+  .dash-recent-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2px;
+  }
+  .dash-recent-header-title {
+    font-size: clamp(10px,2.2vw,11px);
+    font-weight: 700;
+    color: rgba(239,248,226,0.35);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+  }
+  .dash-recent-header-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: color-mix(in srgb, var(--acc), transparent 86%);
+  }
+  .dash-view-all-btn {
+    font-size: clamp(10px,2.5vw,11px);
+    font-weight: 600;
+    color: var(--acc);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    padding: 0;
+    opacity: 0.75;
+    transition: opacity 0.15s;
+    flex-shrink: 0;
+  }
+  .dash-view-all-btn:hover { opacity: 1; }
+
+  /* Collapsed state: show only first session */
+  .dash-recent.collapsed .dash-session:nth-child(n+2) { display: none; }
+
+
+
+  /* Premium layered light theme: token-only depth and hierarchy pass */
+  html[data-base-theme="light"] {
+    --surface-page: var(--p0);
+    --surface-section: var(--p1);
+    --surface-raised: var(--p2);
+    --surface-selected: var(--p3);
+    --surface-soft: var(--p1);
+    --surface-glass: var(--surface-raised);
+    --subtle-border: var(--border);
+    --shadow-small: 0 1px 1px rgba(48,45,39,0.05), 0 4px 10px rgba(48,45,39,0.08), inset 0 1px 0 rgba(255,255,255,0.82);
+    --shadow-hover: 0 1px 2px rgba(48,45,39,0.07), 0 8px 16px rgba(48,45,39,0.12), inset 0 1px 0 rgba(255,255,255,0.9);
+    --shadow-inset: inset 0 2px 4px rgba(48,45,39,0.11), inset 0 -1px 0 rgba(255,255,255,0.70);
+    --light-raised-gradient: linear-gradient(180deg, var(--surface-selected) 0%, var(--surface-raised) 100%);
+    --light-section-gradient: linear-gradient(180deg, color-mix(in srgb, var(--surface-raised), var(--surface-section) 58%) 0%, var(--surface-section) 100%);
+    --light-accent-surface: color-mix(in srgb, var(--acc), var(--surface-selected) 76%);
+    --light-accent-text: color-mix(in srgb, var(--acc-vlo), #061004 46%);
+    --light-action-tone: color-mix(in srgb, var(--acc-vlo), #061004 56%);
+    --light-soft-ink: color-mix(in srgb, var(--text-primary), var(--surface-page) 14%);
+    --light-shadow-ink: #302d27;
+    --light-separation-border: color-mix(in srgb, var(--text-primary), transparent 88%);
+    --light-recessed-tint: color-mix(in srgb, var(--text-primary), transparent 90%);
+  }
+
+  html[data-base-theme="light"] body {
+    background: var(--surface-page);
+  }
+  html[data-base-theme="light"] body::before {
+    background:
+      radial-gradient(ellipse 62% 54% at 18% 10%, color-mix(in srgb, var(--surface-selected), transparent 48%) 0%, transparent 68%),
+      radial-gradient(ellipse 52% 46% at 86% 92%, color-mix(in srgb, var(--surface-section), transparent 24%) 0%, transparent 68%),
+      radial-gradient(ellipse 30% 26% at 76% 18%, color-mix(in srgb, var(--acc), transparent 94%) 0%, transparent 62%);
+    opacity: 0.48;
+  }
+  html[data-base-theme="light"] body::after {
+    background:
+      radial-gradient(ellipse 34% 28% at 92% 30%, color-mix(in srgb, var(--acc-2), transparent 96%) 0%, transparent 58%),
+      radial-gradient(ellipse 32% 28% at 10% 76%, color-mix(in srgb, var(--surface-selected), transparent 62%) 0%, transparent 58%);
+    opacity: 0.34;
+  }
+  html[data-base-theme="light"] .app {
+    background: linear-gradient(160deg, var(--surface-section) 0%, var(--surface-page) 100%);
+    border-color: var(--light-separation-border);
+    box-shadow: var(--shadow-app);
+  }
+
+  html[data-base-theme="light"] .setup-header,
+  html[data-base-theme="light"] .dash-header,
+  html[data-base-theme="light"] .profile-header,
+  html[data-base-theme="light"] .test-top,
+  html[data-base-theme="light"] .setup-body,
+  html[data-base-theme="light"] .dash-recent,
+  html[data-base-theme="light"] .profile-sessions,
+  html[data-base-theme="light"] .dash-profile-panel,
+  html[data-base-theme="light"] .improve-banner,
+  html[data-base-theme="light"] .theme-opts,
+  html[data-base-theme="light"] .practice-mode-card {
+    background: var(--light-section-gradient);
+    border-color: color-mix(in srgb, var(--subtle-border), transparent 34%);
+    box-shadow: var(--shadow-small);
+  }
+
+  html[data-base-theme="light"] .card,
+  html[data-base-theme="light"] .q-card,
+  html[data-base-theme="light"] .res-cw-card,
+  html[data-base-theme="light"] .daily-goal-card,
+  html[data-base-theme="light"] .weekly-summary-card,
+  html[data-base-theme="light"] .session-summary-card,
+  html[data-base-theme="light"] .profile-stat-card,
+  html[data-base-theme="light"] .dash-stat,
+  html[data-base-theme="light"] .dash-xp-row,
+  html[data-base-theme="light"] .bento-cell,
+  html[data-base-theme="light"] .pb-c,
+  html[data-base-theme="light"] .pb-xp-card,
+  html[data-base-theme="light"] .milestone-badge,
+  html[data-base-theme="light"] #timedStatRow .stat-c {
+    background: var(--light-raised-gradient);
+    border-color: color-mix(in srgb, var(--subtle-border), transparent 52%);
+    box-shadow: var(--shadow-small);
+  }
+
+  html[data-theme="default"][data-base-theme="light"] .card:hover,
+  html[data-theme="default"][data-base-theme="light"] .q-card:hover,
+  html[data-theme="default"][data-base-theme="light"] .daily-goal-card:hover,
+  html[data-theme="default"][data-base-theme="light"] .weekly-summary-card:hover,
+  html[data-theme="default"][data-base-theme="light"] .profile-stat-card:hover,
+  html[data-theme="default"][data-base-theme="light"] .dash-stat:hover,
+  html[data-theme="default"][data-base-theme="light"] .bento-cell:hover,
+  html[data-theme="default"][data-base-theme="light"] .pb-c:hover,
+  html[data-theme="default"][data-base-theme="light"] .milestone-badge:hover {
+    box-shadow: var(--shadow-hover);
+  }
+
+  html[data-base-theme="light"] .num-inp,
+  html[data-base-theme="light"] .ans-input,
+  html[data-base-theme="light"] .welcome-input,
+  html[data-base-theme="light"] .goal-edit-input,
+  html[data-base-theme="light"] .profile-input,
+  html[data-base-theme="light"] .select-trigger,
+  html[data-base-theme="light"] #customTimerInput,
+  html[data-base-theme="light"] #timedCustomMinsInput {
+    background: var(--light-raised-gradient) !important;
+    border-color: color-mix(in srgb, var(--subtle-border), transparent 38%) !important;
+    color: var(--text-primary) !important;
+    box-shadow: var(--shadow-small) !important;
+  }
+  html[data-base-theme="light"] .num-inp:hover,
+  html[data-base-theme="light"] .ans-input:hover,
+  html[data-base-theme="light"] .welcome-input:hover,
+  html[data-base-theme="light"] .goal-edit-input:hover,
+  html[data-base-theme="light"] .profile-input:hover,
+  html[data-base-theme="light"] .select-trigger:hover {
+    background: var(--surface-selected) !important;
+    box-shadow: var(--shadow-hover) !important;
+  }
+  html[data-base-theme="light"] .num-inp:focus,
+  html[data-base-theme="light"] .ans-input:focus,
+  html[data-base-theme="light"] .welcome-input:focus,
+  html[data-base-theme="light"] .goal-edit-input:focus,
+  html[data-base-theme="light"] .profile-input:focus,
+  html[data-base-theme="light"] .select-trigger:focus {
+    background: var(--surface-selected) !important;
+    border-color: color-mix(in srgb, var(--acc), transparent 38%) !important;
+    box-shadow: var(--shadow-hover), var(--focus-ring) !important;
+  }
+
+  html[data-base-theme="light"] #s-setup .num-inp,
+  html[data-base-theme="light"] #s-setup .bento-q-inp,
+  html[data-base-theme="light"] #s-setup #customTimerInput,
+  html[data-base-theme="light"] #s-setup #timedCustomMinsInput,
+  html[data-base-theme="light"] #s-setup .select-trigger {
+    background: color-mix(in srgb, var(--surface-page), var(--surface-section) 42%) !important;
+    border-color: color-mix(in srgb, var(--light-soft-ink), transparent 86%) !important;
+    color: var(--light-soft-ink) !important;
+    box-shadow:
+      inset 0 2px 4px color-mix(in srgb, var(--light-shadow-ink, #302d27), transparent 86%),
+      inset 0 -1px 0 rgba(255,255,255,0.72) !important;
+  }
+  html[data-base-theme="light"] #s-setup .num-inp:hover,
+  html[data-base-theme="light"] #s-setup .bento-q-inp:hover,
+  html[data-base-theme="light"] #s-setup #customTimerInput:hover,
+  html[data-base-theme="light"] #s-setup #timedCustomMinsInput:hover,
+  html[data-base-theme="light"] #s-setup .select-trigger:hover {
+    background: color-mix(in srgb, var(--surface-selected), var(--surface-section) 54%) !important;
+    box-shadow:
+      inset 0 2px 5px color-mix(in srgb, var(--light-shadow-ink, #302d27), transparent 84%),
+      inset 0 -1px 0 rgba(255,255,255,0.78) !important;
+  }
+  html[data-base-theme="light"] #s-setup .num-inp:focus,
+  html[data-base-theme="light"] #s-setup .bento-q-inp:focus,
+  html[data-base-theme="light"] #s-setup #customTimerInput:focus,
+  html[data-base-theme="light"] #s-setup #timedCustomMinsInput:focus,
+  html[data-base-theme="light"] #s-setup .select-trigger:focus {
+    background: color-mix(in srgb, var(--surface-selected), var(--surface-section) 38%) !important;
+    border-color: color-mix(in srgb, var(--light-action-tone), transparent 50%) !important;
+    box-shadow:
+      inset 0 2px 5px color-mix(in srgb, var(--light-shadow-ink, #302d27), transparent 82%),
+      inset 0 -1px 0 rgba(255,255,255,0.82),
+      0 0 0 3px color-mix(in srgb, var(--acc), transparent 82%) !important;
+  }
+
+  html[data-base-theme="light"] .type-btn,
+  html[data-base-theme="light"] .timer-opt,
+  html[data-base-theme="light"] .diff-btn,
+  html[data-base-theme="light"] .pick-btn,
+  html[data-base-theme="light"] .theme-opt-btn,
+  html[data-base-theme="light"] .tables-select-btn,
+  html[data-base-theme="light"] .focus-chip,
+  html[data-base-theme="light"] .focus-all-btn,
+  html[data-base-theme="light"] .back-btn,
+  html[data-base-theme="light"] .dash-profile-btn,
+  html[data-base-theme="light"] .profile-header-edit,
+  html[data-base-theme="light"] .hint-btn,
+  html[data-base-theme="light"] .home-btn,
+  html[data-base-theme="light"] .export-btn {
+    background: var(--light-raised-gradient);
+    border-color: color-mix(in srgb, var(--subtle-border), transparent 48%);
+    color: var(--text-secondary);
+    box-shadow: var(--shadow-small);
+    text-shadow: none;
+  }
+  html[data-base-theme="light"] .type-btn:hover,
+  html[data-base-theme="light"] .timer-opt:hover,
+  html[data-base-theme="light"] .diff-btn:hover,
+  html[data-base-theme="light"] .pick-btn:hover:not(:disabled),
+  html[data-base-theme="light"] .theme-opt-btn:hover,
+  html[data-base-theme="light"] .tables-select-btn:hover,
+  html[data-base-theme="light"] .focus-chip:hover,
+  html[data-base-theme="light"] .focus-all-btn:hover,
+  html[data-base-theme="light"] .back-btn:hover,
+  html[data-base-theme="light"] .dash-profile-btn:hover,
+  html[data-base-theme="light"] .profile-header-edit:hover,
+  html[data-base-theme="light"] .hint-btn:hover:not(:disabled),
+  html[data-base-theme="light"] .home-btn:hover,
+  html[data-base-theme="light"] .export-btn:hover {
+    background: var(--surface-selected);
+    border-color: color-mix(in srgb, var(--border-strong), transparent 28%);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-hover);
+  }
+
+  html[data-base-theme="light"] .type-btn.active,
+  html[data-base-theme="light"] .timer-opt.active,
+  html[data-base-theme="light"] .diff-btn.active,
+  html[data-base-theme="light"] .theme-opt-btn.active,
+  html[data-base-theme="light"] .focus-chip.selected,
+  html[data-base-theme="light"] .milestone-badge.unlocked,
+  html[data-base-theme="light"] .session-summary-xp {
+    background: var(--light-accent-surface);
+    border-color: color-mix(in srgb, var(--acc), transparent 42%);
+    color: var(--light-accent-text);
+    box-shadow: var(--shadow-hover);
+    font-weight: 800;
+  }
+
+  html[data-base-theme="light"] .back-btn,
+  html[data-base-theme="light"] .dash-profile-btn,
+  html[data-base-theme="light"] .profile-header .back-btn {
+    background: var(--light-raised-gradient) !important;
+    border-color: var(--light-separation-border) !important;
+    color: var(--light-soft-ink) !important;
+    box-shadow: var(--shadow-small) !important;
+  }
+  html[data-base-theme="light"] .back-btn svg,
+  html[data-base-theme="light"] .dash-profile-btn svg,
+  html[data-base-theme="light"] .profile-header .back-btn svg {
+    color: var(--light-soft-ink);
+    stroke: currentColor;
+    opacity: 0.86;
+  }
+  html[data-base-theme="light"] .profile-header .back-btn:hover,
+  html[data-base-theme="light"] .back-btn:hover,
+  html[data-base-theme="light"] .dash-profile-btn:hover {
+    background: var(--surface-selected) !important;
+    color: var(--light-soft-ink) !important;
+    box-shadow: var(--shadow-hover) !important;
+  }
+
+  html[data-base-theme="light"] .check-btn:not(:disabled),
+  html[data-base-theme="light"] .again-btn,
+  html[data-base-theme="light"] .welcome-btn,
+  html[data-base-theme="light"] .dash-start-btn,
+  html[data-base-theme="light"] .bento-start,
+  html[data-base-theme="light"] .cp-done-btn {
+    background: linear-gradient(180deg, var(--acc-hi) 0%, var(--acc) 100%);
+    border-color: color-mix(in srgb, var(--acc-lo), transparent 36%);
+    color: var(--btn-txt);
+    box-shadow: 0 1px 1px color-mix(in srgb, var(--acc-vlo), transparent 78%), 0 6px 14px color-mix(in srgb, var(--acc), transparent 76%), inset 0 1px 0 rgba(255,255,255,0.34);
+  }
+  html[data-base-theme="light"] .check-btn:not(:disabled):hover,
+  html[data-base-theme="light"] .again-btn:hover,
+  html[data-base-theme="light"] .welcome-btn:hover,
+  html[data-base-theme="light"] .dash-start-btn:hover,
+  html[data-base-theme="light"] .bento-start:hover,
+  html[data-base-theme="light"] .cp-done-btn:hover {
+    box-shadow: 0 1px 2px color-mix(in srgb, var(--acc-vlo), transparent 72%), 0 9px 18px color-mix(in srgb, var(--acc), transparent 70%), inset 0 1px 0 rgba(255,255,255,0.42);
+    opacity: 1;
+  }
+  html[data-base-theme="light"] .check-btn:disabled,
+  html[data-base-theme="light"] .hint-btn:disabled {
+    background: var(--surface-section);
+    color: var(--text-muted);
+    border-color: color-mix(in srgb, var(--subtle-border), transparent 42%);
+    box-shadow: var(--shadow-inset);
+  }
+
+  html[data-base-theme="light"] .toggle .tslider,
+  html[data-base-theme="light"] .unlimited-tog-pill {
+    background: var(--surface-section);
+    border-color: color-mix(in srgb, var(--subtle-border), transparent 28%);
+    box-shadow: var(--shadow-inset);
+  }
+  html[data-base-theme="light"] .toggle .tslider::before,
+  html[data-base-theme="light"] .unlimited-tog-pill::after {
+    background: var(--surface-selected);
+    box-shadow: var(--shadow-small);
+  }
+  html[data-base-theme="light"] .toggle input:checked + .tslider,
+  html[data-base-theme="light"] .unlimited-tog-label input:checked + .unlimited-tog-pill {
+    background: linear-gradient(180deg, var(--acc-hi) 0%, var(--acc) 100%) !important;
+    border-color: color-mix(in srgb, var(--acc-lo), transparent 34%) !important;
+    box-shadow: var(--shadow-small) !important;
+  }
+  html[data-base-theme="light"] .unlimited-tog-label input:checked + .unlimited-tog-pill::after {
+    transform: translateX(16px);
+    background: var(--surface-selected) !important;
+    box-shadow: var(--shadow-small) !important;
+  }
+  html[data-base-theme="light"] .unlimited-tog-label input:checked ~ span,
+  html[data-base-theme="light"] .unlimited-tog-label:has(input:checked) {
+    color: var(--light-action-tone) !important;
+  }
+
+  html[data-base-theme="light"] .prog-bar,
+  html[data-base-theme="light"] .dash-xp-bar-bg,
+  html[data-base-theme="light"] .daily-goal-bar-bg,
+  html[data-base-theme="light"] .profile-bar-bg,
+  html[data-base-theme="light"] .pb-xp-bar-bg,
+  html[data-base-theme="light"] .timed-range {
+    background: var(--surface-section);
+    box-shadow: var(--shadow-inset);
+    border-color: transparent;
+  }
+  html[data-base-theme="light"] .prog-fill,
+  html[data-base-theme="light"] .dash-xp-bar-fill,
+  html[data-base-theme="light"] .daily-goal-bar-fill,
+  html[data-base-theme="light"] .profile-bar-fill,
+  html[data-base-theme="light"] .pb-xp-bar-fill {
+    background: linear-gradient(90deg, var(--acc-lo), var(--acc));
+    box-shadow: 0 1px 2px color-mix(in srgb, var(--acc-vlo), transparent 72%), inset 0 1px 0 rgba(255,255,255,0.34);
+  }
+
+  html[data-base-theme="light"] .review-wrap,
+  html[data-base-theme="light"] .review-scroll,
+  html[data-base-theme="light"] #reviewList,
+  html[data-base-theme="light"] .dash-session,
+  html[data-base-theme="light"] .dash-session + .dash-session,
+  html[data-base-theme="light"] .profile-danger {
+    background: var(--surface-section);
+    border-color: color-mix(in srgb, var(--subtle-border), transparent 60%);
+    box-shadow: var(--shadow-inset);
+  }
+  html[data-base-theme="light"] .dash-session-pct.good,
+  html[data-base-theme="light"] .fb-ok {
+    background: color-mix(in srgb, var(--ok-bg), var(--surface-selected) 42%);
+    color: var(--ok-text);
+    border-color: color-mix(in srgb, var(--ok-bd), transparent 36%);
+  }
+  html[data-base-theme="light"] .dash-session-pct.bad,
+  html[data-base-theme="light"] .fb-no {
+    background: color-mix(in srgb, var(--err-bg), var(--surface-selected) 42%);
+    color: var(--text-primary);
+    border-color: color-mix(in srgb, var(--err), transparent 52%);
+  }
+  html[data-base-theme="light"] .ans-split-overlay .split-sep,
+  html[data-base-theme="light"] .res-cw-divider {
+    background: color-mix(in srgb, var(--light-soft-ink), transparent 62%);
+  }
+  html[data-base-theme="light"] .res-cw-divider {
+    width: 1px;
+    margin: 12px 0;
+  }
+  html[data-base-theme="light"] .review-head {
+    color: var(--light-soft-ink);
+    border-bottom: 1px solid color-mix(in srgb, var(--light-soft-ink), transparent 84%);
+  }
+  html[data-base-theme="light"] .review-item {
+    border-bottom-color: color-mix(in srgb, var(--light-soft-ink), transparent 86%);
+  }
+  html[data-base-theme="light"] .review-item:last-child {
+    border-bottom: none;
+  }
+  html[data-base-theme="light"] .ri-q,
+  html[data-base-theme="light"] .ri-a {
+    color: var(--light-soft-ink);
+  }
+  html[data-base-theme="light"] .ri-ok {
+    color: var(--light-action-tone);
+  }
+  html[data-base-theme="light"] .ri-no {
+    color: color-mix(in srgb, var(--err), #1d1612 16%);
+  }
+  html[data-base-theme="light"] .chart-wrap {
+    background: color-mix(in srgb, var(--light-soft-ink), transparent 92%);
+    border: 1px solid color-mix(in srgb, var(--light-soft-ink), transparent 84%);
+    box-shadow: var(--shadow-inset);
+  }
+  html[data-base-theme="light"] .chart-title,
+  html[data-base-theme="light"] .chart-row-label,
+  html[data-base-theme="light"] .chart-row-pct {
+    color: var(--light-soft-ink);
+  }
+  html[data-base-theme="light"] .chart-row-bar-bg {
+    background: color-mix(in srgb, var(--light-soft-ink), transparent 82%);
+    box-shadow: var(--shadow-inset);
+  }
+  html[data-base-theme="light"] .chart-row-bar-bg::before {
+    background:
+      linear-gradient(90deg, transparent calc(50% - 0.5px), color-mix(in srgb, var(--light-soft-ink), transparent 82%) calc(50% - 0.5px), color-mix(in srgb, var(--light-soft-ink), transparent 82%) calc(50% + 0.5px), transparent calc(50% + 0.5px)),
+      linear-gradient(90deg, color-mix(in srgb, var(--light-soft-ink), transparent 84%) 1px, transparent 1px),
+      linear-gradient(270deg, color-mix(in srgb, var(--light-soft-ink), transparent 84%) 1px, transparent 1px);
+  }
+  html[data-base-theme="light"] .chart-row-bar-fill.sq,
+  html[data-base-theme="light"] .chart-row-bar-fill.cu {
+    background: linear-gradient(90deg, var(--acc-lo), var(--acc));
+    box-shadow: 0 1px 2px color-mix(in srgb, var(--acc-vlo), transparent 72%), inset 0 1px 0 rgba(255,255,255,0.34);
+  }
+  html[data-base-theme="light"] .chart-axis-scale {
+    color: color-mix(in srgb, var(--light-soft-ink), transparent 28%);
+  }
+
+  html[data-base-theme="light"] #weeklySparkline {
+    background: var(--light-recessed-tint);
+    border: 1px solid var(--light-separation-border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-inset);
+  }
+  html[data-base-theme="light"] #weeklySparkline .sparkline-bar,
+  html[data-base-theme="light"] #weeklySparkline .sparkline-dot,
+  html[data-base-theme="light"] #weeklySparkline [style*="background"] {
+    background-color: color-mix(in srgb, var(--acc), var(--light-action-tone) 16%) !important;
+  }
+  html[data-base-theme="light"] #weeklySparkline .sparkline-day,
+  html[data-base-theme="light"] #weeklySparkline .sparkline-label {
+    color: color-mix(in srgb, var(--text-primary), transparent 34%);
+  }
+  html[data-base-theme="light"] #weeklySparkline .sparkline-y-axis {
+    color: color-mix(in srgb, var(--light-soft-ink), transparent 30%);
+  }
+  html[data-base-theme="light"] #weeklySparkline .sparkline-grid span {
+    background: color-mix(in srgb, var(--light-soft-ink), transparent 84%);
+  }
+
+  html[data-base-theme="light"] .setup-header h1,
+  html[data-base-theme="light"] .dash-name,
+  html[data-base-theme="light"] .profile-header-name,
+  html[data-base-theme="light"] .welcome-heading,
+  html[data-base-theme="light"] .res-title,
+  html[data-base-theme="light"] .big-num,
+  html[data-base-theme="light"] .stat-v,
+  html[data-base-theme="light"] .pb-v,
+  html[data-base-theme="light"] .profile-stat-val,
+  html[data-base-theme="light"] .dash-stat-val,
+  html[data-base-theme="light"] .review-title,
+  html[data-base-theme="light"] .q-main {
+    color: var(--text-primary);
+  }
+  html[data-base-theme="light"] .dash-name span,
+  html[data-base-theme="light"] .dash-stat-val,
+  html[data-base-theme="light"] .daily-goal-count,
+  html[data-base-theme="light"] .pb-new,
+  html[data-base-theme="light"] .q-expr,
+  html[data-base-theme="light"] #qExpr,
+  html[data-base-theme="light"] .timer-secs,
+  html[data-base-theme="light"] .stopwatch-num {
+    color: var(--light-action-tone);
+  }
+  html[data-base-theme="light"] .dash-view-all-btn,
+  html[data-base-theme="light"] .goal-edit-btn,
+  html[data-base-theme="light"] .goal-edit-btn:hover,
+  html[data-base-theme="light"] .dash-name span,
+  html[data-base-theme="light"] .dash-stat-val,
+  html[data-base-theme="light"] .daily-goal-count,
+  html[data-base-theme="light"] .daily-goal-count span,
+  html[data-base-theme="light"] .pb-new {
+    color: var(--light-action-tone);
+  }
+  html[data-base-theme="light"] .daily-goal-label {
+    color: var(--light-soft-ink) !important;
+  }
+  html[data-base-theme="light"] .daily-goal-status,
+  html[data-base-theme="light"] .daily-goal-done-badge,
+  html[data-base-theme="light"] .daily-goal-done-badge * {
+    color: var(--light-soft-ink) !important;
+  }
+  html[data-base-theme="light"] .session-summary-close {
+    color: var(--light-soft-ink) !important;
+    background: var(--surface-raised);
+    border-color: var(--light-separation-border);
+  }
+  html[data-base-theme="light"] .goal-count-sep {
+    color: var(--light-action-tone) !important;
+  }
+  html[data-base-theme="light"] .type-btn.active,
+  html[data-base-theme="light"] .timer-opt.active,
+  html[data-base-theme="light"] .diff-btn.active,
+  html[data-base-theme="light"] .theme-opt-btn.active,
+  html[data-base-theme="light"] .tables-select-btn.active,
+  html[data-base-theme="light"] .focus-chip.selected,
+  html[data-base-theme="light"] .select-option.active,
+  html[data-base-theme="light"] .badge-cu,
+  html[data-base-theme="light"] .fb-ok,
+  html[data-base-theme="light"] .ans-input.correct,
+  html[data-base-theme="light"] .ans-input-wrap::after,
+  html[data-base-theme="light"] .ans-split-overlay .split-correct-val,
+  html[data-base-theme="light"] .pick-btn.correct,
+  html[data-base-theme="light"] .session-summary-score,
+  html[data-base-theme="light"] .session-summary-xp,
+  html[data-base-theme="light"] .dash-view-all-btn,
+  html[data-base-theme="light"] .goal-edit-btn,
+  html[data-base-theme="light"] .goal-edit-btn:hover,
+  html[data-base-theme="light"] .dash-name span,
+  html[data-base-theme="light"] .dash-stat-val,
+  html[data-base-theme="light"] .daily-goal-count,
+  html[data-base-theme="light"] .daily-goal-count span,
+  html[data-base-theme="light"] .pb-new,
+  html[data-base-theme="light"] .pb-xp-val,
+  html[data-base-theme="light"] .res-cw-ok,
+  html[data-base-theme="light"] .sv-ok,
+  html[data-base-theme="light"] .ri-ok,
+  html[data-base-theme="light"] .q-expr,
+  html[data-base-theme="light"] #qExpr,
+  html[data-base-theme="light"] .timer-secs,
+  html[data-base-theme="light"] .stopwatch-num,
+  html[data-base-theme="light"] .dash-xp-title,
+  html[data-base-theme="light"] .dash-xp-level,
+  html[data-base-theme="light"] .weekly-stat-val,
+  html[data-base-theme="light"] .xp-pill,
+  html[data-base-theme="light"] .milestone-badge.unlocked .milestone-badge-name,
+  html[data-base-theme="light"] .milestone-badge-val,
+  html[data-base-theme="light"] .daily-challenge-badge.avail,
+  html[data-base-theme="light"] .dc-tab-day,
+  html[data-base-theme="light"] .dc-tab-mon,
+  html[data-base-theme="light"] .dc-chevron,
+  html[data-base-theme="light"] .dash-session-pct.good,
+  html[data-base-theme="light"] .profile-stat-val,
+  html[data-base-theme="light"] .profile-acc-val,
+  html[data-base-theme="light"] .profile-name-edit button,
+  html[data-base-theme="light"] .practice-mode-active-badge,
+  html[data-base-theme="light"] .profile-save-btn,
+  html[data-base-theme="light"] .xp-float,
+  html[data-base-theme="light"] .levelup-modal-level,
+  html[data-base-theme="light"] .timed-result-num,
+  html[data-base-theme="light"] .timed-result-stat-num {
+    color: var(--light-action-tone) !important;
+    text-shadow: none !important;
+  }
+  html[data-base-theme="light"] .goal-count-unit {
+    color: var(--light-soft-ink) !important;
+  }
+  html[data-base-theme="light"] .daily-goal-count {
+    text-shadow: 0 1px 0 rgba(255,255,255,0.72);
+  }
+  html[data-base-theme="light"] .dash-xp-info {
+    color: var(--light-soft-ink);
+  }
+  html[data-base-theme="light"] .dash-xp-info * {
+    color: var(--light-soft-ink);
+  }
+  html[data-base-theme="light"] .dash-xp-title {
+    color: var(--light-action-tone) !important;
+    opacity: 1;
+  }
+  html[data-base-theme="light"] .dash-xp-sub {
+    color: var(--light-soft-ink) !important;
+    opacity: 0.86;
+  }
+  html[data-base-theme="light"] .dash-xp-level {
+    color: var(--light-action-tone);
+    border-color: color-mix(in srgb, var(--acc), transparent 38%);
+  }
+  html[data-base-theme="light"] .dash-session-date,
+  html[data-base-theme="light"] .dash-session-score,
+  html[data-base-theme="light"] .dash-session-score[style] {
+    color: var(--light-soft-ink) !important;
+  }
+  html[data-base-theme="light"] .dash-session-pct {
+    color: var(--light-soft-ink);
+  }
+  html[data-base-theme="light"] .unlimited-row,
+  html[data-base-theme="light"] .unlimited-label,
+  html[data-base-theme="light"] .unlimited-tog-label,
+  html[data-base-theme="light"] .unlimited-tog-label * {
+    color: var(--light-soft-ink) !important;
+  }
+  html[data-base-theme="light"] .dash-stat-sub,
+  html[data-base-theme="light"] .dash-stat-body,
+  html[data-base-theme="light"] .dash-stat-body * {
+    color: color-mix(in srgb, var(--light-soft-ink), transparent 16%);
+  }
+  html[data-base-theme="light"] .dash-stat-val {
+    color: var(--light-action-tone);
+  }
+  html[data-base-theme="light"] #weaknessWrap,
+  html[data-base-theme="light"] #weaknessWrap *,
+  html[data-base-theme="light"] #weaknessList,
+  html[data-base-theme="light"] #weaknessList * {
+    color: var(--light-soft-ink) !important;
+  }
+  html[data-base-theme="light"] #weaknessList span {
+    background: color-mix(in srgb, var(--err-bg), var(--surface-selected) 48%) !important;
+    border-color: color-mix(in srgb, var(--err), transparent 72%) !important;
+  }
+  html[data-base-theme="light"] #timedSliderWrap .timed-slider-label,
+  html[data-base-theme="light"] #timedSliderWrap .timed-slider-val,
+  html[data-base-theme="light"] #timedSliderWrap .timed-tick,
+  html[data-base-theme="light"] #timedSliderWrap .timed-tick.active-tick {
+    color: var(--light-soft-ink) !important;
+    text-shadow: none !important;
+  }
+  html[data-base-theme="light"] #timedSliderWrap .timed-tick {
+    opacity: 0.64;
+  }
+  html[data-base-theme="light"] #timedSliderWrap .timed-tick.active-tick,
+  html[data-base-theme="light"] #timedSliderWrap .timed-slider-val {
+    opacity: 1;
+  }
+  html[data-base-theme="light"] .card-title,
+  html[data-base-theme="light"] .bento-label,
+  html[data-base-theme="light"] .dash-section-title,
+  html[data-base-theme="light"] .dash-recent-header-title,
+  html[data-base-theme="light"] .daily-goal-label,
+  html[data-base-theme="light"] .chart-title,
+  html[data-base-theme="light"] .review-head,
+  html[data-base-theme="light"] .weekly-summary-title,
+  html[data-base-theme="light"] .session-summary-title,
+  html[data-base-theme="light"] .improve-banner-title,
+  html[data-base-theme="light"] .practice-mode-title,
+  html[data-base-theme="light"] .profile-acc-label,
+  html[data-base-theme="light"] .custom-pickers-label,
+  html[data-base-theme="light"] .cp-section-label {
+    color: var(--light-soft-ink) !important;
+  }
+  html[data-base-theme="light"] .dash-section-title::after,
+  html[data-base-theme="light"] .dash-recent-header-title::after {
+    background: color-mix(in srgb, var(--light-soft-ink), transparent 84%) !important;
+  }
+  html[data-base-theme="light"] .setup-header,
+  html[data-base-theme="light"] .dash-header,
+  html[data-base-theme="light"] .profile-header {
+    border-color: var(--light-separation-border);
+    box-shadow: var(--shadow-hover);
+  }
+  html[data-theme="default"][data-base-theme="light"] #s-dashboard .dash-header {
+    border-color: color-mix(in srgb, var(--acc), var(--light-separation-border) 72%);
+    box-shadow:
+      0 1px 1px rgba(255,255,255,0.74) inset,
+      0 2px 5px color-mix(in srgb, var(--light-shadow-ink), transparent 88%),
+      0 14px 28px color-mix(in srgb, var(--light-shadow-ink), transparent 84%),
+      0 28px 48px color-mix(in srgb, var(--acc-vlo), transparent 88%);
+  }
+  html[data-base-theme="light"] .card,
+  html[data-base-theme="light"] .q-card,
+  html[data-base-theme="light"] .res-cw-card,
+  html[data-base-theme="light"] .review-wrap,
+  html[data-base-theme="light"] .daily-goal-card,
+  html[data-base-theme="light"] .weekly-summary-card,
+  html[data-base-theme="light"] .session-summary-card,
+  html[data-base-theme="light"] .profile-stat-card,
+  html[data-base-theme="light"] .dash-stat,
+  html[data-base-theme="light"] .dash-recent,
+  html[data-base-theme="light"] .dash-session,
+  html[data-base-theme="light"] .dash-xp-row,
+  html[data-base-theme="light"] .bento-cell,
+  html[data-base-theme="light"] .pb-c,
+  html[data-base-theme="light"] .pb-xp-card,
+  html[data-base-theme="light"] .milestone-badge {
+    border-color: var(--light-separation-border);
+  }
+
+  html[data-theme="minimal"][data-base-theme="light"] {
+    --surface-page: var(--p0);
+    --surface-section: color-mix(in srgb, var(--p1), var(--p0) 42%);
+    --surface-raised: color-mix(in srgb, var(--p2), var(--p1) 56%);
+    --surface-selected: color-mix(in srgb, var(--p3), var(--p2) 50%);
+    --shadow-small: 0 1px 1px rgba(48,45,39,0.025), inset 0 1px 0 rgba(255,255,255,0.42);
+    --shadow-hover: 0 1px 2px rgba(48,45,39,0.04), inset 0 1px 0 rgba(255,255,255,0.48);
+    --shadow-inset: inset 0 1px 2px rgba(48,45,39,0.07), inset 0 -1px 0 rgba(255,255,255,0.38);
+    --light-raised-gradient: var(--surface-raised);
+    --light-section-gradient: var(--surface-section);
+  }
+  html[data-theme="minimal"][data-base-theme="light"] body::before,
+  html[data-theme="minimal"][data-base-theme="light"] body::after {
+    display: none;
+  }
+  html[data-theme="minimal"][data-base-theme="light"] .app {
+    background: var(--surface-page);
+    border-color: var(--light-separation-border);
+    box-shadow: none;
+  }
+  html[data-theme="minimal"][data-base-theme="light"] .setup-header,
+  html[data-theme="minimal"][data-base-theme="light"] .dash-header,
+  html[data-theme="minimal"][data-base-theme="light"] .profile-header,
+  html[data-theme="minimal"][data-base-theme="light"] .test-top,
+  html[data-theme="minimal"][data-base-theme="light"] .setup-body,
+  html[data-theme="minimal"][data-base-theme="light"] .dash-recent,
+  html[data-theme="minimal"][data-base-theme="light"] .profile-sessions,
+  html[data-theme="minimal"][data-base-theme="light"] .dash-profile-panel,
+  html[data-theme="minimal"][data-base-theme="light"] .improve-banner {
+    background: var(--surface-section);
+    border-color: var(--light-separation-border);
+    box-shadow: none;
+  }
+  html[data-theme="minimal"][data-base-theme="light"] .card,
+  html[data-theme="minimal"][data-base-theme="light"] .q-card,
+  html[data-theme="minimal"][data-base-theme="light"] .res-cw-card,
+  html[data-theme="minimal"][data-base-theme="light"] .review-wrap,
+  html[data-theme="minimal"][data-base-theme="light"] .daily-goal-card,
+  html[data-theme="minimal"][data-base-theme="light"] .weekly-summary-card,
+  html[data-theme="minimal"][data-base-theme="light"] .session-summary-card,
+  html[data-theme="minimal"][data-base-theme="light"] .profile-stat-card,
+  html[data-theme="minimal"][data-base-theme="light"] .dash-stat,
+  html[data-theme="minimal"][data-base-theme="light"] .dash-xp-row,
+  html[data-theme="minimal"][data-base-theme="light"] .bento-cell,
+  html[data-theme="minimal"][data-base-theme="light"] .pb-c,
+  html[data-theme="minimal"][data-base-theme="light"] .pb-xp-card {
+    background: var(--surface-raised);
+    border-color: var(--light-separation-border);
+    box-shadow: var(--shadow-small);
+  }
+  html[data-theme="minimal"][data-base-theme="light"] .num-inp,
+  html[data-theme="minimal"][data-base-theme="light"] .ans-input,
+  html[data-theme="minimal"][data-base-theme="light"] .welcome-input,
+  html[data-theme="minimal"][data-base-theme="light"] .goal-edit-input,
+  html[data-theme="minimal"][data-base-theme="light"] .profile-input,
+  html[data-theme="minimal"][data-base-theme="light"] .select-trigger,
+  html[data-theme="minimal"][data-base-theme="light"] .type-btn,
+  html[data-theme="minimal"][data-base-theme="light"] .timer-opt,
+  html[data-theme="minimal"][data-base-theme="light"] .diff-btn,
+  html[data-theme="minimal"][data-base-theme="light"] .pick-btn,
+  html[data-theme="minimal"][data-base-theme="light"] .theme-opt-btn {
+    background: var(--surface-raised) !important;
+    box-shadow: var(--shadow-small) !important;
+  }
+  html[data-theme="minimal"][data-base-theme="light"] .num-inp:hover,
+  html[data-theme="minimal"][data-base-theme="light"] .ans-input:hover,
+  html[data-theme="minimal"][data-base-theme="light"] .welcome-input:hover,
+  html[data-theme="minimal"][data-base-theme="light"] .goal-edit-input:hover,
+  html[data-theme="minimal"][data-base-theme="light"] .profile-input:hover,
+  html[data-theme="minimal"][data-base-theme="light"] .select-trigger:hover,
+  html[data-theme="minimal"][data-base-theme="light"] .type-btn:hover,
+  html[data-theme="minimal"][data-base-theme="light"] .timer-opt:hover,
+  html[data-theme="minimal"][data-base-theme="light"] .diff-btn:hover,
+  html[data-theme="minimal"][data-base-theme="light"] .pick-btn:hover:not(:disabled),
+  html[data-theme="minimal"][data-base-theme="light"] .theme-opt-btn:hover {
+    background: var(--surface-selected) !important;
+    box-shadow: var(--shadow-hover) !important;
+  }
