@@ -29,8 +29,8 @@
     if (!window.supabaseClient) throw new Error("Supabase client missing.");
 
     const { data, error } = await window.supabaseClient.auth.signUp({
-      email,
-      password
+      email: email,
+      password: password
     });
 
     if (error) throw error;
@@ -43,8 +43,8 @@
     if (!window.supabaseClient) throw new Error("Supabase client missing.");
 
     const { data, error } = await window.supabaseClient.auth.signInWithPassword({
-      email,
-      password
+      email: email,
+      password: password
     });
 
     if (error) throw error;
@@ -64,6 +64,59 @@
     window.authState.isLoggedIn = false;
   }
 
+  function setupAuthUI() {
+    const emailInput = document.getElementById("authEmail");
+    const passwordInput = document.getElementById("authPassword");
+    const signupBtn = document.getElementById("authSignupBtn");
+    const loginBtn = document.getElementById("authLoginBtn");
+    const logoutBtn = document.getElementById("authLogoutBtn");
+    const statusEl = document.getElementById("authStatus");
+
+    if (!emailInput || !passwordInput || !signupBtn || !loginBtn || !logoutBtn || !statusEl) {
+      return;
+    }
+
+    function setStatus(message) {
+      statusEl.textContent = message;
+    }
+
+    signupBtn.addEventListener("click", async function () {
+      try {
+        setStatus("Signing up...");
+        await signUpWithEmail(emailInput.value.trim(), passwordInput.value);
+        await refreshAuthState();
+        setStatus(window.authState.isLoggedIn ? "Logged in" : "Check your email to confirm signup");
+      } catch (error) {
+        setStatus(error.message || "Signup failed");
+      }
+    });
+
+    loginBtn.addEventListener("click", async function () {
+      try {
+        setStatus("Logging in...");
+        await loginWithEmail(emailInput.value.trim(), passwordInput.value);
+        await refreshAuthState();
+        setStatus(window.authState.isLoggedIn ? "Logged in" : "Login failed");
+      } catch (error) {
+        setStatus(error.message || "Login failed");
+      }
+    });
+
+    logoutBtn.addEventListener("click", async function () {
+      try {
+        setStatus("Logging out...");
+        await logoutUser();
+        setStatus("Not logged in");
+      } catch (error) {
+        setStatus(error.message || "Logout failed");
+      }
+    });
+
+    refreshAuthState().then(function () {
+      setStatus(window.authState.isLoggedIn ? "Logged in" : "Not logged in");
+    });
+  }
+
   window.refreshAuthState = refreshAuthState;
   window.signUpWithEmail = signUpWithEmail;
   window.loginWithEmail = loginWithEmail;
@@ -78,5 +131,6 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     refreshAuthState();
+    setupAuthUI();
   });
 })();

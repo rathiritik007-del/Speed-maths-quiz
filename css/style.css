@@ -3928,4 +3928,40 @@ select:focus {
   }
   html[data-theme="minimal"] #timedStatRow .stat-c {
     background: var(--surf);
-    border-color: rgba(25
+    border-color: rgba(25, 25, 25, 0.12);
+}
+
+.auth-panel {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+
+.auth-panel input {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.18));
+  background: var(--surface, rgba(255, 255, 255, 0.08));
+  color: var(--text, #fff);
+}
+
+.auth-panel input::placeholder {
+  color: currentColor;
+  opacity: 0.55;
+}
+
+.auth-panel button {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.18));
+  background: var(--accent, #c6ef4e);
+  color: var(--accent-text, #111);
+  cursor: pointer;
+}
+
+#authStatus {
+  font-size: 14px;
+  opacity: 0.8;
+}
