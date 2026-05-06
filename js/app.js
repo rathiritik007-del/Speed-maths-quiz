@@ -89,9 +89,9 @@ function getSavedBaseTheme() {
   try {
     const saved = localStorage.getItem(BASE_THEME_KEY);
     if (saved === 'vibrant' || saved === 'dark' || saved === 'light') return saved;
-    localStorage.setItem(BASE_THEME_KEY, 'vibrant');
+    localStorage.setItem(BASE_THEME_KEY, 'dark');
   } catch(e) {}
-  return 'vibrant';
+  return 'dark';
 }
 
 function buildAccentFamily(accentHex, baseTheme, hueShift = 0) {

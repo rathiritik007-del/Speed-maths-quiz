@@ -299,7 +299,7 @@
     if (baseTheme === null && theme === null && customColorsOn === null && customColors === null) return null;
     return {
       user_id: userId,
-      base_theme: baseTheme || 'vibrant',
+      base_theme: baseTheme || 'dark',
       theme: theme || 'default',
       custom_colors_enabled: customColorsOn === '1',
       custom_colors: customColors,
@@ -462,7 +462,7 @@
       if (!ctx) return;
       runRequest('user_settings', ctx.client.from('user_settings').upsert({
         user_id: ctx.user.id,
-        base_theme: readString(KEYS.baseTheme, 'vibrant'),
+        base_theme: readString(KEYS.baseTheme, 'dark'),
         theme: readString(KEYS.theme, 'default'),
         custom_colors_enabled: readString(KEYS.customColorsOn, '0') === '1',
         custom_colors: readJSON(KEYS.customColors, null),
@@ -670,7 +670,7 @@
         !!progressRow.practice_mode
       ] : [],
       settings: settingsRow ? [
-        settingsRow.base_theme || 'vibrant',
+        settingsRow.base_theme || 'dark',
         settingsRow.theme || 'default',
         !!settingsRow.custom_colors_enabled,
         settingsRow.custom_colors || null
@@ -703,7 +703,7 @@
         readString(KEYS.practiceMode, '0') === '1'
       ],
       settings: [
-        readString(KEYS.baseTheme, 'vibrant'),
+        readString(KEYS.baseTheme, 'dark'),
         readString(KEYS.theme, 'default'),
         readString(KEYS.customColorsOn, '0') === '1',
         readJSON(KEYS.customColors, null)
@@ -809,7 +809,7 @@
       || progressRow.practice_mode === true
     )) return true;
     if (settingsRow && (
-      (settingsRow.base_theme && settingsRow.base_theme !== 'vibrant')
+      (settingsRow.base_theme && settingsRow.base_theme !== 'dark')
       || (settingsRow.theme && settingsRow.theme !== 'default')
       || settingsRow.custom_colors_enabled === true
       || (settingsRow.custom_colors !== undefined && settingsRow.custom_colors !== null)
