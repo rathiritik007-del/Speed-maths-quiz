@@ -1718,7 +1718,7 @@ function saveProfileNameFromScreen() {
   if (ns) ns.textContent = name;
 }
 
-function confirmResetProfile() {
+async function confirmResetProfile() {
   if (!confirm('This will delete all your data permanently. Are you sure?')) return;
   try { localStorage.removeItem(PROFILE_KEY); } catch(e){}
   try { localStorage.removeItem(HISTORY_KEY); } catch(e){}
@@ -1727,7 +1727,16 @@ function confirmResetProfile() {
   try { localStorage.removeItem(WEAKNESS_KEY); } catch(e){}
   try { localStorage.removeItem(XP_KEY); } catch(e){}
   try { localStorage.removeItem(DAY_STREAK_KEY); } catch(e){}
+  try { localStorage.removeItem(GOAL_KEY); } catch(e){}
+  try { localStorage.removeItem(MILESTONES_KEY); } catch(e){}
+  try { localStorage.removeItem(DAILY_CHAL_KEY); } catch(e){}
   try { localStorage.removeItem(DC_HISTORY_KEY); } catch(e){}
+  try { localStorage.removeItem(PRACTICE_MODE_KEY); } catch(e){}
+  try { localStorage.removeItem(COLOR_THEME_KEY); } catch(e){}
+  try { localStorage.removeItem(COLOR_ENABLED_KEY); } catch(e){}
+  try { localStorage.removeItem(BASE_THEME_KEY); } catch(e){}
+  try { localStorage.removeItem(THEME_KEY); } catch(e){}
+  await window.resetSupabaseAppData?.();
   location.reload();
 }
 
