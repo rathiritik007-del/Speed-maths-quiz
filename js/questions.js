@@ -17,7 +17,10 @@ function applyPracticeMode(on) {
 }
 
 function setPracticeMode(on) {
-  try { localStorage.setItem(PRACTICE_MODE_KEY, on ? '1' : '0'); } catch(e) {}
+  try {
+    localStorage.setItem(PRACTICE_MODE_KEY, on ? '1' : '0');
+    window.syncUserProgressToSupabase?.();
+  } catch(e) {}
   applyPracticeMode(on);
   // If XP/level modal is showing, hide it immediately
   if (on) {
@@ -1134,6 +1137,32 @@ const autoTog = document.getElementById('autosubTog');
 const feedbackTog = document.getElementById('feedbackTog');
 const pickDropdown = document.getElementById('pickModeDropdown');
 
+function setSetupReveal(el, show, displayValue) {
+  if (!el) return;
+  const display = displayValue || 'block';
+  if (el._setupRevealTimer) clearTimeout(el._setupRevealTimer);
+  el.classList.add('setup-reveal');
+  if (show) {
+    el.style.display = display;
+    el.classList.remove('closing');
+    void el.offsetWidth;
+    el.classList.add('open');
+    return;
+  }
+  if (!el.classList.contains('open') && el.style.display === 'none') return;
+  el.classList.remove('open');
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    el.classList.remove('closing');
+    el.style.display = 'none';
+    return;
+  }
+  el.classList.add('closing');
+  el._setupRevealTimer = setTimeout(() => {
+    el.classList.remove('closing');
+    el.style.display = 'none';
+  }, 190);
+}
+
 pickTog.addEventListener('change', () => {
   if (pickTog.checked) {
     autoTog.checked = false;
@@ -1142,12 +1171,12 @@ pickTog.addEventListener('change', () => {
     autoTog.disabled = true;
     feedbackTog.disabled = true;
 
-    pickDropdown.style.display = 'block';
+    setSetupReveal(pickDropdown, true, 'block');
   } else {
     autoTog.disabled = false;
     feedbackTog.disabled = false;
 
-    pickDropdown.style.display = 'none';
+    setSetupReveal(pickDropdown, false, 'block');
   }
 });
 
@@ -1159,12 +1188,12 @@ function onTimedSliderChange(slider) {
   const labels = ['30s','60s','90s','2m','3m','5m','✏️ Custom'];
   const ci = document.getElementById('timedCustomMinsInput');
   if (idx === 6) {
-    ci.style.display = 'block';
+    setSetupReveal(ci, true, 'block');
     const mins = parseFloat(ci.value) || 1;
     timedDuration = Math.max(1, Math.round(mins * 60));
     document.getElementById('timedSliderVal').textContent = mins + 'm custom';
   } else {
-    ci.style.display = 'none';
+    setSetupReveal(ci, false, 'block');
     timedDuration = TIMED_DURATIONS_SETUP[idx];
     document.getElementById('timedSliderVal').textContent = labels[idx];
   }
@@ -1206,7 +1235,8 @@ function setTimerOpt(el){
   timerMode = el.dataset.value;
   const ci = document.getElementById('customTimerInput');
   const tw = document.getElementById('timedSliderWrap');
-  ci.style.display = timerMode === 'custom' ? 'block' : 'none';
+  setSetupReveal(ci, timerMode === 'custom', 'block');
+  setSetupReveal(tw, timerMode === 'timed', 'flex');
   tw.classList.toggle('visible', timerMode === 'timed');
   // update qCount label visibility
   const qCountCell = document.getElementById('qCount').closest('.bento-cell');
@@ -1242,7 +1272,7 @@ if(trigger){
       timerMode = opt.dataset.value;
       trigger.textContent = opt.textContent;
       dropdown.classList.remove('open');
-      customInput.style.display = timerMode === 'custom' ? 'block' : 'none';
+      setSetupReveal(customInput, timerMode === 'custom', 'block');
     };
   });
   document.addEventListener('click', (e) => {
@@ -1302,7 +1332,10 @@ function getPB(){
   try { return JSON.parse(localStorage.getItem(PB_KEY)) || {}; } catch(e){ return {}; }
 }
 function savePB(pb){
-  try { localStorage.setItem(PB_KEY, JSON.stringify(pb)); } catch(e){}
+  try {
+    localStorage.setItem(PB_KEY, JSON.stringify(pb));
+    window.syncUserProgressToSupabase?.();
+  } catch(e){}
 }
 
 // ───────── CONFETTI ─────────
@@ -1447,12 +1480,20 @@ function eraseHistoryConfirm() {
   renderHistory();
 }
 
+function saveSessionToSupabase(session) {
+  window.syncSessionToSupabase?.(session);
+}
+
 function saveHistory(score, total, pct, xp) {
   let history = [];
   try { history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch(e) {}
-  history.unshift({ score, total, correct: score, pct, xp: xp || 0, date: new Date().toISOString(), timed: isTimedMode ? timedDuration : null });
+  const session = { score, total, correct: score, pct, xp: xp || 0, date: new Date().toISOString(), timed: isTimedMode ? timedDuration : null };
+  history.unshift(session);
   history = history.slice(0, MAX_HISTORY);
-  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); } catch(e) {}
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    saveSessionToSupabase(session);
+  } catch(e) {}
 }
 
 function renderHistory() {
@@ -1485,6 +1526,8 @@ function toggleHistory(){
 //  PROFILE · WELCOME · DASHBOARD
 // ═══════════════════════════════════════════════
 const PROFILE_KEY = 'quiz_profile';
+const PROFILE_AVATAR_KEY = 'quiz_profile_avatar';
+const PROFILE_AVATAR_MAX_BYTES = 2 * 1024 * 1024;
 const HISTORY_KEY = 'quiz_history';
 const MAX_HISTORY = 200;
 
@@ -1505,7 +1548,114 @@ function getProfile() {
   try { return JSON.parse(localStorage.getItem(PROFILE_KEY)) || {}; } catch(e) { return {}; }
 }
 function saveProfile(data) {
-  try { localStorage.setItem(PROFILE_KEY, JSON.stringify(data)); } catch(e) {}
+  try {
+    localStorage.setItem(PROFILE_KEY, JSON.stringify(data));
+    window.syncProfileToSupabase?.();
+  } catch(e) {}
+}
+function getProfileAvatar() {
+  try { return localStorage.getItem(PROFILE_AVATAR_KEY) || ''; } catch(e) { return ''; }
+}
+function saveProfileAvatar(dataUrl, file) {
+  try {
+    localStorage.setItem(PROFILE_AVATAR_KEY, dataUrl);
+    window.syncProfileAvatarToSupabase?.(dataUrl, file);
+  } catch(e) {}
+}
+function removeProfileAvatar() {
+  closeProfilePhotoMenu();
+  try { localStorage.removeItem(PROFILE_AVATAR_KEY); } catch(e) {}
+  const input = document.getElementById('profileAvatarInput');
+  if (input) input.value = '';
+  window.deleteProfileAvatarFromSupabase?.();
+  renderProfileAvatar((getProfile().name || '?'));
+}
+function openProfileAvatarAction() {
+  if (getProfileAvatar()) {
+    toggleProfilePhotoMenu();
+  } else {
+    openProfileAvatarPicker();
+  }
+}
+function openProfileAvatarPicker() {
+  closeProfilePhotoMenu();
+  document.getElementById('profileAvatarInput')?.click();
+}
+function toggleProfilePhotoMenu() {
+  const menu = document.getElementById('profilePhotoMenu');
+  if (!menu) return;
+  const isOpen = menu.classList.contains('open');
+  if (!isOpen) positionProfilePhotoMenu();
+  menu.classList.toggle('open', !isOpen);
+  menu.setAttribute('aria-hidden', isOpen ? 'true' : 'false');
+}
+function positionProfilePhotoMenu() {
+  const menu = document.getElementById('profilePhotoMenu');
+  const wrap = document.getElementById('profileAvatarWrap');
+  if (!menu || !wrap) return;
+  const rect = wrap.getBoundingClientRect();
+  const left = Math.max(12, Math.min(rect.left, window.innerWidth - 156));
+  const top = Math.min(rect.bottom + 8, window.innerHeight - 150);
+  menu.style.left = left + 'px';
+  menu.style.top = top + 'px';
+}
+function closeProfilePhotoMenu() {
+  const menu = document.getElementById('profilePhotoMenu');
+  if (!menu) return;
+  menu.classList.remove('open');
+  menu.setAttribute('aria-hidden', 'true');
+}
+function viewProfileAvatar() {
+  const image = getProfileAvatar();
+  closeProfilePhotoMenu();
+  if (!image) return;
+  const modal = document.getElementById('profilePhotoViewer');
+  const img = document.getElementById('profilePhotoViewerImg');
+  if (!modal || !img) return;
+  img.src = image;
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+}
+function closeProfilePhotoViewer() {
+  const modal = document.getElementById('profilePhotoViewer');
+  const img = document.getElementById('profilePhotoViewerImg');
+  if (!modal) return;
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+  if (img) img.removeAttribute('src');
+}
+function renderProfileAvatar(name) {
+  const avatar = document.getElementById('profileAvatar');
+  if (!avatar) return;
+  const image = getProfileAvatar();
+  if (image) {
+    avatar.textContent = '';
+    avatar.style.backgroundImage = `url("${image}")`;
+  } else {
+    avatar.style.backgroundImage = '';
+    avatar.textContent = (name || '?').charAt(0).toUpperCase();
+    closeProfilePhotoMenu();
+  }
+}
+function handleProfileAvatarFile(file) {
+  if (!file) return;
+  if (!file.type || !file.type.startsWith('image/')) {
+    alert('Please choose an image file.');
+    return;
+  }
+  if (file.size > PROFILE_AVATAR_MAX_BYTES) {
+    alert('Please choose an image smaller than 2 MB.');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    const dataUrl = typeof reader.result === 'string' ? reader.result : '';
+    if (!dataUrl) return;
+    saveProfileAvatar(dataUrl, file);
+    renderProfileAvatar((getProfile().name || '?'));
+  };
+  reader.onerror = () => console.warn('Could not read selected profile image.');
+  reader.readAsDataURL(file);
 }
 function getSessionHistory() {
   try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch(e) { return []; }
@@ -1605,14 +1755,15 @@ function showProfile() {
   const profile  = getProfile();
   const history  = getSessionHistory();
   const pb       = getPB();
+  updateProfileVersionDisplay();
 
   // Sync practice mode toggle
   const tog = document.getElementById('practiceModeTog');
   if (tog) tog.checked = isPracticeMode();
 
-  // Avatar initial
+  // Avatar
   const name = profile.name || '?';
-  document.getElementById('profileAvatar').textContent = name.charAt(0).toUpperCase();
+  renderProfileAvatar(name);
   document.getElementById('profileDisplayName').textContent = name;
   document.getElementById('profileSince').textContent = profile.joinedDate
     ? 'Member since ' + new Date(profile.joinedDate).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'})
@@ -1680,11 +1831,24 @@ function showProfile() {
   show('s-profile');
 }
 
+function updateProfileVersionDisplay() {
+  const el = document.getElementById('profileVersion');
+  if (!el) return;
+  el.textContent = window.APP_VERSION ? `Version ${window.APP_VERSION}` : '';
+}
+
 function toggleProfileNameEdit() {
   const row = document.getElementById('profileNameEditRow');
   const isOpen = row.classList.contains('open');
   if (!isOpen) document.getElementById('profileNameEditInput').value = getProfile().name || '';
-  row.classList.toggle('open', !isOpen);
+  if (isOpen) {
+    row.classList.add('closing');
+    row.classList.remove('open');
+    setTimeout(() => row.classList.remove('closing'), 180);
+  } else {
+    row.classList.remove('closing');
+    row.classList.add('open');
+  }
 }
 
 function saveProfileNameFromScreen() {
@@ -1694,25 +1858,175 @@ function saveProfileNameFromScreen() {
   profile.name = name;
   saveProfile(profile);
   document.getElementById('profileDisplayName').textContent = name;
-  document.getElementById('profileAvatar').textContent = name.charAt(0).toUpperCase();
-  document.getElementById('profileNameEditRow').classList.remove('open');
+  renderProfileAvatar(name);
+  const row = document.getElementById('profileNameEditRow');
+  row.classList.add('closing');
+  row.classList.remove('open');
+  setTimeout(() => row.classList.remove('closing'), 180);
   // update dashboard name too if visible
   const ns = document.getElementById('dashNameSpan');
   if (ns) ns.textContent = name;
 }
 
+let _resetModalLastFocus = null;
+
 function confirmResetProfile() {
-  if (!confirm('This will delete all your data permanently. Are you sure?')) return;
-  try { localStorage.removeItem(PROFILE_KEY); } catch(e){}
-  try { localStorage.removeItem(HISTORY_KEY); } catch(e){}
-  try { localStorage.removeItem(PB_KEY); } catch(e){}
-  try { localStorage.removeItem(SR_KEY); } catch(e){}
-  try { localStorage.removeItem(WEAKNESS_KEY); } catch(e){}
-  try { localStorage.removeItem(XP_KEY); } catch(e){}
-  try { localStorage.removeItem(DAY_STREAK_KEY); } catch(e){}
-  try { localStorage.removeItem(DC_HISTORY_KEY); } catch(e){}
+  openResetProfileModal();
+}
+
+function openResetProfileModal() {
+  const modal = document.getElementById('resetProfileModal');
+  const context = document.getElementById('resetModalContext');
+  const confirmBtn = document.getElementById('resetConfirmBtn');
+  if (!modal) return;
+  const loggedIn = !!(window.authState && window.authState.isLoggedIn);
+  if (context) {
+    context.textContent = loggedIn
+      ? 'Your account and profile name will stay. You will remain signed in.'
+      : 'Your local profile and progress will be cleared.';
+  }
+  _resetModalLastFocus = document.activeElement;
+  modal.classList.remove('closing');
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  setTimeout(() => (confirmBtn || document.getElementById('resetCancelBtn'))?.focus(), 0);
+}
+
+function closeResetProfileModal() {
+  const modal = document.getElementById('resetProfileModal');
+  if (!modal) return;
+  modal.setAttribute('aria-hidden', 'true');
+  const restoreFocus = () => {
+    if (_resetModalLastFocus && typeof _resetModalLastFocus.focus === 'function') {
+      _resetModalLastFocus.focus();
+    }
+    _resetModalLastFocus = null;
+  };
+  if (!modal.classList.contains('open')) {
+    restoreFocus();
+    return;
+  }
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    modal.classList.remove('open', 'closing');
+    restoreFocus();
+    return;
+  }
+  modal.classList.add('closing');
+  setTimeout(() => {
+    modal.classList.remove('open', 'closing');
+    restoreFocus();
+  }, 180);
+}
+
+async function performResetProfile() {
+  closeResetProfileModal();
+  const loggedIn = !!(window.authState && window.authState.isLoggedIn);
+  const currentScreen = document.querySelector('.screen.active');
+  const preservedProfile = getProfile();
+  const preservedAvatar = getProfileAvatar();
+  const keysToClear = [
+    HISTORY_KEY,
+    PB_KEY,
+    XP_KEY,
+    DAY_STREAK_KEY,
+    GOAL_KEY,
+    MILESTONES_KEY,
+    WEAKNESS_KEY,
+    SR_KEY,
+    DAILY_CHAL_KEY,
+    DC_HISTORY_KEY,
+    PRACTICE_MODE_KEY,
+    'quiz_custom_colors',
+    'quiz_custom_colors_on',
+    'quiz_base_theme',
+    'quiz_theme',
+    'quiz_last_session_summary',
+    'quiz_weekly_xp',
+    'quiz_sync_notice_dismissed',
+    'quiz_local_data_synced',
+    PROFILE_AVATAR_KEY
+  ];
+
+  if (!loggedIn) {
+    try { localStorage.removeItem(PROFILE_KEY); } catch(e){}
+  }
+  keysToClear.forEach(key => {
+    try { localStorage.removeItem(key); } catch(e){}
+  });
+
+  if (loggedIn) {
+    try { localStorage.setItem(PROFILE_KEY, JSON.stringify(preservedProfile)); } catch(e){}
+    if (preservedAvatar) {
+      try { localStorage.setItem(PROFILE_AVATAR_KEY, preservedAvatar); } catch(e){}
+    }
+    await window.resetSupabaseAppData?.({ preserveProfile: preservedProfile });
+
+    applyPracticeMode(false);
+    if (typeof initTheme === 'function') initTheme();
+    if (typeof initCustomColors === 'function') initCustomColors();
+    if (typeof updateXPPill === 'function') updateXPPill();
+    if (typeof updateDailyGoalUI === 'function') updateDailyGoalUI();
+    if (typeof updateDailyChallengeBtn === 'function') updateDailyChallengeBtn();
+    if (typeof renderSessionSummaryCard === 'function') renderSessionSummaryCard();
+    if (typeof renderWeeklySummary === 'function') renderWeeklySummary();
+    if (typeof renderHistory === 'function') renderHistory();
+    if (currentScreen && currentScreen.id === 's-profile') showProfile();
+    else if (currentScreen && currentScreen.id === 's-dashboard') showDashboard();
+    else if (currentScreen) show(currentScreen.id);
+    if (typeof updateAuthUI === 'function') updateAuthUI();
+    return;
+  }
+
   location.reload();
 }
+
+document.addEventListener('DOMContentLoaded', function initResetProfileModal() {
+  const modal = document.getElementById('resetProfileModal');
+  const closeBtn = document.getElementById('resetModalCloseBtn');
+  const cancelBtn = document.getElementById('resetCancelBtn');
+  const confirmBtn = document.getElementById('resetConfirmBtn');
+  if (!modal) return;
+  closeBtn?.addEventListener('click', closeResetProfileModal);
+  cancelBtn?.addEventListener('click', closeResetProfileModal);
+  confirmBtn?.addEventListener('click', performResetProfile);
+  document.querySelectorAll('[data-reset-close]').forEach(el => {
+    el.addEventListener('click', closeResetProfileModal);
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && modal.classList.contains('open')) closeResetProfileModal();
+  });
+});
+
+document.addEventListener('DOMContentLoaded', function initProfileAvatarInput() {
+  const input = document.getElementById('profileAvatarInput');
+  if (!input) return;
+  input.addEventListener('change', event => {
+    const file = event.target.files && event.target.files[0];
+    handleProfileAvatarFile(file);
+    input.value = '';
+  });
+  document.addEventListener('click', event => {
+    const wrap = document.getElementById('profileAvatarWrap');
+    if (!wrap || wrap.contains(event.target)) return;
+    closeProfilePhotoMenu();
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      closeProfilePhotoMenu();
+      closeProfilePhotoViewer();
+    }
+  });
+  document.getElementById('photoViewerCloseBtn')?.addEventListener('click', closeProfilePhotoViewer);
+  document.querySelectorAll('[data-photo-viewer-close]').forEach(el => {
+    el.addEventListener('click', closeProfilePhotoViewer);
+  });
+  window.addEventListener('resize', () => {
+    if (document.getElementById('profilePhotoMenu')?.classList.contains('open')) positionProfilePhotoMenu();
+  });
+  window.addEventListener('scroll', () => {
+    if (document.getElementById('profilePhotoMenu')?.classList.contains('open')) positionProfilePhotoMenu();
+  }, true);
+});
 
 // ── goHome ──
 function abortTest() {
@@ -1841,7 +2155,10 @@ function getDailyGoal() {
   try { return parseInt(localStorage.getItem(GOAL_KEY)) || 20; } catch(e) { return 20; }
 }
 function saveDailyGoal(n) {
-  try { localStorage.setItem(GOAL_KEY, n); } catch(e) {}
+  try {
+    localStorage.setItem(GOAL_KEY, n);
+    window.syncUserProgressToSupabase?.();
+  } catch(e) {}
 }
 
 function getTodayQuestionCount(history) {
@@ -1855,14 +2172,24 @@ function toggleGoalEdit() {
   const row = document.getElementById('goalEditRow');
   const isOpen = row.classList.contains('open');
   if (!isOpen) document.getElementById('goalEditInput').value = getDailyGoal();
-  row.classList.toggle('open', !isOpen);
+  if (isOpen) {
+    row.classList.add('closing');
+    row.classList.remove('open');
+    setTimeout(() => row.classList.remove('closing'), 180);
+  } else {
+    row.classList.remove('closing');
+    row.classList.add('open');
+  }
 }
 
 function saveGoalEdit() {
   const val = parseInt(document.getElementById('goalEditInput').value);
   if (!val || val < 1) return;
   saveDailyGoal(val);
-  document.getElementById('goalEditRow').classList.remove('open');
+  const row = document.getElementById('goalEditRow');
+  row.classList.add('closing');
+  row.classList.remove('open');
+  setTimeout(() => row.classList.remove('closing'), 180);
   updateDailyGoalUI();
 }
 
@@ -1877,6 +2204,21 @@ function updateDailyGoalUI() {
   document.getElementById('goalTargetCount').textContent = goal;
   document.getElementById('dailyGoalFill').style.width   = pct + '%';
   document.getElementById('dailyGoalFill').classList.toggle('done', isDone);
+
+  const gauge = document.getElementById('dailyGoalGauge');
+  if (gauge) {
+    gauge.style.setProperty('--goal-pct', pct + '%');
+    gauge.style.setProperty('--goal-dash', pct);
+    gauge.style.setProperty('--goal-deg', (pct * 1.8) + 'deg');
+    gauge.classList.toggle('done', isDone);
+  }
+
+  const status = document.getElementById('dailyGoalStatus');
+  if (status) {
+    status.innerHTML = isDone
+      ? ''
+      : '<span class="daily-goal-status-sub">Start with a quick session.</span>';
+  }
 
   const badge = document.getElementById('goalDoneBadge');
   badge.classList.toggle('show', isDone);
@@ -1938,7 +2280,10 @@ function saveUnlockedMilestone(id) {
   const unlocked = getUnlockedMilestones();
   if (!unlocked.includes(id)) {
     unlocked.push(id);
-    try { localStorage.setItem(MILESTONES_KEY, JSON.stringify(unlocked)); } catch(e) {}
+    try {
+      localStorage.setItem(MILESTONES_KEY, JSON.stringify(unlocked));
+      window.syncMilestonesToSupabase?.();
+    } catch(e) {}
   }
 }
 
@@ -2120,8 +2465,8 @@ showProfile = function() {
 
 // ── Hook into saveHistory to trigger milestone checks ──
 const _origSaveHistory = saveHistory;
-saveHistory = function(s, total, pct) {
-  _origSaveHistory(s, total, pct);
+saveHistory = function(s, total, pct, xp) {
+  _origSaveHistory(s, total, pct, xp);
   if (isPracticeMode()) return;
   const history = getSessionHistory();
   const pb      = getPB();
@@ -2204,7 +2549,10 @@ function getDayStreakData() {
   catch(e) { return {streak:0, bestStreak:0, lastDate:''}; }
 }
 function saveDayStreakData(d) {
-  try { localStorage.setItem(DAY_STREAK_KEY, JSON.stringify(d)); } catch(e) {}
+  try {
+    localStorage.setItem(DAY_STREAK_KEY, JSON.stringify(d));
+    window.syncUserProgressToSupabase?.();
+  } catch(e) {}
 }
 
 /**
@@ -2247,7 +2595,10 @@ function getXPData() {
   catch(e) { return {totalXP: 0, currentLevel: 1}; }
 }
 function saveXPData(d) {
-  try { localStorage.setItem(XP_KEY, JSON.stringify(d)); } catch(e) {}
+  try {
+    localStorage.setItem(XP_KEY, JSON.stringify(d));
+    window.syncUserProgressToSupabase?.();
+  } catch(e) {}
 }
 
 /** XP needed to reach a given level (cumulative total from 0).
@@ -2274,6 +2625,10 @@ function xpForCurrentLevel(level) {
 }
 function levelTitle(level) {
   return LEVEL_TITLES[Math.min(level - 1, LEVEL_TITLES.length - 1)];
+}
+
+function levelShapeClass(level) {
+  return 'xp-shape-' + levelTitle(level).toLowerCase();
 }
 
 /**
@@ -2333,7 +2688,22 @@ function updateDashXP(animateLevelUp) {
     sub:    document.getElementById('dashXpSub'),
     bar:    document.getElementById('dashXpBar'),
   };
-  if (el.level) el.level.textContent = `Lv ${level}`;
+  if (el.level) {
+    el.level.textContent = `Lv ${level}`;
+    el.level.classList.remove(
+      'xp-shape-beginner',
+      'xp-shape-apprentice',
+      'xp-shape-student',
+      'xp-shape-practitioner',
+      'xp-shape-skilled',
+      'xp-shape-advanced',
+      'xp-shape-expert',
+      'xp-shape-master',
+      'xp-shape-grandmaster',
+      'xp-shape-legend'
+    );
+    el.level.classList.add(levelShapeClass(level));
+  }
   if (el.title) el.title.textContent = levelTitle(level);
   if (el.sub)   el.sub.textContent   = `${xpIn} / ${xpNeeded} XP to next level`;
 
@@ -2420,7 +2790,10 @@ function getWeaknessData() {
   catch(e) { return {}; }
 }
 function saveWeaknessData(d) {
-  try { localStorage.setItem(WEAKNESS_KEY, JSON.stringify(d)); } catch(e) {}
+  try {
+    localStorage.setItem(WEAKNESS_KEY, JSON.stringify(d));
+    window.syncWeaknessToSupabase?.();
+  } catch(e) {}
 }
 
 /** Update per-number stats after each answer */
@@ -2555,7 +2928,10 @@ function getSRQueue() {
   try { return JSON.parse(localStorage.getItem(SR_KEY)) || []; } catch(e) { return []; }
 }
 function saveSRQueue(q) {
-  try { localStorage.setItem(SR_KEY, JSON.stringify(q.slice(0, SR_MAX))); } catch(e) {}
+  try {
+    localStorage.setItem(SR_KEY, JSON.stringify(q.slice(0, SR_MAX)));
+    window.syncSpacedRepetitionToSupabase?.();
+  } catch(e) {}
 }
 
 /** Add a wrong question to the persistent SR queue */
@@ -2604,7 +2980,11 @@ function getDailyChallengeData() {
   catch(e) { return {}; }
 }
 function saveDailyChallengeData(d) {
-  try { localStorage.setItem(DAILY_CHAL_KEY, JSON.stringify(d)); } catch(e) {}
+  let saved = false;
+  try {
+    localStorage.setItem(DAILY_CHAL_KEY, JSON.stringify(d));
+    saved = true;
+  } catch(e) {}
   // Also append to running DC history log
   if (d.completed) {
     try {
@@ -2617,6 +2997,7 @@ function saveDailyChallengeData(d) {
       }
     } catch(e) {}
   }
+  if (saved) window.syncDailyChallengesToSupabase?.();
 }
 
 function isDailyChallengeCompleted() {
@@ -3109,12 +3490,15 @@ showProfile = function() {
 // ─────────────────────────────────────────────
 (function initRetentionSystems() {
   updateXPPill();
-  // Defer setup screen update slightly (after init routing runs)
-  setTimeout(() => {
+  function refreshDailyChallengeCard() {
     updateSetupMotivation();
     // Set initial visibility based on whatever screen is active at load
     const activeScreen = document.querySelector('.screen.active');
     if (activeScreen) updateDailyChallengeVisibility(activeScreen.id);
     else updateDailyChallengeVisibility('s-setup'); // default
-  }, 120);
+  }
+  // Defer setup screen update slightly (after init routing runs)
+  setTimeout(refreshDailyChallengeCard, 120);
+  document.addEventListener('DOMContentLoaded', refreshDailyChallengeCard);
+  window.addEventListener('load', refreshDailyChallengeCard);
 })();

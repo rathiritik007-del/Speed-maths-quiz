@@ -4,7 +4,7 @@ const COLOR_ENABLED_KEY = 'quiz_custom_colors_on';
 const BASE_THEME_KEY    = 'quiz_base_theme';
 const CC_VARS = [
   '--p0','--p1','--p2','--p3','--p4','--p5','--p6','--p7',
-  '--acc','--acc-hi','--acc-lo','--acc-vlo','--acc-2','--acc-2-hi','--btn-txt',
+  '--acc','--acc-hi','--acc-lo','--acc-vlo','--acc-2','--acc-2-hi','--acc-2-lo','--btn-txt',
   '--bg','--app-bg','--surf','--surf-d','--inp','--hov','--bar-bg',
   '--ok','--ok-text','--ok-bg','--ok-fb','--ok-bd','--err','--err-bg','--no-bd',
   '--text-primary','--text-secondary','--text-muted','--border','--border-strong',
@@ -49,6 +49,31 @@ function getLuminance(hex) {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
+function getContrastRatio(fgHex, bgHex) {
+  const fg = getLuminance(fgHex);
+  const bg = getLuminance(bgHex);
+  const light = Math.max(fg, bg);
+  const dark = Math.min(fg, bg);
+  return (light + 0.05) / (dark + 0.05);
+}
+
+function getReadableLightAccent(h, s, maxLightness) {
+  const surface = '#fbfaf7';
+  for (let l = maxLightness; l >= 18; l -= 1) {
+    const candidate = hslToHex(h, s, l);
+    if (getContrastRatio(candidate, surface) >= 4.5) return candidate;
+  }
+  return hslToHex(h, s, 18);
+}
+
+function getReadableOnAccent(colors) {
+  const darkText = '#101114';
+  const lightText = '#ffffff';
+  const darkScore = Math.min(...colors.map(color => getContrastRatio(darkText, color)));
+  const lightScore = Math.min(...colors.map(color => getContrastRatio(lightText, color)));
+  return darkScore >= lightScore ? darkText : lightText;
+}
+
 
 function normalizeHex(hex, fallback) {
   if (typeof hex !== 'string') return fallback;
@@ -64,9 +89,9 @@ function getSavedBaseTheme() {
   try {
     const saved = localStorage.getItem(BASE_THEME_KEY);
     if (saved === 'vibrant' || saved === 'dark' || saved === 'light') return saved;
-    localStorage.setItem(BASE_THEME_KEY, 'vibrant');
+    localStorage.setItem(BASE_THEME_KEY, 'dark');
   } catch(e) {}
-  return 'vibrant';
+  return 'dark';
 }
 
 function buildAccentFamily(accentHex, baseTheme, hueShift = 0) {
@@ -75,6 +100,19 @@ function buildAccentFamily(accentHex, baseTheme, hueShift = 0) {
   const h = ((s0 < 8 ? 215 : rawH) + hueShift + 360) % 360;
   const s = baseTheme === 'light' ? clampN(s0 + 12, 54, 88) : clampN(s0, 38, 86);
   const l = baseTheme === 'light' ? clampN(l0 - 8, 28, 42) : clampN(l0, 52, 68);
+  if (baseTheme === 'light') {
+    const vividS = clampN(s0 + 8, 44, 92);
+    const vividL = clampN(l0, 42, 76);
+    const acc = hslToHex(h, vividS, vividL);
+    const readable = getReadableLightAccent(h, s, clampN(vividL - 10, 28, 44));
+    const [, , readableL] = hexToHSL(readable);
+    return {
+      acc,
+      hi: hslToHex(h, clampN(vividS - 6, 34, 86), clampN(vividL + 10, 50, 84)),
+      lo: readable,
+      vlo: hslToHex(h, clampN(s + 2, 36, 86), clampN(readableL - 12, 14, 30)),
+    };
+  }
   const acc = hslToHex(h, s, l);
   return {
     acc,
@@ -119,12 +157,13 @@ function buildVibrantCustomPalette(accentHex, baseHex) {
   const baseAccS = clampN(Math.round(bS * 0.65), 28, 88);
   const acc2    = hslToHex(bH, baseAccS, clampN(bL0 + 28, 44, 68));
   const acc2Hi  = hslToHex(bH, clampN(baseAccS - 6, 22, 80), clampN(bL0 + 38, 54, 76));
+  const acc2Lo  = hslToHex(bH, clampN(baseAccS + 2, 30, 90), clampN(bL0 + 10, 30, 52));
 
   return {
     '--p0': p0, '--p1': p1, '--p2': p2, '--p3': p3,
     '--p4': p4, '--p5': p5, '--p6': p6, '--p7': p7,
     '--acc': acc, '--acc-hi': accHi, '--acc-lo': accLo, '--acc-vlo': accVlo,
-    '--acc-2': acc2, '--acc-2-hi': acc2Hi, '--btn-txt': btnTxt,
+    '--acc-2': acc2, '--acc-2-hi': acc2Hi, '--acc-2-lo': acc2Lo, '--btn-txt': btnTxt,
     '--bg': p0, '--app-bg': p1, '--surf': p4, '--surf-d': p3,
     '--inp': p2, '--hov': p5, '--bar-bg': p2,
     '--ok-bg': okBg, '--ok-fb': okFb, '--ok-bd': okFb, '--no-bd': p3,
@@ -155,12 +194,14 @@ function buildNeutralPalette(baseTheme, accentHex, secondaryHex) {
         shadowCard: '0 1px 1px rgba(48,45,39,0.06), 0 5px 12px rgba(48,45,39,0.10), inset 0 1px 0 rgba(255,255,255,0.86)',
       };
   const [p0,p1,p2,p3,p4,p5,p6,p7] = base.p;
-  const btnTxt = getLuminance(accent.acc) > 0.38 ? '#101114' : '#ffffff';
+  const btnTxt = dark
+    ? (getLuminance(accent.acc) > 0.38 ? '#101114' : '#ffffff')
+    : getReadableOnAccent([accent.acc, accent.hi]);
   return {
     '--p0': p0, '--p1': p1, '--p2': p2, '--p3': p3,
     '--p4': p4, '--p5': p5, '--p6': p6, '--p7': p7,
     '--acc': accent.acc, '--acc-hi': accent.hi, '--acc-lo': accent.lo, '--acc-vlo': accent.vlo,
-    '--acc-2': secondary.acc, '--acc-2-hi': secondary.hi, '--btn-txt': btnTxt,
+    '--acc-2': secondary.acc, '--acc-2-hi': secondary.hi, '--acc-2-lo': secondary.lo, '--btn-txt': btnTxt,
     '--bg': p0, '--app-bg': p1,
     '--surface-raised': dark ? p4 : p2,
     '--surf': dark ? p4 : p2,
@@ -201,6 +242,23 @@ function applyPaletteVars(palette) {
   const html = document.documentElement;
   Object.entries(palette).forEach(([k, v]) => html.style.setProperty(k, v));
   if (typeof refreshTimedSliderVisual === 'function') requestAnimationFrame(refreshTimedSliderVisual);
+}
+
+let _themeUIRefreshFrame = null;
+function refreshThemeDependentUI() {
+  if (_themeUIRefreshFrame) cancelAnimationFrame(_themeUIRefreshFrame);
+  _themeUIRefreshFrame = requestAnimationFrame(() => {
+    _themeUIRefreshFrame = null;
+    const html = document.documentElement;
+    window.updateAuthUI?.();
+    window.updateSyncNotice?.();
+    if (typeof showProfile === 'function' && document.getElementById('s-profile')?.classList.contains('active')) {
+      showProfile();
+    }
+    html.classList.add('theme-ui-refreshing');
+    void html.offsetHeight;
+    requestAnimationFrame(() => html.classList.remove('theme-ui-refreshing'));
+  });
 }
 
 function getCurrentColorPicks() {
@@ -420,7 +478,9 @@ function openCustomPicker(target, triggerEl) {
   if (hexInp) hexInp.value = hex.replace('#','').toUpperCase();
   updateHueThumb();
   const modal = document.getElementById('customPickerModal');
+  modal.classList.remove('closing');
   modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
   // Scroll the trigger into view if it's obscured, then position
   if (triggerEl) triggerEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   requestAnimationFrame(() => {
@@ -431,7 +491,21 @@ function openCustomPicker(target, triggerEl) {
 }
 
 function closeCustomPicker() {
-  document.getElementById('customPickerModal').classList.remove('open');
+  const modal = document.getElementById('customPickerModal');
+  if (!modal) return;
+  modal.setAttribute('aria-hidden', 'true');
+  if (!modal.classList.contains('open')) {
+    modal.classList.remove('closing');
+    return;
+  }
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    modal.classList.remove('open', 'closing');
+    return;
+  }
+  modal.classList.add('closing');
+  setTimeout(() => {
+    modal.classList.remove('open', 'closing');
+  }, 180);
 }
 
 // Pointer interaction helpers
@@ -544,7 +618,9 @@ function applyCustomColors() {
   }
   html.setAttribute('data-custom-color', 'active');
   localStorage.setItem(COLOR_THEME_KEY, JSON.stringify({ accent: accentHex, base: baseHex }));
+  window.syncUserSettingsToSupabase?.();
   syncAnalogousAccentSwatch();
+  refreshThemeDependentUI();
 }
 
 function clearCustomColors() {
@@ -552,6 +628,7 @@ function clearCustomColors() {
   CC_VARS.forEach(k => html.style.removeProperty(k));
   html.removeAttribute('data-custom-color');
   applyBaseThemeTokens();
+  refreshThemeDependentUI();
 }
 
 function setCustomColorEnabled(enabled) {
@@ -560,6 +637,7 @@ function setCustomColorEnabled(enabled) {
   if (tog)   tog.checked          = enabled;
   if (panel) panel.style.display  = enabled ? '' : 'none';
   localStorage.setItem(COLOR_ENABLED_KEY, enabled ? '1' : '0');
+  window.syncUserSettingsToSupabase?.();
   if (enabled) {
     applyCustomColors();
   } else {
@@ -567,7 +645,7 @@ function setCustomColorEnabled(enabled) {
   }
 }
 
-function initCustomColors() {
+function loadSavedCustomColorInputs() {
   // Restore saved colour picks into the pickers
   const savedColors = localStorage.getItem(COLOR_THEME_KEY);
   if (savedColors) {
@@ -579,6 +657,10 @@ function initCustomColors() {
       if (bp && base)   bp.value = base;
     } catch(e) { localStorage.removeItem(COLOR_THEME_KEY); }
   }
+}
+
+function initCustomColors() {
+  loadSavedCustomColorInputs();
   syncColorSwatches(); // also marks matching preset as active
   syncBaseColorLabel(); // set correct label for current base theme
   // Restore enabled/disabled state (persists across refreshes)
@@ -600,6 +682,7 @@ function initTheme() {
 function setBaseTheme(baseTheme) {
   const next = baseTheme === 'light' ? 'light' : (baseTheme === 'dark' ? 'dark' : 'vibrant');
   localStorage.setItem(BASE_THEME_KEY, next);
+  window.syncUserSettingsToSupabase?.();
   applyBaseTheme(next, true);
 }
 
@@ -620,10 +703,12 @@ function applyBaseTheme(baseTheme, animate) {
     btnLight.classList.toggle('active', next === 'light');
   }
   syncAnalogousAccentSwatch();
+  refreshThemeDependentUI();
 }
 
 function setTheme(theme) {
   localStorage.setItem(THEME_KEY, theme);
+  window.syncUserSettingsToSupabase?.();
   applyTheme(theme, true);
 }
 
@@ -645,6 +730,7 @@ function applyTheme(theme, animate) {
     btnDefault.classList.toggle('active', theme === 'default');
     btnMinimal.classList.toggle('active', theme === 'minimal');
   }
+  refreshThemeDependentUI();
 }
 
 
@@ -823,8 +909,13 @@ function getSessionSummary() {
 }
 
 function dismissSessionSummary() {
-  document.getElementById('sessionSummaryCard').classList.remove('show');
+  const card = document.getElementById('sessionSummaryCard');
+  if (!card) return;
+  card.classList.add('dismiss-right');
   try { localStorage.removeItem(SESSION_SUMMARY_KEY); } catch(e) {}
+  window.setTimeout(() => {
+    card.classList.remove('show', 'dismiss-right');
+  }, 280);
 }
 
 function renderSessionSummaryCard() {
@@ -845,11 +936,13 @@ function renderSessionSummaryCard() {
   } else {
     streakEl.style.display = 'none';
   }
+  card.classList.remove('dismiss-right');
   card.classList.add('show');
 }
 
 // Track XP gained during session
 let _sessionStartXP = 0;
+let _dashboardPulsePending = false;
 function onSessionStartHook() { _sessionStartXP = getXPData().totalXP; }
 
 // Hook into startTest to record start XP
@@ -865,7 +958,36 @@ onSessionComplete = function(pct, sessionBestStreak, score, total) {
   _origOnSessionComplete(pct, sessionBestStreak, score, total);
   const xpGained = Math.max(0, getXPData().totalXP - _sessionStartXP);
   saveSessionSummary(pct, score, total, xpGained, sessionBestStreak);
+  _dashboardPulsePending = true;
 };
+
+function pulseDashboardStatsAfterSession() {
+  if (!_dashboardPulsePending) return;
+  _dashboardPulsePending = false;
+  const ids = [
+    'dashTodaySessions',
+    'dashTodayAcc',
+    'dashDayStreak',
+    'dashXpLevel',
+    'dashXpTitle',
+    'dashXpSub',
+    'dashXpBar',
+    'goalDoneCount',
+    'goalTargetCount',
+    'dailyGoalFill',
+    'wkQs',
+    'wkAcc',
+    'wkXP'
+  ];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('dash-value-pulse');
+    void el.offsetWidth;
+    el.classList.add('dash-value-pulse');
+    el.addEventListener('animationend', () => el.classList.remove('dash-value-pulse'), { once: true });
+  });
+}
 
 // ─────────────────────────────────────────────
 // 4. STREAK WARNING (comeback nudge)
@@ -1178,15 +1300,179 @@ showDashboard = function() {
   renderStreakWarning();
   renderWeeklySummary();
   recordDailyXP();
+  pulseDashboardStatsAfterSession();
 };
 
 function toggleDashRecentSessions(btn) {
   const list = document.getElementById('dashRecentList');
   if (!list) return;
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion) {
+    const isCollapsed = list.classList.toggle('collapsed');
+    if (btn) btn.textContent = isCollapsed ? 'View All' : 'Show Less';
+    return;
+  }
+  const startHeight = list.offsetHeight;
+  list.style.maxHeight = startHeight + 'px';
+  list.classList.add('is-animating');
+  void list.offsetHeight;
   const isCollapsed = list.classList.toggle('collapsed');
   if (btn) btn.textContent = isCollapsed ? 'View All' : 'Show Less';
+  const targetHeight = isCollapsed ? Math.min(48, list.scrollHeight) : list.scrollHeight;
+  list.style.maxHeight = targetHeight + 'px';
+  window.setTimeout(() => {
+    list.classList.remove('is-animating');
+    list.style.maxHeight = '';
+  }, 340);
 }
 
+const SYNC_NOTICE_DISMISSED_KEY = 'quiz_sync_notice_dismissed';
+const LOCAL_DATA_SYNCED_KEY = 'quiz_local_data_synced';
+const PWA_INSTALL_DISMISSED_KEY = 'quiz_pwa_install_dismissed';
+let deferredPwaInstallPrompt = null;
+
+function readLocalJSON(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch(e) {
+    return fallback;
+  }
+}
+
+function hasMeaningfulLocalProgress() {
+  const history = readLocalJSON('quiz_history', []);
+  if (Array.isArray(history) && history.length) return true;
+  const profile = readLocalJSON('quiz_profile', null);
+  if (profile && Object.keys(profile).length) return true;
+  const xp = readLocalJSON('quiz_xp', null);
+  if (xp && ((xp.totalXP || 0) > 0 || (xp.currentLevel || 1) > 1)) return true;
+  const pb = readLocalJSON('quiz_pb', null);
+  if (pb && Object.keys(pb).length) return true;
+  const dayStreak = readLocalJSON('quiz_day_streak2', null);
+  if (dayStreak && Object.keys(dayStreak).length) return true;
+  const milestones = readLocalJSON('quiz_milestones', []);
+  if (Array.isArray(milestones) && milestones.length) return true;
+  const weakness = readLocalJSON('quiz_weakness', null);
+  if (weakness && Object.keys(weakness).length) return true;
+  const srQueue = readLocalJSON('quiz_sr_queue', []);
+  if (Array.isArray(srQueue) && srQueue.length) return true;
+  const dailyChallenge = readLocalJSON('quiz_daily_challenge', null);
+  if (dailyChallenge && Object.keys(dailyChallenge).length) return true;
+  const dcHistory = readLocalJSON('quiz_dc_history', []);
+  return Array.isArray(dcHistory) && dcHistory.length;
+}
+
+function shouldShowSyncNotice() {
+  if (window.authState && window.authState.isLoggedIn) return false;
+  try {
+    if (localStorage.getItem(SYNC_NOTICE_DISMISSED_KEY) === '1') return false;
+    if (localStorage.getItem(LOCAL_DATA_SYNCED_KEY) === '1') return false;
+  } catch(e) {
+    return false;
+  }
+  return hasMeaningfulLocalProgress();
+}
+
+function updateSyncNotice() {
+  const notice = document.getElementById('syncNotice');
+  if (!notice) return;
+  notice.classList.toggle('show', shouldShowSyncNotice());
+}
+
+function dismissSyncNotice() {
+  try { localStorage.setItem(SYNC_NOTICE_DISMISSED_KEY, '1'); } catch(e) {}
+  updateSyncNotice();
+}
+
+function openSyncNoticeAuth() {
+  const notice = document.getElementById('syncNotice');
+  if (notice) notice.classList.remove('show');
+  window.openAuthModal?.('login');
+}
+
+function initSyncNotice() {
+  document.getElementById('syncNoticeDismissBtn')?.addEventListener('click', dismissSyncNotice);
+  document.getElementById('syncNoticeSignInBtn')?.addEventListener('click', openSyncNoticeAuth);
+  setTimeout(updateSyncNotice, 500);
+}
+
+window.updateSyncNotice = updateSyncNotice;
+document.addEventListener('DOMContentLoaded', initSyncNotice);
+
+function isRunningStandalone() {
+  return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+function shouldShowPwaInstallNotice() {
+  if (isRunningStandalone()) return false;
+  try {
+    return localStorage.getItem(PWA_INSTALL_DISMISSED_KEY) !== '1';
+  } catch(e) {
+    return false;
+  }
+}
+
+function hidePwaInstallNotice() {
+  document.getElementById('pwaInstallNotice')?.classList.remove('show');
+}
+
+function showPwaInstallNotice() {
+  const notice = document.getElementById('pwaInstallNotice');
+  if (!notice || !deferredPwaInstallPrompt || !shouldShowPwaInstallNotice()) return;
+  notice.classList.add('show');
+}
+
+function dismissPwaInstallNotice() {
+  try { localStorage.setItem(PWA_INSTALL_DISMISSED_KEY, '1'); } catch(e) {}
+  deferredPwaInstallPrompt = null;
+  hidePwaInstallNotice();
+}
+
+async function promptPwaInstall() {
+  if (!deferredPwaInstallPrompt) return;
+  const promptEvent = deferredPwaInstallPrompt;
+  deferredPwaInstallPrompt = null;
+  hidePwaInstallNotice();
+  try {
+    promptEvent.prompt();
+    await promptEvent.userChoice;
+  } catch(e) {
+    console.warn('PWA install prompt failed', e);
+  }
+}
+
+function initPwaInstallPrompt() {
+  document.getElementById('pwaInstallDismissBtn')?.addEventListener('click', dismissPwaInstallNotice);
+  document.getElementById('pwaInstallBtn')?.addEventListener('click', promptPwaInstall);
+
+  window.addEventListener('beforeinstallprompt', event => {
+    if (!shouldShowPwaInstallNotice()) return;
+    event.preventDefault();
+    deferredPwaInstallPrompt = event;
+    window.setTimeout(showPwaInstallNotice, 1400);
+  });
+
+  window.addEventListener('appinstalled', () => {
+    try { localStorage.setItem(PWA_INSTALL_DISMISSED_KEY, '1'); } catch(e) {}
+    deferredPwaInstallPrompt = null;
+    hidePwaInstallNotice();
+  });
+}
+
+function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(error => {
+      console.warn('Service worker registration failed', error);
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', initPwaInstallPrompt);
+registerServiceWorker();
+
+loadSavedCustomColorInputs();
 initTheme();
 initCustomColors();
 
