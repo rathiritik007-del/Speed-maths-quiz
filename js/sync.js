@@ -66,6 +66,10 @@
     return 'quiz_sync_conflict_dismissed_' + userId;
   }
 
+  function localSyncMarkerKey(userId) {
+    return 'quiz_local_sync_marker_' + userId;
+  }
+
   function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
@@ -93,11 +97,12 @@
     console.warn('Supabase sync failed for ' + scope + ':', error && error.message ? error.message : error);
   }
 
-  function runRequest(scope, request) {
+  function runRequest(scope, request, onSuccess) {
     try {
       if (!request || typeof request.then !== 'function') return;
       request.then(({ error }) => {
         if (error) warnSync(scope, error);
+        else if (typeof onSuccess === 'function') onSuccess();
       }).catch(error => warnSync(scope, error));
     } catch(error) {
       warnSync(scope, error);
@@ -423,7 +428,7 @@
         name: profile.name || null,
         joined_date: profile.joinedDate || null,
         updated_at: new Date().toISOString()
-      }, { onConflict: 'user_id' }));
+      }, { onConflict: 'user_id' }), () => markLocalSyncedForUser(ctx));
     });
   }
 
@@ -447,7 +452,7 @@
         daily_goal: goal,
         practice_mode: readString(KEYS.practiceMode, '0') === '1',
         updated_at: new Date().toISOString()
-      }, { onConflict: 'user_id' }));
+      }, { onConflict: 'user_id' }), () => markLocalSyncedForUser(ctx));
     });
   }
 
@@ -462,7 +467,7 @@
         custom_colors_enabled: readString(KEYS.customColorsOn, '0') === '1',
         custom_colors: readJSON(KEYS.customColors, null),
         updated_at: new Date().toISOString()
-      }, { onConflict: 'user_id' }));
+      }, { onConflict: 'user_id' }), () => markLocalSyncedForUser(ctx));
     });
   }
 
@@ -477,7 +482,7 @@
         milestone_id: id,
         unlocked_at: new Date().toISOString()
       }));
-      runRequest('achievements_or_milestones', ctx.client.from('achievements_or_milestones').upsert(rows, { onConflict: 'user_id,milestone_id' }));
+      runRequest('achievements_or_milestones', ctx.client.from('achievements_or_milestones').upsert(rows, { onConflict: 'user_id,milestone_id' }), () => markLocalSyncedForUser(ctx));
     });
   }
 
@@ -489,7 +494,7 @@
         user_id: ctx.user.id,
         weakness_data: readJSON(KEYS.weakness, {}),
         updated_at: new Date().toISOString()
-      }, { onConflict: 'user_id' }));
+      }, { onConflict: 'user_id' }), () => markLocalSyncedForUser(ctx));
     });
   }
 
@@ -501,7 +506,7 @@
         user_id: ctx.user.id,
         queue: readJSON(KEYS.srQueue, []),
         updated_at: new Date().toISOString()
-      }, { onConflict: 'user_id' }));
+      }, { onConflict: 'user_id' }), () => markLocalSyncedForUser(ctx));
     });
   }
 
@@ -532,7 +537,7 @@
         };
       });
       if (!rows.length) return;
-      runRequest('daily_challenges', ctx.client.from('daily_challenges').upsert(rows, { onConflict: 'user_id,challenge_date' }));
+      runRequest('daily_challenges', ctx.client.from('daily_challenges').upsert(rows, { onConflict: 'user_id,challenge_date' }), () => markLocalSyncedForUser(ctx));
     });
   }
 
@@ -547,7 +552,7 @@
       time_taken_seconds: null,
       mode: session.timed ? 'timed' : 'practice',
       raw_data: session
-    }));
+    }), () => markLocalSyncedForUser(ctx));
   }
 
   function syncLatestSessionToSupabase() {
@@ -601,6 +606,7 @@
     await migrateDailyChallenges(ctx);
     try { localStorage.setItem('quiz_local_data_synced', '1'); } catch(e) {}
     try { localStorage.removeItem('quiz_sync_notice_dismissed'); } catch(e) {}
+    markLocalSyncedForUser(ctx);
     window.updateSyncNotice?.();
   }
 
@@ -720,6 +726,28 @@
     };
   }
 
+  function markLocalSyncedForUser(ctx) {
+    if (!ctx || !ctx.user || !ctx.user.id) return;
+    try {
+      localStorage.setItem(localSyncMarkerKey(ctx.user.id), JSON.stringify({
+        userId: ctx.user.id,
+        local: localSignature(),
+        syncedAt: new Date().toISOString()
+      }));
+      localStorage.setItem('quiz_local_data_synced', '1');
+    } catch(e) {}
+  }
+
+  function isLocalUnchangedSinceUserSync(ctx) {
+    if (!ctx || !ctx.user || !ctx.user.id) return false;
+    try {
+      const saved = JSON.parse(localStorage.getItem(localSyncMarkerKey(ctx.user.id)) || 'null');
+      return !!(saved && saved.userId === ctx.user.id && saved.local === localSignature());
+    } catch(e) {
+      return false;
+    }
+  }
+
   function markConflictResolved(ctx, source, parts) {
     if (!ctx || !source || !parts) return;
     try {
@@ -738,7 +766,7 @@
     try {
       const saved = JSON.parse(localStorage.getItem(conflictResolvedKey(ctx.user.id)) || 'null');
       if (!saved) return false;
-      if (saved.source === 'account') return saved.cloud === parts.cloud;
+      if (saved.source === 'account') return saved.cloud === parts.cloud && saved.local === parts.local;
       if (saved.source === 'device') return saved.local === parts.local;
       return false;
     } catch(e) {
@@ -941,6 +969,7 @@
 
       try { localStorage.setItem('quiz_local_data_synced', '1'); } catch(e) {}
       try { localStorage.removeItem('quiz_sync_notice_dismissed'); } catch(e) {}
+      markLocalSyncedForUser(ctx);
       refreshAfterCloudRestore();
     } catch(error) {
       warnSync('cloud restore', error);
@@ -1102,7 +1131,11 @@
             const parts = conflictParts(cloudRows);
             const signature = JSON.stringify(parts);
             if (parts.local === parts.cloud) {
-              try { localStorage.setItem('quiz_local_data_synced', '1'); } catch(e) {}
+              markLocalSyncedForUser(ctx);
+              return;
+            }
+            if (isLocalUnchangedSinceUserSync(ctx)) {
+              syncAllLocalAppStateToSupabase();
               return;
             }
             if (isConflictResolved(ctx, parts) || isConflictDismissedThisSession(ctx, signature)) return;
