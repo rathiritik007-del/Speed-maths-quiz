@@ -1,6 +1,6 @@
 {
   "name": "Mental Math Trainer",
-  "short_name": "Math Trainer",
+  "short_name": "Mental Math",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
