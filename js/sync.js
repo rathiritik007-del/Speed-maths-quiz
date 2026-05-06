@@ -952,31 +952,67 @@
     pendingConflictSignature = signature || conflictParts(cloudRows);
     const modal = document.getElementById('progressConflictModal');
     if (!modal) return;
+    modal.classList.remove('closing');
     modal.classList.add('open');
     modal.setAttribute('aria-hidden', 'false');
     setTimeout(() => document.getElementById('conflictAccountBtn')?.focus(), 0);
   }
 
-  function closeProgressConflictModal() {
+  function closeProgressConflictModal(afterClose) {
     const modal = document.getElementById('progressConflictModal');
-    if (!modal) return;
-    modal.classList.remove('open');
+    if (!modal) {
+      if (typeof afterClose === 'function') afterClose();
+      return;
+    }
     modal.setAttribute('aria-hidden', 'true');
+    if (!modal.classList.contains('open')) {
+      modal.classList.remove('closing');
+      if (typeof afterClose === 'function') afterClose();
+      return;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      modal.classList.remove('open', 'closing');
+      if (typeof afterClose === 'function') afterClose();
+      return;
+    }
+    modal.classList.add('closing');
+    setTimeout(() => {
+      modal.classList.remove('open', 'closing');
+      if (typeof afterClose === 'function') afterClose();
+    }, 180);
   }
 
   function openReplaceAccountModal() {
     const modal = document.getElementById('replaceAccountModal');
     if (!modal) return;
+    modal.classList.remove('closing');
     modal.classList.add('open');
     modal.setAttribute('aria-hidden', 'false');
     setTimeout(() => document.getElementById('replaceAccountCancelBtn')?.focus(), 0);
   }
 
-  function closeReplaceAccountModal() {
+  function closeReplaceAccountModal(afterClose) {
     const modal = document.getElementById('replaceAccountModal');
-    if (!modal) return;
-    modal.classList.remove('open');
+    if (!modal) {
+      if (typeof afterClose === 'function') afterClose();
+      return;
+    }
     modal.setAttribute('aria-hidden', 'true');
+    if (!modal.classList.contains('open')) {
+      modal.classList.remove('closing');
+      if (typeof afterClose === 'function') afterClose();
+      return;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      modal.classList.remove('open', 'closing');
+      if (typeof afterClose === 'function') afterClose();
+      return;
+    }
+    modal.classList.add('closing');
+    setTimeout(() => {
+      modal.classList.remove('open', 'closing');
+      if (typeof afterClose === 'function') afterClose();
+    }, 180);
   }
 
   async function useAccountProgressFromConflict() {
@@ -989,8 +1025,7 @@
   }
 
   function requestKeepDeviceProgress() {
-    closeProgressConflictModal();
-    openReplaceAccountModal();
+    closeProgressConflictModal(openReplaceAccountModal);
   }
 
   async function confirmKeepDeviceProgress() {
@@ -1016,8 +1051,7 @@
   }
 
   function cancelReplaceWarning() {
-    closeReplaceAccountModal();
-    openProgressConflictModal(pendingConflictRows, pendingConflictSignature);
+    closeReplaceAccountModal(() => openProgressConflictModal(pendingConflictRows, pendingConflictSignature));
   }
 
   document.addEventListener('DOMContentLoaded', () => {

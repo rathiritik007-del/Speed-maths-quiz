@@ -1757,7 +1757,14 @@ function toggleProfileNameEdit() {
   const row = document.getElementById('profileNameEditRow');
   const isOpen = row.classList.contains('open');
   if (!isOpen) document.getElementById('profileNameEditInput').value = getProfile().name || '';
-  row.classList.toggle('open', !isOpen);
+  if (isOpen) {
+    row.classList.add('closing');
+    row.classList.remove('open');
+    setTimeout(() => row.classList.remove('closing'), 180);
+  } else {
+    row.classList.remove('closing');
+    row.classList.add('open');
+  }
 }
 
 function saveProfileNameFromScreen() {
@@ -1768,7 +1775,10 @@ function saveProfileNameFromScreen() {
   saveProfile(profile);
   document.getElementById('profileDisplayName').textContent = name;
   renderProfileAvatar(name);
-  document.getElementById('profileNameEditRow').classList.remove('open');
+  const row = document.getElementById('profileNameEditRow');
+  row.classList.add('closing');
+  row.classList.remove('open');
+  setTimeout(() => row.classList.remove('closing'), 180);
   // update dashboard name too if visible
   const ns = document.getElementById('dashNameSpan');
   if (ns) ns.textContent = name;
@@ -2057,14 +2067,24 @@ function toggleGoalEdit() {
   const row = document.getElementById('goalEditRow');
   const isOpen = row.classList.contains('open');
   if (!isOpen) document.getElementById('goalEditInput').value = getDailyGoal();
-  row.classList.toggle('open', !isOpen);
+  if (isOpen) {
+    row.classList.add('closing');
+    row.classList.remove('open');
+    setTimeout(() => row.classList.remove('closing'), 180);
+  } else {
+    row.classList.remove('closing');
+    row.classList.add('open');
+  }
 }
 
 function saveGoalEdit() {
   const val = parseInt(document.getElementById('goalEditInput').value);
   if (!val || val < 1) return;
   saveDailyGoal(val);
-  document.getElementById('goalEditRow').classList.remove('open');
+  const row = document.getElementById('goalEditRow');
+  row.classList.add('closing');
+  row.classList.remove('open');
+  setTimeout(() => row.classList.remove('closing'), 180);
   updateDailyGoalUI();
 }
 

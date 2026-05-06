@@ -7,6 +7,7 @@
   let authMode = "login";
   let authOpenedFromScreen = null;
   let explicitAuthActionInFlight = false;
+  let lastRenderedLoggedIn = null;
 
   async function refreshAuthState(options) {
     const shouldRunPostLoginSync = !!(options && options.runPostLoginSync);
@@ -179,6 +180,15 @@
     if (els.profileEmail) els.profileEmail.textContent = email;
     if (els.profileBtn) els.profileBtn.textContent = loggedIn ? "Manage account" : "Sign in / Sync Progress";
     if (els.accountCard) els.accountCard.classList.toggle("logged-in", loggedIn);
+    if (els.accountCard && lastRenderedLoggedIn !== null && lastRenderedLoggedIn !== loggedIn) {
+      els.accountCard.classList.remove("auth-state-changing");
+      void els.accountCard.offsetWidth;
+      els.accountCard.classList.add("auth-state-changing");
+      window.setTimeout(function () {
+        els.accountCard?.classList.remove("auth-state-changing");
+      }, 240);
+    }
+    lastRenderedLoggedIn = loggedIn;
 
     if (els.profileLogoutBtn) {
       els.profileLogoutBtn.disabled = !loggedIn;

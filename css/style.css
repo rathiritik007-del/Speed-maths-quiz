@@ -2479,19 +2479,48 @@ select:focus {
       background: rgba(123,168,50,0.18);
       border: 1px solid color-mix(in srgb, var(--acc), transparent 70%);
       border-radius: 10px;
-      padding: 7px 12px;
+      padding: 0 12px;
       font-size: 12px;
       font-weight: 700;
       color: var(--acc);
     }
-    .daily-goal-done-badge.show { display: flex; }
+    .daily-goal-done-badge.show {
+      display: flex;
+      padding-top: 7px;
+      padding-bottom: 7px;
+      animation: goalBadgeIn 0.22s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    @keyframes goalBadgeIn {
+      from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
     .goal-edit-row {
       display: none;
       align-items: center;
       gap: 8px;
       margin-top: 2px;
+      overflow: hidden;
     }
-    .goal-edit-row.open { display: flex; }
+    .goal-edit-row.open,
+    .goal-edit-row.closing { display: flex; }
+    .goal-edit-row.open {
+      animation: revealRowIn 0.2s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    .goal-edit-row.closing {
+      animation: revealRowOut 0.18s ease both;
+    }
+    @keyframes revealRowIn {
+      from { max-height: 0; opacity: 0; transform: translateY(-4px); }
+      to { max-height: 48px; opacity: 1; transform: translateY(0); }
+    }
+    @keyframes revealRowOut {
+      from {
+      max-height: 48px;
+      opacity: 1;
+      transform: translateY(0);
+      }
+      to { max-height: 0; opacity: 0; transform: translateY(-4px); }
+    }
     .goal-edit-input {
       flex: 1;
       padding: 8px 12px;
@@ -3017,7 +3046,11 @@ select:focus {
     .hint-btn:hover:not(:disabled) { color:var(--acc); border-color:color-mix(in srgb, var(--acc), transparent 55%); background: color-mix(in srgb, var(--p4), transparent 30%); }
     .hint-btn:disabled { opacity:0.35; cursor:default; font-size: clamp(10px, 2.5vw, 11px); padding: clamp(11px, 3.5vw, 15px) clamp(7px, 2.5vw, 10px); }
     .hint-reveal { display:none; font-size:12px; font-weight:600; color:rgba(239,248,226,0.6); text-align:center; padding: 8px 16px; margin: 6px 0 0; background: color-mix(in srgb, var(--p3), transparent 55%); border-radius: 10px; border: 1px solid color-mix(in srgb, var(--acc), transparent 82%); letter-spacing:0.02em; line-height: 1.4; flex-shrink: 0; }
-    .hint-reveal.show { display:block; }
+    .hint-reveal.show { display:block; animation: hintRevealIn 0.18s cubic-bezier(0.22,1,0.36,1) both; }
+    @keyframes hintRevealIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
     html[data-theme="minimal"] .hint-btn { background: var(--surf-d); box-shadow: none; }
 
     /* ── Milestones Section on Profile ── */
@@ -3394,9 +3427,9 @@ select:focus {
       position: fixed;
       bottom: 24px;
       left: 50%;
-      transform: translateX(-50%);
+      transform: translateX(-50%) translateY(12px);
       z-index: 999;
-      display: none;
+      display: flex;
       align-items: center;
       gap: 8px;
       background: rgba(30,5,50,0.95);
@@ -3411,9 +3444,16 @@ select:focus {
       backdrop-filter: blur(12px);
       font-family: 'Inter', sans-serif;
       white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s ease, transform 0.2s cubic-bezier(0.22,1,0.36,1), border-color 0.16s ease, box-shadow 0.16s ease;
     }
-    #endSessionBtn.visible { display: flex; }
-    #endSessionBtn:active { transform: translateX(-50%) scale(0.96); }
+    #endSessionBtn.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+    #endSessionBtn:active { transform: translateX(-50%) translateY(0) scale(0.96); }
 
     /* XP display in dashboard stats area */
     .dash-xp-row {
@@ -3618,8 +3658,16 @@ select:focus {
       display: none;
       gap: 8px;
       align-items: center;
+      overflow: hidden;
     }
-    .profile-name-edit.open { display: flex; }
+    .profile-name-edit.open,
+    .profile-name-edit.closing { display: flex; }
+    .profile-name-edit.open {
+      animation: revealRowIn 0.2s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    .profile-name-edit.closing {
+      animation: revealRowOut 0.18s ease both;
+    }
     .profile-name-edit input {
       flex: 1;
       padding: 10px 14px;
@@ -4081,6 +4129,7 @@ select:focus {
 .auth-account-email {
   font-size: 12px;
   color: var(--text-secondary);
+  transition: color 0.16s ease, opacity 0.18s ease, transform 0.18s cubic-bezier(0.22,1,0.36,1);
 }
 
 .auth-account-email {
@@ -4096,6 +4145,18 @@ select:focus {
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+  transition: opacity 0.18s ease, transform 0.18s cubic-bezier(0.22,1,0.36,1);
+}
+
+.auth-account-card.auth-state-changing .auth-account-status,
+.auth-account-card.auth-state-changing .auth-account-email,
+.auth-account-card.auth-state-changing .auth-account-actions {
+  animation: authStateFade 0.22s cubic-bezier(0.22,1,0.36,1) both;
+}
+
+@keyframes authStateFade {
+  from { opacity: 0.55; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .auth-account-btn,
@@ -4152,7 +4213,9 @@ select:focus {
 }
 
 .auth-account-logout {
-  display: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 9px 12px;
   border-radius: 10px;
   border: 1px solid color-mix(in srgb, var(--border-strong), transparent 15%);
@@ -4161,7 +4224,16 @@ select:focus {
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 0.14s ease, border-color 0.16s ease, color 0.16s ease, background 0.16s ease;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  max-width: 0;
+  padding-left: 0;
+  padding-right: 0;
+  transform: translateY(3px);
+  overflow: hidden;
+  white-space: nowrap;
+  transition: opacity 0.18s ease, transform 0.18s cubic-bezier(0.22,1,0.36,1), max-width 0.2s cubic-bezier(0.22,1,0.36,1), padding-left 0.2s ease, padding-right 0.2s ease, border-color 0.16s ease, color 0.16s ease, background 0.16s ease, visibility 0s linear 0.18s;
 }
 
 .auth-account-logout:hover {
@@ -4170,7 +4242,14 @@ select:focus {
 }
 
 .auth-account-card.logged-in .auth-account-logout {
-  display: inline-flex;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  max-width: 92px;
+  padding-left: 12px;
+  padding-right: 12px;
+  transform: translateY(0);
+  transition-delay: 0s;
 }
 
 .auth-modal {
@@ -4221,12 +4300,14 @@ select:focus {
 }
 
 .auth-modal.closing .auth-modal-backdrop,
-.reset-modal.closing .reset-modal-backdrop {
+.reset-modal.closing .reset-modal-backdrop,
+.conflict-modal.closing .conflict-modal-backdrop {
   animation: modalBackdropOut 0.18s ease both;
 }
 
 .auth-modal.closing .auth-modal-card,
-.reset-modal.closing .reset-modal-card {
+.reset-modal.closing .reset-modal-card,
+.conflict-modal.closing .conflict-modal-card {
   animation: modalCardOut 0.18s ease both;
 }
 
@@ -4565,7 +4646,8 @@ select:focus {
 
 .reset-modal.open,
 .reset-modal.closing,
-.conflict-modal.open {
+.conflict-modal.open,
+.conflict-modal.closing {
   display: flex;
 }
 
@@ -4797,6 +4879,7 @@ html.theme-ui-refreshing .card {
   .reset-modal.open .reset-modal-card,
   .reset-modal.closing .reset-modal-card,
   .conflict-modal.open .conflict-modal-card,
+  .conflict-modal.closing .conflict-modal-card,
   .auth-sync-pill.show,
   .sync-notice.show,
   .pwa-install-notice.show,
@@ -4820,6 +4903,15 @@ html.theme-ui-refreshing .card {
     width: 100%;
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .auth-account-btn,
+  .auth-account-logout {
+    width: 100%;
+  }
+
+  .auth-account-card.logged-in .auth-account-logout {
+    max-width: none;
   }
 
   .sync-notice {
