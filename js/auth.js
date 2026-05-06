@@ -129,11 +129,11 @@
     if (titleEl) titleEl.textContent = isSignup ? "Sign up" : "Log in";
     if (subEl) {
       subEl.textContent = isSignup
-        ? "Create an account for progress sync when cloud saving is added."
-        : "Sign in to prepare progress sync for this profile.";
+        ? "Create an account to back up your progress."
+        : "Sign in to sync your progress across devices.";
     }
     if (submitBtn) submitBtn.textContent = isSignup ? "Sign up" : "Log in";
-    if (modeToggle) modeToggle.textContent = isSignup ? "Already have an account? Log in" : "Need an account? Sign up";
+    if (modeToggle) modeToggle.textContent = isSignup ? "Already have an account? Log in" : "New here? Create an account";
     if (passwordInput) passwordInput.autocomplete = isSignup ? "new-password" : "current-password";
   }
 

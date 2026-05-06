@@ -1562,22 +1562,79 @@ function saveProfileAvatar(dataUrl, file) {
     window.syncProfileAvatarToSupabase?.(dataUrl, file);
   } catch(e) {}
 }
+function removeProfileAvatar() {
+  closeProfilePhotoMenu();
+  try { localStorage.removeItem(PROFILE_AVATAR_KEY); } catch(e) {}
+  const input = document.getElementById('profileAvatarInput');
+  if (input) input.value = '';
+  window.deleteProfileAvatarFromSupabase?.();
+  renderProfileAvatar((getProfile().name || '?'));
+}
+function openProfileAvatarAction() {
+  if (getProfileAvatar()) {
+    toggleProfilePhotoMenu();
+  } else {
+    openProfileAvatarPicker();
+  }
+}
 function openProfileAvatarPicker() {
+  closeProfilePhotoMenu();
   document.getElementById('profileAvatarInput')?.click();
+}
+function toggleProfilePhotoMenu() {
+  const menu = document.getElementById('profilePhotoMenu');
+  if (!menu) return;
+  const isOpen = menu.classList.contains('open');
+  if (!isOpen) positionProfilePhotoMenu();
+  menu.classList.toggle('open', !isOpen);
+  menu.setAttribute('aria-hidden', isOpen ? 'true' : 'false');
+}
+function positionProfilePhotoMenu() {
+  const menu = document.getElementById('profilePhotoMenu');
+  const wrap = document.getElementById('profileAvatarWrap');
+  if (!menu || !wrap) return;
+  const rect = wrap.getBoundingClientRect();
+  const left = Math.max(12, Math.min(rect.left, window.innerWidth - 156));
+  const top = Math.min(rect.bottom + 8, window.innerHeight - 150);
+  menu.style.left = left + 'px';
+  menu.style.top = top + 'px';
+}
+function closeProfilePhotoMenu() {
+  const menu = document.getElementById('profilePhotoMenu');
+  if (!menu) return;
+  menu.classList.remove('open');
+  menu.setAttribute('aria-hidden', 'true');
+}
+function viewProfileAvatar() {
+  const image = getProfileAvatar();
+  closeProfilePhotoMenu();
+  if (!image) return;
+  const modal = document.getElementById('profilePhotoViewer');
+  const img = document.getElementById('profilePhotoViewerImg');
+  if (!modal || !img) return;
+  img.src = image;
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+}
+function closeProfilePhotoViewer() {
+  const modal = document.getElementById('profilePhotoViewer');
+  const img = document.getElementById('profilePhotoViewerImg');
+  if (!modal) return;
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+  if (img) img.removeAttribute('src');
 }
 function renderProfileAvatar(name) {
   const avatar = document.getElementById('profileAvatar');
-  const photoBtn = document.getElementById('profilePhotoBtn');
   if (!avatar) return;
   const image = getProfileAvatar();
   if (image) {
     avatar.textContent = '';
     avatar.style.backgroundImage = `url("${image}")`;
-    if (photoBtn) photoBtn.textContent = 'Change photo';
   } else {
     avatar.style.backgroundImage = '';
     avatar.textContent = (name || '?').charAt(0).toUpperCase();
-    if (photoBtn) photoBtn.textContent = 'Add profile picture';
+    closeProfilePhotoMenu();
   }
 }
 function handleProfileAvatarFile(file) {
@@ -1948,6 +2005,27 @@ document.addEventListener('DOMContentLoaded', function initProfileAvatarInput() 
     handleProfileAvatarFile(file);
     input.value = '';
   });
+  document.addEventListener('click', event => {
+    const wrap = document.getElementById('profileAvatarWrap');
+    if (!wrap || wrap.contains(event.target)) return;
+    closeProfilePhotoMenu();
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      closeProfilePhotoMenu();
+      closeProfilePhotoViewer();
+    }
+  });
+  document.getElementById('photoViewerCloseBtn')?.addEventListener('click', closeProfilePhotoViewer);
+  document.querySelectorAll('[data-photo-viewer-close]').forEach(el => {
+    el.addEventListener('click', closeProfilePhotoViewer);
+  });
+  window.addEventListener('resize', () => {
+    if (document.getElementById('profilePhotoMenu')?.classList.contains('open')) positionProfilePhotoMenu();
+  });
+  window.addEventListener('scroll', () => {
+    if (document.getElementById('profilePhotoMenu')?.classList.contains('open')) positionProfilePhotoMenu();
+  }, true);
 });
 
 // ── goHome ──
@@ -2126,6 +2204,21 @@ function updateDailyGoalUI() {
   document.getElementById('goalTargetCount').textContent = goal;
   document.getElementById('dailyGoalFill').style.width   = pct + '%';
   document.getElementById('dailyGoalFill').classList.toggle('done', isDone);
+
+  const gauge = document.getElementById('dailyGoalGauge');
+  if (gauge) {
+    gauge.style.setProperty('--goal-pct', pct + '%');
+    gauge.style.setProperty('--goal-dash', pct);
+    gauge.style.setProperty('--goal-deg', (pct * 1.8) + 'deg');
+    gauge.classList.toggle('done', isDone);
+  }
+
+  const status = document.getElementById('dailyGoalStatus');
+  if (status) {
+    status.innerHTML = isDone
+      ? ''
+      : '<span class="daily-goal-status-sub">Start with a quick session.</span>';
+  }
 
   const badge = document.getElementById('goalDoneBadge');
   badge.classList.toggle('show', isDone);
@@ -2534,6 +2627,10 @@ function levelTitle(level) {
   return LEVEL_TITLES[Math.min(level - 1, LEVEL_TITLES.length - 1)];
 }
 
+function levelShapeClass(level) {
+  return 'xp-shape-' + levelTitle(level).toLowerCase();
+}
+
 /**
  * addXP — called after each correct answer.
  * bonus=true when current session answer-streak is 3+
@@ -2591,7 +2688,22 @@ function updateDashXP(animateLevelUp) {
     sub:    document.getElementById('dashXpSub'),
     bar:    document.getElementById('dashXpBar'),
   };
-  if (el.level) el.level.textContent = `Lv ${level}`;
+  if (el.level) {
+    el.level.textContent = `Lv ${level}`;
+    el.level.classList.remove(
+      'xp-shape-beginner',
+      'xp-shape-apprentice',
+      'xp-shape-student',
+      'xp-shape-practitioner',
+      'xp-shape-skilled',
+      'xp-shape-advanced',
+      'xp-shape-expert',
+      'xp-shape-master',
+      'xp-shape-grandmaster',
+      'xp-shape-legend'
+    );
+    el.level.classList.add(levelShapeClass(level));
+  }
   if (el.title) el.title.textContent = levelTitle(level);
   if (el.sub)   el.sub.textContent   = `${xpIn} / ${xpNeeded} XP to next level`;
 

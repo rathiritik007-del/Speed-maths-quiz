@@ -115,11 +115,17 @@
         <div class="daily-goal-label">Daily Goal</div>
         <button class="goal-edit-btn" onclick="toggleGoalEdit()">edit</button>
       </div>
-      <div class="daily-goal-count"><span id="goalDoneCount">0</span><span class="goal-count-sep"> / </span><span id="goalTargetCount">20</span><span class="goal-count-unit"> Qs</span></div>
-      <div class="daily-goal-bar-bg">
-        <div class="daily-goal-bar-fill" id="dailyGoalFill" style="width:0%"></div>
+      <div class="daily-goal-gauge" id="dailyGoalGauge" style="--goal-pct:0%; --goal-deg:0deg;">
+        <div class="daily-goal-gauge-track" aria-hidden="true">
+          <svg class="daily-goal-gauge-svg" viewBox="0 0 120 66" focusable="false" aria-hidden="true">
+            <path class="daily-goal-gauge-bg" d="M12 56 A48 48 0 0 1 108 56" pathLength="100"></path>
+            <path class="daily-goal-gauge-progress" d="M12 56 A48 48 0 0 1 108 56" pathLength="100"></path>
+          </svg>
+          <div class="daily-goal-bar-fill" id="dailyGoalFill" style="width:0%"></div>
+        </div>
+        <div class="daily-goal-count"><span id="goalDoneCount">0</span><span class="goal-count-sep"> / </span><span id="goalTargetCount">20</span><span class="goal-count-unit"> Qs</span></div>
       </div>
-      <div class="daily-goal-status">Keep going — you're on track!</div>
+      <div class="daily-goal-status" id="dailyGoalStatus">Keep going — you're on track!</div>
       <div class="daily-goal-done-badge" id="goalDoneBadge">🏅 Daily goal complete!</div>
       <div class="goal-edit-row" id="goalEditRow">
         <input type="number" class="goal-edit-input" id="goalEditInput" min="5" max="200" step="5" placeholder="e.g. 20">
@@ -196,11 +202,23 @@
   <div class="screen" id="s-profile">
 
     <div class="profile-header">
-      <button class="profile-avatar" id="profileAvatar" type="button" onclick="openProfileAvatarPicker()" title="Change profile photo">?</button>
+      <div class="profile-avatar-wrap" id="profileAvatarWrap">
+        <button class="profile-avatar" id="profileAvatar" type="button" onclick="openProfileAvatarAction()" title="Edit profile photo">?</button>
+        <button class="profile-avatar-edit-btn" type="button" onclick="openProfileAvatarAction()" aria-label="Edit profile photo">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 20h9"/>
+            <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+          </svg>
+        </button>
+        <div class="profile-photo-menu" id="profilePhotoMenu" aria-hidden="true">
+          <button type="button" onclick="viewProfileAvatar()">View photo</button>
+          <button type="button" onclick="openProfileAvatarPicker()">Update photo</button>
+          <button type="button" class="danger" onclick="removeProfileAvatar()">Remove photo</button>
+        </div>
+      </div>
       <div class="profile-header-info">
         <div class="profile-header-name" id="profileDisplayName">—</div>
         <div class="profile-header-since" id="profileSince">Member since —</div>
-        <button class="profile-photo-btn" id="profilePhotoBtn" type="button" onclick="openProfileAvatarPicker()">Add profile picture</button>
       </div>
       <input id="profileAvatarInput" type="file" accept="image/*" hidden>
       <button class="profile-header-edit" onclick="toggleProfileNameEdit()">Edit</button>
@@ -1021,7 +1039,7 @@
         <input id="authPassword" type="password" autocomplete="current-password" required>
       </label>
       <button class="auth-submit" id="authSubmitBtn" type="submit">Log in</button>
-      <button class="auth-mode-toggle" id="authModeToggle" type="button">Need an account? Sign up</button>
+      <button class="auth-mode-toggle" id="authModeToggle" type="button">New here? Create an account</button>
     </form>
     <div class="auth-logged-in" id="authLoggedInPanel">
       <div class="auth-user-email" id="authUserEmail"></div>
@@ -1079,6 +1097,14 @@
       <button class="conflict-cancel-btn" id="replaceAccountCancelBtn" type="button">Cancel</button>
       <button class="conflict-replace-btn" id="replaceAccountContinueBtn" type="button">Continue</button>
     </div>
+  </div>
+</div>
+<!-- Profile Photo Viewer Modal -->
+<div class="photo-viewer-modal" id="profilePhotoViewer" aria-hidden="true">
+  <div class="photo-viewer-backdrop" data-photo-viewer-close></div>
+  <div class="photo-viewer-card" role="dialog" aria-modal="true" aria-label="Profile photo">
+    <button class="photo-viewer-close" id="photoViewerCloseBtn" type="button" aria-label="Close photo viewer">&times;</button>
+    <img id="profilePhotoViewerImg" alt="Profile photo">
   </div>
 </div>
 

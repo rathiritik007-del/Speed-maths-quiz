@@ -1461,6 +1461,36 @@ html[data-theme="minimal"] {
   }
   .weekly-summary-stats { display: none !important; }
 
+  @media (max-width: 560px) {
+    .weekly-sparkline {
+      gap: 3px !important;
+      padding: 12px 11px 12px 6px !important;
+    }
+    .sparkline-y-axis {
+      width: 12px;
+      font-size: 7.5px;
+      padding: 2px 0 15px;
+      transform: translateX(-1px);
+    }
+    .sparkline-plot {
+      padding: 0 2px;
+      gap: 1px;
+    }
+    .sparkline-day {
+      gap: 5px !important;
+      min-width: 0;
+    }
+    .sparkline-bar {
+      width: 8px !important;
+    }
+    .sparkline-label {
+      font-size: 9px !important;
+      line-height: 10px !important;
+      min-width: 16px;
+      text-align: center;
+    }
+  }
+
   /* ── Daily Goal Card Redesign ── */
   .daily-goal-label {
     font-size: clamp(12px,2.8vw,13px) !important;
@@ -1476,11 +1506,11 @@ html[data-theme="minimal"] {
   .daily-goal-count {
     font-size: clamp(26px,6vw,34px) !important;
     font-weight: 900 !important;
-    color: #eff8e2 !important;
+    color: var(--text-primary) !important;
     line-height: 1.1 !important;
-    letter-spacing: -0.5px !important;
+    letter-spacing: 0 !important;
   }
-  .daily-goal-count span { color: var(--acc); }
+  .daily-goal-count span { color: inherit; }
   .daily-goal-bar-bg { height: 5px !important; }
   .daily-goal-status {
     font-size: clamp(11px,2.5vw,12px);
@@ -1492,77 +1522,210 @@ html[data-theme="minimal"] {
     padding: 14px 16px !important;
     gap: 8px !important;
   }
+  .daily-goal-gauge {
+    width: min(150px, 100%) !important;
+    margin: 2px auto 6px !important;
+  }
+  .daily-goal-gauge-bg,
+  .daily-goal-gauge-progress {
+    stroke-width: 9 !important;
+  }
   .daily-goal-label {
-    font-size: clamp(11px,2.5vw,12px) !important;
+    font-size: clamp(12px,2.8vw,13px) !important;
   }
   .goal-edit-btn {
     font-size: 10px !important;
   }
   .daily-goal-count {
-    font-size: clamp(22px,5.2vw,29px) !important;
+    font-size: clamp(16px,3.7vw,20px) !important;
     line-height: 1.05 !important;
-    letter-spacing: -0.35px !important;
+    letter-spacing: 0 !important;
+  }
+  .daily-goal-gauge .daily-goal-count {
+    color: var(--text-primary) !important;
+    line-height: 1 !important;
+    letter-spacing: 0 !important;
+    white-space: nowrap !important;
+  }
+  .daily-goal-gauge .daily-goal-count span {
+    color: inherit !important;
+  }
+  .daily-goal-gauge .goal-count-unit {
+    display: none !important;
   }
   .daily-goal-status {
     font-size: clamp(10px,2.25vw,11px) !important;
     line-height: 1.25 !important;
     margin-top: 0 !important;
+    text-align: center !important;
+    min-height: 26px !important;
+  }
+  .daily-goal-status-main {
+    display: none !important;
+  }
+  .daily-goal-status-sub {
+    color: var(--text-secondary) !important;
+    opacity: 0.62 !important;
   }
   .daily-goal-done-badge {
     padding: 6px 10px !important;
     font-size: clamp(10px,2.25vw,11px) !important;
     line-height: 1.2 !important;
+    justify-content: center !important;
+    text-align: center !important;
+    min-height: 42px !important;
+  }
+
+  @media (max-width: 560px) {
+    .daily-goal-card {
+      padding: 15px 14px !important;
+      gap: 9px !important;
+    }
+
+    .daily-goal-gauge {
+      width: min(138px, 100%) !important;
+    }
+
+    .daily-goal-count {
+      font-size: clamp(15px,4.1vw,18px) !important;
+    }
+
+    .goal-edit-btn {
+      font-size: 12px !important;
+      font-weight: 800 !important;
+      padding: 3px 5px !important;
+    }
   }
 
   /* ── XP / Level Row Redesign ── */
   .dash-xp-row {
     flex-direction: row !important;
     align-items: center !important;
-    gap: 14px !important;
-    padding: 14px 16px !important;
+    gap: 16px !important;
+    padding: 10px 16px !important;
   }
   .dash-xp-left { display: none !important; }
   .dash-xp-level {
-    width: 44px !important;
-    height: 44px !important;
-    font-size: clamp(11px,2.6vw,13px) !important;
+    width: 48px !important;
+    height: 48px !important;
+    font-size: clamp(14px,3vw,15px) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     background: color-mix(in srgb, var(--p4), transparent 30%) !important;
-    border: 2px solid color-mix(in srgb, var(--acc), transparent 62%) !important;
+    border: 3px solid color-mix(in srgb, var(--acc), transparent 56%) !important;
     border-radius: 50% !important;
     line-height: 1 !important;
     flex-shrink: 0 !important;
-    clip-path: none !important;
-    box-shadow: 0 0 12px color-mix(in srgb, var(--acc), transparent 80%) !important;
+    box-shadow: 0 0 8px color-mix(in srgb, var(--acc), transparent 88%) !important;
     color: var(--acc) !important;
-    font-weight: 800 !important;
+    font-weight: 900 !important;
+  }
+  .dash-xp-level.xp-shape-beginner {
+    border-radius: 50% !important;
+    clip-path: none !important;
+  }
+  .dash-xp-level.xp-shape-apprentice {
+    border-radius: 13px !important;
+    clip-path: none !important;
+  }
+  .dash-xp-level.xp-shape-student {
+    border-radius: 18px !important;
+    clip-path: none !important;
+  }
+  .dash-xp-level.xp-shape-practitioner {
+    border-radius: 10px !important;
+    clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0 50%) !important;
+  }
+  .dash-xp-level.xp-shape-skilled {
+    border-radius: 10px !important;
+    clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%) !important;
+  }
+  .dash-xp-level.xp-shape-advanced {
+    border-radius: 8px !important;
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%) !important;
+  }
+  .dash-xp-level.xp-shape-expert {
+    border-radius: 10px !important;
+    clip-path: polygon(18% 4%, 82% 4%, 96% 28%, 84% 82%, 50% 100%, 16% 82%, 4% 28%) !important;
+  }
+  .dash-xp-level.xp-shape-master {
+    border-radius: 8px !important;
+    clip-path: polygon(14% 0, 86% 0, 100% 30%, 84% 84%, 50% 100%, 16% 84%, 0 30%) !important;
+  }
+  .dash-xp-level.xp-shape-grandmaster {
+    border-radius: 8px !important;
+    clip-path: polygon(50% 0, 88% 12%, 100% 42%, 86% 82%, 50% 100%, 14% 82%, 0 42%, 12% 12%) !important;
+  }
+  .dash-xp-level.xp-shape-legend {
+    border-radius: 8px !important;
+    clip-path: polygon(50% 0, 62% 26%, 90% 12%, 78% 40%, 100% 50%, 78% 60%, 90% 88%, 62% 74%, 50% 100%, 38% 74%, 10% 88%, 22% 60%, 0 50%, 22% 40%, 10% 12%, 38% 26%) !important;
+    box-shadow: 0 0 10px color-mix(in srgb, var(--acc), transparent 84%) !important;
   }
   .dash-xp-info {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 3px !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(92px, 34%) !important;
+    grid-template-rows: auto auto !important;
+    column-gap: 18px !important;
+    row-gap: 3px !important;
+    align-items: center !important;
     flex: 1 !important;
     min-width: 0 !important;
   }
   .dash-xp-title {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
     font-size: clamp(13px,3vw,15px) !important;
-    font-weight: 700 !important;
+    font-weight: 750 !important;
     color: #eff8e2 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
   }
   .dash-xp-sub {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
     font-size: clamp(11px,2.5vw,12px) !important;
     color: rgba(239,248,226,0.4) !important;
     margin-top: 0 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
   }
   .dash-xp-bar-wrap {
-    max-width: 100% !important;
+    grid-column: 2 !important;
+    grid-row: 1 / span 2 !important;
+    max-width: 132px !important;
     flex: none !important;
     width: 100% !important;
-    margin-top: 5px !important;
+    margin: 0 0 0 auto !important;
+    justify-self: end !important;
   }
   .dash-xp-bar-bg { height: 5px !important; }
+
+  @media (max-width: 380px) {
+    .dash-xp-row {
+      gap: 12px !important;
+      padding: 9px 14px !important;
+    }
+
+    .dash-xp-level {
+      width: 44px !important;
+      height: 44px !important;
+      font-size: 13px !important;
+    }
+
+    .dash-xp-info {
+      grid-template-columns: minmax(0, 1fr) minmax(76px, 30%) !important;
+      column-gap: 12px !important;
+    }
+
+    .dash-xp-bar-wrap {
+      max-width: 98px !important;
+    }
+  }
 
   /* ── Today Stat Cards Redesign ── */
   .dash-stat {
@@ -1787,11 +1950,26 @@ html[data-theme="minimal"] {
   html[data-base-theme="light"] #s-setup .num-inp,
   html[data-base-theme="light"] #s-setup .bento-q-inp,
   html[data-base-theme="light"] #s-setup #customTimerInput,
+  html[data-base-theme="light"] #s-setup #timedCustomMinsInput {
+    color: var(--text-primary) !important;
+  }
+
+  html[data-base-theme="light"] #s-setup #customTimerInput::placeholder,
+  html[data-base-theme="light"] #s-setup #timedCustomMinsInput::placeholder {
+    color: color-mix(in srgb, var(--light-soft-ink), transparent 34%) !important;
+  }
+
+  html[data-base-theme="light"] #s-setup .select-trigger {
+    color: var(--light-soft-ink) !important;
+  }
+
+  html[data-base-theme="light"] #s-setup .num-inp,
+  html[data-base-theme="light"] #s-setup .bento-q-inp,
+  html[data-base-theme="light"] #s-setup #customTimerInput,
   html[data-base-theme="light"] #s-setup #timedCustomMinsInput,
   html[data-base-theme="light"] #s-setup .select-trigger {
     background: color-mix(in srgb, var(--surface-page), var(--surface-section) 42%) !important;
     border-color: color-mix(in srgb, var(--light-soft-ink), transparent 86%) !important;
-    color: var(--light-soft-ink) !important;
     box-shadow:
       inset 0 2px 4px color-mix(in srgb, var(--light-shadow-ink, #302d27), transparent 86%),
       inset 0 -1px 0 rgba(255,255,255,0.72) !important;
@@ -2114,9 +2292,9 @@ html[data-theme="minimal"] {
     color: var(--light-soft-ink) !important;
   }
   html[data-base-theme="light"] .session-summary-close {
-    color: var(--light-soft-ink) !important;
-    background: var(--surface-raised);
-    border-color: var(--light-separation-border);
+    color: color-mix(in srgb, var(--light-soft-ink), transparent 22%) !important;
+    background: transparent;
+    border-color: transparent;
   }
   html[data-base-theme="light"] .goal-count-sep {
     color: var(--light-action-tone) !important;
@@ -2180,6 +2358,19 @@ html[data-theme="minimal"] {
   }
   html[data-base-theme="light"] .daily-goal-count {
     text-shadow: 0 1px 0 rgba(255,255,255,0.72);
+  }
+  html[data-base-theme="light"] .daily-goal-gauge .daily-goal-count,
+  html[data-base-theme="light"] .daily-goal-gauge .daily-goal-count span {
+    color: var(--text-primary) !important;
+  }
+  html[data-base-theme="light"] .daily-goal-gauge .goal-count-unit {
+    display: none !important;
+  }
+  html[data-base-theme="light"] .daily-goal-status-main {
+    color: var(--light-soft-ink) !important;
+  }
+  html[data-base-theme="light"] .daily-goal-status-sub {
+    color: color-mix(in srgb, var(--light-soft-ink), transparent 24%) !important;
   }
   html[data-base-theme="light"] .dash-xp-info {
     color: var(--light-soft-ink);
@@ -2262,6 +2453,55 @@ html[data-theme="minimal"] {
   html[data-base-theme="light"] .custom-pickers-label,
   html[data-base-theme="light"] .cp-section-label {
     color: var(--light-soft-ink) !important;
+  }
+  html[data-base-theme="light"] .profile-photo-btn,
+  html[data-base-theme="light"] .auth-modal-kicker,
+  html[data-base-theme="light"] .auth-mode-toggle,
+  html[data-base-theme="light"] .auth-account-email,
+  html[data-base-theme="light"] .auth-user-state {
+    color: var(--acc-2-lo) !important;
+  }
+  html[data-base-theme="light"] .auth-mode-toggle:hover,
+  html[data-base-theme="light"] .profile-photo-btn:hover {
+    color: var(--acc-2) !important;
+  }
+  html[data-base-theme="light"] .profile-photo-remove-btn {
+    color: color-mix(in srgb, var(--light-soft-ink), transparent 28%) !important;
+  }
+  html[data-base-theme="light"] .profile-photo-remove-btn:hover {
+    color: var(--err) !important;
+  }
+  html[data-base-theme="light"] .profile-avatar-edit-btn {
+    background: var(--surface-raised) !important;
+    border-color: color-mix(in srgb, var(--acc-2-lo), transparent 58%) !important;
+    color: var(--acc-2-lo) !important;
+    box-shadow: var(--shadow-small) !important;
+  }
+  html[data-base-theme="light"] .profile-photo-menu {
+    background: var(--surface-raised) !important;
+    border-color: var(--light-separation-border) !important;
+    box-shadow: var(--shadow-hover) !important;
+  }
+  html[data-base-theme="light"] .profile-photo-menu button {
+    color: var(--light-soft-ink) !important;
+  }
+  html[data-base-theme="light"] .profile-photo-menu button:hover {
+    background: color-mix(in srgb, var(--acc-2-lo), transparent 90%) !important;
+  }
+  html[data-base-theme="light"] .profile-photo-menu button.danger {
+    color: var(--err) !important;
+  }
+  html[data-base-theme="light"] .photo-viewer-card,
+  html[data-base-theme="light"] .photo-viewer-close {
+    background: var(--surface-raised) !important;
+    border-color: var(--light-separation-border) !important;
+    box-shadow: var(--shadow-hover) !important;
+  }
+  html[data-base-theme="light"] .photo-viewer-close {
+    color: var(--light-soft-ink) !important;
+  }
+  html[data-base-theme="light"] .photo-viewer-card img {
+    background: var(--surface-page) !important;
   }
   html[data-base-theme="light"] .dash-section-title::after,
   html[data-base-theme="light"] .dash-recent-header-title::after {
@@ -2354,8 +2594,8 @@ html[data-theme="minimal"] {
   }
   html[data-theme="default"][data-base-theme="light"] .kb-key {
     background: var(--light-raised-gradient);
-    border-color: color-mix(in srgb, var(--light-separation-border), transparent 18%);
-    color: var(--light-soft-ink);
+    border-color: color-mix(in srgb, var(--light-soft-ink), transparent 78%);
+    color: var(--acc-2-lo);
     box-shadow: var(--shadow-small);
   }
   html[data-theme="default"][data-base-theme="light"] .kb-key:active,
@@ -2373,6 +2613,10 @@ html[data-theme="minimal"] {
   }
   html[data-theme="default"][data-base-theme="light"] .kb-del {
     color: color-mix(in srgb, var(--err), #1d1612 14%);
+  }
+
+  html[data-theme="default"][data-base-theme="light"] .kb-enter {
+    color: var(--btn-txt);
   }
 
   html[data-base-theme="light"] #milestoneToast {
@@ -2555,4 +2799,17 @@ html[data-theme="minimal"] {
   html[data-theme="minimal"][data-base-theme="light"] .theme-opt-btn:hover {
     background: var(--surface-selected) !important;
     box-shadow: var(--shadow-hover) !important;
+  }
+
+  html[data-theme="minimal"][data-base-theme="light"] .kb-key {
+    border-color: color-mix(in srgb, var(--light-soft-ink), transparent 78%) !important;
+    color: var(--acc-2-lo) !important;
+  }
+
+  html[data-theme="minimal"][data-base-theme="light"] .kb-del {
+    color: color-mix(in srgb, var(--err), #1d1612 14%) !important;
+  }
+
+  html[data-theme="minimal"][data-base-theme="light"] .kb-enter {
+    color: var(--btn-txt) !important;
   }

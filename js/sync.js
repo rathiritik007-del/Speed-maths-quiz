@@ -248,6 +248,35 @@
     uploadProfileAvatar(ctx, dataUrl, file).catch(error => warnSync('profile avatar', error));
   }
 
+  async function deleteProfileAvatar(ctx) {
+    if (!ctx) return;
+    const existing = await requestData(
+      'delete profile avatar lookup',
+      ctx.client.from('user_profile').select('avatar_path').eq('user_id', ctx.user.id).maybeSingle(),
+      null
+    );
+    const path = existing && existing.avatar_path ? existing.avatar_path : null;
+    if (path) {
+      const { error: removeError } = await ctx.client.storage.from('profile-pictures').remove([path]);
+      if (removeError) warnSync('profile avatar storage delete', removeError);
+    }
+    const { error: profileError } = await ctx.client
+      .from('user_profile')
+      .update({
+        avatar_path: null,
+        avatar_url: null,
+        updated_at: new Date().toISOString()
+      })
+      .eq('user_id', ctx.user.id);
+    if (profileError) throw profileError;
+  }
+
+  function deleteProfileAvatarFromSupabase() {
+    const ctx = getClientAndUser();
+    if (!ctx) return;
+    deleteProfileAvatar(ctx).catch(error => warnSync('profile avatar delete', error));
+  }
+
   async function migrateProfileAvatarIfCloudEmpty(ctx) {
     try {
       const avatar = readString(KEYS.profileAvatar, null);
@@ -1196,6 +1225,7 @@
 
   window.syncProfileToSupabase = syncProfileToSupabase;
   window.syncProfileAvatarToSupabase = syncProfileAvatarToSupabase;
+  window.deleteProfileAvatarFromSupabase = deleteProfileAvatarFromSupabase;
   window.syncUserProgressToSupabase = syncUserProgressToSupabase;
   window.syncUserSettingsToSupabase = syncUserSettingsToSupabase;
   window.syncMilestonesToSupabase = syncMilestonesToSupabase;
