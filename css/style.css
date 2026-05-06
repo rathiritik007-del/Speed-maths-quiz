@@ -2209,6 +2209,20 @@ select:focus {
     .welcome-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(123,168,50,0.4); }
     .welcome-btn:active { transform: scale(0.97); }
     .welcome-btn:disabled { opacity: 0.35; cursor: default; transform: none; }
+    .welcome-signin-btn {
+      margin-top: 12px;
+      border: 0;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 800;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      opacity: 0.82;
+      transition: color 0.16s ease, opacity 0.16s ease, transform 0.14s ease;
+    }
+    .welcome-signin-btn:hover { color: var(--acc); opacity: 1; }
+    .welcome-signin-btn:active { transform: scale(0.98); }
 
     /* ════════════════════════════════════════════════
        DASHBOARD SCREEN
@@ -4009,10 +4023,58 @@ select:focus {
   gap: 4px;
 }
 
+.auth-account-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .auth-account-title {
   font-size: 14px;
   font-weight: 800;
   color: var(--text-primary);
+}
+
+.auth-sync-pill {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--acc), transparent 72%);
+  background: color-mix(in srgb, var(--acc), transparent 88%);
+  color: var(--acc);
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--acc), transparent 86%);
+}
+
+.auth-sync-pill.show {
+  display: inline-flex;
+  animation: pillFadeIn 0.18s ease both;
+}
+
+.auth-sync-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: 0 0 0 0 color-mix(in srgb, currentColor, transparent 56%);
+  animation: syncDotPulse 0.9s ease-in-out infinite;
+}
+
+@keyframes pillFadeIn {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes syncDotPulse {
+  0%, 100% { transform: scale(0.82); opacity: 0.65; }
+  50% { transform: scale(1); opacity: 1; }
 }
 
 .auth-account-status,
@@ -4147,12 +4209,14 @@ select:focus {
 }
 
 .auth-modal.open .auth-modal-backdrop,
-.reset-modal.open .reset-modal-backdrop {
+.reset-modal.open .reset-modal-backdrop,
+.conflict-modal.open .conflict-modal-backdrop {
   animation: modalBackdropIn 0.18s ease both;
 }
 
 .auth-modal.open .auth-modal-card,
-.reset-modal.open .reset-modal-card {
+.reset-modal.open .reset-modal-card,
+.conflict-modal.open .conflict-modal-card {
   animation: modalCardIn 0.22s cubic-bezier(0.22,1,0.36,1) both;
 }
 
@@ -4213,7 +4277,8 @@ select:focus {
 }
 
 .auth-modal-close:hover,
-.reset-modal-close:hover {
+.reset-modal-close:hover,
+.conflict-modal-close:hover {
   transform: translateY(-1px);
   color: var(--text-primary);
   border-color: color-mix(in srgb, var(--acc), transparent 72%);
@@ -4460,6 +4525,11 @@ select:focus {
 .pwa-install-primary:active,
 .pwa-install-secondary:active,
 .reset-modal-close:active,
+.conflict-modal-close:active,
+.conflict-cancel-btn:active,
+.conflict-account-btn:active,
+.conflict-device-btn:active,
+.conflict-replace-btn:active,
 .reset-cancel-btn:active,
 .reset-confirm-btn:active,
 .profile-header-edit:active,
@@ -4483,12 +4553,24 @@ select:focus {
   padding: 18px;
 }
 
+.conflict-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 3150;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
 .reset-modal.open,
-.reset-modal.closing {
+.reset-modal.closing,
+.conflict-modal.open {
   display: flex;
 }
 
-.reset-modal-backdrop {
+.reset-modal-backdrop,
+.conflict-modal-backdrop {
   position: absolute;
   inset: 0;
   background: color-mix(in srgb, var(--p0), transparent 18%);
@@ -4496,7 +4578,8 @@ select:focus {
   -webkit-backdrop-filter: blur(14px);
 }
 
-.reset-modal-card {
+.reset-modal-card,
+.conflict-modal-card {
   width: min(100%, 440px);
   position: relative;
   z-index: 1;
@@ -4508,7 +4591,16 @@ select:focus {
   overflow: hidden;
 }
 
-.reset-modal-card::before {
+.conflict-modal-card {
+  border-color: color-mix(in srgb, var(--acc), transparent 72%);
+}
+
+.conflict-modal-card.warning {
+  border-color: color-mix(in srgb, var(--err), transparent 70%);
+}
+
+.reset-modal-card::before,
+.conflict-modal-card::before {
   content: '';
   position: absolute;
   top: 0;
@@ -4518,7 +4610,16 @@ select:focus {
   background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--err), transparent 35%), transparent);
 }
 
-.reset-modal-close {
+.conflict-modal-card::before {
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--acc), transparent 35%), transparent);
+}
+
+.conflict-modal-card.warning::before {
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--err), transparent 35%), transparent);
+}
+
+.reset-modal-close,
+.conflict-modal-close {
   position: absolute;
   top: 12px;
   right: 12px;
@@ -4534,12 +4635,14 @@ select:focus {
   transition: transform 0.14s ease, border-color 0.16s ease, color 0.16s ease, background 0.16s ease;
 }
 
-.reset-modal-head {
+.reset-modal-head,
+.conflict-modal-head {
   padding-right: 34px;
   margin-bottom: 18px;
 }
 
-.reset-modal-kicker {
+.reset-modal-kicker,
+.conflict-modal-kicker {
   font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
@@ -4548,39 +4651,87 @@ select:focus {
   margin-bottom: 6px;
 }
 
-.reset-modal-head h2 {
+.conflict-modal-kicker {
+  color: var(--acc);
+}
+
+.conflict-modal-card.warning .conflict-modal-kicker {
+  color: var(--err);
+}
+
+.reset-modal-head h2,
+.conflict-modal-head h2 {
   margin: 0;
   font-size: clamp(24px, 6vw, 32px);
   color: var(--text-primary);
   line-height: 1.1;
 }
 
-.reset-modal-head p {
+.reset-modal-head p,
+.conflict-modal-head p {
   margin: 8px 0 0;
   color: var(--text-secondary);
   font-size: 14px;
   line-height: 1.45;
 }
 
-.reset-modal-actions {
+.reset-modal-actions,
+.conflict-modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .reset-cancel-btn,
-.reset-confirm-btn {
+.reset-confirm-btn,
+.conflict-cancel-btn,
+.conflict-account-btn,
+.conflict-device-btn,
+.conflict-replace-btn {
   padding: 12px 14px;
   font-size: 13px;
   font-weight: 900;
   cursor: pointer;
+  font-family: 'Inter', sans-serif;
 }
 
-.reset-confirm-btn {
+.reset-confirm-btn,
+.conflict-account-btn {
   background: var(--err);
   border-color: color-mix(in srgb, var(--err), transparent 35%);
   color: #fff;
   box-shadow: 0 10px 26px color-mix(in srgb, var(--err), transparent 78%);
+}
+
+.conflict-account-btn {
+  background: var(--acc);
+  border: 1px solid color-mix(in srgb, var(--acc), transparent 58%);
+  color: var(--btn-txt);
+  border-radius: 12px;
+  box-shadow: 0 10px 26px color-mix(in srgb, var(--acc), transparent 78%);
+}
+
+.conflict-device-btn,
+.conflict-replace-btn {
+  border: 1px solid color-mix(in srgb, var(--err), transparent 58%);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--err), transparent 86%);
+  color: var(--err);
+}
+
+.conflict-cancel-btn {
+  border: 1px solid color-mix(in srgb, var(--border-strong), transparent 15%);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surf-d), transparent 35%);
+  color: var(--text-secondary);
+}
+
+.conflict-cancel-btn:hover,
+.conflict-device-btn:hover,
+.conflict-replace-btn:hover {
+  color: var(--text-primary);
+  border-color: color-mix(in srgb, var(--acc), transparent 70%);
 }
 
 .profile-stat-card,
@@ -4599,12 +4750,14 @@ html[data-theme="minimal"] .auth-modal-card,
 html[data-theme="minimal"] .auth-logged-in,
 html[data-theme="minimal"] .sync-notice,
 html[data-theme="minimal"] .pwa-install-notice,
-html[data-theme="minimal"] .reset-modal-card {
+html[data-theme="minimal"] .reset-modal-card,
+html[data-theme="minimal"] .conflict-modal-card {
   box-shadow: none;
 }
 
 html[data-theme="minimal"] .auth-modal-backdrop,
-html[data-theme="minimal"] .reset-modal-backdrop {
+html[data-theme="minimal"] .reset-modal-backdrop,
+html[data-theme="minimal"] .conflict-modal-backdrop {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
@@ -4614,6 +4767,7 @@ html.theme-ui-refreshing .auth-modal-card,
 html.theme-ui-refreshing .sync-notice,
 html.theme-ui-refreshing .pwa-install-notice,
 html.theme-ui-refreshing .reset-modal-card,
+html.theme-ui-refreshing .conflict-modal-card,
 html.theme-ui-refreshing .profile-header,
 html.theme-ui-refreshing .profile-stat-card,
 html.theme-ui-refreshing .card {
@@ -4642,11 +4796,17 @@ html.theme-ui-refreshing .card {
   .auth-modal.closing .auth-modal-card,
   .reset-modal.open .reset-modal-card,
   .reset-modal.closing .reset-modal-card,
+  .conflict-modal.open .conflict-modal-card,
+  .auth-sync-pill.show,
   .sync-notice.show,
   .pwa-install-notice.show,
   .screen.active,
   .screen.active .card {
     transform: none !important;
+  }
+
+  .auth-sync-dot {
+    animation: none !important;
   }
 }
 
@@ -4675,7 +4835,8 @@ html.theme-ui-refreshing .card {
 
   .sync-notice-actions,
   .pwa-install-actions,
-  .reset-modal-actions {
+  .reset-modal-actions,
+  .conflict-modal-actions {
     flex-direction: column-reverse;
   }
 
@@ -4684,7 +4845,11 @@ html.theme-ui-refreshing .card {
   .pwa-install-primary,
   .pwa-install-secondary,
   .reset-cancel-btn,
-  .reset-confirm-btn {
+  .reset-confirm-btn,
+  .conflict-cancel-btn,
+  .conflict-account-btn,
+  .conflict-device-btn,
+  .conflict-replace-btn {
     width: 100%;
   }
 

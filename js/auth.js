@@ -5,8 +5,12 @@
   };
 
   let authMode = "login";
+  let authOpenedFromScreen = null;
+  let explicitAuthActionInFlight = false;
 
-  async function refreshAuthState() {
+  async function refreshAuthState(options) {
+    const shouldRunPostLoginSync = !!(options && options.runPostLoginSync);
+
     if (!window.supabaseClient) {
       console.warn("Supabase client missing.");
       window.authState.user = null;
@@ -29,7 +33,9 @@
     window.authState.isLoggedIn = !!data.user;
     updateAuthUI();
     window.updateSyncNotice?.();
-    if (window.authState.isLoggedIn) window.migrateLocalAppStateToSupabase?.();
+    if (window.authState.isLoggedIn && shouldRunPostLoginSync) {
+      window.migrateLocalAppStateToSupabase?.({ showStatus: true });
+    }
 
     return data.user || null;
   }
@@ -37,29 +43,39 @@
   async function signUpWithEmail(email, password) {
     if (!window.supabaseClient) throw new Error("Supabase client missing.");
 
-    const { data, error } = await window.supabaseClient.auth.signUp({
-      email: email,
-      password: password
-    });
+    explicitAuthActionInFlight = true;
+    try {
+      const { data, error } = await window.supabaseClient.auth.signUp({
+        email: email,
+        password: password
+      });
 
-    if (error) throw error;
+      if (error) throw error;
 
-    await refreshAuthState();
-    return data;
+      await refreshAuthState({ runPostLoginSync: true });
+      return data;
+    } finally {
+      explicitAuthActionInFlight = false;
+    }
   }
 
   async function loginWithEmail(email, password) {
     if (!window.supabaseClient) throw new Error("Supabase client missing.");
 
-    const { data, error } = await window.supabaseClient.auth.signInWithPassword({
-      email: email,
-      password: password
-    });
+    explicitAuthActionInFlight = true;
+    try {
+      const { data, error } = await window.supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
 
-    if (error) throw error;
+      if (error) throw error;
 
-    await refreshAuthState();
-    return data;
+      await refreshAuthState({ runPostLoginSync: true });
+      return data;
+    } finally {
+      explicitAuthActionInFlight = false;
+    }
   }
 
   async function logoutUser() {
@@ -123,6 +139,8 @@
   function openAuthModal(mode) {
     const { modal, emailInput } = getAuthEls();
     if (!modal) return;
+    const activeScreen = document.querySelector(".screen.active");
+    authOpenedFromScreen = activeScreen ? activeScreen.id : null;
     if (mode) setAuthMode(mode);
     updateAuthUI();
     modal.classList.remove("closing");
@@ -199,6 +217,13 @@
 
       passwordInput.value = "";
       updateAuthUI();
+      if (window.authState.isLoggedIn) {
+        const returnScreen = authOpenedFromScreen;
+        closeAuthModal();
+        if ((returnScreen === "s-profile" || returnScreen === "s-welcome") && typeof showProfile === "function") {
+          setTimeout(function () { showProfile(); }, 0);
+        }
+      }
     } catch (error) {
       setStatus(error.message || (authMode === "signup" ? "Signup failed." : "Login failed."), true);
     } finally {
@@ -252,12 +277,14 @@
   window.updateAuthUI = updateAuthUI;
 
   if (window.supabaseClient) {
-    window.supabaseClient.auth.onAuthStateChange(function (_event, session) {
+    window.supabaseClient.auth.onAuthStateChange(function (event, session) {
       window.authState.user = session && session.user ? session.user : null;
       window.authState.isLoggedIn = !!window.authState.user;
       updateAuthUI();
       window.updateSyncNotice?.();
-      if (window.authState.isLoggedIn) window.migrateLocalAppStateToSupabase?.();
+      if (window.authState.isLoggedIn && event === "SIGNED_IN" && !explicitAuthActionInFlight) {
+        window.migrateLocalAppStateToSupabase?.({ showStatus: true });
+      }
     });
   }
 

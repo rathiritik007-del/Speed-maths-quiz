@@ -38,6 +38,7 @@
         >
       </div>
       <button class="welcome-btn" id="welcomeSubmitBtn" disabled onclick="saveWelcomeName()">Let's go →</button>
+      <button class="welcome-signin-btn" type="button" onclick="openAuthModal('login')">Existing user? Sign in</button>
     </div>
   </div>
 
@@ -221,7 +222,13 @@
     <div class="dash-section-title">Account</div>
     <div class="auth-account-card">
       <div class="auth-account-copy">
-        <div class="auth-account-title">Progress sync</div>
+        <div class="auth-account-title-row">
+          <div class="auth-account-title">Progress sync</div>
+          <div class="auth-sync-pill" id="profileSyncPill" aria-live="polite" aria-hidden="true">
+            <span class="auth-sync-dot" aria-hidden="true"></span>
+            <span>Syncing</span>
+          </div>
+        </div>
         <div class="auth-account-status" id="authProfileStatus">Not logged in</div>
         <div class="auth-account-email" id="authProfileEmail"></div>
       </div>
@@ -1038,6 +1045,39 @@
     <div class="reset-modal-actions">
       <button class="reset-cancel-btn" id="resetCancelBtn" type="button">Cancel</button>
       <button class="reset-confirm-btn" id="resetConfirmBtn" type="button">Reset Profile</button>
+    </div>
+  </div>
+</div>
+<!-- Progress Conflict Modal -->
+<div class="conflict-modal" id="progressConflictModal" aria-hidden="true">
+  <div class="conflict-modal-backdrop" data-conflict-close></div>
+  <div class="conflict-modal-card" role="dialog" aria-modal="true" aria-labelledby="conflictModalTitle">
+    <button class="conflict-modal-close" id="conflictModalCloseBtn" type="button" aria-label="Close progress conflict">&times;</button>
+    <div class="conflict-modal-head">
+      <div class="conflict-modal-kicker">Progress Sync</div>
+      <h2 id="conflictModalTitle">Progress found in two places</h2>
+      <p>This device has local progress, and your account already has saved progress. Choose which progress to use.</p>
+    </div>
+    <div class="conflict-modal-actions">
+      <button class="conflict-cancel-btn" id="conflictCancelBtn" type="button">Cancel</button>
+      <button class="conflict-device-btn" id="conflictDeviceBtn" type="button">Keep device progress</button>
+      <button class="conflict-account-btn" id="conflictAccountBtn" type="button">Use account progress</button>
+    </div>
+  </div>
+</div>
+<!-- Replace Account Progress Warning Modal -->
+<div class="conflict-modal" id="replaceAccountModal" aria-hidden="true">
+  <div class="conflict-modal-backdrop" data-replace-close></div>
+  <div class="conflict-modal-card warning" role="dialog" aria-modal="true" aria-labelledby="replaceAccountTitle">
+    <button class="conflict-modal-close" id="replaceAccountCloseBtn" type="button" aria-label="Close replace account warning">&times;</button>
+    <div class="conflict-modal-head">
+      <div class="conflict-modal-kicker">Careful</div>
+      <h2 id="replaceAccountTitle">Replace account progress?</h2>
+      <p>This will replace your existing account progress with the progress saved on this device. This action may remove or overwrite progress currently saved in your account. Do you want to continue?</p>
+    </div>
+    <div class="conflict-modal-actions">
+      <button class="conflict-cancel-btn" id="replaceAccountCancelBtn" type="button">Cancel</button>
+      <button class="conflict-replace-btn" id="replaceAccountContinueBtn" type="button">Continue</button>
     </div>
   </div>
 </div>
