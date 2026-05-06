@@ -4,7 +4,7 @@ const COLOR_ENABLED_KEY = 'quiz_custom_colors_on';
 const BASE_THEME_KEY    = 'quiz_base_theme';
 const CC_VARS = [
   '--p0','--p1','--p2','--p3','--p4','--p5','--p6','--p7',
-  '--acc','--acc-hi','--acc-lo','--acc-vlo','--acc-2','--acc-2-hi','--btn-txt',
+  '--acc','--acc-hi','--acc-lo','--acc-vlo','--acc-2','--acc-2-hi','--acc-2-lo','--btn-txt',
   '--bg','--app-bg','--surf','--surf-d','--inp','--hov','--bar-bg',
   '--ok','--ok-text','--ok-bg','--ok-fb','--ok-bd','--err','--err-bg','--no-bd',
   '--text-primary','--text-secondary','--text-muted','--border','--border-strong',
@@ -49,6 +49,31 @@ function getLuminance(hex) {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
+function getContrastRatio(fgHex, bgHex) {
+  const fg = getLuminance(fgHex);
+  const bg = getLuminance(bgHex);
+  const light = Math.max(fg, bg);
+  const dark = Math.min(fg, bg);
+  return (light + 0.05) / (dark + 0.05);
+}
+
+function getReadableLightAccent(h, s, maxLightness) {
+  const surface = '#fbfaf7';
+  for (let l = maxLightness; l >= 18; l -= 1) {
+    const candidate = hslToHex(h, s, l);
+    if (getContrastRatio(candidate, surface) >= 4.5) return candidate;
+  }
+  return hslToHex(h, s, 18);
+}
+
+function getReadableOnAccent(colors) {
+  const darkText = '#101114';
+  const lightText = '#ffffff';
+  const darkScore = Math.min(...colors.map(color => getContrastRatio(darkText, color)));
+  const lightScore = Math.min(...colors.map(color => getContrastRatio(lightText, color)));
+  return darkScore >= lightScore ? darkText : lightText;
+}
+
 
 function normalizeHex(hex, fallback) {
   if (typeof hex !== 'string') return fallback;
@@ -75,6 +100,19 @@ function buildAccentFamily(accentHex, baseTheme, hueShift = 0) {
   const h = ((s0 < 8 ? 215 : rawH) + hueShift + 360) % 360;
   const s = baseTheme === 'light' ? clampN(s0 + 12, 54, 88) : clampN(s0, 38, 86);
   const l = baseTheme === 'light' ? clampN(l0 - 8, 28, 42) : clampN(l0, 52, 68);
+  if (baseTheme === 'light') {
+    const vividS = clampN(s0 + 8, 44, 92);
+    const vividL = clampN(l0, 42, 76);
+    const acc = hslToHex(h, vividS, vividL);
+    const readable = getReadableLightAccent(h, s, clampN(vividL - 10, 28, 44));
+    const [, , readableL] = hexToHSL(readable);
+    return {
+      acc,
+      hi: hslToHex(h, clampN(vividS - 6, 34, 86), clampN(vividL + 10, 50, 84)),
+      lo: readable,
+      vlo: hslToHex(h, clampN(s + 2, 36, 86), clampN(readableL - 12, 14, 30)),
+    };
+  }
   const acc = hslToHex(h, s, l);
   return {
     acc,
@@ -119,12 +157,13 @@ function buildVibrantCustomPalette(accentHex, baseHex) {
   const baseAccS = clampN(Math.round(bS * 0.65), 28, 88);
   const acc2    = hslToHex(bH, baseAccS, clampN(bL0 + 28, 44, 68));
   const acc2Hi  = hslToHex(bH, clampN(baseAccS - 6, 22, 80), clampN(bL0 + 38, 54, 76));
+  const acc2Lo  = hslToHex(bH, clampN(baseAccS + 2, 30, 90), clampN(bL0 + 10, 30, 52));
 
   return {
     '--p0': p0, '--p1': p1, '--p2': p2, '--p3': p3,
     '--p4': p4, '--p5': p5, '--p6': p6, '--p7': p7,
     '--acc': acc, '--acc-hi': accHi, '--acc-lo': accLo, '--acc-vlo': accVlo,
-    '--acc-2': acc2, '--acc-2-hi': acc2Hi, '--btn-txt': btnTxt,
+    '--acc-2': acc2, '--acc-2-hi': acc2Hi, '--acc-2-lo': acc2Lo, '--btn-txt': btnTxt,
     '--bg': p0, '--app-bg': p1, '--surf': p4, '--surf-d': p3,
     '--inp': p2, '--hov': p5, '--bar-bg': p2,
     '--ok-bg': okBg, '--ok-fb': okFb, '--ok-bd': okFb, '--no-bd': p3,
@@ -155,12 +194,14 @@ function buildNeutralPalette(baseTheme, accentHex, secondaryHex) {
         shadowCard: '0 1px 1px rgba(48,45,39,0.06), 0 5px 12px rgba(48,45,39,0.10), inset 0 1px 0 rgba(255,255,255,0.86)',
       };
   const [p0,p1,p2,p3,p4,p5,p6,p7] = base.p;
-  const btnTxt = getLuminance(accent.acc) > 0.38 ? '#101114' : '#ffffff';
+  const btnTxt = dark
+    ? (getLuminance(accent.acc) > 0.38 ? '#101114' : '#ffffff')
+    : getReadableOnAccent([accent.acc, accent.hi]);
   return {
     '--p0': p0, '--p1': p1, '--p2': p2, '--p3': p3,
     '--p4': p4, '--p5': p5, '--p6': p6, '--p7': p7,
     '--acc': accent.acc, '--acc-hi': accent.hi, '--acc-lo': accent.lo, '--acc-vlo': accent.vlo,
-    '--acc-2': secondary.acc, '--acc-2-hi': secondary.hi, '--btn-txt': btnTxt,
+    '--acc-2': secondary.acc, '--acc-2-hi': secondary.hi, '--acc-2-lo': secondary.lo, '--btn-txt': btnTxt,
     '--bg': p0, '--app-bg': p1,
     '--surface-raised': dark ? p4 : p2,
     '--surf': dark ? p4 : p2,

@@ -32,6 +32,7 @@
       /* Neutral theme architecture tokens */
       --acc-2: #8fb7ff;
       --acc-2-hi: #b5ccff;
+      --acc-2-lo: #5f83c8;
       --text-primary: #f4f2ea;
       --text-secondary: #b8b4aa;
       --text-muted: #858078;
@@ -1647,9 +1648,12 @@ html[data-theme="minimal"] {
     --shadow-inset: inset 0 2px 4px rgba(48,45,39,0.11), inset 0 -1px 0 rgba(255,255,255,0.70);
     --light-raised-gradient: linear-gradient(180deg, var(--surface-selected) 0%, var(--surface-raised) 100%);
     --light-section-gradient: linear-gradient(180deg, color-mix(in srgb, var(--surface-raised), var(--surface-section) 58%) 0%, var(--surface-section) 100%);
-    --light-accent-surface: color-mix(in srgb, var(--acc), var(--surface-selected) 76%);
-    --light-accent-text: color-mix(in srgb, var(--acc-vlo), #061004 46%);
-    --light-action-tone: color-mix(in srgb, var(--acc-vlo), #061004 56%);
+    --light-accent-fill: var(--acc);
+    --light-accent-surface: color-mix(in srgb, var(--acc), var(--surface-selected) 62%);
+    --light-accent-text: color-mix(in srgb, var(--acc-lo), #061004 22%);
+    --light-action-tone: color-mix(in srgb, var(--acc-lo), #061004 30%);
+    --light-secondary-action: color-mix(in srgb, var(--acc-2-lo), #061004 18%);
+    --light-accent-depth: color-mix(in srgb, var(--acc-2), var(--surface-selected) 72%);
     --light-soft-ink: color-mix(in srgb, var(--text-primary), var(--surface-page) 14%);
     --light-shadow-ink: #302d27;
     --light-separation-border: color-mix(in srgb, var(--text-primary), transparent 88%);
@@ -2272,6 +2276,163 @@ html[data-theme="minimal"] {
     border-color: var(--light-separation-border);
   }
 
+  html[data-theme="default"][data-base-theme="light"] #s-test .test-top {
+    background:
+      linear-gradient(145deg, color-mix(in srgb, var(--surface-raised), var(--acc) 8%) 0%, color-mix(in srgb, var(--surface-section), var(--acc-2) 7%) 100%);
+    border-color: color-mix(in srgb, var(--acc-2-lo), var(--light-separation-border) 70%);
+    box-shadow:
+      0 1px 1px rgba(255,255,255,0.78) inset,
+      0 8px 18px color-mix(in srgb, var(--light-shadow-ink), transparent 88%),
+      0 18px 36px color-mix(in srgb, var(--acc-2-lo), transparent 88%);
+  }
+  html[data-theme="default"][data-base-theme="light"] #s-test .q-card {
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--surface-selected), var(--acc) 7%) 0%, color-mix(in srgb, var(--surface-raised), var(--acc-2) 5%) 100%);
+    border-color: color-mix(in srgb, var(--acc-2-lo), var(--light-separation-border) 68%);
+    box-shadow:
+      0 1px 1px rgba(255,255,255,0.84) inset,
+      0 8px 18px color-mix(in srgb, var(--light-shadow-ink), transparent 88%),
+      0 22px 44px color-mix(in srgb, var(--acc-vlo), transparent 90%),
+      0 0 0 1px color-mix(in srgb, var(--acc), transparent 84%);
+  }
+  html[data-theme="default"][data-base-theme="light"] #s-test .q-card::before {
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--acc), transparent 35%), color-mix(in srgb, var(--acc-2), transparent 42%), transparent);
+  }
+  html[data-theme="default"][data-base-theme="light"] #s-test .q-card::after {
+    content: '';
+    position: absolute;
+    inset: auto 12% 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--acc-2), transparent 58%), transparent);
+    pointer-events: none;
+  }
+  html[data-theme="default"][data-base-theme="light"] .q-pill,
+  html[data-theme="default"][data-base-theme="light"] .score-pill,
+  html[data-theme="default"][data-base-theme="light"] .streak-pill {
+    background: color-mix(in srgb, var(--light-accent-depth), transparent 18%);
+    border-color: color-mix(in srgb, var(--acc-2-lo), transparent 48%);
+    color: var(--light-secondary-action);
+  }
+  html[data-theme="default"][data-base-theme="light"] .score-pill span,
+  html[data-theme="default"][data-base-theme="light"] .q-pill span {
+    color: var(--light-action-tone);
+  }
+  html[data-theme="default"][data-base-theme="light"] .timer-arc-fill {
+    stroke: var(--light-accent-fill);
+    opacity: 0.72;
+  }
+  html[data-theme="default"][data-base-theme="light"] .timer-arc-bg {
+    stroke: color-mix(in srgb, var(--light-soft-ink), transparent 84%);
+  }
+
+  html[data-theme="default"][data-base-theme="light"] .custom-keyboard {
+    background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--surface-page), var(--acc-2) 5%) 100%);
+  }
+  html[data-theme="default"][data-base-theme="light"] .kb-key {
+    background: var(--light-raised-gradient);
+    border-color: color-mix(in srgb, var(--light-separation-border), transparent 18%);
+    color: var(--light-soft-ink);
+    box-shadow: var(--shadow-small);
+  }
+  html[data-theme="default"][data-base-theme="light"] .kb-key:active,
+  html[data-theme="default"][data-base-theme="light"] .kb-key.kb-pressed {
+    background: var(--light-accent-surface);
+    border-color: color-mix(in srgb, var(--acc), transparent 34%);
+    color: var(--light-accent-text);
+    box-shadow: var(--shadow-hover), 0 0 0 2px color-mix(in srgb, var(--acc), transparent 80%);
+  }
+  html[data-theme="default"][data-base-theme="light"] .kb-enter {
+    background: linear-gradient(180deg, var(--acc-hi) 0%, var(--acc) 100%);
+    border-color: color-mix(in srgb, var(--acc-lo), transparent 34%);
+    color: var(--btn-txt);
+    box-shadow: 0 1px 1px color-mix(in srgb, var(--acc-vlo), transparent 78%), 0 6px 14px color-mix(in srgb, var(--acc), transparent 76%), inset 0 1px 0 rgba(255,255,255,0.34);
+  }
+  html[data-theme="default"][data-base-theme="light"] .kb-del {
+    color: color-mix(in srgb, var(--err), #1d1612 14%);
+  }
+
+  html[data-base-theme="light"] #milestoneToast {
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--surface-raised), var(--acc) 8%) 0%, color-mix(in srgb, var(--surface-section), var(--acc-2) 7%) 100%);
+    border-color: color-mix(in srgb, var(--acc-2-lo), var(--light-separation-border) 60%);
+    box-shadow:
+      0 1px 1px rgba(255,255,255,0.78) inset,
+      0 8px 18px color-mix(in srgb, var(--light-shadow-ink), transparent 88%),
+      0 18px 36px color-mix(in srgb, var(--acc-2-lo), transparent 90%);
+  }
+  html[data-base-theme="light"] #milestoneToast .milestone-label {
+    color: var(--light-secondary-action);
+  }
+  html[data-base-theme="light"] #milestoneToast .milestone-title {
+    color: var(--light-action-tone);
+  }
+  html[data-base-theme="light"] #milestoneToast .milestone-sub {
+    color: color-mix(in srgb, var(--light-soft-ink), transparent 28%);
+  }
+
+  html[data-base-theme="light"]:not([data-theme="minimal"]) .daily-challenge-btn {
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--surface-raised), var(--acc) 8%) 0%, color-mix(in srgb, var(--surface-section), var(--acc-2) 7%) 100%);
+    border-color: color-mix(in srgb, var(--acc-2-lo), var(--light-separation-border) 62%);
+    color: var(--light-soft-ink);
+    box-shadow:
+      -1px 0 4px color-mix(in srgb, var(--light-shadow-ink), transparent 94%),
+      -6px 0 16px color-mix(in srgb, var(--acc-2-lo), transparent 96%),
+      inset 0 1px 0 rgba(255,255,255,0.78);
+  }
+  html[data-base-theme="light"]:not([data-theme="minimal"]) .dc-tab,
+  html[data-base-theme="light"]:not([data-theme="minimal"]) .daily-challenge-btn:hover .dc-tab,
+  html[data-base-theme="light"]:not([data-theme="minimal"]) .daily-challenge-btn.dc-open .dc-tab {
+    background: linear-gradient(180deg, var(--acc-hi) 0%, var(--acc) 100%);
+    border-right-color: color-mix(in srgb, var(--acc-lo), transparent 34%);
+    box-shadow: inset -1px 0 0 color-mix(in srgb, var(--acc-vlo), transparent 78%);
+  }
+  html[data-base-theme="light"]:not([data-theme="minimal"]) .daily-challenge-title {
+    color: var(--light-action-tone) !important;
+  }
+  html[data-base-theme="light"]:not([data-theme="minimal"]) .daily-challenge-sub {
+    color: var(--light-secondary-action) !important;
+    opacity: 0.78;
+  }
+  html[data-base-theme="light"]:not([data-theme="minimal"]) .dc-tab-day,
+  html[data-base-theme="light"]:not([data-theme="minimal"]) .dc-tab-mon,
+  html[data-base-theme="light"]:not([data-theme="minimal"]) .dc-chevron {
+    color: var(--btn-txt) !important;
+    text-shadow: none !important;
+  }
+  html[data-base-theme="light"]:not([data-theme="minimal"]) .daily-challenge-badge.avail {
+    background: color-mix(in srgb, var(--light-accent-depth), transparent 10%);
+    border-color: color-mix(in srgb, var(--acc-2-lo), transparent 45%);
+    color: var(--light-secondary-action) !important;
+  }
+  html[data-base-theme="light"]:not([data-theme="minimal"]) .daily-challenge-btn:hover,
+  html[data-base-theme="light"]:not([data-theme="minimal"]) .daily-challenge-btn:focus-visible,
+  html[data-base-theme="light"]:not([data-theme="minimal"]) .daily-challenge-btn.dc-open {
+    border-color: color-mix(in srgb, var(--acc), transparent 28%);
+    box-shadow:
+      -1px 0 5px color-mix(in srgb, var(--light-shadow-ink), transparent 93%),
+      -7px 0 18px color-mix(in srgb, var(--acc), transparent 93%),
+      0 0 0 1px color-mix(in srgb, var(--acc-2), transparent 85%),
+      inset 0 1px 0 rgba(255,255,255,0.82);
+  }
+  @media (max-width: 599px) {
+    html[data-base-theme="light"]:not([data-theme="minimal"]) .daily-challenge-btn:hover:not(.dc-open) {
+      border-color: color-mix(in srgb, var(--acc-2-lo), var(--light-separation-border) 62%) !important;
+      box-shadow:
+        -1px 0 4px color-mix(in srgb, var(--light-shadow-ink), transparent 94%),
+        -6px 0 16px color-mix(in srgb, var(--acc-2-lo), transparent 96%),
+        inset 0 1px 0 rgba(255,255,255,0.78) !important;
+    }
+    html[data-base-theme="light"]:not([data-theme="minimal"]) .daily-challenge-btn.dc-open {
+      border-color: color-mix(in srgb, var(--acc), transparent 28%) !important;
+      box-shadow:
+        -1px 0 5px color-mix(in srgb, var(--light-shadow-ink), transparent 93%),
+        -7px 0 18px color-mix(in srgb, var(--acc), transparent 93%),
+        0 0 0 1px color-mix(in srgb, var(--acc-2), transparent 85%),
+        inset 0 1px 0 rgba(255,255,255,0.82) !important;
+    }
+  }
+
   html[data-theme="minimal"][data-base-theme="light"] {
     --surface-page: var(--p0);
     --surface-section: color-mix(in srgb, var(--p1), var(--p0) 42%);
@@ -2290,6 +2451,27 @@ html[data-theme="minimal"] {
   html[data-theme="minimal"][data-base-theme="light"] .app {
     background: var(--surface-page);
     border-color: var(--light-separation-border);
+    box-shadow: none;
+  }
+  html[data-theme="minimal"][data-base-theme="light"] .daily-challenge-btn,
+  html[data-theme="minimal"][data-base-theme="light"] .daily-challenge-btn.dc-open {
+    border-color: color-mix(in srgb, var(--light-soft-ink), transparent 78%) !important;
+    border-right: none;
+  }
+  html[data-theme="minimal"][data-base-theme="light"] .daily-challenge-title {
+    color: var(--light-action-tone) !important;
+  }
+  html[data-theme="minimal"][data-base-theme="light"] .daily-challenge-sub {
+    color: var(--light-secondary-action) !important;
+    opacity: 0.78;
+  }
+  html[data-theme="minimal"][data-base-theme="light"] .daily-challenge-badge.avail {
+    color: var(--light-secondary-action) !important;
+    border-color: color-mix(in srgb, var(--light-soft-ink), transparent 78%) !important;
+  }
+  html[data-theme="minimal"][data-base-theme="light"] #milestoneToast {
+    background: var(--surface-raised);
+    border-color: color-mix(in srgb, var(--light-soft-ink), transparent 78%);
     box-shadow: none;
   }
   html[data-theme="minimal"][data-base-theme="light"] .setup-header,
