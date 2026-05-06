@@ -28,6 +28,7 @@
     window.authState.user = data.user || null;
     window.authState.isLoggedIn = !!data.user;
     updateAuthUI();
+    if (window.authState.isLoggedIn) window.syncAllLocalAppStateToSupabase?.();
 
     return data.user || null;
   }
@@ -244,6 +245,7 @@
       window.authState.user = session && session.user ? session.user : null;
       window.authState.isLoggedIn = !!window.authState.user;
       updateAuthUI();
+      if (window.authState.isLoggedIn) window.syncAllLocalAppStateToSupabase?.();
     });
   }
 

@@ -17,7 +17,10 @@ function applyPracticeMode(on) {
 }
 
 function setPracticeMode(on) {
-  try { localStorage.setItem(PRACTICE_MODE_KEY, on ? '1' : '0'); } catch(e) {}
+  try {
+    localStorage.setItem(PRACTICE_MODE_KEY, on ? '1' : '0');
+    window.syncUserProgressToSupabase?.();
+  } catch(e) {}
   applyPracticeMode(on);
   // If XP/level modal is showing, hide it immediately
   if (on) {
@@ -1302,7 +1305,10 @@ function getPB(){
   try { return JSON.parse(localStorage.getItem(PB_KEY)) || {}; } catch(e){ return {}; }
 }
 function savePB(pb){
-  try { localStorage.setItem(PB_KEY, JSON.stringify(pb)); } catch(e){}
+  try {
+    localStorage.setItem(PB_KEY, JSON.stringify(pb));
+    window.syncUserProgressToSupabase?.();
+  } catch(e){}
 }
 
 // ───────── CONFETTI ─────────
@@ -1448,31 +1454,7 @@ function eraseHistoryConfirm() {
 }
 
 function saveSessionToSupabase(session) {
-  try {
-    const client = window.supabaseClient;
-    const user = window.authState && window.authState.user;
-    if (!client || !user || !user.id) return;
-
-    const request = client.from('sessions').insert({
-      user_id: user.id,
-      total_questions: session.total,
-      correct_answers: session.score,
-      accuracy: session.pct,
-      time_taken_seconds: null,
-      mode: session.timed ? 'timed' : 'practice',
-      raw_data: session
-    });
-
-    if (request && typeof request.then === 'function') {
-      request.then(({ error }) => {
-        if (error) console.warn('Supabase session save failed:', error.message || error);
-      }).catch(error => {
-        console.warn('Supabase session save failed:', error.message || error);
-      });
-    }
-  } catch (error) {
-    console.warn('Supabase session save failed:', error.message || error);
-  }
+  window.syncSessionToSupabase?.(session);
 }
 
 function saveHistory(score, total, pct, xp) {
@@ -1537,7 +1519,10 @@ function getProfile() {
   try { return JSON.parse(localStorage.getItem(PROFILE_KEY)) || {}; } catch(e) { return {}; }
 }
 function saveProfile(data) {
-  try { localStorage.setItem(PROFILE_KEY, JSON.stringify(data)); } catch(e) {}
+  try {
+    localStorage.setItem(PROFILE_KEY, JSON.stringify(data));
+    window.syncProfileToSupabase?.();
+  } catch(e) {}
 }
 function getSessionHistory() {
   try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch(e) { return []; }
@@ -1873,7 +1858,10 @@ function getDailyGoal() {
   try { return parseInt(localStorage.getItem(GOAL_KEY)) || 20; } catch(e) { return 20; }
 }
 function saveDailyGoal(n) {
-  try { localStorage.setItem(GOAL_KEY, n); } catch(e) {}
+  try {
+    localStorage.setItem(GOAL_KEY, n);
+    window.syncUserProgressToSupabase?.();
+  } catch(e) {}
 }
 
 function getTodayQuestionCount(history) {
@@ -1970,7 +1958,10 @@ function saveUnlockedMilestone(id) {
   const unlocked = getUnlockedMilestones();
   if (!unlocked.includes(id)) {
     unlocked.push(id);
-    try { localStorage.setItem(MILESTONES_KEY, JSON.stringify(unlocked)); } catch(e) {}
+    try {
+      localStorage.setItem(MILESTONES_KEY, JSON.stringify(unlocked));
+      window.syncMilestonesToSupabase?.();
+    } catch(e) {}
   }
 }
 
@@ -2236,7 +2227,10 @@ function getDayStreakData() {
   catch(e) { return {streak:0, bestStreak:0, lastDate:''}; }
 }
 function saveDayStreakData(d) {
-  try { localStorage.setItem(DAY_STREAK_KEY, JSON.stringify(d)); } catch(e) {}
+  try {
+    localStorage.setItem(DAY_STREAK_KEY, JSON.stringify(d));
+    window.syncUserProgressToSupabase?.();
+  } catch(e) {}
 }
 
 /**
@@ -2279,7 +2273,10 @@ function getXPData() {
   catch(e) { return {totalXP: 0, currentLevel: 1}; }
 }
 function saveXPData(d) {
-  try { localStorage.setItem(XP_KEY, JSON.stringify(d)); } catch(e) {}
+  try {
+    localStorage.setItem(XP_KEY, JSON.stringify(d));
+    window.syncUserProgressToSupabase?.();
+  } catch(e) {}
 }
 
 /** XP needed to reach a given level (cumulative total from 0).
@@ -2452,7 +2449,10 @@ function getWeaknessData() {
   catch(e) { return {}; }
 }
 function saveWeaknessData(d) {
-  try { localStorage.setItem(WEAKNESS_KEY, JSON.stringify(d)); } catch(e) {}
+  try {
+    localStorage.setItem(WEAKNESS_KEY, JSON.stringify(d));
+    window.syncWeaknessToSupabase?.();
+  } catch(e) {}
 }
 
 /** Update per-number stats after each answer */
@@ -2587,7 +2587,10 @@ function getSRQueue() {
   try { return JSON.parse(localStorage.getItem(SR_KEY)) || []; } catch(e) { return []; }
 }
 function saveSRQueue(q) {
-  try { localStorage.setItem(SR_KEY, JSON.stringify(q.slice(0, SR_MAX))); } catch(e) {}
+  try {
+    localStorage.setItem(SR_KEY, JSON.stringify(q.slice(0, SR_MAX)));
+    window.syncSpacedRepetitionToSupabase?.();
+  } catch(e) {}
 }
 
 /** Add a wrong question to the persistent SR queue */
@@ -2636,7 +2639,11 @@ function getDailyChallengeData() {
   catch(e) { return {}; }
 }
 function saveDailyChallengeData(d) {
-  try { localStorage.setItem(DAILY_CHAL_KEY, JSON.stringify(d)); } catch(e) {}
+  let saved = false;
+  try {
+    localStorage.setItem(DAILY_CHAL_KEY, JSON.stringify(d));
+    saved = true;
+  } catch(e) {}
   // Also append to running DC history log
   if (d.completed) {
     try {
@@ -2649,6 +2656,7 @@ function saveDailyChallengeData(d) {
       }
     } catch(e) {}
   }
+  if (saved) window.syncDailyChallengesToSupabase?.();
 }
 
 function isDailyChallengeCompleted() {
@@ -3141,12 +3149,15 @@ showProfile = function() {
 // ─────────────────────────────────────────────
 (function initRetentionSystems() {
   updateXPPill();
-  // Defer setup screen update slightly (after init routing runs)
-  setTimeout(() => {
+  function refreshDailyChallengeCard() {
     updateSetupMotivation();
     // Set initial visibility based on whatever screen is active at load
     const activeScreen = document.querySelector('.screen.active');
     if (activeScreen) updateDailyChallengeVisibility(activeScreen.id);
     else updateDailyChallengeVisibility('s-setup'); // default
-  }, 120);
+  }
+  // Defer setup screen update slightly (after init routing runs)
+  setTimeout(refreshDailyChallengeCard, 120);
+  document.addEventListener('DOMContentLoaded', refreshDailyChallengeCard);
+  window.addEventListener('load', refreshDailyChallengeCard);
 })();

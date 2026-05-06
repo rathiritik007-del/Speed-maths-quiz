@@ -544,6 +544,7 @@ function applyCustomColors() {
   }
   html.setAttribute('data-custom-color', 'active');
   localStorage.setItem(COLOR_THEME_KEY, JSON.stringify({ accent: accentHex, base: baseHex }));
+  window.syncUserSettingsToSupabase?.();
   syncAnalogousAccentSwatch();
 }
 
@@ -560,6 +561,7 @@ function setCustomColorEnabled(enabled) {
   if (tog)   tog.checked          = enabled;
   if (panel) panel.style.display  = enabled ? '' : 'none';
   localStorage.setItem(COLOR_ENABLED_KEY, enabled ? '1' : '0');
+  window.syncUserSettingsToSupabase?.();
   if (enabled) {
     applyCustomColors();
   } else {
@@ -567,7 +569,7 @@ function setCustomColorEnabled(enabled) {
   }
 }
 
-function initCustomColors() {
+function loadSavedCustomColorInputs() {
   // Restore saved colour picks into the pickers
   const savedColors = localStorage.getItem(COLOR_THEME_KEY);
   if (savedColors) {
@@ -579,6 +581,10 @@ function initCustomColors() {
       if (bp && base)   bp.value = base;
     } catch(e) { localStorage.removeItem(COLOR_THEME_KEY); }
   }
+}
+
+function initCustomColors() {
+  loadSavedCustomColorInputs();
   syncColorSwatches(); // also marks matching preset as active
   syncBaseColorLabel(); // set correct label for current base theme
   // Restore enabled/disabled state (persists across refreshes)
@@ -600,6 +606,7 @@ function initTheme() {
 function setBaseTheme(baseTheme) {
   const next = baseTheme === 'light' ? 'light' : (baseTheme === 'dark' ? 'dark' : 'vibrant');
   localStorage.setItem(BASE_THEME_KEY, next);
+  window.syncUserSettingsToSupabase?.();
   applyBaseTheme(next, true);
 }
 
@@ -624,6 +631,7 @@ function applyBaseTheme(baseTheme, animate) {
 
 function setTheme(theme) {
   localStorage.setItem(THEME_KEY, theme);
+  window.syncUserSettingsToSupabase?.();
   applyTheme(theme, true);
 }
 
@@ -1187,6 +1195,7 @@ function toggleDashRecentSessions(btn) {
   if (btn) btn.textContent = isCollapsed ? 'View All' : 'Show Less';
 }
 
+loadSavedCustomColorInputs();
 initTheme();
 initCustomColors();
 
