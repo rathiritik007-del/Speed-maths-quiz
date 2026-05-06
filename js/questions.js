@@ -1499,6 +1499,8 @@ function toggleHistory(){
 //  PROFILE · WELCOME · DASHBOARD
 // ═══════════════════════════════════════════════
 const PROFILE_KEY = 'quiz_profile';
+const PROFILE_AVATAR_KEY = 'quiz_profile_avatar';
+const PROFILE_AVATAR_MAX_BYTES = 2 * 1024 * 1024;
 const HISTORY_KEY = 'quiz_history';
 const MAX_HISTORY = 200;
 
@@ -1523,6 +1525,53 @@ function saveProfile(data) {
     localStorage.setItem(PROFILE_KEY, JSON.stringify(data));
     window.syncProfileToSupabase?.();
   } catch(e) {}
+}
+function getProfileAvatar() {
+  try { return localStorage.getItem(PROFILE_AVATAR_KEY) || ''; } catch(e) { return ''; }
+}
+function saveProfileAvatar(dataUrl, file) {
+  try {
+    localStorage.setItem(PROFILE_AVATAR_KEY, dataUrl);
+    window.syncProfileAvatarToSupabase?.(dataUrl, file);
+  } catch(e) {}
+}
+function openProfileAvatarPicker() {
+  document.getElementById('profileAvatarInput')?.click();
+}
+function renderProfileAvatar(name) {
+  const avatar = document.getElementById('profileAvatar');
+  const photoBtn = document.getElementById('profilePhotoBtn');
+  if (!avatar) return;
+  const image = getProfileAvatar();
+  if (image) {
+    avatar.textContent = '';
+    avatar.style.backgroundImage = `url("${image}")`;
+    if (photoBtn) photoBtn.textContent = 'Change photo';
+  } else {
+    avatar.style.backgroundImage = '';
+    avatar.textContent = (name || '?').charAt(0).toUpperCase();
+    if (photoBtn) photoBtn.textContent = 'Add profile picture';
+  }
+}
+function handleProfileAvatarFile(file) {
+  if (!file) return;
+  if (!file.type || !file.type.startsWith('image/')) {
+    alert('Please choose an image file.');
+    return;
+  }
+  if (file.size > PROFILE_AVATAR_MAX_BYTES) {
+    alert('Please choose an image smaller than 2 MB.');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    const dataUrl = typeof reader.result === 'string' ? reader.result : '';
+    if (!dataUrl) return;
+    saveProfileAvatar(dataUrl, file);
+    renderProfileAvatar((getProfile().name || '?'));
+  };
+  reader.onerror = () => console.warn('Could not read selected profile image.');
+  reader.readAsDataURL(file);
 }
 function getSessionHistory() {
   try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch(e) { return []; }
@@ -1628,9 +1677,9 @@ function showProfile() {
   const tog = document.getElementById('practiceModeTog');
   if (tog) tog.checked = isPracticeMode();
 
-  // Avatar initial
+  // Avatar
   const name = profile.name || '?';
-  document.getElementById('profileAvatar').textContent = name.charAt(0).toUpperCase();
+  renderProfileAvatar(name);
   document.getElementById('profileDisplayName').textContent = name;
   document.getElementById('profileSince').textContent = profile.joinedDate
     ? 'Member since ' + new Date(profile.joinedDate).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'})
@@ -1718,7 +1767,7 @@ function saveProfileNameFromScreen() {
   profile.name = name;
   saveProfile(profile);
   document.getElementById('profileDisplayName').textContent = name;
-  document.getElementById('profileAvatar').textContent = name.charAt(0).toUpperCase();
+  renderProfileAvatar(name);
   document.getElementById('profileNameEditRow').classList.remove('open');
   // update dashboard name too if visible
   const ns = document.getElementById('dashNameSpan');
@@ -1743,6 +1792,7 @@ function openResetProfileModal() {
       : 'Your local profile and progress will be cleared.';
   }
   _resetModalLastFocus = document.activeElement;
+  modal.classList.remove('closing');
   modal.classList.add('open');
   modal.setAttribute('aria-hidden', 'false');
   setTimeout(() => (confirmBtn || document.getElementById('resetCancelBtn'))?.focus(), 0);
@@ -1751,12 +1801,27 @@ function openResetProfileModal() {
 function closeResetProfileModal() {
   const modal = document.getElementById('resetProfileModal');
   if (!modal) return;
-  modal.classList.remove('open');
   modal.setAttribute('aria-hidden', 'true');
-  if (_resetModalLastFocus && typeof _resetModalLastFocus.focus === 'function') {
-    _resetModalLastFocus.focus();
+  const restoreFocus = () => {
+    if (_resetModalLastFocus && typeof _resetModalLastFocus.focus === 'function') {
+      _resetModalLastFocus.focus();
+    }
+    _resetModalLastFocus = null;
+  };
+  if (!modal.classList.contains('open')) {
+    restoreFocus();
+    return;
   }
-  _resetModalLastFocus = null;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    modal.classList.remove('open', 'closing');
+    restoreFocus();
+    return;
+  }
+  modal.classList.add('closing');
+  setTimeout(() => {
+    modal.classList.remove('open', 'closing');
+    restoreFocus();
+  }, 180);
 }
 
 async function performResetProfile() {
@@ -1764,6 +1829,7 @@ async function performResetProfile() {
   const loggedIn = !!(window.authState && window.authState.isLoggedIn);
   const currentScreen = document.querySelector('.screen.active');
   const preservedProfile = getProfile();
+  const preservedAvatar = getProfileAvatar();
   const keysToClear = [
     HISTORY_KEY,
     PB_KEY,
@@ -1783,7 +1849,8 @@ async function performResetProfile() {
     'quiz_last_session_summary',
     'quiz_weekly_xp',
     'quiz_sync_notice_dismissed',
-    'quiz_local_data_synced'
+    'quiz_local_data_synced',
+    PROFILE_AVATAR_KEY
   ];
 
   if (!loggedIn) {
@@ -1795,6 +1862,9 @@ async function performResetProfile() {
 
   if (loggedIn) {
     try { localStorage.setItem(PROFILE_KEY, JSON.stringify(preservedProfile)); } catch(e){}
+    if (preservedAvatar) {
+      try { localStorage.setItem(PROFILE_AVATAR_KEY, preservedAvatar); } catch(e){}
+    }
     await window.resetSupabaseAppData?.({ preserveProfile: preservedProfile });
 
     applyPracticeMode(false);
@@ -1830,6 +1900,16 @@ document.addEventListener('DOMContentLoaded', function initResetProfileModal() {
   });
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && modal.classList.contains('open')) closeResetProfileModal();
+  });
+});
+
+document.addEventListener('DOMContentLoaded', function initProfileAvatarInput() {
+  const input = document.getElementById('profileAvatarInput');
+  if (!input) return;
+  input.addEventListener('change', event => {
+    const file = event.target.files && event.target.files[0];
+    handleProfileAvatarFile(file);
+    input.value = '';
   });
 });
 

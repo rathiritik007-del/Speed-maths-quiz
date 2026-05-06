@@ -1594,6 +1594,7 @@ html[data-theme="minimal"] {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 12px;
     margin-bottom: 2px;
   }
   .dash-recent-header-title {
@@ -1623,14 +1624,19 @@ html[data-theme="minimal"] {
     cursor: pointer;
     font-family: 'Inter', sans-serif;
     padding: 0;
+    margin-left: 4px;
     opacity: 0.75;
     transition: opacity 0.15s;
     flex-shrink: 0;
   }
   .dash-view-all-btn:hover { opacity: 1; }
 
-  /* Collapsed state: show only first session */
-  .dash-recent.collapsed .dash-session:nth-child(n+2) { display: none; }
+  /* Collapsed state keeps rows in flow so the container can animate. */
+  .dash-recent.collapsed .dash-session:nth-child(n+2) {
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+  }
 
 
 
@@ -1691,6 +1697,7 @@ html[data-theme="minimal"] {
   html[data-base-theme="light"] .profile-sessions,
   html[data-base-theme="light"] .dash-profile-panel,
   html[data-base-theme="light"] .improve-banner,
+  html[data-base-theme="light"] .auth-account-card,
   html[data-base-theme="light"] .theme-opts,
   html[data-base-theme="light"] .practice-mode-card {
     background: var(--light-section-gradient);
@@ -2234,6 +2241,8 @@ html[data-theme="minimal"] {
   html[data-base-theme="light"] .session-summary-title,
   html[data-base-theme="light"] .improve-banner-title,
   html[data-base-theme="light"] .practice-mode-title,
+  html[data-base-theme="light"] .auth-account-title,
+  html[data-base-theme="light"] .auth-account-status,
   html[data-base-theme="light"] .profile-acc-label,
   html[data-base-theme="light"] .custom-pickers-label,
   html[data-base-theme="light"] .cp-section-label {

@@ -244,6 +244,23 @@ function applyPaletteVars(palette) {
   if (typeof refreshTimedSliderVisual === 'function') requestAnimationFrame(refreshTimedSliderVisual);
 }
 
+let _themeUIRefreshFrame = null;
+function refreshThemeDependentUI() {
+  if (_themeUIRefreshFrame) cancelAnimationFrame(_themeUIRefreshFrame);
+  _themeUIRefreshFrame = requestAnimationFrame(() => {
+    _themeUIRefreshFrame = null;
+    const html = document.documentElement;
+    window.updateAuthUI?.();
+    window.updateSyncNotice?.();
+    if (typeof showProfile === 'function' && document.getElementById('s-profile')?.classList.contains('active')) {
+      showProfile();
+    }
+    html.classList.add('theme-ui-refreshing');
+    void html.offsetHeight;
+    requestAnimationFrame(() => html.classList.remove('theme-ui-refreshing'));
+  });
+}
+
 function getCurrentColorPicks() {
   return {
     accent: normalizeHex(document.getElementById('colorPickAccent')?.value, '#B8D45C'),
@@ -587,6 +604,7 @@ function applyCustomColors() {
   localStorage.setItem(COLOR_THEME_KEY, JSON.stringify({ accent: accentHex, base: baseHex }));
   window.syncUserSettingsToSupabase?.();
   syncAnalogousAccentSwatch();
+  refreshThemeDependentUI();
 }
 
 function clearCustomColors() {
@@ -594,6 +612,7 @@ function clearCustomColors() {
   CC_VARS.forEach(k => html.style.removeProperty(k));
   html.removeAttribute('data-custom-color');
   applyBaseThemeTokens();
+  refreshThemeDependentUI();
 }
 
 function setCustomColorEnabled(enabled) {
@@ -668,6 +687,7 @@ function applyBaseTheme(baseTheme, animate) {
     btnLight.classList.toggle('active', next === 'light');
   }
   syncAnalogousAccentSwatch();
+  refreshThemeDependentUI();
 }
 
 function setTheme(theme) {
@@ -694,6 +714,7 @@ function applyTheme(theme, animate) {
     btnDefault.classList.toggle('active', theme === 'default');
     btnMinimal.classList.toggle('active', theme === 'minimal');
   }
+  refreshThemeDependentUI();
 }
 
 
@@ -872,8 +893,13 @@ function getSessionSummary() {
 }
 
 function dismissSessionSummary() {
-  document.getElementById('sessionSummaryCard').classList.remove('show');
+  const card = document.getElementById('sessionSummaryCard');
+  if (!card) return;
+  card.classList.add('dismiss-right');
   try { localStorage.removeItem(SESSION_SUMMARY_KEY); } catch(e) {}
+  window.setTimeout(() => {
+    card.classList.remove('show', 'dismiss-right');
+  }, 280);
 }
 
 function renderSessionSummaryCard() {
@@ -894,6 +920,7 @@ function renderSessionSummaryCard() {
   } else {
     streakEl.style.display = 'none';
   }
+  card.classList.remove('dismiss-right');
   card.classList.add('show');
 }
 
@@ -1238,6 +1265,8 @@ function toggleDashRecentSessions(btn) {
 
 const SYNC_NOTICE_DISMISSED_KEY = 'quiz_sync_notice_dismissed';
 const LOCAL_DATA_SYNCED_KEY = 'quiz_local_data_synced';
+const PWA_INSTALL_DISMISSED_KEY = 'quiz_pwa_install_dismissed';
+let deferredPwaInstallPrompt = null;
 
 function readLocalJSON(key, fallback) {
   try {
@@ -1307,6 +1336,78 @@ function initSyncNotice() {
 
 window.updateSyncNotice = updateSyncNotice;
 document.addEventListener('DOMContentLoaded', initSyncNotice);
+
+function isRunningStandalone() {
+  return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+function shouldShowPwaInstallNotice() {
+  if (isRunningStandalone()) return false;
+  try {
+    return localStorage.getItem(PWA_INSTALL_DISMISSED_KEY) !== '1';
+  } catch(e) {
+    return false;
+  }
+}
+
+function hidePwaInstallNotice() {
+  document.getElementById('pwaInstallNotice')?.classList.remove('show');
+}
+
+function showPwaInstallNotice() {
+  const notice = document.getElementById('pwaInstallNotice');
+  if (!notice || !deferredPwaInstallPrompt || !shouldShowPwaInstallNotice()) return;
+  notice.classList.add('show');
+}
+
+function dismissPwaInstallNotice() {
+  try { localStorage.setItem(PWA_INSTALL_DISMISSED_KEY, '1'); } catch(e) {}
+  deferredPwaInstallPrompt = null;
+  hidePwaInstallNotice();
+}
+
+async function promptPwaInstall() {
+  if (!deferredPwaInstallPrompt) return;
+  const promptEvent = deferredPwaInstallPrompt;
+  deferredPwaInstallPrompt = null;
+  hidePwaInstallNotice();
+  try {
+    promptEvent.prompt();
+    await promptEvent.userChoice;
+  } catch(e) {
+    console.warn('PWA install prompt failed', e);
+  }
+}
+
+function initPwaInstallPrompt() {
+  document.getElementById('pwaInstallDismissBtn')?.addEventListener('click', dismissPwaInstallNotice);
+  document.getElementById('pwaInstallBtn')?.addEventListener('click', promptPwaInstall);
+
+  window.addEventListener('beforeinstallprompt', event => {
+    if (!shouldShowPwaInstallNotice()) return;
+    event.preventDefault();
+    deferredPwaInstallPrompt = event;
+    window.setTimeout(showPwaInstallNotice, 1400);
+  });
+
+  window.addEventListener('appinstalled', () => {
+    try { localStorage.setItem(PWA_INSTALL_DISMISSED_KEY, '1'); } catch(e) {}
+    deferredPwaInstallPrompt = null;
+    hidePwaInstallNotice();
+  });
+}
+
+function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(error => {
+      console.warn('Service worker registration failed', error);
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', initPwaInstallPrompt);
+registerServiceWorker();
 
 loadSavedCustomColorInputs();
 initTheme();

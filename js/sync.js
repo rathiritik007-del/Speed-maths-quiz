@@ -15,7 +15,8 @@
     customColors: 'quiz_custom_colors',
     customColorsOn: 'quiz_custom_colors_on',
     baseTheme: 'quiz_base_theme',
-    theme: 'quiz_theme'
+    theme: 'quiz_theme',
+    profileAvatar: 'quiz_profile_avatar'
   };
 
   const pending = {};
@@ -101,6 +102,79 @@
       joined_date: profile.joinedDate || null,
       updated_at: new Date().toISOString()
     };
+  }
+
+  function dataUrlToBlob(dataUrl) {
+    if (!dataUrl || typeof dataUrl !== 'string' || !dataUrl.startsWith('data:')) return null;
+    const parts = dataUrl.split(',');
+    if (parts.length < 2) return null;
+    const meta = parts[0];
+    const mimeMatch = meta.match(/^data:([^;]+);base64$/);
+    const mime = mimeMatch ? mimeMatch[1] : 'image/png';
+    const binary = atob(parts[1]);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new Blob([bytes], { type: mime });
+  }
+
+  function avatarExtension(file, blob) {
+    const mime = (file && file.type) || (blob && blob.type) || 'image/png';
+    if (mime === 'image/jpeg') return 'jpg';
+    if (mime === 'image/webp') return 'webp';
+    if (mime === 'image/gif') return 'gif';
+    return 'png';
+  }
+
+  async function uploadProfileAvatar(ctx, dataUrl, file) {
+    if (!ctx || !dataUrl) return null;
+    const blob = file || dataUrlToBlob(dataUrl);
+    if (!blob) return null;
+    const ext = avatarExtension(file, blob);
+    const path = `${ctx.user.id}/avatar.${ext}`;
+    const { error: uploadError } = await ctx.client.storage
+      .from('profile-pictures')
+      .upload(path, blob, {
+        cacheControl: '3600',
+        contentType: blob.type || 'image/png',
+        upsert: true
+      });
+    if (uploadError) throw uploadError;
+    const { data } = ctx.client.storage.from('profile-pictures').getPublicUrl(path);
+    const publicUrl = data && data.publicUrl ? data.publicUrl : null;
+    if (!publicUrl) throw new Error('Could not create profile avatar public URL.');
+    const profile = readJSON(KEYS.profile, {});
+    const { error: profileError } = await ctx.client.from('user_profile').upsert({
+      user_id: ctx.user.id,
+      name: profile.name || null,
+      joined_date: profile.joinedDate || null,
+      avatar_path: path,
+      avatar_url: publicUrl,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id' });
+    if (profileError) throw profileError;
+    return { path, publicUrl };
+  }
+
+  function syncProfileAvatarToSupabase(dataUrl, file) {
+    const ctx = getClientAndUser();
+    if (!ctx || !dataUrl) return;
+    uploadProfileAvatar(ctx, dataUrl, file).catch(error => warnSync('profile avatar', error));
+  }
+
+  async function migrateProfileAvatarIfCloudEmpty(ctx) {
+    try {
+      const avatar = readString(KEYS.profileAvatar, null);
+      if (!avatar) return;
+      const existing = await requestData(
+        'migration profile avatar',
+        ctx.client.from('user_profile').select('avatar_url, avatar_path').eq('user_id', ctx.user.id).maybeSingle(),
+        null
+      );
+      if (rowHasCloudValue(existing, ['avatar_url', 'avatar_path'])) return;
+      await uploadProfileAvatar(ctx, avatar, null);
+    } catch(error) {
+      warnSync('migration profile avatar', error);
+    }
   }
 
   function mapProgressRow(userId) {
@@ -418,6 +492,7 @@
     (async () => {
       try {
         await insertRowIfCloudEmpty(ctx, 'user_profile', mapProfileRow(ctx.user.id), ['name', 'joined_date']);
+        await migrateProfileAvatarIfCloudEmpty(ctx);
         await insertRowIfCloudEmpty(ctx, 'user_progress', mapProgressRow(ctx.user.id), [
           'total_xp',
           'current_level',
@@ -491,6 +566,7 @@
   }
 
   window.syncProfileToSupabase = syncProfileToSupabase;
+  window.syncProfileAvatarToSupabase = syncProfileAvatarToSupabase;
   window.syncUserProgressToSupabase = syncUserProgressToSupabase;
   window.syncUserSettingsToSupabase = syncUserSettingsToSupabase;
   window.syncMilestonesToSupabase = syncMilestonesToSupabase;

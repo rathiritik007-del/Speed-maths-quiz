@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Mental Math Trainer</title>
+  <meta name="theme-color" content="#3d0a57">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Mental Math Trainer">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/themes.css">
@@ -60,7 +66,7 @@
     <div class="session-summary-card" id="sessionSummaryCard">
       <div class="session-summary-header">
         <span class="session-summary-title">Recent Session</span>
-        <button class="session-summary-close" onclick="dismissSessionSummary()">×</button>
+        <button class="session-summary-close" onclick="dismissSessionSummary()">Dismiss</button>
       </div>
       <div class="session-summary-row">
         <div class="session-summary-score" id="sscScore">—</div>
@@ -189,11 +195,13 @@
   <div class="screen" id="s-profile">
 
     <div class="profile-header">
-      <div class="profile-avatar" id="profileAvatar">?</div>
+      <button class="profile-avatar" id="profileAvatar" type="button" onclick="openProfileAvatarPicker()" title="Change profile photo">?</button>
       <div class="profile-header-info">
         <div class="profile-header-name" id="profileDisplayName">—</div>
         <div class="profile-header-since" id="profileSince">Member since —</div>
+        <button class="profile-photo-btn" id="profilePhotoBtn" type="button" onclick="openProfileAvatarPicker()">Add profile picture</button>
       </div>
+      <input id="profileAvatarInput" type="file" accept="image/*" hidden>
       <button class="profile-header-edit" onclick="toggleProfileNameEdit()">Edit</button>
       <button class="back-btn" onclick="goHome()" title="Home" style="flex-shrink:0;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -973,6 +981,17 @@
   <div class="sync-notice-actions">
     <button class="sync-notice-primary" id="syncNoticeSignInBtn" type="button">Sign in &amp; Sync</button>
     <button class="sync-notice-secondary" id="syncNoticeDismissBtn" type="button">Not now</button>
+  </div>
+</div>
+<!-- PWA Install Notice -->
+<div class="pwa-install-notice" id="pwaInstallNotice" role="status" aria-live="polite">
+  <div class="pwa-install-copy">
+    <div class="pwa-install-title">Install Mental Math Trainer?</div>
+    <div class="pwa-install-body">Install the app for quicker access and a smoother full-screen experience.</div>
+  </div>
+  <div class="pwa-install-actions">
+    <button class="pwa-install-secondary" id="pwaInstallDismissBtn" type="button">Not now</button>
+    <button class="pwa-install-primary" id="pwaInstallBtn" type="button">Install</button>
   </div>
 </div>
 <!-- Auth Modal -->

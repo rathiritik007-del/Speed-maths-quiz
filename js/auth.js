@@ -125,6 +125,7 @@
     if (!modal) return;
     if (mode) setAuthMode(mode);
     updateAuthUI();
+    modal.classList.remove("closing");
     modal.classList.add("open");
     modal.setAttribute("aria-hidden", "false");
     if (!window.authState.isLoggedIn && emailInput) {
@@ -135,8 +136,16 @@
   function closeAuthModal() {
     const { modal } = getAuthEls();
     if (!modal) return;
-    modal.classList.remove("open");
     modal.setAttribute("aria-hidden", "true");
+    if (!modal.classList.contains("open")) return;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      modal.classList.remove("open", "closing");
+      return;
+    }
+    modal.classList.add("closing");
+    setTimeout(function () {
+      modal.classList.remove("open", "closing");
+    }, 180);
   }
 
   function updateAuthUI() {
@@ -240,6 +249,7 @@
   window.openAuthModal = openAuthModal;
   window.closeAuthModal = closeAuthModal;
   window.setAuthMode = setAuthMode;
+  window.updateAuthUI = updateAuthUI;
 
   if (window.supabaseClient) {
     window.supabaseClient.auth.onAuthStateChange(function (_event, session) {
