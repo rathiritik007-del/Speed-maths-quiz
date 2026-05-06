@@ -2594,9 +2594,12 @@ html[data-theme="minimal"] {
   }
   html[data-theme="default"][data-base-theme="light"] .kb-key {
     background: var(--light-raised-gradient);
-    border-color: color-mix(in srgb, var(--light-soft-ink), transparent 78%);
-    color: var(--acc-2-lo);
-    box-shadow: var(--shadow-small);
+    border-color: color-mix(in srgb, var(--light-soft-ink), transparent 70%);
+    color: color-mix(in srgb, var(--light-soft-ink), #000 32%);
+    box-shadow:
+      0 1px 1px rgba(255,255,255,0.82) inset,
+      0 8px 18px color-mix(in srgb, var(--light-shadow-ink), transparent 84%),
+      0 18px 34px color-mix(in srgb, var(--light-shadow-ink), transparent 90%);
   }
   html[data-theme="default"][data-base-theme="light"] .kb-key:active,
   html[data-theme="default"][data-base-theme="light"] .kb-key.kb-pressed {
@@ -2802,8 +2805,12 @@ html[data-theme="minimal"] {
   }
 
   html[data-theme="minimal"][data-base-theme="light"] .kb-key {
-    border-color: color-mix(in srgb, var(--light-soft-ink), transparent 78%) !important;
-    color: var(--acc-2-lo) !important;
+    border-color: color-mix(in srgb, var(--light-soft-ink), transparent 70%) !important;
+    color: color-mix(in srgb, var(--light-soft-ink), #000 32%) !important;
+    box-shadow:
+      0 1px 1px rgba(255,255,255,0.82) inset,
+      0 8px 18px color-mix(in srgb, var(--light-shadow-ink), transparent 84%),
+      0 18px 34px color-mix(in srgb, var(--light-shadow-ink), transparent 90%) !important;
   }
 
   html[data-theme="minimal"][data-base-theme="light"] .kb-del {
@@ -2811,5 +2818,22 @@ html[data-theme="minimal"] {
   }
 
   html[data-theme="minimal"][data-base-theme="light"] .kb-enter {
+    color: var(--btn-txt) !important;
+  }
+
+  html[data-base-theme="light"] .kb-key {
+    color: color-mix(in srgb, var(--light-soft-ink), #000 36%) !important;
+    border-color: color-mix(in srgb, var(--light-soft-ink), transparent 68%) !important;
+    box-shadow:
+      0 1px 1px rgba(255,255,255,0.82) inset,
+      0 8px 18px color-mix(in srgb, var(--light-shadow-ink), transparent 84%),
+      0 18px 34px color-mix(in srgb, var(--light-shadow-ink), transparent 90%) !important;
+  }
+
+  html[data-base-theme="light"] .kb-del {
+    color: color-mix(in srgb, var(--err), #1d1612 14%) !important;
+  }
+
+  html[data-base-theme="light"] .kb-enter {
     color: var(--btn-txt) !important;
   }
