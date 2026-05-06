@@ -555,6 +555,24 @@
     .toggle input:checked + .tslider { background: var(--p4); border-color: var(--acc); box-shadow: 0 0 10px color-mix(in srgb, var(--p4), transparent 50%), 0 0 4px color-mix(in srgb, var(--acc), transparent 70%); }
     .toggle input:checked + .tslider::before { transform: translateX(23px); background: var(--acc-hi); }
 
+    .setup-reveal {
+      overflow: hidden;
+    }
+    .setup-reveal.open {
+      animation: setupRevealIn 0.2s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    .setup-reveal.closing {
+      animation: setupRevealOut 0.18s ease both;
+    }
+    @keyframes setupRevealIn {
+      from { max-height: 0; opacity: 0; transform: translateY(-5px); }
+      to { max-height: 220px; opacity: 1; transform: translateY(0); }
+    }
+    @keyframes setupRevealOut {
+      from { max-height: 220px; opacity: 1; transform: translateY(0); }
+      to { max-height: 0; opacity: 0; transform: translateY(-5px); }
+    }
+
     #s-setup .start-btn {
       margin: 4px clamp(12px, 4vw, 20px) clamp(12px, 4vw, 20px);
       padding: clamp(12px, 3.2vw, 16px);
@@ -2376,6 +2394,9 @@ select:focus {
       will-change: max-height;
     }
     .dash-recent.collapsed { max-height: 48px; }
+    .dash-recent.is-animating {
+      will-change: max-height;
+    }
     .dash-session {
       display: flex;
       align-items: center;
@@ -2387,10 +2408,15 @@ select:focus {
       transform: translateY(0);
       transition: opacity 0.22s ease, transform 0.28s cubic-bezier(0.22,1,0.36,1);
     }
+    .dash-recent:not(.collapsed) .dash-session:nth-child(2) { transition-delay: 0.03s; }
+    .dash-recent:not(.collapsed) .dash-session:nth-child(3) { transition-delay: 0.055s; }
+    .dash-recent:not(.collapsed) .dash-session:nth-child(4) { transition-delay: 0.08s; }
+    .dash-recent:not(.collapsed) .dash-session:nth-child(5) { transition-delay: 0.105s; }
     .dash-recent.collapsed .dash-session:nth-child(n+2) {
       opacity: 0;
       transform: translateY(-8px);
       pointer-events: none;
+      transition-delay: 0s;
     }
     .dash-session:last-child { border-bottom: none; }
     .dash-session-date {
@@ -2417,6 +2443,14 @@ select:focus {
       text-align: center;
       color: rgba(239,248,226,0.3);
       font-size: 13px;
+    }
+    .dash-value-pulse {
+      animation: dashValuePulse 0.34s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    @keyframes dashValuePulse {
+      0% { opacity: 0.72; transform: translateY(2px) scale(0.99); filter: brightness(1); }
+      55% { opacity: 1; transform: translateY(0) scale(1.025); filter: brightness(1.12); }
+      100% { opacity: 1; transform: translateY(0) scale(1); filter: brightness(1); }
     }
 
     /* ── Weekly + Daily Goal side-by-side row ── */

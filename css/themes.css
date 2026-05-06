@@ -1223,7 +1223,8 @@ html[data-theme="minimal"] {
     display: none; pointer-events: none;
     inset: 0;
   }
-  #customPickerModal.open { display: block; pointer-events: auto; }
+  #customPickerModal.open,
+  #customPickerModal.closing { display: block; pointer-events: auto; }
   #cpOverlay {
     position: absolute; inset: 0;
     background: transparent;
@@ -1242,6 +1243,20 @@ html[data-theme="minimal"] {
     box-shadow: 0 12px 40px rgba(0,0,0,.75), 0 2px 8px rgba(0,0,0,.4);
     font-family: 'Inter', sans-serif;
     z-index: 1;
+  }
+  #customPickerModal.open #cpPanel {
+    animation: customPickerIn 0.18s cubic-bezier(0.22,1,0.36,1) both;
+  }
+  #customPickerModal.closing #cpPanel {
+    animation: customPickerOut 0.16s ease both;
+  }
+  @keyframes customPickerIn {
+    from { opacity: 0; transform: translateY(6px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes customPickerOut {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to { opacity: 0; transform: translateY(4px) scale(0.985); }
   }
   /* arrow: points down by default, up when data-arrow="up" */
   #cpPanel::after {

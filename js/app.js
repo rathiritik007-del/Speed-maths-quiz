@@ -478,7 +478,9 @@ function openCustomPicker(target, triggerEl) {
   if (hexInp) hexInp.value = hex.replace('#','').toUpperCase();
   updateHueThumb();
   const modal = document.getElementById('customPickerModal');
+  modal.classList.remove('closing');
   modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
   // Scroll the trigger into view if it's obscured, then position
   if (triggerEl) triggerEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   requestAnimationFrame(() => {
@@ -489,7 +491,21 @@ function openCustomPicker(target, triggerEl) {
 }
 
 function closeCustomPicker() {
-  document.getElementById('customPickerModal').classList.remove('open');
+  const modal = document.getElementById('customPickerModal');
+  if (!modal) return;
+  modal.setAttribute('aria-hidden', 'true');
+  if (!modal.classList.contains('open')) {
+    modal.classList.remove('closing');
+    return;
+  }
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    modal.classList.remove('open', 'closing');
+    return;
+  }
+  modal.classList.add('closing');
+  setTimeout(() => {
+    modal.classList.remove('open', 'closing');
+  }, 180);
 }
 
 // Pointer interaction helpers
@@ -926,6 +942,7 @@ function renderSessionSummaryCard() {
 
 // Track XP gained during session
 let _sessionStartXP = 0;
+let _dashboardPulsePending = false;
 function onSessionStartHook() { _sessionStartXP = getXPData().totalXP; }
 
 // Hook into startTest to record start XP
@@ -941,7 +958,36 @@ onSessionComplete = function(pct, sessionBestStreak, score, total) {
   _origOnSessionComplete(pct, sessionBestStreak, score, total);
   const xpGained = Math.max(0, getXPData().totalXP - _sessionStartXP);
   saveSessionSummary(pct, score, total, xpGained, sessionBestStreak);
+  _dashboardPulsePending = true;
 };
+
+function pulseDashboardStatsAfterSession() {
+  if (!_dashboardPulsePending) return;
+  _dashboardPulsePending = false;
+  const ids = [
+    'dashTodaySessions',
+    'dashTodayAcc',
+    'dashDayStreak',
+    'dashXpLevel',
+    'dashXpTitle',
+    'dashXpSub',
+    'dashXpBar',
+    'goalDoneCount',
+    'goalTargetCount',
+    'dailyGoalFill',
+    'wkQs',
+    'wkAcc',
+    'wkXP'
+  ];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('dash-value-pulse');
+    void el.offsetWidth;
+    el.classList.add('dash-value-pulse');
+    el.addEventListener('animationend', () => el.classList.remove('dash-value-pulse'), { once: true });
+  });
+}
 
 // ─────────────────────────────────────────────
 // 4. STREAK WARNING (comeback nudge)
@@ -1254,13 +1300,30 @@ showDashboard = function() {
   renderStreakWarning();
   renderWeeklySummary();
   recordDailyXP();
+  pulseDashboardStatsAfterSession();
 };
 
 function toggleDashRecentSessions(btn) {
   const list = document.getElementById('dashRecentList');
   if (!list) return;
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion) {
+    const isCollapsed = list.classList.toggle('collapsed');
+    if (btn) btn.textContent = isCollapsed ? 'View All' : 'Show Less';
+    return;
+  }
+  const startHeight = list.offsetHeight;
+  list.style.maxHeight = startHeight + 'px';
+  list.classList.add('is-animating');
+  void list.offsetHeight;
   const isCollapsed = list.classList.toggle('collapsed');
   if (btn) btn.textContent = isCollapsed ? 'View All' : 'Show Less';
+  const targetHeight = isCollapsed ? Math.min(48, list.scrollHeight) : list.scrollHeight;
+  list.style.maxHeight = targetHeight + 'px';
+  window.setTimeout(() => {
+    list.classList.remove('is-animating');
+    list.style.maxHeight = '';
+  }, 340);
 }
 
 const SYNC_NOTICE_DISMISSED_KEY = 'quiz_sync_notice_dismissed';

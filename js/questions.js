@@ -1137,6 +1137,32 @@ const autoTog = document.getElementById('autosubTog');
 const feedbackTog = document.getElementById('feedbackTog');
 const pickDropdown = document.getElementById('pickModeDropdown');
 
+function setSetupReveal(el, show, displayValue) {
+  if (!el) return;
+  const display = displayValue || 'block';
+  if (el._setupRevealTimer) clearTimeout(el._setupRevealTimer);
+  el.classList.add('setup-reveal');
+  if (show) {
+    el.style.display = display;
+    el.classList.remove('closing');
+    void el.offsetWidth;
+    el.classList.add('open');
+    return;
+  }
+  if (!el.classList.contains('open') && el.style.display === 'none') return;
+  el.classList.remove('open');
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    el.classList.remove('closing');
+    el.style.display = 'none';
+    return;
+  }
+  el.classList.add('closing');
+  el._setupRevealTimer = setTimeout(() => {
+    el.classList.remove('closing');
+    el.style.display = 'none';
+  }, 190);
+}
+
 pickTog.addEventListener('change', () => {
   if (pickTog.checked) {
     autoTog.checked = false;
@@ -1145,12 +1171,12 @@ pickTog.addEventListener('change', () => {
     autoTog.disabled = true;
     feedbackTog.disabled = true;
 
-    pickDropdown.style.display = 'block';
+    setSetupReveal(pickDropdown, true, 'block');
   } else {
     autoTog.disabled = false;
     feedbackTog.disabled = false;
 
-    pickDropdown.style.display = 'none';
+    setSetupReveal(pickDropdown, false, 'block');
   }
 });
 
@@ -1162,12 +1188,12 @@ function onTimedSliderChange(slider) {
   const labels = ['30s','60s','90s','2m','3m','5m','✏️ Custom'];
   const ci = document.getElementById('timedCustomMinsInput');
   if (idx === 6) {
-    ci.style.display = 'block';
+    setSetupReveal(ci, true, 'block');
     const mins = parseFloat(ci.value) || 1;
     timedDuration = Math.max(1, Math.round(mins * 60));
     document.getElementById('timedSliderVal').textContent = mins + 'm custom';
   } else {
-    ci.style.display = 'none';
+    setSetupReveal(ci, false, 'block');
     timedDuration = TIMED_DURATIONS_SETUP[idx];
     document.getElementById('timedSliderVal').textContent = labels[idx];
   }
@@ -1209,7 +1235,8 @@ function setTimerOpt(el){
   timerMode = el.dataset.value;
   const ci = document.getElementById('customTimerInput');
   const tw = document.getElementById('timedSliderWrap');
-  ci.style.display = timerMode === 'custom' ? 'block' : 'none';
+  setSetupReveal(ci, timerMode === 'custom', 'block');
+  setSetupReveal(tw, timerMode === 'timed', 'flex');
   tw.classList.toggle('visible', timerMode === 'timed');
   // update qCount label visibility
   const qCountCell = document.getElementById('qCount').closest('.bento-cell');
@@ -1245,7 +1272,7 @@ if(trigger){
       timerMode = opt.dataset.value;
       trigger.textContent = opt.textContent;
       dropdown.classList.remove('open');
-      customInput.style.display = timerMode === 'custom' ? 'block' : 'none';
+      setSetupReveal(customInput, timerMode === 'custom', 'block');
     };
   });
   document.addEventListener('click', (e) => {
