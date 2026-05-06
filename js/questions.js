@@ -1718,8 +1718,42 @@ function saveProfileNameFromScreen() {
   if (ns) ns.textContent = name;
 }
 
-async function confirmResetProfile() {
-  if (!confirm('This will delete all your data permanently. Are you sure?')) return;
+let _resetModalLastFocus = null;
+
+function confirmResetProfile() {
+  openResetProfileModal();
+}
+
+function openResetProfileModal() {
+  const modal = document.getElementById('resetProfileModal');
+  const context = document.getElementById('resetModalContext');
+  const confirmBtn = document.getElementById('resetConfirmBtn');
+  if (!modal) return;
+  const loggedIn = !!(window.authState && window.authState.isLoggedIn);
+  if (context) {
+    context.textContent = loggedIn
+      ? 'Your account and profile name will stay. You will remain signed in.'
+      : 'Your local profile and progress will be cleared.';
+  }
+  _resetModalLastFocus = document.activeElement;
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  setTimeout(() => (confirmBtn || document.getElementById('resetCancelBtn'))?.focus(), 0);
+}
+
+function closeResetProfileModal() {
+  const modal = document.getElementById('resetProfileModal');
+  if (!modal) return;
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+  if (_resetModalLastFocus && typeof _resetModalLastFocus.focus === 'function') {
+    _resetModalLastFocus.focus();
+  }
+  _resetModalLastFocus = null;
+}
+
+async function performResetProfile() {
+  closeResetProfileModal();
   const loggedIn = !!(window.authState && window.authState.isLoggedIn);
   const currentScreen = document.querySelector('.screen.active');
   const preservedProfile = getProfile();
@@ -1740,7 +1774,9 @@ async function confirmResetProfile() {
     'quiz_base_theme',
     'quiz_theme',
     'quiz_last_session_summary',
-    'quiz_weekly_xp'
+    'quiz_weekly_xp',
+    'quiz_sync_notice_dismissed',
+    'quiz_local_data_synced'
   ];
 
   if (!loggedIn) {
@@ -1772,6 +1808,23 @@ async function confirmResetProfile() {
 
   location.reload();
 }
+
+document.addEventListener('DOMContentLoaded', function initResetProfileModal() {
+  const modal = document.getElementById('resetProfileModal');
+  const closeBtn = document.getElementById('resetModalCloseBtn');
+  const cancelBtn = document.getElementById('resetCancelBtn');
+  const confirmBtn = document.getElementById('resetConfirmBtn');
+  if (!modal) return;
+  closeBtn?.addEventListener('click', closeResetProfileModal);
+  cancelBtn?.addEventListener('click', closeResetProfileModal);
+  confirmBtn?.addEventListener('click', performResetProfile);
+  document.querySelectorAll('[data-reset-close]').forEach(el => {
+    el.addEventListener('click', closeResetProfileModal);
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && modal.classList.contains('open')) closeResetProfileModal();
+  });
+});
 
 // ── goHome ──
 function abortTest() {

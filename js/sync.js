@@ -448,6 +448,9 @@
           updated_at: new Date().toISOString()
         }, ['queue']);
         await migrateDailyChallenges(ctx);
+        try { localStorage.setItem('quiz_local_data_synced', '1'); } catch(e) {}
+        try { localStorage.removeItem('quiz_sync_notice_dismissed'); } catch(e) {}
+        window.updateSyncNotice?.();
       } catch(error) {
         warnSync('migration', error);
       }

@@ -1236,6 +1236,78 @@ function toggleDashRecentSessions(btn) {
   if (btn) btn.textContent = isCollapsed ? 'View All' : 'Show Less';
 }
 
+const SYNC_NOTICE_DISMISSED_KEY = 'quiz_sync_notice_dismissed';
+const LOCAL_DATA_SYNCED_KEY = 'quiz_local_data_synced';
+
+function readLocalJSON(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch(e) {
+    return fallback;
+  }
+}
+
+function hasMeaningfulLocalProgress() {
+  const history = readLocalJSON('quiz_history', []);
+  if (Array.isArray(history) && history.length) return true;
+  const profile = readLocalJSON('quiz_profile', null);
+  if (profile && Object.keys(profile).length) return true;
+  const xp = readLocalJSON('quiz_xp', null);
+  if (xp && ((xp.totalXP || 0) > 0 || (xp.currentLevel || 1) > 1)) return true;
+  const pb = readLocalJSON('quiz_pb', null);
+  if (pb && Object.keys(pb).length) return true;
+  const dayStreak = readLocalJSON('quiz_day_streak2', null);
+  if (dayStreak && Object.keys(dayStreak).length) return true;
+  const milestones = readLocalJSON('quiz_milestones', []);
+  if (Array.isArray(milestones) && milestones.length) return true;
+  const weakness = readLocalJSON('quiz_weakness', null);
+  if (weakness && Object.keys(weakness).length) return true;
+  const srQueue = readLocalJSON('quiz_sr_queue', []);
+  if (Array.isArray(srQueue) && srQueue.length) return true;
+  const dailyChallenge = readLocalJSON('quiz_daily_challenge', null);
+  if (dailyChallenge && Object.keys(dailyChallenge).length) return true;
+  const dcHistory = readLocalJSON('quiz_dc_history', []);
+  return Array.isArray(dcHistory) && dcHistory.length;
+}
+
+function shouldShowSyncNotice() {
+  if (window.authState && window.authState.isLoggedIn) return false;
+  try {
+    if (localStorage.getItem(SYNC_NOTICE_DISMISSED_KEY) === '1') return false;
+    if (localStorage.getItem(LOCAL_DATA_SYNCED_KEY) === '1') return false;
+  } catch(e) {
+    return false;
+  }
+  return hasMeaningfulLocalProgress();
+}
+
+function updateSyncNotice() {
+  const notice = document.getElementById('syncNotice');
+  if (!notice) return;
+  notice.classList.toggle('show', shouldShowSyncNotice());
+}
+
+function dismissSyncNotice() {
+  try { localStorage.setItem(SYNC_NOTICE_DISMISSED_KEY, '1'); } catch(e) {}
+  updateSyncNotice();
+}
+
+function openSyncNoticeAuth() {
+  const notice = document.getElementById('syncNotice');
+  if (notice) notice.classList.remove('show');
+  window.openAuthModal?.('login');
+}
+
+function initSyncNotice() {
+  document.getElementById('syncNoticeDismissBtn')?.addEventListener('click', dismissSyncNotice);
+  document.getElementById('syncNoticeSignInBtn')?.addEventListener('click', openSyncNoticeAuth);
+  setTimeout(updateSyncNotice, 500);
+}
+
+window.updateSyncNotice = updateSyncNotice;
+document.addEventListener('DOMContentLoaded', initSyncNotice);
+
 loadSavedCustomColorInputs();
 initTheme();
 initCustomColors();

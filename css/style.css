@@ -3980,12 +3980,19 @@ select:focus {
 .auth-account-logout,
 .auth-submit,
 .auth-mode-toggle,
-.auth-modal-close {
+.auth-modal-close,
+.sync-notice-primary,
+.sync-notice-secondary,
+.reset-modal-close,
+.reset-cancel-btn,
+.reset-confirm-btn {
   font-family: 'Inter', sans-serif;
 }
 
 .auth-account-btn,
-.auth-submit {
+.auth-submit,
+.sync-notice-primary,
+.reset-confirm-btn {
   border: 1px solid color-mix(in srgb, var(--acc), transparent 68%);
   border-radius: 12px;
   background: var(--acc);
@@ -4003,7 +4010,9 @@ select:focus {
 }
 
 .auth-account-btn:hover,
-.auth-submit:hover {
+.auth-submit:hover,
+.sync-notice-primary:hover,
+.reset-confirm-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 14px 32px color-mix(in srgb, var(--acc), transparent 70%);
 }
@@ -4210,13 +4219,192 @@ select:focus {
   font-weight: 700;
 }
 
+.sync-notice {
+  position: fixed;
+  left: 50%;
+  bottom: max(18px, env(safe-area-inset-bottom, 18px));
+  transform: translateX(-50%) translateY(18px);
+  z-index: 2500;
+  width: min(calc(100vw - 28px), 520px);
+  display: none;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 18px;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--surf), transparent 10%), color-mix(in srgb, var(--p1), transparent 18%));
+  border: 1px solid color-mix(in srgb, var(--acc), transparent 78%);
+  box-shadow: var(--shadow-app);
+}
+
+.sync-notice.show {
+  display: flex;
+  transform: translateX(-50%) translateY(0);
+}
+
+.sync-notice-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.sync-notice-title {
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--text-primary);
+  margin-bottom: 3px;
+}
+
+.sync-notice-body {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+.sync-notice-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.sync-notice-primary,
+.sync-notice-secondary {
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.sync-notice-secondary,
+.reset-cancel-btn {
+  border: 1px solid color-mix(in srgb, var(--border-strong), transparent 15%);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surf-d), transparent 35%);
+  color: var(--text-secondary);
+}
+
+.sync-notice-secondary:hover,
+.reset-cancel-btn:hover {
+  color: var(--text-primary);
+  border-color: color-mix(in srgb, var(--acc), transparent 70%);
+}
+
+.reset-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 3100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.reset-modal.open {
+  display: flex;
+}
+
+.reset-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--p0), transparent 18%);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.reset-modal-card {
+  width: min(100%, 440px);
+  position: relative;
+  z-index: 1;
+  border-radius: 20px;
+  padding: clamp(20px, 5vw, 26px);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--surf), transparent 10%), color-mix(in srgb, var(--p1), transparent 18%));
+  border: 1px solid color-mix(in srgb, var(--err), transparent 70%);
+  box-shadow: var(--shadow-app);
+  overflow: hidden;
+}
+
+.reset-modal-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--err), transparent 35%), transparent);
+}
+
+.reset-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--border-strong), transparent 20%);
+  background: color-mix(in srgb, var(--surf-d), transparent 35%);
+  color: var(--text-secondary);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.reset-modal-head {
+  padding-right: 34px;
+  margin-bottom: 18px;
+}
+
+.reset-modal-kicker {
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--err);
+  margin-bottom: 6px;
+}
+
+.reset-modal-head h2 {
+  margin: 0;
+  font-size: clamp(24px, 6vw, 32px);
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+.reset-modal-head p {
+  margin: 8px 0 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.reset-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.reset-cancel-btn,
+.reset-confirm-btn {
+  padding: 12px 14px;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.reset-confirm-btn {
+  background: var(--err);
+  border-color: color-mix(in srgb, var(--err), transparent 35%);
+  color: #fff;
+  box-shadow: 0 10px 26px color-mix(in srgb, var(--err), transparent 78%);
+}
+
 html[data-theme="minimal"] .auth-account-card,
 html[data-theme="minimal"] .auth-modal-card,
-html[data-theme="minimal"] .auth-logged-in {
+html[data-theme="minimal"] .auth-logged-in,
+html[data-theme="minimal"] .sync-notice,
+html[data-theme="minimal"] .reset-modal-card {
   box-shadow: none;
 }
 
-html[data-theme="minimal"] .auth-modal-backdrop {
+html[data-theme="minimal"] .auth-modal-backdrop,
+html[data-theme="minimal"] .reset-modal-backdrop {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
@@ -4231,6 +4419,23 @@ html[data-theme="minimal"] .auth-modal-backdrop {
     width: 100%;
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .sync-notice {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .sync-notice-actions,
+  .reset-modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .sync-notice-primary,
+  .sync-notice-secondary,
+  .reset-cancel-btn,
+  .reset-confirm-btn {
+    width: 100%;
   }
 
   .auth-account-btn,
