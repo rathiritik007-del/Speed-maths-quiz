@@ -1720,23 +1720,56 @@ function saveProfileNameFromScreen() {
 
 async function confirmResetProfile() {
   if (!confirm('This will delete all your data permanently. Are you sure?')) return;
-  try { localStorage.removeItem(PROFILE_KEY); } catch(e){}
-  try { localStorage.removeItem(HISTORY_KEY); } catch(e){}
-  try { localStorage.removeItem(PB_KEY); } catch(e){}
-  try { localStorage.removeItem(SR_KEY); } catch(e){}
-  try { localStorage.removeItem(WEAKNESS_KEY); } catch(e){}
-  try { localStorage.removeItem(XP_KEY); } catch(e){}
-  try { localStorage.removeItem(DAY_STREAK_KEY); } catch(e){}
-  try { localStorage.removeItem(GOAL_KEY); } catch(e){}
-  try { localStorage.removeItem(MILESTONES_KEY); } catch(e){}
-  try { localStorage.removeItem(DAILY_CHAL_KEY); } catch(e){}
-  try { localStorage.removeItem(DC_HISTORY_KEY); } catch(e){}
-  try { localStorage.removeItem(PRACTICE_MODE_KEY); } catch(e){}
-  try { localStorage.removeItem(COLOR_THEME_KEY); } catch(e){}
-  try { localStorage.removeItem(COLOR_ENABLED_KEY); } catch(e){}
-  try { localStorage.removeItem(BASE_THEME_KEY); } catch(e){}
-  try { localStorage.removeItem(THEME_KEY); } catch(e){}
-  await window.resetSupabaseAppData?.();
+  const loggedIn = !!(window.authState && window.authState.isLoggedIn);
+  const currentScreen = document.querySelector('.screen.active');
+  const preservedProfile = getProfile();
+  const keysToClear = [
+    HISTORY_KEY,
+    PB_KEY,
+    XP_KEY,
+    DAY_STREAK_KEY,
+    GOAL_KEY,
+    MILESTONES_KEY,
+    WEAKNESS_KEY,
+    SR_KEY,
+    DAILY_CHAL_KEY,
+    DC_HISTORY_KEY,
+    PRACTICE_MODE_KEY,
+    'quiz_custom_colors',
+    'quiz_custom_colors_on',
+    'quiz_base_theme',
+    'quiz_theme',
+    'quiz_last_session_summary',
+    'quiz_weekly_xp'
+  ];
+
+  if (!loggedIn) {
+    try { localStorage.removeItem(PROFILE_KEY); } catch(e){}
+  }
+  keysToClear.forEach(key => {
+    try { localStorage.removeItem(key); } catch(e){}
+  });
+
+  if (loggedIn) {
+    try { localStorage.setItem(PROFILE_KEY, JSON.stringify(preservedProfile)); } catch(e){}
+    await window.resetSupabaseAppData?.({ preserveProfile: preservedProfile });
+
+    applyPracticeMode(false);
+    if (typeof initTheme === 'function') initTheme();
+    if (typeof initCustomColors === 'function') initCustomColors();
+    if (typeof updateXPPill === 'function') updateXPPill();
+    if (typeof updateDailyGoalUI === 'function') updateDailyGoalUI();
+    if (typeof updateDailyChallengeBtn === 'function') updateDailyChallengeBtn();
+    if (typeof renderSessionSummaryCard === 'function') renderSessionSummaryCard();
+    if (typeof renderWeeklySummary === 'function') renderWeeklySummary();
+    if (typeof renderHistory === 'function') renderHistory();
+    if (currentScreen && currentScreen.id === 's-profile') showProfile();
+    else if (currentScreen && currentScreen.id === 's-dashboard') showDashboard();
+    else if (currentScreen) show(currentScreen.id);
+    if (typeof updateAuthUI === 'function') updateAuthUI();
+    return;
+  }
+
   location.reload();
 }
 

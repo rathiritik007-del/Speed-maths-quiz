@@ -454,12 +454,12 @@
     })();
   }
 
-  async function resetSupabaseAppData() {
+  async function resetSupabaseAppData(options) {
     const ctx = getClientAndUser();
     if (!ctx) return;
+    const preserveProfile = options && options.preserveProfile;
     const tables = [
       'sessions',
-      'user_profile',
       'user_progress',
       'user_settings',
       'achievements_or_milestones',
@@ -467,6 +467,7 @@
       'spaced_repetition_queue',
       'daily_challenges'
     ];
+    if (!preserveProfile) tables.push('user_profile');
     await Promise.all(tables.map(async table => {
       try {
         const { error } = await ctx.client.from(table).delete().eq('user_id', ctx.user.id);
@@ -475,6 +476,15 @@
         warnSync('reset ' + table, error);
       }
     }));
+    if (preserveProfile) {
+      const profile = preserveProfile;
+      runRequest('reset user_profile', ctx.client.from('user_profile').upsert({
+        user_id: ctx.user.id,
+        name: profile.name || null,
+        joined_date: profile.joinedDate || null,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' }));
+    }
   }
 
   window.syncProfileToSupabase = syncProfileToSupabase;
