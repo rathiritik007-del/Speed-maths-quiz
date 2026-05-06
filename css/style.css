@@ -3681,6 +3681,16 @@ select:focus {
       white-space: nowrap;
     }
     .profile-danger-btn:hover { background: rgba(202,60,37,0.25); color: #ff6b4a; }
+
+    .profile-version {
+      margin-top: 4px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      opacity: 0.72;
+      letter-spacing: 0;
+    }
     /* ════════════════════════════════════
        TIMED MODE DURATION SLIDER
     ════════════════════════════════════ */

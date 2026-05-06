@@ -1622,6 +1622,7 @@ function showProfile() {
   const profile  = getProfile();
   const history  = getSessionHistory();
   const pb       = getPB();
+  updateProfileVersionDisplay();
 
   // Sync practice mode toggle
   const tog = document.getElementById('practiceModeTog');
@@ -1695,6 +1696,12 @@ function showProfile() {
   // Reset edit row
   document.getElementById('profileNameEditRow').classList.remove('open');
   show('s-profile');
+}
+
+function updateProfileVersionDisplay() {
+  const el = document.getElementById('profileVersion');
+  if (!el) return;
+  el.textContent = window.APP_VERSION ? `Version ${window.APP_VERSION}` : '';
 }
 
 function toggleProfileNameEdit() {
