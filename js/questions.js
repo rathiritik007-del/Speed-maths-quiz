@@ -36,6 +36,7 @@ applyPracticeMode(isPracticeMode());
 
   let qs=[], cur=0, score=0, results=[], qType='both';
 let instant=true, autoSub=false, answered=false, pickMode=false;
+let pendingPickAnswer = null;
 
 let timerInterval=null;
 let stopwatchInterval=null;
@@ -468,7 +469,7 @@ function setMultType(btn){
   }
 
   function loadQ(){
-    clearTimer(); answered=false;
+    clearTimer(); answered=false; pendingPickAnswer = null;
 
     // In timed mode, cycle through question pool infinitely
     if(isTimedMode && cur >= qs.length){
@@ -539,6 +540,12 @@ function setMultType(btn){
       document.getElementById('pickZone').style.display = 'block';
       document.getElementById('keyboard').style.display = 'none';
       document.getElementById('qSub').textContent = 'Choose the correct answer';
+      const checkBtn = document.getElementById('checkBtn');
+      checkBtn.disabled = false;
+      checkBtn.classList.remove('is-next');
+      checkBtn.textContent = 'Check';
+      checkBtn.onclick = submitPendingPickAnswer;
+      checkBtn.style.display = 'none';
       buildPickGrid(q);
     } else {
       // TYPE MODE
@@ -641,10 +648,31 @@ if(timerMode === 'stopwatch'){
     return arr;
   }
 
-  function pickAnswer(chosen, correct){
-  if(answered) return;
+  function submitPendingPickAnswer(){
+  if(answered){ nextQ(); return true; }
+  if(!pendingPickAnswer) return false;
+  return pickAnswer(pendingPickAnswer.chosen, pendingPickAnswer.correct, true);
+}
+
+  function pickAnswer(chosen, correct, forceSubmit){
+  if(answered) return false;
+  const selectedPickType = document.getElementById('pickModeType')?.value || 'auto';
+  if(!forceSubmit && !isTimedMode && selectedPickType === 'manual'){
+    pendingPickAnswer = { chosen, correct };
+    document.querySelectorAll('.pick-btn').forEach(btn => {
+      const val = parseInt(btn.textContent.replace(/,/g, ''));
+      btn.classList.toggle('selected', val === chosen);
+    });
+    const actionBtn = document.getElementById('checkBtn');
+    actionBtn.style.display = 'block';
+    actionBtn.textContent = 'Check';
+    actionBtn.classList.remove('is-next');
+    actionBtn.onclick = () => pickAnswer(chosen, correct, true);
+    return false;
+  }
   clearTimer(); clearStopwatch();
   answered = true;
+  pendingPickAnswer = null;
 
   const isCorrect = chosen === correct;
   if(isCorrect){ score++; streak++; if(streak>bestStreak) bestStreak=streak; }
@@ -3410,8 +3438,9 @@ checkAnswer = function() {
 };
 
 const _origPickAnswer = pickAnswer;
-pickAnswer = function(chosen, correct) {
-  _origPickAnswer(chosen, correct);
+pickAnswer = function(chosen, correct, forceSubmit) {
+  const submitted = _origPickAnswer(chosen, correct, forceSubmit);
+  if (submitted === false) return false;
   const q = qs[cur];
   if (q) {
     const isCorrect = chosen === correct;
@@ -3424,6 +3453,7 @@ pickAnswer = function(chosen, correct) {
       deductXP();
     }
   }
+  return submitted;
 };
 
 // ─────────────────────────────────────────────
