@@ -896,6 +896,140 @@
     };
   }
 
+  function formatConflictDate(value) {
+    if (!value) return 'Not available';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 'Not available';
+    return date.toLocaleString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit'
+    });
+  }
+
+  function latestSessionDate(sessions) {
+    const dates = (Array.isArray(sessions) ? sessions : [])
+      .map(session => session && session.date)
+      .filter(Boolean)
+      .map(value => new Date(value))
+      .filter(date => !Number.isNaN(date.getTime()))
+      .sort((a, b) => b - a);
+    return dates[0] ? dates[0].toISOString() : null;
+  }
+
+  function conflictSectionDiffs(localParts, cloudParts) {
+    return ['profile', 'avatar', 'progress', 'settings', 'milestones', 'weakness', 'sr', 'daily']
+      .filter(section => JSON.stringify(localParts[section]) !== JSON.stringify(cloudParts[section]));
+  }
+
+  function getConflictSummary(cloudRows) {
+    const localHistory = readJSON(KEYS.history, []);
+    const cloudSessionRows = Array.isArray(cloudRows && cloudRows[3]) ? cloudRows[3] : [];
+    const cloudSessions = dedupeSessionsByKey(cloudSessionRows.map(restoredSessionFromRow).filter(session => session && session.date));
+    const localParts = localSignatureParts();
+    const cloudParts = cloudSignatureParts(cloudRows);
+    const localSessionCount = Array.isArray(localHistory) ? dedupeSessionsByKey(localHistory).length : 0;
+    const cloudSessionCount = cloudSessions.length;
+    const localLatest = latestSessionDate(localHistory);
+    const cloudLatest = latestSessionDate(cloudSessions);
+    const localLatestTime = localLatest ? new Date(localLatest).getTime() : 0;
+    const cloudLatestTime = cloudLatest ? new Date(cloudLatest).getTime() : 0;
+    const sectionDiffs = conflictSectionDiffs(localParts, cloudParts);
+    let recommendation = 'Review carefully before choosing.';
+    let recommendationTarget = 'review';
+    if (cloudSessionCount > localSessionCount || cloudLatestTime > localLatestTime) {
+      recommendation = 'Recommended: Use account progress';
+      recommendationTarget = 'account';
+    } else if (localSessionCount > cloudSessionCount || localLatestTime > cloudLatestTime) {
+      recommendation = 'Recommended: Keep device progress';
+      recommendationTarget = 'device';
+    }
+    return {
+      localSessionCount,
+      cloudSessionCount,
+      localLatest,
+      cloudLatest,
+      sectionDiffs,
+      recommendation,
+      recommendationTarget
+    };
+  }
+
+  function ensureConflictModalDetails(modal) {
+    const card = modal && modal.querySelector('.conflict-modal-card');
+    if (!card) return null;
+    let details = document.getElementById('conflictModalDetails');
+    if (!details) {
+      details = document.createElement('div');
+      details.id = 'conflictModalDetails';
+      details.className = 'conflict-compare';
+      const actions = card.querySelector('.conflict-modal-actions');
+      card.insertBefore(details, actions || null);
+    }
+    return details;
+  }
+
+  function formatConflictDiffs(sections) {
+    if (!Array.isArray(sections) || !sections.length) return 'Saved progress differs';
+    const labels = {
+      profile: 'profile',
+      avatar: 'photo',
+      progress: 'XP/stats',
+      settings: 'settings',
+      milestones: 'achievements',
+      weakness: 'weakness data',
+      sr: 'practice queue',
+      daily: 'daily progress'
+    };
+    return sections.map(section => labels[section] || section).join(', ');
+  }
+
+  function renderConflictModalDetails(cloudRows) {
+    const modal = document.getElementById('progressConflictModal');
+    const details = ensureConflictModalDetails(modal);
+    if (!modal || !details) return;
+    const headText = modal.querySelector('.conflict-modal-head p');
+    if (headText) {
+      headText.textContent = 'This device and your account have different saved progress. Choose which version you want to use.';
+    }
+    const summary = getConflictSummary(cloudRows);
+    details.innerHTML = `
+      <div class="conflict-compare-grid" aria-label="Progress comparison">
+        <div class="conflict-compare-card">
+          <div class="conflict-compare-label">This device</div>
+          <div class="conflict-compare-row"><span>Sessions</span><strong>${summary.localSessionCount}</strong></div>
+          <div class="conflict-compare-row"><span>Latest activity</span><strong>${formatConflictDate(summary.localLatest)}</strong></div>
+        </div>
+        <div class="conflict-compare-card">
+          <div class="conflict-compare-label">Your account</div>
+          <div class="conflict-compare-row"><span>Sessions</span><strong>${summary.cloudSessionCount}</strong></div>
+          <div class="conflict-compare-row"><span>Latest activity</span><strong>${formatConflictDate(summary.cloudLatest)}</strong></div>
+        </div>
+      </div>
+      <div class="conflict-diff-note">Different: ${formatConflictDiffs(summary.sectionDiffs)}</div>
+      <div class="conflict-recommendation">${summary.recommendation}</div>
+    `;
+    const accountBtn = document.getElementById('conflictAccountBtn');
+    const deviceBtn = document.getElementById('conflictDeviceBtn');
+    const cancelBtn = document.getElementById('conflictCancelBtn');
+    [accountBtn, deviceBtn, cancelBtn].forEach(btn => {
+      btn?.classList.remove('conflict-action-primary', 'conflict-action-secondary', 'conflict-action-tertiary', 'conflict-action-destructive');
+    });
+    if (accountBtn) {
+      accountBtn.innerHTML = '<span>Use account progress</span><small>Replace this device with your saved account progress.</small>';
+      accountBtn.classList.add(summary.recommendationTarget === 'account' ? 'conflict-action-primary' : 'conflict-action-secondary');
+    }
+    if (deviceBtn) {
+      deviceBtn.innerHTML = '<span>Keep device progress</span><small>Replace account progress with this device. This can overwrite account data.</small>';
+      deviceBtn.classList.add(summary.recommendationTarget === 'device' ? 'conflict-action-primary' : 'conflict-action-secondary', 'conflict-action-destructive');
+    }
+    if (cancelBtn) {
+      cancelBtn.innerHTML = '<span>Cancel</span><small>Do nothing for now. This conflict is not resolved.</small>';
+      cancelBtn.classList.add('conflict-action-tertiary');
+    }
+  }
+
   function markLocalSyncedForUser(ctx, cloudRows) {
     if (!ctx || !ctx.user || !ctx.user.id) return;
     const localSig = localSignature();
@@ -1182,6 +1316,7 @@
     pendingConflictSignature = signature || conflictParts(cloudRows);
     const modal = document.getElementById('progressConflictModal');
     if (!modal) return;
+    renderConflictModalDetails(cloudRows);
     modal.classList.remove('closing');
     modal.classList.add('open');
     modal.setAttribute('aria-hidden', 'false');

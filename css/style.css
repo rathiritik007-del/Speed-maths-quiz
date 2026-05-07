@@ -5204,6 +5204,73 @@ select:focus {
   line-height: 1.45;
 }
 
+.conflict-compare {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 16px;
+}
+
+.conflict-compare-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.conflict-compare-card {
+  border: 1px solid color-mix(in srgb, var(--border-strong), transparent 30%);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surf-d), transparent 42%);
+  padding: 12px;
+  min-width: 0;
+}
+
+.conflict-compare-label {
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 900;
+  margin-bottom: 8px;
+}
+
+.conflict-compare-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.conflict-compare-row + .conflict-compare-row {
+  margin-top: 6px;
+}
+
+.conflict-compare-row strong {
+  color: var(--text-primary);
+  font-weight: 800;
+  text-align: right;
+}
+
+.conflict-diff-note,
+.conflict-recommendation {
+  border-radius: 12px;
+  padding: 9px 10px;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.conflict-diff-note {
+  color: var(--text-secondary);
+  background: color-mix(in srgb, var(--surf-d), transparent 55%);
+  border: 1px solid color-mix(in srgb, var(--border-strong), transparent 45%);
+}
+
+.conflict-recommendation {
+  color: var(--acc);
+  background: color-mix(in srgb, var(--acc), transparent 90%);
+  border: 1px solid color-mix(in srgb, var(--acc), transparent 74%);
+  font-weight: 900;
+}
+
 .reset-modal-actions,
 .conflict-modal-actions {
   display: flex;
@@ -5223,6 +5290,44 @@ select:focus {
   font-weight: 900;
   cursor: pointer;
   font-family: 'Inter', sans-serif;
+}
+
+.conflict-cancel-btn,
+.conflict-account-btn,
+.conflict-device-btn,
+.conflict-replace-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  text-align: left;
+  line-height: 1.2;
+}
+
+.conflict-account-btn,
+.conflict-device-btn {
+  flex: 1 1 0;
+  min-width: min(100%, 168px);
+  min-height: 66px;
+  justify-content: center;
+  order: 1;
+}
+
+.conflict-cancel-btn {
+  flex: 0 0 100%;
+  min-height: 44px;
+  justify-content: center;
+  order: 2;
+}
+
+.conflict-cancel-btn small,
+.conflict-account-btn small,
+.conflict-device-btn small {
+  color: currentColor;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.25;
+  opacity: 0.72;
 }
 
 .reset-confirm-btn,
@@ -5261,6 +5366,63 @@ select:focus {
 .conflict-replace-btn:hover {
   color: var(--text-primary);
   border-color: color-mix(in srgb, var(--acc), transparent 70%);
+}
+
+.conflict-action-primary {
+  background: var(--acc);
+  border: 1px solid color-mix(in srgb, var(--acc), transparent 58%);
+  color: var(--btn-txt);
+  box-shadow: 0 10px 26px color-mix(in srgb, var(--acc), transparent 78%);
+}
+
+.conflict-action-secondary {
+  background: color-mix(in srgb, var(--surf-d), transparent 35%);
+  border: 1px solid color-mix(in srgb, var(--border-strong), transparent 15%);
+  color: var(--text-primary);
+  box-shadow: none;
+}
+
+.conflict-action-secondary.conflict-action-destructive {
+  background: color-mix(in srgb, var(--err), transparent 90%);
+  border-color: color-mix(in srgb, var(--err), transparent 62%);
+  color: var(--err);
+}
+
+.conflict-action-tertiary {
+  background: transparent;
+  border-color: color-mix(in srgb, var(--border-strong), transparent 45%);
+  color: var(--text-secondary);
+  box-shadow: none;
+  opacity: 0.86;
+}
+
+.conflict-action-tertiary small {
+  display: none;
+}
+
+#replaceAccountModal .conflict-modal-actions {
+  flex-wrap: nowrap;
+}
+
+#replaceAccountModal .conflict-cancel-btn,
+#replaceAccountModal .conflict-replace-btn {
+  flex: 1 1 0;
+  min-height: 48px;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+#replaceAccountModal .conflict-cancel-btn {
+  order: 1;
+}
+
+#replaceAccountModal .conflict-replace-btn {
+  order: 2;
+  background: var(--acc);
+  border-color: color-mix(in srgb, var(--acc), transparent 58%);
+  color: var(--btn-txt);
+  box-shadow: 0 10px 26px color-mix(in srgb, var(--acc), transparent 78%);
 }
 
 .profile-stat-card,
@@ -5377,6 +5539,19 @@ html.theme-ui-refreshing .card {
   .reset-modal-actions,
   .conflict-modal-actions {
     flex-direction: column-reverse;
+  }
+
+  .conflict-modal-actions {
+    flex-direction: row;
+  }
+
+  #replaceAccountModal .conflict-modal-actions {
+    flex-direction: column;
+    flex-wrap: nowrap;
+  }
+
+  .conflict-compare-grid {
+    grid-template-columns: 1fr;
   }
 
   .sync-notice-primary,
