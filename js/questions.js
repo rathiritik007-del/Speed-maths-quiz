@@ -1169,12 +1169,15 @@ function setSetupReveal(el, show, displayValue) {
   if (!el) return;
   const display = displayValue || 'block';
   if (el._setupRevealTimer) clearTimeout(el._setupRevealTimer);
+  if (el._setupRevealFrame) cancelAnimationFrame(el._setupRevealFrame);
   el.classList.add('setup-reveal');
   if (show) {
     el.style.display = display;
     el.classList.remove('closing');
-    void el.offsetWidth;
-    el.classList.add('open');
+    el._setupRevealFrame = requestAnimationFrame(() => {
+      el.classList.add('open');
+      el._setupRevealFrame = null;
+    });
     return;
   }
   if (!el.classList.contains('open') && el.style.display === 'none') return;

@@ -1306,23 +1306,11 @@ showDashboard = function() {
 function toggleDashRecentSessions(btn) {
   const list = document.getElementById('dashRecentList');
   if (!list) return;
-  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduceMotion) {
-    const isCollapsed = list.classList.toggle('collapsed');
-    if (btn) btn.textContent = isCollapsed ? 'View All' : 'Show Less';
-    return;
-  }
-  const startHeight = list.offsetHeight;
-  list.style.maxHeight = startHeight + 'px';
   list.classList.add('is-animating');
-  void list.offsetHeight;
   const isCollapsed = list.classList.toggle('collapsed');
   if (btn) btn.textContent = isCollapsed ? 'View All' : 'Show Less';
-  const targetHeight = isCollapsed ? Math.min(48, list.scrollHeight) : list.scrollHeight;
-  list.style.maxHeight = targetHeight + 'px';
   window.setTimeout(() => {
     list.classList.remove('is-animating');
-    list.style.maxHeight = '';
   }, 340);
 }
 

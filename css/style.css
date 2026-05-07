@@ -193,7 +193,7 @@
 
     /* ── Type/timer btn tap ── */
     .type-btn, .timer-opt {
-      transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+      transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s ease, background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
     }
     .type-btn:active, .timer-opt:active { transform: scale(0.94); }
 
@@ -557,6 +557,7 @@
 
     .setup-reveal {
       overflow: hidden;
+      contain: layout paint;
     }
     .setup-reveal.open {
       animation: setupRevealIn 0.2s cubic-bezier(0.22,1,0.36,1) both;
@@ -571,6 +572,27 @@
     @keyframes setupRevealOut {
       from { max-height: 220px; opacity: 1; transform: translateY(0); }
       to { max-height: 0; opacity: 0; transform: translateY(-5px); }
+    }
+
+    @media (max-width: 560px) {
+      .setup-reveal.open {
+        animation-name: setupRevealMobileIn;
+        animation-duration: 0.24s;
+        animation-timing-function: cubic-bezier(0.22,1,0.36,1);
+      }
+      .setup-reveal.closing {
+        animation-name: setupRevealMobileOut;
+        animation-duration: 0.2s;
+        animation-timing-function: cubic-bezier(0.4,0,0.2,1);
+      }
+      @keyframes setupRevealMobileIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes setupRevealMobileOut {
+        from { opacity: 1; transform: translateY(0); }
+        to { opacity: 0; transform: translateY(-5px); }
+      }
     }
 
     #s-setup .start-btn {
@@ -1982,7 +2004,7 @@ select:focus {
       font-weight: 600;
       cursor: pointer;
       font-family: 'Inter', sans-serif;
-      transition: all 0.15s;
+      transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
       text-align: center;
       min-width: 0;
       overflow: hidden;
@@ -2395,12 +2417,15 @@ select:focus {
       border-radius: 16px;
       overflow: hidden;
       max-height: 420px;
-      transition: max-height 0.34s cubic-bezier(0.22,1,0.36,1), border-color 0.2s, box-shadow 0.2s;
-      will-change: max-height;
+      transition: max-height 0.34s cubic-bezier(0.22,1,0.36,1);
+      contain: layout paint;
     }
     .dash-recent.collapsed { max-height: 48px; }
     .dash-recent.is-animating {
       will-change: max-height;
+    }
+    .dash-recent.is-animating .dash-session {
+      will-change: opacity, transform;
     }
     .dash-session {
       display: flex;
@@ -2492,6 +2517,7 @@ select:focus {
       gap: 10px;
       box-sizing: border-box;
       min-width: 0;
+      contain: layout paint;
     }
     .daily-goal-top {
       display: flex;
@@ -2669,6 +2695,7 @@ select:focus {
       max-width: 100%;
       box-sizing: border-box;
       padding: 0;
+      contain: layout paint;
     }
     .goal-edit-row.open,
     .goal-edit-row.closing { display: flex; }
@@ -2677,6 +2704,7 @@ select:focus {
     }
     .goal-edit-row.closing {
       animation: revealRowOut 0.18s ease both;
+      will-change: max-height, opacity, transform;
     }
     @keyframes revealRowIn {
       from { max-height: 0; opacity: 0; transform: translateY(-4px); }
@@ -2763,10 +2791,14 @@ select:focus {
 
       .goal-edit-row.open {
         animation-name: revealGoalEditMobileIn;
+        animation-duration: 0.24s;
+        animation-timing-function: cubic-bezier(0.22,1,0.36,1);
       }
 
       .goal-edit-row.closing {
         animation-name: revealGoalEditMobileOut;
+        animation-duration: 0.2s;
+        animation-timing-function: cubic-bezier(0.4,0,0.2,1);
       }
 
       .goal-edit-input {
@@ -2785,13 +2817,29 @@ select:focus {
       }
 
       @keyframes revealGoalEditMobileIn {
-        from { max-height: 0; opacity: 0; transform: translateY(-4px); }
-        to { max-height: 92px; opacity: 1; transform: translateY(0); }
+        from { opacity: 0; transform: translateY(-4px); }
+        to { opacity: 1; transform: translateY(0); }
       }
 
       @keyframes revealGoalEditMobileOut {
-        from { max-height: 92px; opacity: 1; transform: translateY(0); }
-        to { max-height: 0; opacity: 0; transform: translateY(-4px); }
+        from { opacity: 1; transform: translateY(0); }
+        to { opacity: 0; transform: translateY(-4px); }
+      }
+    }
+
+    @media (max-width: 560px) {
+      .dash-recent {
+        transition: none;
+      }
+      .dash-session {
+        transition-duration: 0.3s;
+        transition-timing-function: cubic-bezier(0.22,1,0.36,1);
+      }
+      .dash-recent.is-animating {
+        will-change: auto;
+      }
+      .dash-recent.is-animating .dash-session {
+        will-change: opacity, transform;
       }
     }
 
@@ -4284,7 +4332,7 @@ select:focus {
       font-size: 13px; font-weight: 600;
       cursor: pointer;
       font-family: 'Inter', sans-serif;
-      transition: all 0.15s;
+      transition: border-color 0.15s ease, color 0.15s ease, transform 0.12s ease;
       flex-shrink: 0;
     }
     .profile-header-edit:hover { border-color: color-mix(in srgb, var(--acc), transparent 50%); color: #eff8e2; }
@@ -4295,6 +4343,7 @@ select:focus {
       gap: 8px;
       align-items: center;
       overflow: hidden;
+      contain: layout paint;
     }
     .profile-name-edit.open,
     .profile-name-edit.closing { display: flex; }
@@ -4303,6 +4352,7 @@ select:focus {
     }
     .profile-name-edit.closing {
       animation: revealRowOut 0.18s ease both;
+      will-change: max-height, opacity, transform;
     }
     .profile-name-edit input {
       flex: 1;
@@ -4965,6 +5015,50 @@ select:focus {
 @keyframes modalCardOut {
   from { opacity: 1; transform: translateY(0) scale(1); }
   to { opacity: 0; transform: translateY(8px) scale(0.985); }
+}
+
+@media (max-width: 560px) {
+  .profile-name-edit.open {
+    animation-name: revealProfileEditMobileIn;
+    animation-duration: 0.24s;
+    animation-timing-function: cubic-bezier(0.22,1,0.36,1);
+  }
+  .profile-name-edit.closing {
+    animation-name: revealProfileEditMobileOut;
+    animation-duration: 0.2s;
+    animation-timing-function: cubic-bezier(0.4,0,0.2,1);
+  }
+  @keyframes revealProfileEditMobileIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes revealProfileEditMobileOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-4px); }
+  }
+
+  .auth-modal-card,
+  .reset-modal-card,
+  .conflict-modal-card {
+    contain: layout paint;
+    transform: translateZ(0);
+  }
+  .auth-modal.open .auth-modal-card,
+  .auth-modal.closing .auth-modal-card,
+  .reset-modal.open .reset-modal-card,
+  .reset-modal.closing .reset-modal-card,
+  .conflict-modal.open .conflict-modal-card,
+  .conflict-modal.closing .conflict-modal-card {
+    will-change: opacity, transform;
+  }
+  .auth-modal.open .auth-modal-backdrop,
+  .reset-modal.open .reset-modal-backdrop,
+  .conflict-modal.open .conflict-modal-backdrop,
+  .auth-modal.closing .auth-modal-backdrop,
+  .reset-modal.closing .reset-modal-backdrop,
+  .conflict-modal.closing .conflict-modal-backdrop {
+    animation: none;
+  }
 }
 
 .auth-modal-card::before {
