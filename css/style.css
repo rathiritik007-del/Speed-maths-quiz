@@ -2586,6 +2586,10 @@ select:focus {
       filter: drop-shadow(0 4px 8px color-mix(in srgb, var(--acc), transparent 88%));
       transition: stroke-dasharray 0.6s cubic-bezier(0.22,1,0.36,1), filter 0.2s ease;
     }
+    .daily-goal-gauge.zero .daily-goal-gauge-progress {
+      opacity: 0;
+      filter: none;
+    }
     .daily-goal-gauge .daily-goal-bar-fill {
       display: none;
     }

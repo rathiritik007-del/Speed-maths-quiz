@@ -2479,6 +2479,7 @@ function updateDailyGoalUI() {
     gauge.style.setProperty('--goal-dash', pct);
     gauge.style.setProperty('--goal-deg', (pct * 1.8) + 'deg');
     gauge.classList.toggle('done', isDone);
+    gauge.classList.toggle('zero', pct <= 0);
   }
 
   const status = document.getElementById('dailyGoalStatus');
