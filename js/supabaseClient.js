@@ -11,5 +11,12 @@
 
   const { url, publishableKey } = window.SUPABASE_CONFIG;
 
-  window.supabaseClient = window.supabase.createClient(url, publishableKey);
+  window.supabaseClient = window.supabase.createClient(url, publishableKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      storageKey: "mental-math-trainer-auth"
+    }
+  });
 })();

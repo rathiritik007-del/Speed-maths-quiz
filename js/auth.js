@@ -20,6 +20,25 @@
       return null;
     }
 
+    const { data: sessionData, error: sessionError } = await window.supabaseClient.auth.getSession();
+
+    if (sessionError) {
+      console.warn("Could not read Supabase auth session:", sessionError.message);
+      window.authState.user = null;
+      window.authState.isLoggedIn = false;
+      updateAuthUI();
+      window.updateSyncNotice?.();
+      return null;
+    }
+
+    if (!sessionData || !sessionData.session) {
+      window.authState.user = null;
+      window.authState.isLoggedIn = false;
+      updateAuthUI();
+      window.updateSyncNotice?.();
+      return null;
+    }
+
     const { data, error } = await window.supabaseClient.auth.getUser();
 
     if (error) {
@@ -27,6 +46,7 @@
       window.authState.user = null;
       window.authState.isLoggedIn = false;
       updateAuthUI();
+      window.updateSyncNotice?.();
       return null;
     }
 
@@ -82,7 +102,7 @@
   async function logoutUser() {
     if (!window.supabaseClient) throw new Error("Supabase client missing.");
 
-    const { error } = await window.supabaseClient.auth.signOut();
+    const { error } = await window.supabaseClient.auth.signOut({ scope: "local" });
 
     if (error) throw error;
 
