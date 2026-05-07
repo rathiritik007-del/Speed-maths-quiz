@@ -100,6 +100,10 @@
     console.warn('Supabase sync failed for ' + scope + ':', error && error.message ? error.message : error);
   }
 
+  function debugSessionSync(message, details) {
+    console.log('[session sync] ' + message, details || {});
+  }
+
   function runRequest(scope, request, onSuccess) {
     try {
       if (!request || typeof request.then !== 'function') return;
@@ -374,12 +378,39 @@
   }
 
   function sessionKey(session) {
-    return [
+    if (session && session.session_id) return String(session.session_id);
+    const legacyParts = [
       session && session.date,
       session && session.score,
       session && session.total,
       session && session.pct
-    ].join('|');
+    ];
+    if (legacyParts.every(value => value === null || value === undefined || value === '')) return '';
+    return legacyParts.join('|');
+  }
+
+  function rowSessionKey(row) {
+    if (row && row.raw_data) return sessionKey(row.raw_data);
+    const legacyParts = [
+      row && row.created_at,
+      row && row.correct_answers,
+      row && row.total_questions,
+      row && row.accuracy
+    ];
+    if (legacyParts.every(value => value === null || value === undefined || value === '')) return '';
+    return legacyParts.join('|');
+  }
+
+  function dedupeSessionsByKey(sessions) {
+    const seen = new Set();
+    const deduped = [];
+    (Array.isArray(sessions) ? sessions : []).forEach(session => {
+      const key = sessionKey(session);
+      if (!session || !key || seen.has(key)) return;
+      seen.add(key);
+      deduped.push(session);
+    });
+    return deduped;
   }
 
   function mapDailyChallengeRows(userId) {
@@ -423,16 +454,47 @@
     if (!Array.isArray(history) || !history.length) return;
     const existingRows = await requestData(
       'migration sessions',
-      ctx.client.from('sessions').select('raw_data').eq('user_id', ctx.user.id),
+      ctx.client.from('sessions').select('raw_data,created_at,correct_answers,total_questions,accuracy').eq('user_id', ctx.user.id),
       []
     );
     const existingKeys = new Set((Array.isArray(existingRows) ? existingRows : [])
-      .map(row => row && row.raw_data ? sessionKey(row.raw_data) : '')
+      .map(rowSessionKey)
       .filter(Boolean));
-    const rows = history
+    const rows = dedupeSessionsByKey(history)
       .filter(session => session && !existingKeys.has(sessionKey(session)))
       .map(session => mapSessionRow(ctx.user.id, session));
     if (rows.length) await awaitRequest('migration sessions', ctx.client.from('sessions').insert(rows));
+  }
+
+  async function uploadSingleSessionIfMissing(ctx, session) {
+    if (!ctx || !session) return false;
+    const key = sessionKey(session);
+    debugSessionSync('upload requested', {
+      session_id: session.session_id || null,
+      canonicalKey: key
+    });
+    if (!key) return false;
+    const existingRows = await requestData(
+      'session upload lookup',
+      ctx.client.from('sessions').select('raw_data,created_at,correct_answers,total_questions,accuracy').eq('user_id', ctx.user.id),
+      []
+    );
+    const existingKeys = new Set((Array.isArray(existingRows) ? existingRows : []).map(rowSessionKey).filter(Boolean));
+    if (existingKeys.has(key)) {
+      debugSessionSync('upload skipped; session already exists in Supabase', {
+        canonicalKey: key,
+        cloudSessionCount: existingKeys.size
+      });
+      return false;
+    }
+    try {
+      await awaitRequest('single session upload', ctx.client.from('sessions').insert(mapSessionRow(ctx.user.id, session)));
+      debugSessionSync('upload succeeded', { canonicalKey: key });
+      return true;
+    } catch(error) {
+      debugSessionSync('upload failed', { canonicalKey: key, error });
+      throw error;
+    }
   }
 
   async function migrateMilestones(ctx) {
@@ -503,7 +565,19 @@
   function syncSessionToSupabase(session) {
     const ctx = getClientAndUser();
     if (!ctx) return;
-    uploadFullLocalStateAndMarkSynced(ctx).catch(error => warnSync('sessions verified full sync', error));
+    debugSessionSync('syncSessionToSupabase received session', {
+      session_id: session && session.session_id ? session.session_id : null,
+      canonicalKey: session ? sessionKey(session) : null
+    });
+    (async () => {
+      if (session) await uploadSingleSessionIfMissing(ctx, session);
+      await uploadFullLocalStateAndMarkSynced(ctx);
+      const rows = await fetchCloudAppState(ctx);
+      const cloudSessions = Array.isArray(rows && rows[3]) ? rows[3] : [];
+      debugSessionSync('post-sync cloud session count', {
+        cloudSessionCount: cloudSessions.length
+      });
+    })().catch(error => warnSync('sessions verified full sync', error));
   }
 
   function syncLatestSessionToSupabase() {
@@ -701,7 +775,7 @@
       dailyRows
     ] = rows || [];
     const sessions = Array.isArray(sessionRows)
-      ? sessionRows.map(row => row && row.raw_data ? sessionKey(row.raw_data) : [row && row.created_at, row && row.correct_answers, row && row.total_questions, row && row.accuracy].join('|')).sort()
+      ? sessionRows.map(rowSessionKey).sort()
       : [];
     return {
       profile: profileRow ? [profileRow.name || '', profileRow.joined_date || ''] : [],
@@ -800,6 +874,14 @@
       mismatchedSections: Object.keys(diff),
       diff
     });
+    if (diff.sessions) {
+      const localSessions = new Set(diff.sessions.local || []);
+      const cloudSessions = new Set(diff.sessions.cloud || []);
+      console.warn('[session sync] local/cloud session key diff', {
+        onlyLocal: [...localSessions].filter(key => !cloudSessions.has(key)),
+        onlyCloud: [...cloudSessions].filter(key => !localSessions.has(key))
+      });
+    }
   }
 
   function conflictParts(cloudRows) {
@@ -991,9 +1073,9 @@
     }
 
     if (Array.isArray(sessionRows) && sessionRows.length) {
-      const sessions = sessionRows
+      const sessions = dedupeSessionsByKey(sessionRows
         .map(restoredSessionFromRow)
-        .filter(session => session && session.date)
+        .filter(session => session && session.date))
         .sort((a, b) => new Date(b.date) - new Date(a.date))
         .slice(0, 200);
       writeJSON(KEYS.history, sessions);

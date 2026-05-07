@@ -1484,14 +1484,29 @@ function saveSessionToSupabase(session) {
   window.syncSessionToSupabase?.(session);
 }
 
+function createSessionId() {
+  if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+    return window.crypto.randomUUID();
+  }
+  return `session_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
 function saveHistory(score, total, pct, xp) {
   let history = [];
   try { history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch(e) {}
-  const session = { score, total, correct: score, pct, xp: xp || 0, date: new Date().toISOString(), timed: isTimedMode ? timedDuration : null };
+  const session = { session_id: createSessionId(), score, total, correct: score, pct, xp: xp || 0, date: new Date().toISOString(), timed: isTimedMode ? timedDuration : null };
+  console.log('[session sync] created local session', {
+    session_id: session.session_id,
+    localCountBefore: Array.isArray(history) ? history.length : 0
+  });
   history.unshift(session);
   history = history.slice(0, MAX_HISTORY);
   try {
     localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    console.log('[session sync] saved local session', {
+      session_id: session.session_id,
+      localCountAfter: history.length
+    });
     saveSessionToSupabase(session);
   } catch(e) {}
 }
