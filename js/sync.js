@@ -27,6 +27,7 @@
   let pendingConflictRows = null;
   let pendingConflictSignature = null;
   let cloudReadFailed = false;
+  const SYNC_MARKER_SCHEMA_VERSION = 2;
 
   function getClientAndUser() {
     const client = window.supabaseClient;
@@ -102,6 +103,10 @@
 
   function debugSessionSync(message, details) {
     console.log('[session sync] ' + message, details || {});
+  }
+
+  function debugSyncMarker(message, details) {
+    console.log('[sync marker] ' + message, details || {});
   }
 
   function runRequest(scope, request, onSuccess) {
@@ -689,7 +694,7 @@
     }
     try { localStorage.setItem('quiz_local_data_synced', '1'); } catch(e) {}
     try { localStorage.removeItem('quiz_sync_notice_dismissed'); } catch(e) {}
-    markLocalSyncedForUser(ctx);
+    markLocalSyncedForUser(ctx, rows);
     window.updateSyncNotice?.();
     return true;
   }
@@ -891,24 +896,56 @@
     };
   }
 
-  function markLocalSyncedForUser(ctx) {
+  function markLocalSyncedForUser(ctx, cloudRows) {
     if (!ctx || !ctx.user || !ctx.user.id) return;
+    const localSig = localSignature();
+    const cloudSig = cloudRows ? cloudSignature(cloudRows) : null;
     try {
       localStorage.setItem(localSyncMarkerKey(ctx.user.id), JSON.stringify({
         userId: ctx.user.id,
-        local: localSignature(),
-        syncedAt: new Date().toISOString()
+        local: localSig,
+        cloud: cloudSig,
+        syncedAt: new Date().toISOString(),
+        schemaVersion: SYNC_MARKER_SCHEMA_VERSION
       }));
       localStorage.setItem('quiz_local_data_synced', '1');
+      debugSyncMarker('written', {
+        userId: ctx.user.id,
+        hasCloudSignature: !!cloudSig,
+        schemaVersion: SYNC_MARKER_SCHEMA_VERSION
+      });
     } catch(e) {}
   }
 
-  function isLocalUnchangedSinceUserSync(ctx) {
+  function isLocalUnchangedSinceUserSync(ctx, cloudRows) {
     if (!ctx || !ctx.user || !ctx.user.id) return false;
     try {
       const saved = JSON.parse(localStorage.getItem(localSyncMarkerKey(ctx.user.id)) || 'null');
-      return !!(saved && saved.userId === ctx.user.id && saved.local === localSignature());
+      const currentLocal = localSignature();
+      const currentCloud = cloudRows ? cloudSignature(cloudRows) : null;
+      let trusted = false;
+      let reason = 'trusted';
+      if (!saved) reason = 'missing marker';
+      else if (saved.userId !== ctx.user.id) reason = 'user mismatch';
+      else if (!saved.cloud) reason = 'missing cloud signature';
+      else if (!currentCloud) reason = 'missing current cloud signature';
+      else if (saved.local !== currentLocal) reason = 'local changed';
+      else if (saved.cloud !== currentCloud) reason = 'cloud changed';
+      else trusted = true;
+      debugSyncMarker('checked', {
+        userId: ctx.user.id,
+        trusted,
+        reason: trusted ? 'trusted' : reason,
+        hasSavedCloudSignature: !!(saved && saved.cloud),
+        hasCurrentCloudSignature: !!currentCloud
+      });
+      return trusted;
     } catch(e) {
+      debugSyncMarker('checked', {
+        userId: ctx.user.id,
+        trusted: false,
+        reason: 'parse error'
+      });
       return false;
     }
   }
@@ -932,7 +969,7 @@
       const saved = JSON.parse(localStorage.getItem(conflictResolvedKey(ctx.user.id)) || 'null');
       if (!saved) return false;
       if (saved.source === 'account') return saved.cloud === parts.cloud && saved.local === parts.local;
-      if (saved.source === 'device') return saved.local === parts.local;
+      if (saved.source === 'device') return saved.cloud === parts.cloud && saved.local === parts.local;
       return false;
     } catch(e) {
       return false;
@@ -1298,10 +1335,13 @@
               await markLocalSyncedAfterVerifiedCloudMatch(ctx, cloudRows);
               return;
             }
-            if (isLocalUnchangedSinceUserSync(ctx)) {
+            if (isLocalUnchangedSinceUserSync(ctx, cloudRows)) {
               await syncAllLocalAppStateToSupabase();
               return;
             }
+            debugSyncMarker('not trusted; continuing to conflict decision', {
+              userId: ctx.user.id
+            });
             if (isConflictResolved(ctx, parts) || isConflictDismissedThisSession(ctx, signature)) return;
             conflictToOpen = { rows: cloudRows, parts };
             return;
