@@ -1601,6 +1601,16 @@ function saveProfile(data) {
 function getProfileAvatar() {
   try { return localStorage.getItem(PROFILE_AVATAR_KEY) || ''; } catch(e) { return ''; }
 }
+function moveFocusBeforeHiding(container, fallback) {
+  if (!container || !container.contains(document.activeElement)) return;
+  if (fallback && typeof fallback.focus === 'function' && !fallback.disabled) {
+    fallback.focus({ preventScroll: true });
+    return;
+  }
+  if (document.activeElement && typeof document.activeElement.blur === 'function') {
+    document.activeElement.blur();
+  }
+}
 function saveProfileAvatar(dataUrl, file) {
   try {
     localStorage.setItem(PROFILE_AVATAR_KEY, dataUrl);
@@ -1630,9 +1640,13 @@ function toggleProfilePhotoMenu() {
   const menu = document.getElementById('profilePhotoMenu');
   if (!menu) return;
   const isOpen = menu.classList.contains('open');
-  if (!isOpen) positionProfilePhotoMenu();
-  menu.classList.toggle('open', !isOpen);
-  menu.setAttribute('aria-hidden', isOpen ? 'true' : 'false');
+  if (isOpen) {
+    closeProfilePhotoMenu();
+    return;
+  }
+  positionProfilePhotoMenu();
+  menu.classList.add('open');
+  menu.setAttribute('aria-hidden', 'false');
 }
 function positionProfilePhotoMenu() {
   const menu = document.getElementById('profilePhotoMenu');
@@ -1647,6 +1661,7 @@ function positionProfilePhotoMenu() {
 function closeProfilePhotoMenu() {
   const menu = document.getElementById('profilePhotoMenu');
   if (!menu) return;
+  moveFocusBeforeHiding(menu, document.querySelector('.profile-avatar-edit-btn') || document.getElementById('profileAvatar'));
   menu.classList.remove('open');
   menu.setAttribute('aria-hidden', 'true');
 }
@@ -1665,6 +1680,7 @@ function closeProfilePhotoViewer() {
   const modal = document.getElementById('profilePhotoViewer');
   const img = document.getElementById('profilePhotoViewerImg');
   if (!modal) return;
+  moveFocusBeforeHiding(modal, document.querySelector('.profile-avatar-edit-btn') || document.getElementById('profileAvatar'));
   modal.classList.remove('open');
   modal.setAttribute('aria-hidden', 'true');
   if (img) img.removeAttribute('src');
@@ -2089,6 +2105,7 @@ function openResetProfileModal() {
 function closeResetProfileModal() {
   const modal = document.getElementById('resetProfileModal');
   if (!modal) return;
+  moveFocusBeforeHiding(modal, _resetModalLastFocus);
   modal.setAttribute('aria-hidden', 'true');
   const restoreFocus = () => {
     if (_resetModalLastFocus && typeof _resetModalLastFocus.focus === 'function') {
