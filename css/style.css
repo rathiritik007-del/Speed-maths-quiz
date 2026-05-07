@@ -3916,19 +3916,33 @@ select:focus {
       flex-shrink: 0;
       width: 64px;
       height: 64px;
+      background: transparent;
     }
     .profile-avatar {
       width: 64px; height: 64px;
       border-radius: 50%;
-      background: linear-gradient(135deg, var(--acc-lo), var(--p4));
+      overflow: hidden;
+      padding: 0;
+      appearance: none;
+      -webkit-appearance: none;
+      background-color: color-mix(in srgb, var(--acc), var(--p4) 34%);
+      background-image: none;
       display: flex; align-items: center; justify-content: center;
       font-size: 26px; font-weight: 800; color: #eff8e2;
       flex-shrink: 0;
       border: 2px solid color-mix(in srgb, var(--acc), transparent 70%);
       background-size: cover;
       background-position: center;
+      background-repeat: no-repeat;
+      background-origin: border-box;
+      background-clip: border-box;
       cursor: pointer;
       font-family: 'Inter', sans-serif;
+      line-height: 1;
+    }
+    .profile-avatar:empty {
+      border-color: transparent;
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--acc), transparent 70%);
     }
     .profile-avatar-edit-btn {
       position: absolute;
@@ -3937,6 +3951,9 @@ select:focus {
       width: 24px;
       height: 24px;
       border-radius: 50%;
+      overflow: hidden;
+      appearance: none;
+      -webkit-appearance: none;
       border: 1px solid color-mix(in srgb, var(--acc), transparent 62%);
       background: color-mix(in srgb, var(--surface-raised, var(--p4)), transparent 8%);
       color: var(--text-primary);
@@ -4048,6 +4065,173 @@ select:focus {
       line-height: 1;
       cursor: pointer;
       z-index: 1;
+    }
+    .photo-crop-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 270;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .photo-crop-modal.open { display: flex; }
+    .photo-crop-backdrop {
+      position: absolute;
+      inset: 0;
+      background: color-mix(in srgb, var(--p0), transparent 18%);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .photo-crop-card {
+      position: relative;
+      width: min(92vw, 420px);
+      max-height: min(92vh, 720px);
+      overflow: auto;
+      border-radius: 22px;
+      padding: 20px;
+      background: color-mix(in srgb, var(--surface-raised, var(--p4)), transparent 5%);
+      border: 1px solid color-mix(in srgb, var(--border-strong), transparent 18%);
+      box-shadow: var(--shadow-card);
+      animation: menuIn 0.18s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .photo-crop-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1px solid color-mix(in srgb, var(--border-strong), transparent 25%);
+      background: color-mix(in srgb, var(--surface-raised, var(--p4)), transparent 8%);
+      color: var(--text-primary);
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .photo-crop-head {
+      padding-right: 34px;
+      margin-bottom: 16px;
+    }
+    .photo-crop-head h2 {
+      margin: 0;
+      color: var(--text-primary);
+      font-size: 22px;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+    .photo-crop-head p {
+      margin: 7px 0 0;
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .photo-crop-stage {
+      width: min(72vw, 300px);
+      height: min(72vw, 300px);
+      max-width: 300px;
+      max-height: 300px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--inp), transparent 12%);
+      border: 1px solid color-mix(in srgb, var(--acc), transparent 72%);
+      box-shadow: inset 0 0 0 999px color-mix(in srgb, var(--p0), transparent 96%), 0 12px 32px color-mix(in srgb, var(--shadow, var(--p0)), transparent 55%);
+      overflow: hidden;
+      touch-action: none;
+      cursor: grab;
+    }
+    .photo-crop-stage:active { cursor: grabbing; }
+    .photo-crop-circle {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      border-radius: inherit;
+    }
+    .photo-crop-circle img {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      max-width: none;
+      user-select: none;
+      pointer-events: none;
+      transform-origin: center;
+      will-change: transform;
+    }
+    .photo-crop-controls {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px 12px;
+      align-items: center;
+      margin-top: 4px;
+    }
+    .photo-crop-controls label {
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .photo-crop-controls input[type="range"] {
+      width: 100%;
+      accent-color: var(--acc);
+    }
+    .photo-crop-reset {
+      grid-column: 1 / -1;
+      justify-self: start;
+      border: 0;
+      background: transparent;
+      color: var(--acc);
+      padding: 2px 0;
+      font-size: 12px;
+      font-weight: 800;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+    }
+    .photo-crop-status {
+      min-height: 18px;
+      margin-top: 8px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+    .photo-crop-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .photo-crop-actions button {
+      min-height: 44px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 800;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      text-align: center;
+    }
+    .photo-crop-cancel {
+      border: 1px solid color-mix(in srgb, var(--border-strong), transparent 28%);
+      background: color-mix(in srgb, var(--surface-raised, var(--p4)), transparent 18%);
+      color: var(--text-primary);
+    }
+    .photo-crop-save {
+      border: 1px solid color-mix(in srgb, var(--acc), transparent 38%);
+      background: var(--acc);
+      color: var(--btn-txt);
+      box-shadow: 0 10px 28px color-mix(in srgb, var(--acc), transparent 72%);
+    }
+    .photo-crop-save:disabled {
+      opacity: 0.65;
+      cursor: wait;
+    }
+    @media (max-width: 420px) {
+      .photo-crop-card {
+        padding: 18px;
+      }
+      .photo-crop-actions {
+        grid-template-columns: 1fr;
+      }
     }
     .profile-header-info { flex: 1; min-width: 0; }
     .profile-header-name {

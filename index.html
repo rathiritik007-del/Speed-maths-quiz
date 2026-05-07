@@ -1108,6 +1108,33 @@
   </div>
 </div>
 
+<!-- Profile Photo Crop Modal -->
+<div class="photo-crop-modal" id="profilePhotoCropModal" aria-hidden="true">
+  <div class="photo-crop-backdrop" data-photo-crop-cancel></div>
+  <div class="photo-crop-card" role="dialog" aria-modal="true" aria-labelledby="photoCropTitle">
+    <button class="photo-crop-close" id="photoCropCloseBtn" type="button" aria-label="Cancel photo adjustment">&times;</button>
+    <div class="photo-crop-head">
+      <h2 id="photoCropTitle">Adjust profile photo</h2>
+      <p>Drag to center your photo. Use zoom if needed.</p>
+    </div>
+    <div class="photo-crop-stage" id="photoCropStage">
+      <div class="photo-crop-circle">
+        <img id="photoCropImg" alt="">
+      </div>
+    </div>
+    <div class="photo-crop-controls">
+      <label for="photoCropZoom">Zoom</label>
+      <input id="photoCropZoom" type="range" min="1" max="3" step="0.01" value="1">
+      <button class="photo-crop-reset" id="photoCropResetBtn" type="button">Reset position</button>
+    </div>
+    <div class="photo-crop-status" id="photoCropStatus" role="status" aria-live="polite"></div>
+    <div class="photo-crop-actions">
+      <button class="photo-crop-cancel" type="button" data-photo-crop-cancel>Cancel</button>
+      <button class="photo-crop-save" id="photoCropSaveBtn" type="button">Save photo</button>
+    </div>
+  </div>
+</div>
+
 <!-- Daily Challenge Floating Pin Card (fixed, always visible) -->
 <button class="daily-challenge-btn" id="dailyChallengeBtn" onclick="startDailyChallenge()">
   <div class="dc-tab">
