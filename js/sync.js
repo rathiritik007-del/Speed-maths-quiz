@@ -21,6 +21,9 @@
 
   const pending = {};
   const syncDecisionInFlight = {};
+  let fullSyncTimer = null;
+  let fullSyncInFlight = null;
+  let fullSyncQueued = false;
   let pendingConflictRows = null;
   let pendingConflictSignature = null;
   let cloudReadFailed = false;
@@ -212,6 +215,18 @@
     return 'png';
   }
 
+  async function awaitRequest(scope, request) {
+    const { data, error } = await request;
+    if (error) throw error;
+    return data;
+  }
+
+  function withAvatarCacheBust(url) {
+    if (!url) return url;
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}v=${Date.now()}`;
+  }
+
   async function uploadProfileAvatar(ctx, dataUrl, file) {
     if (!ctx || !dataUrl) return null;
     const blob = file || dataUrlToBlob(dataUrl);
@@ -229,23 +244,30 @@
     const { data } = ctx.client.storage.from('profile-pictures').getPublicUrl(path);
     const publicUrl = data && data.publicUrl ? data.publicUrl : null;
     if (!publicUrl) throw new Error('Could not create profile avatar public URL.');
+    const avatarUrl = withAvatarCacheBust(publicUrl);
     const profile = readJSON(KEYS.profile, {});
     const { error: profileError } = await ctx.client.from('user_profile').upsert({
       user_id: ctx.user.id,
       name: profile.name || null,
       joined_date: profile.joinedDate || null,
       avatar_path: path,
-      avatar_url: publicUrl,
+      avatar_url: avatarUrl,
       updated_at: new Date().toISOString()
     }, { onConflict: 'user_id' });
     if (profileError) throw profileError;
-    return { path, publicUrl };
+    writeString(KEYS.profileAvatar, avatarUrl);
+    if (typeof window.renderProfileAvatar === 'function') {
+      window.renderProfileAvatar(profile.name || '?');
+    }
+    return { path, publicUrl: avatarUrl };
   }
 
   function syncProfileAvatarToSupabase(dataUrl, file) {
     const ctx = getClientAndUser();
     if (!ctx || !dataUrl) return;
-    uploadProfileAvatar(ctx, dataUrl, file).catch(error => warnSync('profile avatar', error));
+    uploadProfileAvatar(ctx, dataUrl, file)
+      .then(() => uploadFullLocalStateAndMarkSynced(ctx))
+      .catch(error => warnSync('profile avatar', error));
   }
 
   async function deleteProfileAvatar(ctx) {
@@ -269,12 +291,15 @@
       })
       .eq('user_id', ctx.user.id);
     if (profileError) throw profileError;
+    try { localStorage.removeItem(KEYS.profileAvatar); } catch(e) {}
   }
 
   function deleteProfileAvatarFromSupabase() {
     const ctx = getClientAndUser();
     if (!ctx) return;
-    deleteProfileAvatar(ctx).catch(error => warnSync('profile avatar delete', error));
+    deleteProfileAvatar(ctx)
+      .then(() => uploadFullLocalStateAndMarkSynced(ctx))
+      .catch(error => warnSync('profile avatar delete', error));
   }
 
   async function migrateProfileAvatarIfCloudEmpty(ctx) {
@@ -390,7 +415,7 @@
       null
     );
     if (rowHasCloudValue(existing, cloudValueKeys)) return;
-    runRequest('migration ' + table, ctx.client.from(table).upsert(row, { onConflict: 'user_id' }));
+    await awaitRequest('migration ' + table, ctx.client.from(table).upsert(row, { onConflict: 'user_id' }));
   }
 
   async function migrateSessions(ctx) {
@@ -407,10 +432,10 @@
     const rows = history
       .filter(session => session && !existingKeys.has(sessionKey(session)))
       .map(session => mapSessionRow(ctx.user.id, session));
-    if (rows.length) runRequest('migration sessions', ctx.client.from('sessions').insert(rows));
+    if (rows.length) await awaitRequest('migration sessions', ctx.client.from('sessions').insert(rows));
   }
 
-  function migrateMilestones(ctx) {
+  async function migrateMilestones(ctx) {
     const ids = readJSON(KEYS.milestones, []);
     if (!Array.isArray(ids) || !ids.length) return;
     const rows = ids.map(id => ({
@@ -418,7 +443,7 @@
       milestone_id: id,
       unlocked_at: new Date().toISOString()
     }));
-    runRequest('migration achievements_or_milestones', ctx.client.from('achievements_or_milestones').upsert(rows, { onConflict: 'user_id,milestone_id' }));
+    await awaitRequest('migration achievements_or_milestones', ctx.client.from('achievements_or_milestones').upsert(rows, { onConflict: 'user_id,milestone_id' }));
   }
 
   async function migrateDataRowIfCloudEmpty(ctx, table, row, dataKeys) {
@@ -429,7 +454,7 @@
       null
     );
     if (rowHasCloudValue(existing, dataKeys)) return;
-    runRequest('migration ' + table, ctx.client.from(table).upsert(row, { onConflict: 'user_id' }));
+    await awaitRequest('migration ' + table, ctx.client.from(table).upsert(row, { onConflict: 'user_id' }));
   }
 
   async function migrateDailyChallenges(ctx) {
@@ -444,144 +469,41 @@
       .map(row => row && row.challenge_date)
       .filter(Boolean));
     const missingRows = rows.filter(row => !existingDates.has(row.challenge_date));
-    if (missingRows.length) runRequest('migration daily_challenges', ctx.client.from('daily_challenges').insert(missingRows));
+    if (missingRows.length) await awaitRequest('migration daily_challenges', ctx.client.from('daily_challenges').insert(missingRows));
   }
 
   function syncProfileToSupabase() {
-    schedule('user_profile', () => {
-      const ctx = getClientAndUser();
-      if (!ctx) return;
-      const profile = readJSON(KEYS.profile, {});
-      runRequest('user_profile', ctx.client.from('user_profile').upsert({
-        user_id: ctx.user.id,
-        name: profile.name || null,
-        joined_date: profile.joinedDate || null,
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'user_id' }), () => markLocalSyncedForUser(ctx));
-    });
+    scheduleVerifiedFullLocalSync('user_profile');
   }
 
   function syncUserProgressToSupabase() {
-    schedule('user_progress', () => {
-      const ctx = getClientAndUser();
-      if (!ctx) return;
-      const xp = readJSON(KEYS.xp, {});
-      const pb = readJSON(KEYS.pb, {});
-      const dayStreak = readJSON(KEYS.dayStreak, {});
-      const goal = parseInt(readString(KEYS.dailyGoal, '20')) || 20;
-      runRequest('user_progress', ctx.client.from('user_progress').upsert({
-        user_id: ctx.user.id,
-        total_xp: xp.totalXP || 0,
-        current_level: xp.currentLevel || 1,
-        best_pct: pb.bestPct || 0,
-        best_session_streak: pb.bestStreak || 0,
-        day_streak: dayStreak.streak || 0,
-        best_day_streak: dayStreak.bestStreak || 0,
-        last_streak_date: dayStreak.lastDate || null,
-        daily_goal: goal,
-        practice_mode: readString(KEYS.practiceMode, '0') === '1',
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'user_id' }), () => markLocalSyncedForUser(ctx));
-    });
+    scheduleVerifiedFullLocalSync('user_progress');
   }
 
   function syncUserSettingsToSupabase() {
-    schedule('user_settings', () => {
-      const ctx = getClientAndUser();
-      if (!ctx) return;
-      runRequest('user_settings', ctx.client.from('user_settings').upsert({
-        user_id: ctx.user.id,
-        base_theme: readString(KEYS.baseTheme, 'dark'),
-        theme: readString(KEYS.theme, 'default'),
-        custom_colors_enabled: readString(KEYS.customColorsOn, '0') === '1',
-        custom_colors: readJSON(KEYS.customColors, null),
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'user_id' }), () => markLocalSyncedForUser(ctx));
-    });
+    scheduleVerifiedFullLocalSync('user_settings');
   }
 
   function syncMilestonesToSupabase() {
-    schedule('achievements_or_milestones', () => {
-      const ctx = getClientAndUser();
-      if (!ctx) return;
-      const ids = readJSON(KEYS.milestones, []);
-      if (!Array.isArray(ids) || !ids.length) return;
-      const rows = ids.map(id => ({
-        user_id: ctx.user.id,
-        milestone_id: id,
-        unlocked_at: new Date().toISOString()
-      }));
-      runRequest('achievements_or_milestones', ctx.client.from('achievements_or_milestones').upsert(rows, { onConflict: 'user_id,milestone_id' }), () => markLocalSyncedForUser(ctx));
-    });
+    scheduleVerifiedFullLocalSync('achievements_or_milestones');
   }
 
   function syncWeaknessToSupabase() {
-    schedule('weakness_stats', () => {
-      const ctx = getClientAndUser();
-      if (!ctx) return;
-      runRequest('weakness_stats', ctx.client.from('weakness_stats').upsert({
-        user_id: ctx.user.id,
-        weakness_data: readJSON(KEYS.weakness, {}),
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'user_id' }), () => markLocalSyncedForUser(ctx));
-    });
+    scheduleVerifiedFullLocalSync('weakness_stats');
   }
 
   function syncSpacedRepetitionToSupabase() {
-    schedule('spaced_repetition_queue', () => {
-      const ctx = getClientAndUser();
-      if (!ctx) return;
-      runRequest('spaced_repetition_queue', ctx.client.from('spaced_repetition_queue').upsert({
-        user_id: ctx.user.id,
-        queue: readJSON(KEYS.srQueue, []),
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'user_id' }), () => markLocalSyncedForUser(ctx));
-    });
+    scheduleVerifiedFullLocalSync('spaced_repetition_queue');
   }
 
   function syncDailyChallengesToSupabase() {
-    schedule('daily_challenges', () => {
-      const ctx = getClientAndUser();
-      if (!ctx) return;
-      const current = readJSON(KEYS.dailyChallenge, {});
-      const history = readJSON(KEYS.dcHistory, []);
-      const byDate = {};
-      if (current && current.date) byDate[current.date] = current;
-      if (Array.isArray(history)) {
-        history.forEach(item => {
-          if (item && item.date) byDate[item.date] = { ...byDate[item.date], ...item };
-        });
-      }
-      const rows = Object.keys(byDate).map(date => {
-        const item = byDate[date] || {};
-        return {
-          user_id: ctx.user.id,
-          challenge_date: date,
-          completed: !!item.completed || item.score !== undefined,
-          score: item.score || 0,
-          total: item.total || 0,
-          pct: item.pct || 0,
-          bracket: item.bracket || null,
-          raw_data: item
-        };
-      });
-      if (!rows.length) return;
-      runRequest('daily_challenges', ctx.client.from('daily_challenges').upsert(rows, { onConflict: 'user_id,challenge_date' }), () => markLocalSyncedForUser(ctx));
-    });
+    scheduleVerifiedFullLocalSync('daily_challenges');
   }
 
   function syncSessionToSupabase(session) {
     const ctx = getClientAndUser();
-    if (!ctx || !session) return;
-    runRequest('sessions', ctx.client.from('sessions').insert({
-      user_id: ctx.user.id,
-      total_questions: session.total,
-      correct_answers: session.score,
-      accuracy: session.pct,
-      time_taken_seconds: null,
-      mode: session.timed ? 'timed' : 'practice',
-      raw_data: session
-    }), () => markLocalSyncedForUser(ctx));
+    if (!ctx) return;
+    uploadFullLocalStateAndMarkSynced(ctx).catch(error => warnSync('sessions verified full sync', error));
   }
 
   function syncLatestSessionToSupabase() {
@@ -590,53 +512,112 @@
   }
 
   function syncAllLocalAppStateToSupabase() {
-    if (!getClientAndUser()) return;
-    syncProfileToSupabase();
-    syncUserProgressToSupabase();
-    syncUserSettingsToSupabase();
-    syncMilestonesToSupabase();
-    syncWeaknessToSupabase();
-    syncSpacedRepetitionToSupabase();
-    syncDailyChallengesToSupabase();
+    const ctx = getClientAndUser();
+    if (!ctx) return Promise.resolve(false);
+    return uploadFullLocalStateAndMarkSynced(ctx);
   }
 
   async function uploadLocalAppStateToSupabase(ctx) {
-    await insertRowIfCloudEmpty(ctx, 'user_profile', mapProfileRow(ctx.user.id), ['name', 'joined_date']);
-    await migrateProfileAvatarIfCloudEmpty(ctx);
-    await insertRowIfCloudEmpty(ctx, 'user_progress', mapProgressRow(ctx.user.id), [
-      'total_xp',
-      'current_level',
-      'best_pct',
-      'best_session_streak',
-      'day_streak',
-      'best_day_streak',
-      'last_streak_date',
-      'daily_goal',
-      'practice_mode'
-    ]);
-    await insertRowIfCloudEmpty(ctx, 'user_settings', mapSettingsRow(ctx.user.id), [
-      'base_theme',
-      'theme',
-      'custom_colors_enabled',
-      'custom_colors'
-    ]);
+    return uploadFullLocalStateAndMarkSynced(ctx);
+  }
+
+  async function uploadFullLocalStateToSupabase(ctx) {
+    const profileRow = mapProfileRow(ctx.user.id);
+    if (profileRow) {
+      await awaitRequest('user_profile full sync', ctx.client.from('user_profile').upsert(profileRow, { onConflict: 'user_id' }));
+    }
+
+    const avatar = readString(KEYS.profileAvatar, null);
+    if (avatar && avatar.startsWith('data:')) {
+      await uploadProfileAvatar(ctx, avatar, null);
+    }
+
+    const progressRow = mapProgressRow(ctx.user.id);
+    if (progressRow) {
+      await awaitRequest('user_progress full sync', ctx.client.from('user_progress').upsert(progressRow, { onConflict: 'user_id' }));
+    }
+
+    const settingsRow = mapSettingsRow(ctx.user.id);
+    if (settingsRow) {
+      await awaitRequest('user_settings full sync', ctx.client.from('user_settings').upsert(settingsRow, { onConflict: 'user_id' }));
+    }
+
     await migrateSessions(ctx);
-    migrateMilestones(ctx);
-    await migrateDataRowIfCloudEmpty(ctx, 'weakness_stats', readString(KEYS.weakness, null) === null ? null : {
+    await migrateMilestones(ctx);
+
+    const weaknessRaw = readString(KEYS.weakness, null);
+    if (weaknessRaw !== null) {
+      await awaitRequest('weakness_stats full sync', ctx.client.from('weakness_stats').upsert({
       user_id: ctx.user.id,
       weakness_data: readJSON(KEYS.weakness, {}),
       updated_at: new Date().toISOString()
-    }, ['weakness_data']);
-    await migrateDataRowIfCloudEmpty(ctx, 'spaced_repetition_queue', readString(KEYS.srQueue, null) === null ? null : {
-      user_id: ctx.user.id,
-      queue: readJSON(KEYS.srQueue, []),
-      updated_at: new Date().toISOString()
-    }, ['queue']);
-    await migrateDailyChallenges(ctx);
+      }, { onConflict: 'user_id' }));
+    }
+
+    const srRaw = readString(KEYS.srQueue, null);
+    if (srRaw !== null) {
+      await awaitRequest('spaced_repetition_queue full sync', ctx.client.from('spaced_repetition_queue').upsert({
+        user_id: ctx.user.id,
+        queue: readJSON(KEYS.srQueue, []),
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' }));
+    }
+
+    const dailyRows = mapDailyChallengeRows(ctx.user.id);
+    if (dailyRows.length) {
+      await awaitRequest('daily_challenges full sync', ctx.client.from('daily_challenges').upsert(dailyRows, { onConflict: 'user_id,challenge_date' }));
+    }
+  }
+
+  async function uploadFullLocalStateAndMarkSynced(ctx) {
+    if (!ctx || !ctx.user || !ctx.user.id) return false;
+    if (fullSyncInFlight) {
+      fullSyncQueued = true;
+      return fullSyncInFlight;
+    }
+
+    fullSyncInFlight = (async () => {
+      let verified = false;
+      do {
+        fullSyncQueued = false;
+        await uploadFullLocalStateToSupabase(ctx);
+        verified = await markLocalSyncedAfterVerifiedCloudMatch(ctx);
+      } while (fullSyncQueued);
+
+      if (!verified) {
+        throw new Error('Cloud verification did not match local app state after sync.');
+      }
+      return true;
+    })().finally(() => {
+      fullSyncInFlight = null;
+    });
+
+    return fullSyncInFlight;
+  }
+
+  function scheduleVerifiedFullLocalSync(scope) {
+    if (fullSyncTimer) clearTimeout(fullSyncTimer);
+    fullSyncTimer = setTimeout(() => {
+      fullSyncTimer = null;
+      const ctx = getClientAndUser();
+      if (!ctx) return;
+      uploadFullLocalStateAndMarkSynced(ctx).catch(error => warnSync(scope + ' verified full sync', error));
+    }, 350);
+  }
+
+  async function markLocalSyncedAfterVerifiedCloudMatch(ctx, cloudRows) {
+    cloudReadFailed = false;
+    const rows = cloudRows || await fetchCloudAppState(ctx);
+    if (cloudReadFailed) return false;
+    if (cloudSignature(rows) !== localSignature()) {
+      logSignatureMismatch('verified full sync', rows);
+      return false;
+    }
     try { localStorage.setItem('quiz_local_data_synced', '1'); } catch(e) {}
     try { localStorage.removeItem('quiz_sync_notice_dismissed'); } catch(e) {}
     markLocalSyncedForUser(ctx);
     window.updateSyncNotice?.();
+    return true;
   }
 
   function restoredSessionFromRow(row) {
@@ -671,7 +652,44 @@
     return new Date().toISOString().slice(0, 10);
   }
 
-  function cloudSignature(rows) {
+  function uniqueSorted(values) {
+    return [...new Set((Array.isArray(values) ? values : []).filter(value => value !== null && value !== undefined && value !== ''))].sort();
+  }
+
+  function stableValue(value) {
+    if (Array.isArray(value)) return value.map(stableValue);
+    if (value && typeof value === 'object') {
+      return Object.keys(value).sort().reduce((result, key) => {
+        result[key] = stableValue(value[key]);
+        return result;
+      }, {});
+    }
+    return value;
+  }
+
+  function normalizedDailyRowsFromLocal() {
+    return mapDailyChallengeRows('local').map(row => [
+      row.challenge_date || '',
+      !!row.completed,
+      row.score || 0,
+      row.total || 0,
+      row.pct || 0,
+      row.bracket || ''
+    ]).sort((a, b) => String(a[0]).localeCompare(String(b[0])));
+  }
+
+  function normalizedDailyRowsFromCloud(rows) {
+    return (Array.isArray(rows) ? rows : []).map(restoredDailyChallengeFromRow).map(item => [
+      item.date || '',
+      !!item.completed || item.score !== undefined,
+      item.score || 0,
+      item.total || 0,
+      item.pct || 0,
+      item.bracket || ''
+    ]).sort((a, b) => String(a[0]).localeCompare(String(b[0])));
+  }
+
+  function cloudSignatureParts(rows) {
     const [
       profileRow,
       progressRow,
@@ -685,8 +703,9 @@
     const sessions = Array.isArray(sessionRows)
       ? sessionRows.map(row => row && row.raw_data ? sessionKey(row.raw_data) : [row && row.created_at, row && row.correct_answers, row && row.total_questions, row && row.accuracy].join('|')).sort()
       : [];
-    return JSON.stringify({
-      profile: profileRow ? [profileRow.name || '', profileRow.joined_date || '', profileRow.avatar_url || ''] : [],
+    return {
+      profile: profileRow ? [profileRow.name || '', profileRow.joined_date || ''] : [],
+      avatar: profileRow && profileRow.avatar_url ? profileRow.avatar_url : '',
       progress: progressRow ? [
         progressRow.total_xp || 0,
         progressRow.current_level || 1,
@@ -702,25 +721,40 @@
         settingsRow.base_theme || 'dark',
         settingsRow.theme || 'default',
         !!settingsRow.custom_colors_enabled,
-        settingsRow.custom_colors || null
+        stableValue(settingsRow.custom_colors || null)
       ] : [],
-      sessions,
-      milestones: Array.isArray(milestoneRows) ? milestoneRows.map(row => row && row.milestone_id).filter(Boolean).sort() : [],
-      weakness: weaknessRow && weaknessRow.weakness_data ? weaknessRow.weakness_data : null,
-      sr: srRow && Array.isArray(srRow.queue) ? srRow.queue : [],
-      daily: Array.isArray(dailyRows) ? dailyRows.map(row => row && row.challenge_date).filter(Boolean).sort() : []
-    });
+      sessions: uniqueSorted(sessions),
+      milestones: uniqueSorted(Array.isArray(milestoneRows) ? milestoneRows.map(row => row && row.milestone_id) : []),
+      weakness: stableValue(weaknessRow && weaknessRow.weakness_data ? weaknessRow.weakness_data : null),
+      sr: stableValue(srRow && Array.isArray(srRow.queue) ? srRow.queue : []),
+      daily: normalizedDailyRowsFromCloud(dailyRows)
+    };
   }
 
-  function localSignature() {
+  function cloudSignature(rows) {
+    return JSON.stringify(cloudSignatureParts(rows));
+  }
+
+  function localSignatureParts() {
     const history = readJSON(KEYS.history, []);
     const profile = readJSON(KEYS.profile, {});
+    const avatar = readString(KEYS.profileAvatar, '') || '';
     const xp = readJSON(KEYS.xp, {});
     const pb = readJSON(KEYS.pb, {});
     const dayStreak = readJSON(KEYS.dayStreak, {});
-    return JSON.stringify({
-      profile: [profile.name || '', profile.joinedDate || '', readString(KEYS.profileAvatar, '') || ''],
-      progress: [
+    const hasProgress = readString(KEYS.xp, null) !== null
+      || readString(KEYS.pb, null) !== null
+      || readString(KEYS.dayStreak, null) !== null
+      || readString(KEYS.dailyGoal, null) !== null
+      || readString(KEYS.practiceMode, null) !== null;
+    const hasSettings = readString(KEYS.baseTheme, null) !== null
+      || readString(KEYS.theme, null) !== null
+      || readString(KEYS.customColorsOn, null) !== null
+      || readString(KEYS.customColors, null) !== null;
+    return {
+      profile: (profile.name || profile.joinedDate) ? [profile.name || '', profile.joinedDate || ''] : [],
+      avatar,
+      progress: hasProgress ? [
         xp.totalXP || 0,
         xp.currentLevel || 1,
         pb.bestPct || 0,
@@ -728,23 +762,43 @@
         dayStreak.streak || 0,
         dayStreak.bestStreak || 0,
         dayStreak.lastDate || '',
-        readString(KEYS.dailyGoal, '20'),
+        parseInt(readString(KEYS.dailyGoal, '20'), 10) || 20,
         readString(KEYS.practiceMode, '0') === '1'
-      ],
-      settings: [
+      ] : [],
+      settings: hasSettings ? [
         readString(KEYS.baseTheme, 'dark'),
         readString(KEYS.theme, 'default'),
         readString(KEYS.customColorsOn, '0') === '1',
-        readJSON(KEYS.customColors, null)
-      ],
-      sessions: Array.isArray(history) ? history.map(sessionKey).sort() : [],
-      milestones: readJSON(KEYS.milestones, []).sort(),
-      weakness: readJSON(KEYS.weakness, null),
-      sr: readJSON(KEYS.srQueue, []),
-      daily: {
-        current: readJSON(KEYS.dailyChallenge, null),
-        history: readJSON(KEYS.dcHistory, [])
+        stableValue(readJSON(KEYS.customColors, null))
+      ] : [],
+      sessions: uniqueSorted(Array.isArray(history) ? history.map(sessionKey) : []),
+      milestones: uniqueSorted(readJSON(KEYS.milestones, [])),
+      weakness: stableValue(readJSON(KEYS.weakness, null)),
+      sr: stableValue(readJSON(KEYS.srQueue, [])),
+      daily: normalizedDailyRowsFromLocal()
+    };
+  }
+
+  function localSignature() {
+    return JSON.stringify(localSignatureParts());
+  }
+
+  function logSignatureMismatch(scope, rows) {
+    const local = localSignatureParts();
+    const cloud = cloudSignatureParts(rows);
+    const sections = uniqueSorted(Object.keys({ ...local, ...cloud }));
+    const diff = {};
+    sections.forEach(section => {
+      const localValue = local[section];
+      const cloudValue = cloud[section];
+      if (JSON.stringify(localValue) !== JSON.stringify(cloudValue)) {
+        diff[section] = { local: localValue, cloud: cloudValue };
       }
+    });
+    console.warn('Supabase sync verification mismatch:', {
+      scope,
+      mismatchedSections: Object.keys(diff),
+      diff
     });
   }
 
@@ -883,7 +937,7 @@
       requestData('restore user_profile', ctx.client.from('user_profile').select('*').eq('user_id', ctx.user.id).maybeSingle(), null),
       requestData('restore user_progress', ctx.client.from('user_progress').select('*').eq('user_id', ctx.user.id).maybeSingle(), null),
       requestData('restore user_settings', ctx.client.from('user_settings').select('*').eq('user_id', ctx.user.id).maybeSingle(), null),
-      requestData('restore sessions', ctx.client.from('sessions').select('*').eq('user_id', ctx.user.id).limit(200), []),
+      requestData('restore sessions', ctx.client.from('sessions').select('*').eq('user_id', ctx.user.id).order('created_at', { ascending: false }).limit(200), []),
       requestData('restore achievements_or_milestones', ctx.client.from('achievements_or_milestones').select('*').eq('user_id', ctx.user.id), []),
       requestData('restore weakness_stats', ctx.client.from('weakness_stats').select('*').eq('user_id', ctx.user.id).maybeSingle(), null),
       requestData('restore spaced_repetition_queue', ctx.client.from('spaced_repetition_queue').select('*').eq('user_id', ctx.user.id).maybeSingle(), null),
@@ -996,9 +1050,8 @@
       restoreFetchedCloudAppStateToLocal(rows);
       markConflictResolved(ctx, 'account', pendingConflictSignature || conflictParts(rows));
 
-      try { localStorage.setItem('quiz_local_data_synced', '1'); } catch(e) {}
-      try { localStorage.removeItem('quiz_sync_notice_dismissed'); } catch(e) {}
-      markLocalSyncedForUser(ctx);
+      const verified = await markLocalSyncedAfterVerifiedCloudMatch(ctx, rows);
+      if (!verified) warnSync('cloud restore verification', new Error('Restored cloud state did not match local signature.'));
       refreshAfterCloudRestore();
     } catch(error) {
       warnSync('cloud restore', error);
@@ -1091,7 +1144,7 @@
     closeReplaceAccountModal();
     if (!ctx) return;
     try {
-      await resetSupabaseAppData({ preserveProfile: null });
+      await resetSupabaseAppData({ preserveProfile: null, requireSuccess: true });
       await uploadLocalAppStateToSupabase(ctx);
       markConflictResolved(ctx, 'device', pendingConflictSignature || conflictParts(pendingConflictRows));
       pendingConflictRows = null;
@@ -1160,11 +1213,11 @@
             const parts = conflictParts(cloudRows);
             const signature = JSON.stringify(parts);
             if (parts.local === parts.cloud) {
-              markLocalSyncedForUser(ctx);
+              await markLocalSyncedAfterVerifiedCloudMatch(ctx, cloudRows);
               return;
             }
             if (isLocalUnchangedSinceUserSync(ctx)) {
-              syncAllLocalAppStateToSupabase();
+              await syncAllLocalAppStateToSupabase();
               return;
             }
             if (isConflictResolved(ctx, parts) || isConflictDismissedThisSession(ctx, signature)) return;
@@ -1194,6 +1247,8 @@
     const ctx = getClientAndUser();
     if (!ctx) return;
     const preserveProfile = options && options.preserveProfile;
+    const requireSuccess = !!(options && options.requireSuccess);
+    const errors = [];
     const tables = [
       'sessions',
       'user_progress',
@@ -1207,11 +1262,18 @@
     await Promise.all(tables.map(async table => {
       try {
         const { error } = await ctx.client.from(table).delete().eq('user_id', ctx.user.id);
-        if (error) warnSync('reset ' + table, error);
+        if (error) {
+          warnSync('reset ' + table, error);
+          errors.push({ table, error });
+        }
       } catch(error) {
         warnSync('reset ' + table, error);
+        errors.push({ table, error });
       }
     }));
+    if (requireSuccess && errors.length) {
+      throw new Error('Could not clear all cloud app data before replacing account progress: ' + errors.map(item => item.table).join(', '));
+    }
     if (preserveProfile) {
       const profile = preserveProfile;
       runRequest('reset user_profile', ctx.client.from('user_profile').upsert({
