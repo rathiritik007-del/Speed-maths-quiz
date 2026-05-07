@@ -101,6 +101,10 @@
     console.warn('Supabase sync failed for ' + scope + ':', error && error.message ? error.message : error);
   }
 
+  function debugResetSync(message, details) {
+    console.log('[reset sync] ' + message, details || {});
+  }
+
   function debugSessionSync(message, details) {
     console.log('[session sync] ' + message, details || {});
   }
@@ -1157,6 +1161,38 @@
     return Array.isArray(dailyRows) && dailyRows.length;
   }
 
+  function cloudResetVerificationErrors(rows, preserveProfile) {
+    const [
+      profileRow,
+      progressRow,
+      settingsRow,
+      sessionRows,
+      milestoneRows,
+      weaknessRow,
+      srRow,
+      dailyRows
+    ] = rows || [];
+    const errors = [];
+    if (progressRow) errors.push('user_progress');
+    if (settingsRow) errors.push('user_settings');
+    if (Array.isArray(sessionRows) && sessionRows.length) errors.push('sessions');
+    if (Array.isArray(milestoneRows) && milestoneRows.length) errors.push('achievements_or_milestones');
+    if (weaknessRow) errors.push('weakness_stats');
+    if (srRow) errors.push('spaced_repetition_queue');
+    if (Array.isArray(dailyRows) && dailyRows.length) errors.push('daily_challenges');
+    if (!preserveProfile && profileRow) errors.push('user_profile');
+    if (preserveProfile) {
+      const expectedName = preserveProfile.name || '';
+      const expectedJoined = preserveProfile.joinedDate || '';
+      if (!profileRow) errors.push('user_profile_missing');
+      else {
+        if ((profileRow.name || '') !== expectedName) errors.push('user_profile_name');
+        if (expectedJoined && (profileRow.joined_date || '') !== expectedJoined) errors.push('user_profile_joined_date');
+      }
+    }
+    return errors;
+  }
+
   function refreshAfterCloudRestore() {
     setTimeout(() => {
       try {
@@ -1502,10 +1538,16 @@
 
   async function resetSupabaseAppData(options) {
     const ctx = getClientAndUser();
-    if (!ctx) return;
+    if (!ctx) throw new Error('No logged-in Supabase user for reset.');
     const preserveProfile = options && options.preserveProfile;
     const requireSuccess = !!(options && options.requireSuccess);
     const errors = [];
+    debugResetSync('reset started', {
+      loggedIn: !!ctx.user,
+      userId: ctx.user && ctx.user.id,
+      requireSuccess,
+      preserveProfile: !!preserveProfile
+    });
     const tables = [
       'sessions',
       'user_progress',
@@ -1516,14 +1558,19 @@
       'daily_challenges'
     ];
     if (!preserveProfile) tables.push('user_profile');
+    debugResetSync('cloud delete started', { tables });
     await Promise.all(tables.map(async table => {
       try {
         const { error } = await ctx.client.from(table).delete().eq('user_id', ctx.user.id);
         if (error) {
+          debugResetSync('table delete failure', { table, error });
           warnSync('reset ' + table, error);
           errors.push({ table, error });
+        } else {
+          debugResetSync('table delete success', { table });
         }
       } catch(error) {
+        debugResetSync('table delete failure', { table, error });
         warnSync('reset ' + table, error);
         errors.push({ table, error });
       }
@@ -1533,13 +1580,34 @@
     }
     if (preserveProfile) {
       const profile = preserveProfile;
-      runRequest('reset user_profile', ctx.client.from('user_profile').upsert({
+      const avatar = readString(KEYS.profileAvatar, null);
+      const profileRow = {
         user_id: ctx.user.id,
         name: profile.name || null,
         joined_date: profile.joinedDate || null,
         updated_at: new Date().toISOString()
-      }, { onConflict: 'user_id' }));
+      };
+      if (avatar && !avatar.startsWith('data:')) profileRow.avatar_url = avatar;
+      try {
+        await awaitRequest('reset user_profile', ctx.client.from('user_profile').upsert(profileRow, { onConflict: 'user_id' }));
+        debugResetSync('preserved profile upsert success', { userId: ctx.user.id, hasAvatar: !!profileRow.avatar_url });
+      } catch(error) {
+        debugResetSync('preserved profile upsert failure', { error });
+        throw error;
+      }
     }
+    cloudReadFailed = false;
+    const rows = await fetchCloudAppState(ctx);
+    if (cloudReadFailed) throw new Error('Could not verify cloud reset after delete.');
+    const verificationErrors = cloudResetVerificationErrors(rows, preserveProfile);
+    debugResetSync('cloud reset verification result', {
+      ok: verificationErrors.length === 0,
+      failures: verificationErrors
+    });
+    if (verificationErrors.length) {
+      throw new Error('Cloud reset verification failed: ' + verificationErrors.join(', '));
+    }
+    return rows;
   }
 
   window.syncProfileToSupabase = syncProfileToSupabase;

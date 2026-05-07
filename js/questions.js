@@ -1964,6 +1964,8 @@ function closeResetProfileModal() {
 async function performResetProfile() {
   closeResetProfileModal();
   const loggedIn = !!(window.authState && window.authState.isLoggedIn);
+  const resetUserId = window.authState && window.authState.user && window.authState.user.id;
+  console.log('[reset sync] reset started', { loggedIn, userId: resetUserId || null });
   const currentScreen = document.querySelector('.screen.active');
   const preservedProfile = getProfile();
   const preservedAvatar = getProfileAvatar();
@@ -1992,18 +1994,35 @@ async function performResetProfile() {
 
   if (!loggedIn) {
     try { localStorage.removeItem(PROFILE_KEY); } catch(e){}
+    keysToClear.forEach(key => {
+      try { localStorage.removeItem(key); } catch(e){}
+    });
+    console.log('[reset sync] local clear completed', { loggedIn: false });
+    location.reload();
+    return;
   }
-  keysToClear.forEach(key => {
-    try { localStorage.removeItem(key); } catch(e){}
-  });
 
-  if (loggedIn) {
+  try {
+    console.log('[reset sync] cloud reset requested', { userId: resetUserId || null });
+    await window.resetSupabaseAppData?.({ preserveProfile: preservedProfile, requireSuccess: true });
+    console.log('[reset sync] cloud reset verified; local clear started', { userId: resetUserId || null });
+    keysToClear.forEach(key => {
+      try { localStorage.removeItem(key); } catch(e){}
+    });
+    if (resetUserId) {
+      [
+        'quiz_local_sync_marker_' + resetUserId,
+        'quiz_sync_conflict_resolved_' + resetUserId
+      ].forEach(key => {
+        try { localStorage.removeItem(key); } catch(e){}
+      });
+      try { sessionStorage.removeItem('quiz_sync_conflict_dismissed_' + resetUserId); } catch(e){}
+    }
     try { localStorage.setItem(PROFILE_KEY, JSON.stringify(preservedProfile)); } catch(e){}
     if (preservedAvatar) {
       try { localStorage.setItem(PROFILE_AVATAR_KEY, preservedAvatar); } catch(e){}
     }
-    await window.resetSupabaseAppData?.({ preserveProfile: preservedProfile });
-
+    console.log('[reset sync] local clear completed', { loggedIn: true, userId: resetUserId || null });
     applyPracticeMode(false);
     if (typeof initTheme === 'function') initTheme();
     if (typeof initCustomColors === 'function') initCustomColors();
@@ -2017,10 +2036,9 @@ async function performResetProfile() {
     else if (currentScreen && currentScreen.id === 's-dashboard') showDashboard();
     else if (currentScreen) show(currentScreen.id);
     if (typeof updateAuthUI === 'function') updateAuthUI();
-    return;
+  } catch(error) {
+    console.warn('[reset sync] reset failed; local data was kept intact:', error && error.message ? error.message : error);
   }
-
-  location.reload();
 }
 
 document.addEventListener('DOMContentLoaded', function initResetProfileModal() {
