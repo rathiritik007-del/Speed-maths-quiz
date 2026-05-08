@@ -296,7 +296,42 @@
     setAuthMode("login");
     updateAuthUI();
   }
+async function handleAuthRedirectIfNeeded() {
+  if (!window.supabaseClient) return false;
 
+  const url = new URL(window.location.href);
+  const code = url.searchParams.get("code");
+
+  if (!code) return false;
+
+  try {
+    const { error } = await window.supabaseClient.auth.exchangeCodeForSession(code);
+
+    if (error) {
+      console.warn("Supabase auth redirect exchange failed:", error.message);
+      setStatus("Email confirmed, but sign-in failed. Please log in manually.", true);
+      return false;
+    }
+
+    url.searchParams.delete("code");
+    window.history.replaceState({}, document.title, url.pathname + url.search + url.hash);
+
+    await refreshAuthState({ runPostLoginSync: true });
+
+    if (window.authState.isLoggedIn) {
+      closeAuthModal();
+      if (typeof showProfile === "function") {
+        setTimeout(function () { showProfile(); }, 0);
+      }
+    }
+
+    return true;
+  } catch (error) {
+    console.warn("Supabase auth redirect handling failed:", error);
+    setStatus("Email confirmed, but sign-in failed. Please log in manually.", true);
+    return false;
+  }
+}
   window.refreshAuthState = refreshAuthState;
   window.signUpWithEmail = signUpWithEmail;
   window.loginWithEmail = loginWithEmail;
@@ -318,8 +353,13 @@
     });
   }
 
-  document.addEventListener("DOMContentLoaded", function () {
-    setupAuthUI();
-    refreshAuthState();
-  });
+  document.addEventListener("DOMContentLoaded", async function () {
+  setupAuthUI();
+
+  const handledRedirect = await handleAuthRedirectIfNeeded();
+
+  if (!handledRedirect) {
+    await refreshAuthState();
+  }
+});
 })();
