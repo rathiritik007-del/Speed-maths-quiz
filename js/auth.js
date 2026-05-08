@@ -296,6 +296,8 @@
     setAuthMode("login");
     updateAuthUI();
   }
+
+
 async function handleAuthRedirectIfNeeded() {
   if (!window.supabaseClient) return false;
 
@@ -318,12 +320,15 @@ async function handleAuthRedirectIfNeeded() {
 
     await refreshAuthState({ runPostLoginSync: true });
 
-    if (window.authState.isLoggedIn) {
-      closeAuthModal();
-      if (typeof showProfile === "function") {
-        setTimeout(function () { showProfile(); }, 0);
-      }
-    }
+   if (window.authState.isLoggedIn) {
+  closeAuthModal();
+
+  if (typeof showDashboard === "function") {
+    setTimeout(function () { showDashboard(); }, 0);
+  } else if (typeof showProfile === "function") {
+    setTimeout(function () { showProfile(); }, 0);
+  }
+}
 
     return true;
   } catch (error) {
@@ -332,6 +337,7 @@ async function handleAuthRedirectIfNeeded() {
     return false;
   }
 }
+
   window.refreshAuthState = refreshAuthState;
   window.signUpWithEmail = signUpWithEmail;
   window.loginWithEmail = loginWithEmail;
