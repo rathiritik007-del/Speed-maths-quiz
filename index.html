@@ -3,6 +3,41 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <script>
+    (function () {
+      const canonicalHost = "www.mentalmath.online";
+      const redirectHosts = ["speed-maths-quiz.vercel.app", "mentalmath.online"];
+      const currentHost = window.location.hostname;
+
+      if (!redirectHosts.includes(currentHost) || currentHost === canonicalHost) return;
+
+      const destination = "https://" + canonicalHost + window.location.pathname + window.location.search + window.location.hash;
+
+      if (currentHost === "speed-maths-quiz.vercel.app") {
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker.getRegistrations?.()
+            .then(function (registrations) {
+              registrations.forEach(function (registration) {
+                registration.unregister();
+              });
+            })
+            .catch(function () {});
+        }
+
+        if ("caches" in window) {
+          caches.keys()
+            .then(function (keys) {
+              keys.forEach(function (key) {
+                caches.delete(key);
+              });
+            })
+            .catch(function () {});
+        }
+      }
+
+      window.location.replace(destination);
+    })();
+  </script>
   <title>Mental Math Trainer</title>
   <meta name="theme-color" content="#3d0a57">
   <meta name="apple-mobile-web-app-capable" content="yes">

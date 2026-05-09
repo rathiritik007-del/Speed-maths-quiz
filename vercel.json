@@ -1,6 +1,28 @@
 {
   "redirects": [
     {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "speed-maths-quiz.vercel.app"
+        }
+      ],
+      "destination": "https://www.mentalmath.online/",
+      "permanent": true
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "mentalmath.online"
+        }
+      ],
+      "destination": "https://www.mentalmath.online/",
+      "permanent": true
+    },
+    {
       "source": "/:path*",
       "has": [
         {
