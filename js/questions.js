@@ -37,6 +37,7 @@ applyPracticeMode(isPracticeMode());
   let qs=[], cur=0, score=0, results=[], qType='both';
 let instant=true, autoSub=false, answered=false, pickMode=false;
 let pendingPickAnswer = null;
+let autoSubmitTimer = null;
 
 let timerInterval=null;
 let stopwatchInterval=null;
@@ -54,6 +55,50 @@ let timedInterval = null;        // rAF handle
 let timedStartTime = null;
 let timedQAnswered = 0;
 const TIMED_DURATIONS = [30, 60, 90, 120, 180, 300]; // slider steps
+
+function restartAnimationClass(el, className) {
+  if (!el) return;
+  const key = '_restart_' + className;
+  if (el[key]) cancelAnimationFrame(el[key]);
+  el.classList.remove(className);
+  el[key] = requestAnimationFrame(() => {
+    el[key] = null;
+    el.classList.add(className);
+  });
+}
+
+function restartInlineAnimation(el) {
+  if (!el) return;
+  if (el._restartInlineAnimFrame) cancelAnimationFrame(el._restartInlineAnimFrame);
+  el.style.animation = 'none';
+  el._restartInlineAnimFrame = requestAnimationFrame(() => {
+    el._restartInlineAnimFrame = null;
+    el.style.animation = '';
+  });
+}
+
+function clearAutoSubmitTimer() {
+  if (!autoSubmitTimer) return;
+  clearTimeout(autoSubmitTimer);
+  autoSubmitTimer = null;
+}
+
+function maybeScheduleAutoSubmit(inputEl) {
+  clearAutoSubmitTimer();
+  if (!autoSub || answered) return;
+  const q = qs[cur];
+  if (!q || !inputEl) return;
+  const val = inputEl.value;
+  if (val === '' || val === '-') return;
+  const targetLen = q.reverse ? String(q.n).length : String(q.answer).length;
+  if (val.replace('-', '').length < targetLen) return;
+  const scheduledSession = sessionId;
+  const scheduledQuestion = cur;
+  autoSubmitTimer = setTimeout(() => {
+    autoSubmitTimer = null;
+    if (sessionId === scheduledSession && cur === scheduledQuestion && !answered) checkAnswer();
+  }, 120);
+}
 
 // ── new feature state ──
 let streak = 0, bestStreak = 0;
@@ -204,10 +249,10 @@ function setMultType(btn){
   }
   function toggleAllChips(){ focusSelectAll(); }
 
-  function genQs(){
+  function genQs(countOverride){
     const from=parseInt(document.getElementById('rangeFrom').value)||1;
     const to=parseInt(document.getElementById('rangeTo').value)||20;
-    const count=parseInt(document.getElementById('qCount').value)||10;
+    const count=countOverride || parseInt(document.getElementById('qCount').value)||10;
     const shuffle=document.getElementById('shuffleTog').checked;
     const pool=[];
 
@@ -307,19 +352,13 @@ function setMultType(btn){
   // In timed mode, generate a large pool of questions to cycle through
   if(isTimedMode){
     // generate big pool (200 questions), we'll cycle infinitely
-    const savedCount = document.getElementById('qCount').value;
-    document.getElementById('qCount').value = 200;
-    qs = genQs();
-    document.getElementById('qCount').value = savedCount;
+    qs = genQs(200);
     if(!qs.length){ alert('No questions — check your range!'); return; }
     // shuffle to start fresh
     for(let i=qs.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [qs[i],qs[j]]=[qs[j],qs[i]]; }
   } else if(unlimitedMode){
     // Generate large pool for unlimited — will recycle
-    const savedCount = document.getElementById('qCount').value;
-    document.getElementById('qCount').value = 500;
-    qs = genQs();
-    document.getElementById('qCount').value = savedCount;
+    qs = genQs(500);
     if(!qs.length){ alert('No questions — check your range!'); return; }
   } else {
     qs=genQs();
@@ -469,6 +508,7 @@ function setMultType(btn){
   }
 
   function loadQ(){
+    clearAutoSubmitTimer();
     clearTimer(); answered=false; pendingPickAnswer = null;
 
     // In timed mode, cycle through question pool infinitely
@@ -481,7 +521,7 @@ function setMultType(btn){
     const q=qs[cur], total=qs.length, sym=q.type==='square'?'²':'³';
     document.getElementById('qNum').textContent = isTimedMode ? String(timedQAnswered+1) : String(cur+1).padStart(2,'0');
     document.getElementById('qTotal').textContent = isTimedMode ? '∞' : unlimitedMode ? '∞' : total;
-    const _sp=document.getElementById('scorePill'); _sp.textContent=`Score: ${score}`; _sp.classList.remove('pill-bump'); void _sp.offsetWidth; _sp.classList.add('pill-bump');
+    const _sp=document.getElementById('scorePill'); _sp.textContent=`Score: ${score}`; restartAnimationClass(_sp, 'pill-bump');
     document.getElementById('progFill').style.width  = `${(cur/total)*100}%`;
     const badge=document.getElementById('qBadge');
     if(q.type==='table'){
@@ -523,13 +563,13 @@ function setMultType(btn){
 
     // Animate q-card pop
     const qCard = document.querySelector('.q-card');
-    if(qCard){ qCard.classList.remove('q-card-anim'); void qCard.offsetWidth; qCard.classList.add('q-card-anim'); }
+    if(qCard){ restartAnimationClass(qCard, 'q-card-anim'); }
     // Animate expression
     const qExprEl = document.getElementById('qExpr');
-    if(qExprEl){ qExprEl.classList.remove('expr-anim'); void qExprEl.offsetWidth; qExprEl.classList.add('expr-anim'); }
+    if(qExprEl){ restartAnimationClass(qExprEl, 'expr-anim'); }
     // Animate ans zone
     const ansZone = document.querySelector('.ans-zone');
-    if(ansZone){ ansZone.classList.remove('ans-zone-anim'); void ansZone.offsetWidth; ansZone.classList.add('ans-zone-anim'); }
+    if(ansZone){ restartAnimationClass(ansZone, 'ans-zone-anim'); }
     document.getElementById('timerZone').style.display = (!isTimedMode && (timerMode === 'fixed' || timerMode === 'custom')) ? 'flex' : 'none';
     document.getElementById('stopwatchZone').style.display = (!isTimedMode && timerMode === 'stopwatch') ? 'flex' : 'none';
     document.getElementById('timedChip').style.display = isTimedMode ? 'flex' : 'none';
@@ -694,7 +734,7 @@ if(timerMode === 'stopwatch'){
     }
   });
 
-  const _sp=document.getElementById('scorePill'); _sp.textContent=`Score: ${score}`; _sp.classList.remove('pill-bump'); void _sp.offsetWidth; _sp.classList.add('pill-bump');
+  const _sp=document.getElementById('scorePill'); _sp.textContent=`Score: ${score}`; restartAnimationClass(_sp, 'pill-bump');
 
   if(!isCorrect && livesMode){
     lives--; updateLivesPill();
@@ -759,7 +799,7 @@ function startTimer(){
       if(!correct && livesMode){ lives--; updateLivesPill(); }
     }
 
-    const _sp=document.getElementById('scorePill'); _sp.textContent=`Score: ${score}`; _sp.classList.remove('pill-bump'); void _sp.offsetWidth; _sp.classList.add('pill-bump');
+    const _sp=document.getElementById('scorePill'); _sp.textContent=`Score: ${score}`; restartAnimationClass(_sp, 'pill-bump');
     const _sid=sessionId; setTimeout(() => { if(sessionId===_sid) nextQ(); }, 1300);
   }
 
@@ -803,6 +843,7 @@ function startTimer(){
   timerInterval = requestAnimationFrame(animate);
 }
   function checkAnswer(){
+  clearAutoSubmitTimer();
   const btn = document.getElementById('checkBtn');
 
   if(answered){
@@ -863,7 +904,7 @@ function startTimer(){
     if (old) old.remove();
   }
 
-  const _sp=document.getElementById('scorePill'); _sp.textContent=`Score: ${score}`; _sp.classList.remove('pill-bump'); void _sp.offsetWidth; _sp.classList.add('pill-bump');
+  const _sp=document.getElementById('scorePill'); _sp.textContent=`Score: ${score}`; restartAnimationClass(_sp, 'pill-bump');
 
   if(!correct && livesMode){
     lives--;
@@ -962,7 +1003,7 @@ function startTimer(){
     document.getElementById('timedModeBar').classList.remove('visible');
     document.getElementById('timedChip').style.display = 'none';
 
-    setTimeout(()=>{ const bp=document.getElementById('resPct'); if(bp){bp.classList.remove('big-pct-anim'); void bp.offsetWidth; bp.classList.add('big-pct-anim');} document.querySelectorAll('#timedStatRow .stat-c').forEach((el,i)=>{ el.style.animation='none'; void el.offsetWidth; el.style.animation=''; el.style.animationDelay=`${0.15+i*0.07}s`; }); }, 50);
+    setTimeout(()=>{ const bp=document.getElementById('resPct'); if(bp){ restartAnimationClass(bp, 'big-pct-anim'); } document.querySelectorAll('#timedStatRow .stat-c').forEach((el,i)=>{ el.style.animationDelay=`${0.15+i*0.07}s`; restartInlineAnimation(el); }); }, 50);
 
     const total=results.length, wrong=total-score, pct=total>0?Math.round((score/total)*100):0;
 
@@ -993,7 +1034,7 @@ function startTimer(){
 
       // Trigger animation
       const numEl = document.getElementById('timedResTotal');
-      numEl.style.animation = 'none'; void numEl.offsetWidth; numEl.style.animation = '';
+      restartInlineAnimation(numEl);
 
       // confetti if >80% accuracy and >5 questions
       if(pct >= 80 && total >= 5) launchConfetti();
@@ -1019,7 +1060,16 @@ function startTimer(){
       setTimeout(() => { xpBarEl.style.width = xpPct + '%'; }, 120);
     }
 
-    // answer review
+    // answer review + result summaries in one pass
+    const summary = {
+      square: { total: 0, correct: 0 },
+      cube: { total: 0, correct: 0 },
+      add: { total: 0, correct: 0 },
+      sub: { total: 0, correct: 0 },
+      weaknessAdd: { total: 0, wrong: 0 },
+      weaknessSub: { total: 0, wrong: 0 },
+      wrongMap: {}
+    };
     document.getElementById('reviewList').innerHTML = results.map(r=>{
       const sym=r.q.type==='square'?'²':r.q.type==='cube'?'³':'';
       const cls=r.correct?'ri-ok':'ri-no', mark=r.correct?'✓':'✗';
@@ -1031,19 +1081,33 @@ function startTimer(){
       else                         disp = `${r.q.n}${sym}`;
       const correctAns = (r.q.type==='table'||r.q.type==='add'||r.q.type==='sub') ? r.q.answer : (r.q.reverse ? r.q.n : r.q.answer);
       const note=r.correct?`${correctAns}`:r.timedOut?`${correctAns} (time's up)`:`${correctAns} (you: ${r.userAnswer})`;
+      if (summary[r.q.type]) {
+        summary[r.q.type].total++;
+        if (r.correct) summary[r.q.type].correct++;
+      }
+      if (!isTimedMode || !r.timedOut) {
+        if (r.q.type === 'add') {
+          summary.weaknessAdd.total++;
+          if (!r.correct) summary.weaknessAdd.wrong++;
+        } else if (r.q.type === 'sub') {
+          summary.weaknessSub.total++;
+          if (!r.correct) summary.weaknessSub.wrong++;
+        } else {
+          const key = r.q.n+'_'+r.q.type;
+          if(!summary.wrongMap[key]) summary.wrongMap[key]={n:r.q.n,type:r.q.type,wrong:0,total:0};
+          summary.wrongMap[key].total++;
+          if(!r.correct) summary.wrongMap[key].wrong++;
+        }
+      }
       return `<div class="review-item"><span class="ri-q">${disp}</span><span class="ri-a ${cls}">${mark} ${note}</span></div>`;
     }).join('');
 
     // accuracy chart — adapts to mode
-    const sqR = results.filter(r=>r.q.type==='square');
-    const cuR = results.filter(r=>r.q.type==='cube');
-    const adR = results.filter(r=>r.q.type==='add');
-    const sbR = results.filter(r=>r.q.type==='sub');
     const chartWrapEl = document.getElementById('chartWrap');
-    if(adR.length && sbR.length){
+    if(summary.add.total && summary.sub.total){
       // arithmetic mode: Add vs Sub
-      const adPct = Math.round(adR.filter(r=>r.correct).length/adR.length*100);
-      const sbPct = Math.round(sbR.filter(r=>r.correct).length/sbR.length*100);
+      const adPct = Math.round(summary.add.correct/summary.add.total*100);
+      const sbPct = Math.round(summary.sub.correct/summary.sub.total*100);
       chartWrapEl.style.display = 'flex';
       document.getElementById('chartSqVal').textContent = adPct+'%';
       document.getElementById('chartCuVal').textContent = sbPct+'%';
@@ -1056,10 +1120,10 @@ function startTimer(){
         document.getElementById('chartSqBar').style.width = adPct+'%';
         document.getElementById('chartCuBar').style.width = sbPct+'%';
       }, 80);
-    } else if(sqR.length && cuR.length){
+    } else if(summary.square.total && summary.cube.total){
       // squares/cubes mode
-      const sqPct = Math.round(sqR.filter(r=>r.correct).length/sqR.length*100);
-      const cuPct = Math.round(cuR.filter(r=>r.correct).length/cuR.length*100);
+      const sqPct = Math.round(summary.square.correct/summary.square.total*100);
+      const cuPct = Math.round(summary.cube.correct/summary.cube.total*100);
       chartWrapEl.style.display = 'flex';
       chartWrapEl.querySelector('.chart-title').textContent = 'Squares vs Cubes accuracy';
       chartWrapEl.querySelectorAll('.chart-row-label')[0].textContent = 'Squares';
@@ -1079,10 +1143,7 @@ function startTimer(){
     // weakness section
     const wWrap = document.getElementById('weaknessWrap');
     // In timed mode, only count answers the player actively got wrong — not time-outs
-    const weaknessResults = isTimedMode ? results.filter(r => !r.timedOut) : results;
-    const wAdR = weaknessResults.filter(r=>r.q.type==='add');
-    const wSbR = weaknessResults.filter(r=>r.q.type==='sub');
-    const isArithMixed = wAdR.length > 0 && wSbR.length > 0;
+    const isArithMixed = summary.weaknessAdd.total > 0 && summary.weaknessSub.total > 0;
     const isArithSingle = (qType === 'arithmetic') && !isArithMixed;
 
     if(isArithSingle){
@@ -1090,31 +1151,24 @@ function startTimer(){
       wWrap.style.display = 'none';
     } else if(isArithMixed){
       // Mixed arithmetic: show Add vs Sub wrong/total comparison pills
-      const adWrong = wAdR.filter(r=>!r.correct).length;
-      const sbWrong = wSbR.filter(r=>!r.correct).length;
+      const adWrong = summary.weaknessAdd.wrong;
+      const sbWrong = summary.weaknessSub.wrong;
       const hasTrouble = adWrong > 0 || sbWrong > 0;
       if(hasTrouble){
         wWrap.style.display = 'block';
         document.getElementById('weaknessList').innerHTML =
           `<span style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,80,60,0.12);border:1px solid rgba(255,100,80,0.22);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700;color:rgba(239,248,226,0.7);">
-            + Addition <span style="color:#ff8070;margin-left:2px;">${adWrong}/${adR.length} wrong</span>
+            + Addition <span style="color:#ff8070;margin-left:2px;">${adWrong}/${summary.add.total} wrong</span>
           </span>
           <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,80,60,0.12);border:1px solid rgba(255,100,80,0.22);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700;color:rgba(239,248,226,0.7);">
-            − Subtraction <span style="color:#ff8070;margin-left:2px;">${sbWrong}/${sbR.length} wrong</span>
+            − Subtraction <span style="color:#ff8070;margin-left:2px;">${sbWrong}/${summary.sub.total} wrong</span>
           </span>`;
       } else {
         wWrap.style.display = 'none';
       }
     } else {
       // Squares/cubes/tables mode: original per-number weakness chips
-      const wrongMap = {};
-      weaknessResults.forEach(r=>{
-        const key = r.q.n+'_'+r.q.type;
-        if(!wrongMap[key]) wrongMap[key]={n:r.q.n,type:r.q.type,wrong:0,total:0};
-        wrongMap[key].total++;
-        if(!r.correct) wrongMap[key].wrong++;
-      });
-      const weak = Object.values(wrongMap).filter(w=>w.wrong/w.total>0.5).sort((a,b)=>b.wrong/b.total-a.wrong/a.total).slice(0,5);
+      const weak = Object.values(summary.wrongMap).filter(w=>w.wrong/w.total>0.5).sort((a,b)=>b.wrong/b.total-a.wrong/a.total).slice(0,5);
       if(weak.length){
         wWrap.style.display='block';
         document.getElementById('weaknessList').innerHTML = weak.map(w=>{
@@ -1143,12 +1197,8 @@ function startTimer(){
     saveHistory(score, total, pct, Math.max(0, getXPData().totalXP - _sessionStartXP));
   }
 
-  document.getElementById('ansInput').addEventListener('input',()=>{
-    if(!autoSub||answered) return;
-    const q=qs[cur], val=document.getElementById('ansInput').value;
-    if(val===''||val==='-') return;
-    const targetLen = q.reverse ? String(q.n).length : String(q.answer).length;
-    if(val.replace('-','').length>=targetLen) setTimeout(()=>checkAnswer(),120);
+  document.getElementById('ansInput').addEventListener('input', event => {
+    maybeScheduleAutoSubmit(event.target);
   });
   document.getElementById('ansInput').addEventListener('keydown',e=>{
     if(e.key==='Enter'){ answered?nextQ():checkAnswer(); }
@@ -1336,6 +1386,7 @@ keys.forEach(key => {
 
     if (key.classList.contains('kb-del')) {
       input.value = input.value.slice(0, -1);
+      maybeScheduleAutoSubmit(input);
       return;
     }
 
@@ -1346,8 +1397,7 @@ keys.forEach(key => {
 
     input.value += key.textContent;
 
-    // Fire native input event so the single auto-submit listener handles length check
-    input.dispatchEvent(new Event('input'));
+    maybeScheduleAutoSubmit(input);
   });
 });
 document.getElementById('ansInput').addEventListener('focus', (e) => {
@@ -2981,22 +3031,21 @@ function updateDashXP(animateLevelUp) {
     if (animateLevelUp) {
       el.bar.style.transition = 'none';
       el.bar.style.width = '0%';
-      void el.bar.offsetWidth;
-      el.bar.style.transition = '';
+      requestAnimationFrame(() => {
+        el.bar.style.transition = '';
+        el.bar.style.width = pct + '%';
+      });
+    } else {
+      el.bar.style.width = pct + '%';
     }
-    el.bar.style.width = pct + '%';
   }
 
   // Animate level number if levelling up
   if (animateLevelUp && el.level) {
-    el.level.classList.remove('levelup-pop');
-    void el.level.offsetWidth;
-    el.level.classList.add('levelup-pop');
+    restartAnimationClass(el.level, 'levelup-pop');
     el.level.addEventListener('animationend', () => el.level.classList.remove('levelup-pop'), { once: true });
     if (el.bar) {
-      el.bar.classList.remove('levelup-flash');
-      void el.bar.offsetWidth;
-      el.bar.classList.add('levelup-flash');
+      restartAnimationClass(el.bar, 'levelup-flash');
       el.bar.addEventListener('animationend', () => el.bar.classList.remove('levelup-flash'), { once: true });
     }
   }
@@ -3560,9 +3609,7 @@ function onSessionComplete(pct, sessionBestStreak, score, total) {
   if (streakResult.increased) {
     const streakStat = document.getElementById('dashDayStreak');
     if (streakStat) {
-      streakStat.closest('.dash-stat')?.classList.remove('streak-pulse');
-      void streakStat.closest('.dash-stat')?.offsetWidth;
-      streakStat.closest('.dash-stat')?.classList.add('streak-pulse');
+      restartAnimationClass(streakStat.closest('.dash-stat'), 'streak-pulse');
     }
   }
 }
@@ -3610,18 +3657,14 @@ function updateDailyChallengeVisibility(screenId) {
   btn.style.pointerEvents = visible ? 'auto' : 'none';
 
   if (visible) {
-    btn.classList.remove('dc-bounce');
-    void btn.offsetWidth;
-    btn.classList.add('dc-bounce');
+    restartAnimationClass(btn, 'dc-bounce');
     setTimeout(() => btn.classList.remove('dc-bounce'), 700);
 
     // Periodic nudge every 8s while retracted
     if (!btn._dcNudgeInterval) {
       btn._dcNudgeInterval = setInterval(() => {
         if (!btn.classList.contains('dc-open') && !btn.classList.contains('dc-bounce')) {
-          btn.classList.remove('dc-nudge');
-          void btn.offsetWidth;
-          btn.classList.add('dc-nudge');
+          restartAnimationClass(btn, 'dc-nudge');
           setTimeout(() => btn.classList.remove('dc-nudge'), 650);
         }
       }, 8000);
@@ -3773,3 +3816,4 @@ showProfile = function() {
   document.addEventListener('DOMContentLoaded', refreshDailyChallengeCard);
   window.addEventListener('load', refreshDailyChallengeCard);
 })();
+
