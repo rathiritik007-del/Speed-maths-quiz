@@ -58,6 +58,17 @@
   <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
+<script>
+  (function () {
+    try {
+      const rawProfile = localStorage.getItem("quiz_profile");
+      const profile = rawProfile ? JSON.parse(rawProfile) : {};
+      document.body.dataset.bootScreen = profile && profile.name ? "dashboard" : "welcome";
+    } catch (error) {
+      document.body.dataset.bootScreen = "welcome";
+    }
+  })();
+</script>
 <div class="page-wrap">
 <div class="app">
 
@@ -998,9 +1009,9 @@
     </div>
   </div>
 </div>
-<script src="js/storage.js"></script>
-<script src="js/version.js"></script>
-<script src="js/questions.js"></script>
+<script defer src="js/storage.js"></script>
+<script defer src="js/version.js"></script>
+<script defer src="js/questions.js"></script>
 <!-- End Session button (Unlimited mode) -->
 <button id="endSessionBtn" onclick="endUnlimitedSession()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="10" height="10" rx="2" fill="#ff6b6b"/></svg> End Session</button>
 
@@ -1194,13 +1205,13 @@
   </div>
 </button>
 
-<script src="js/config.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabaseClient.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/sync.js"></script>
-<script src="js/ui.js"></script>
-<script src="js/app.js"></script>
+<script defer src="js/config.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script defer src="js/supabaseClient.js"></script>
+<script defer src="js/auth.js"></script>
+<script defer src="js/sync.js"></script>
+<script defer src="js/ui.js"></script>
+<script defer src="js/app.js"></script>
 </body>
 </html>
 <!-- Stable version before refactor -->
