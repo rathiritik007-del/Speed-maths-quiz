@@ -396,9 +396,11 @@
       display: none;
       width: 100%;
       min-height: min(72dvh, 620px);
-      align-items: center;
+      flex-direction: column;
+      align-items: stretch;
       justify-content: center;
-      padding: clamp(24px, 7vw, 44px) clamp(18px, 5vw, 32px);
+      gap: 14px;
+      padding: clamp(20px, 6vw, 34px) clamp(16px, 5vw, 28px);
       pointer-events: none;
     }
 
@@ -411,9 +413,10 @@
     }
 
     .boot-dashboard-card {
-      width: min(100%, 520px);
+      width: min(100%, 620px);
+      margin: 0 auto;
       border-radius: 20px;
-      padding: clamp(22px, 6vw, 34px);
+      padding: clamp(20px, 5vw, 28px);
       position: relative;
       overflow: hidden;
       background: linear-gradient(145deg, color-mix(in srgb, var(--p5), transparent 56%) 0%, color-mix(in srgb, var(--p3), transparent 42%) 100%);
@@ -431,45 +434,65 @@
       background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--acc), transparent 30%), transparent);
     }
 
-    .boot-dashboard-kicker {
-      font-size: clamp(11px, 2.7vw, 13px);
-      font-weight: 700;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 10px;
-    }
-
-    .boot-dashboard-title {
-      color: var(--text-primary);
-      font-size: clamp(25px, 7vw, 38px);
-      font-weight: 800;
-      line-height: 1.12;
-      margin-bottom: 8px;
-    }
-
-    .boot-dashboard-sub {
-      color: var(--text-secondary);
-      font-size: clamp(13px, 3.2vw, 15px);
-      font-weight: 600;
-      margin-bottom: 22px;
-    }
-
-    .boot-dashboard-lines {
+    .boot-dashboard-head {
       display: grid;
       gap: 10px;
+      margin-bottom: 20px;
     }
 
-    .boot-dashboard-lines span {
-      display: block;
-      height: 12px;
+    .boot-skeleton {
       border-radius: 99px;
-      background: color-mix(in srgb, var(--p6), transparent 74%);
+      background: linear-gradient(90deg, color-mix(in srgb, var(--p6), transparent 80%) 0%, color-mix(in srgb, var(--p7), transparent 84%) 48%, color-mix(in srgb, var(--p6), transparent 80%) 100%);
+      box-shadow: inset 0 1px 0 color-mix(in srgb, var(--p7), transparent 88%);
     }
 
-    .boot-dashboard-lines span:nth-child(1) { width: 76%; }
-    .boot-dashboard-lines span:nth-child(2) { width: 54%; }
-    .boot-dashboard-lines span:nth-child(3) { width: 64%; }
+    .boot-kicker {
+      width: 34%;
+      height: 11px;
+      opacity: 0.74;
+    }
+
+    .boot-title {
+      width: 68%;
+      height: clamp(28px, 7vw, 38px);
+      border-radius: 12px;
+    }
+
+    .boot-subtitle {
+      width: 48%;
+      height: 13px;
+      opacity: 0.72;
+    }
+
+    .boot-action {
+      width: min(100%, 190px);
+      height: 46px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, color-mix(in srgb, var(--acc), transparent 48%), color-mix(in srgb, var(--acc-lo), transparent 58%));
+      box-shadow: 0 8px 24px color-mix(in srgb, var(--acc), transparent 82%);
+    }
+
+    .boot-dashboard-grid {
+      width: min(100%, 620px);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .boot-stat,
+    .boot-wide-card {
+      min-height: 78px;
+      border-radius: 16px;
+      background: linear-gradient(145deg, color-mix(in srgb, var(--p4), transparent 68%), color-mix(in srgb, var(--p2), transparent 54%));
+      border: 1px solid color-mix(in srgb, var(--acc), transparent 88%);
+      box-shadow: inset 0 1px 0 color-mix(in srgb, var(--p7), transparent 92%);
+    }
+
+    .boot-wide-card {
+      grid-column: 1 / -1;
+      min-height: 96px;
+    }
 
     /* ════════════════════════════════════
        SETUP SCREEN
