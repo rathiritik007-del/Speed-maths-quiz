@@ -16,7 +16,8 @@
     customColorsOn: 'quiz_custom_colors_on',
     baseTheme: 'quiz_base_theme',
     theme: 'quiz_theme',
-    profileAvatar: 'quiz_profile_avatar'
+    profileAvatar: 'quiz_profile_avatar',
+    sessionSummary: 'quiz_last_session_summary'
   };
 
   const pending = {};
@@ -113,6 +114,10 @@
     console.log('[sync marker] ' + message, details || {});
   }
 
+  function debugKeepDeviceSync(message, details) {
+    console.log('[keep device sync] ' + message, details || {});
+  }
+
   function runRequest(scope, request, onSuccess) {
     try {
       if (!request || typeof request.then !== 'function') return;
@@ -171,6 +176,39 @@
 
     if (objectHasKeys(readJSON(KEYS.dailyChallenge, {}))) return true;
 
+    const dcHistory = readJSON(KEYS.dcHistory, []);
+    return Array.isArray(dcHistory) && dcHistory.length;
+  }
+
+  function hasMeaningfulLocalProgressData() {
+    const history = readJSON(KEYS.history, []);
+    if (Array.isArray(history) && history.length) return true;
+
+    const xp = readJSON(KEYS.xp, {});
+    if (xp && ((xp.totalXP || 0) > 0 || (xp.currentLevel || 1) > 1)) return true;
+
+    const pb = readJSON(KEYS.pb, {});
+    if (pb && ((pb.bestPct || 0) > 0 || (pb.bestStreak || 0) > 0)) return true;
+
+    const dayStreak = readJSON(KEYS.dayStreak, {});
+    if (dayStreak && ((dayStreak.streak || 0) > 0 || (dayStreak.bestStreak || 0) > 0 || dayStreak.lastDate)) return true;
+
+    if (readString(KEYS.dailyGoal, null) !== null) return true;
+    if (readString(KEYS.practiceMode, null) !== null) return true;
+    if (readString(KEYS.baseTheme, null) !== null) return true;
+    if (readString(KEYS.theme, null) !== null) return true;
+    if (readString(KEYS.customColorsOn, null) !== null) return true;
+    if (readString(KEYS.customColors, null) !== null) return true;
+
+    const milestones = readJSON(KEYS.milestones, []);
+    if (Array.isArray(milestones) && milestones.length) return true;
+
+    if (objectHasKeys(readJSON(KEYS.weakness, {}))) return true;
+
+    const srQueue = readJSON(KEYS.srQueue, []);
+    if (Array.isArray(srQueue) && srQueue.length) return true;
+
+    if (objectHasKeys(readJSON(KEYS.dailyChallenge, {}))) return true;
     const dcHistory = readJSON(KEYS.dcHistory, []);
     return Array.isArray(dcHistory) && dcHistory.length;
   }
@@ -600,11 +638,16 @@
     return uploadFullLocalStateAndMarkSynced(ctx);
   }
 
-  async function uploadLocalAppStateToSupabase(ctx) {
-    return uploadFullLocalStateAndMarkSynced(ctx);
+  async function uploadLocalAppStateToSupabase(ctx, options) {
+    return uploadFullLocalStateAndMarkSynced(ctx, options);
   }
 
   async function uploadFullLocalStateToSupabase(ctx) {
+    const result = {
+      avatarUploadFailed: false,
+      avatarError: null
+    };
+
     const profileRow = mapProfileRow(ctx.user.id);
     if (profileRow) {
       await awaitRequest('user_profile full sync', ctx.client.from('user_profile').upsert(profileRow, { onConflict: 'user_id' }));
@@ -612,7 +655,14 @@
 
     const avatar = readString(KEYS.profileAvatar, null);
     if (avatar && avatar.startsWith('data:')) {
-      await uploadProfileAvatar(ctx, avatar, null);
+      try {
+        await uploadProfileAvatar(ctx, avatar, null);
+      } catch(error) {
+        result.avatarUploadFailed = true;
+        result.avatarError = error;
+        warnSync('profile avatar full sync (continuing without blocking progress)', error);
+        console.warn('[sync safety] avatar upload failure but non-avatar sync continuing:', error && error.message ? error.message : error);
+      }
     }
 
     const progressRow = mapProgressRow(ctx.user.id);
@@ -650,9 +700,62 @@
     if (dailyRows.length) {
       await awaitRequest('daily_challenges full sync', ctx.client.from('daily_challenges').upsert(dailyRows, { onConflict: 'user_id,challenge_date' }));
     }
+
+    return result;
   }
 
-  async function uploadFullLocalStateAndMarkSynced(ctx) {
+  function signaturePartsWithoutAvatar(parts) {
+    const copy = { ...(parts || {}) };
+    delete copy.avatar;
+    return copy;
+  }
+
+  function signaturesMatchExceptAvatar(rows) {
+    return JSON.stringify(signaturePartsWithoutAvatar(cloudSignatureParts(rows))) ===
+      JSON.stringify(signaturePartsWithoutAvatar(localSignatureParts()));
+  }
+
+  async function verifyLocalNonAvatarCloudMatch(ctx) {
+    cloudReadFailed = false;
+    const rows = await fetchCloudAppState(ctx);
+    if (cloudReadFailed) return { ok: false, rows };
+    return {
+      ok: signaturesMatchExceptAvatar(rows),
+      rows
+    };
+  }
+
+  function listContainsAllValues(container, required) {
+    const set = new Set((Array.isArray(container) ? container : []).map(value => JSON.stringify(value)));
+    return (Array.isArray(required) ? required : []).every(value => set.has(JSON.stringify(value)));
+  }
+
+  function cloudContainsLocalNonAvatarData(rows) {
+    const local = localSignatureParts();
+    const cloud = cloudSignatureParts(rows);
+
+    if (local.profile.length && JSON.stringify(local.profile) !== JSON.stringify(cloud.profile)) return false;
+    if (local.progress.length && JSON.stringify(local.progress) !== JSON.stringify(cloud.progress)) return false;
+    if (local.settings.length && JSON.stringify(local.settings) !== JSON.stringify(cloud.settings)) return false;
+    if (!listContainsAllValues(cloud.sessions, local.sessions)) return false;
+    if (!listContainsAllValues(cloud.milestones, local.milestones)) return false;
+    if (readString(KEYS.weakness, null) !== null && local.weakness !== cloud.weakness) return false;
+    if (readString(KEYS.srQueue, null) !== null && local.sr !== cloud.sr) return false;
+    if (!listContainsAllValues(cloud.daily, local.daily)) return false;
+    return true;
+  }
+
+  async function verifyCloudContainsLocalNonAvatarData(ctx) {
+    cloudReadFailed = false;
+    const rows = await fetchCloudAppState(ctx);
+    if (cloudReadFailed) return { ok: false, rows };
+    return {
+      ok: cloudContainsLocalNonAvatarData(rows),
+      rows
+    };
+  }
+
+  async function uploadFullLocalStateAndMarkSynced(ctx, options) {
     if (!ctx || !ctx.user || !ctx.user.id) return false;
     if (fullSyncInFlight) {
       fullSyncQueued = true;
@@ -661,16 +764,33 @@
 
     fullSyncInFlight = (async () => {
       let verified = false;
+      let latestUploadResult = null;
       do {
         fullSyncQueued = false;
-        await uploadFullLocalStateToSupabase(ctx);
+        latestUploadResult = await uploadFullLocalStateToSupabase(ctx);
         verified = await markLocalSyncedAfterVerifiedCloudMatch(ctx);
       } while (fullSyncQueued);
 
       if (!verified) {
+        if (options && options.allowAvatarOnlyMismatch && latestUploadResult && latestUploadResult.avatarUploadFailed) {
+          const nonAvatarVerification = await verifyLocalNonAvatarCloudMatch(ctx);
+          if (nonAvatarVerification.ok) {
+            console.warn('[sync safety] non-avatar cloud data matches local data, but full sync marker was not written because avatar still differs.');
+            return {
+              verified: false,
+              nonAvatarVerified: true,
+              avatarUploadFailed: true,
+              rows: nonAvatarVerification.rows
+            };
+          }
+        }
         throw new Error('Cloud verification did not match local app state after sync.');
       }
-      return true;
+      return {
+        verified: true,
+        nonAvatarVerified: true,
+        avatarUploadFailed: !!(latestUploadResult && latestUploadResult.avatarUploadFailed)
+      };
     })().finally(() => {
       fullSyncInFlight = null;
     });
@@ -1161,6 +1281,42 @@
     return Array.isArray(dailyRows) && dailyRows.length;
   }
 
+  function hasCloudMeaningfulNonProfileData(rows) {
+    const [
+      ,
+      progressRow,
+      settingsRow,
+      sessionRows,
+      milestoneRows,
+      weaknessRow,
+      srRow,
+      dailyRows
+    ] = rows || [];
+
+    if (progressRow && (
+      (progressRow.total_xp || 0) > 0
+      || (progressRow.current_level || 1) > 1
+      || (progressRow.best_pct || 0) > 0
+      || (progressRow.best_session_streak || 0) > 0
+      || (progressRow.day_streak || 0) > 0
+      || (progressRow.best_day_streak || 0) > 0
+      || !!progressRow.last_streak_date
+      || (progressRow.daily_goal !== undefined && progressRow.daily_goal !== null && progressRow.daily_goal !== 20)
+      || progressRow.practice_mode === true
+    )) return true;
+    if (settingsRow && (
+      (settingsRow.base_theme && settingsRow.base_theme !== 'dark')
+      || (settingsRow.theme && settingsRow.theme !== 'default')
+      || settingsRow.custom_colors_enabled === true
+      || (settingsRow.custom_colors !== undefined && settingsRow.custom_colors !== null)
+    )) return true;
+    if (Array.isArray(sessionRows) && sessionRows.length) return true;
+    if (Array.isArray(milestoneRows) && milestoneRows.length) return true;
+    if (weaknessRow && objectHasKeys(weaknessRow.weakness_data)) return true;
+    if (srRow && Array.isArray(srRow.queue) && srRow.queue.length) return true;
+    return Array.isArray(dailyRows) && dailyRows.length;
+  }
+
   function cloudResetVerificationErrors(rows, preserveProfile) {
     const [
       profileRow,
@@ -1331,19 +1487,141 @@
     });
   }
 
+  function restorableLocalKeys() {
+    return [
+      KEYS.profile,
+      KEYS.profileAvatar,
+      KEYS.history,
+      KEYS.xp,
+      KEYS.pb,
+      KEYS.dayStreak,
+      KEYS.dailyGoal,
+      KEYS.practiceMode,
+      KEYS.customColors,
+      KEYS.customColorsOn,
+      KEYS.baseTheme,
+      KEYS.theme,
+      KEYS.milestones,
+      KEYS.weakness,
+      KEYS.srQueue,
+      KEYS.dailyChallenge,
+      KEYS.dcHistory,
+      KEYS.sessionSummary
+    ];
+  }
+
+  function createLocalRestoreBackup(reason) {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const key = 'quiz_restore_backup_' + timestamp;
+    const values = {};
+    restorableLocalKeys().forEach(itemKey => {
+      try {
+        const value = localStorage.getItem(itemKey);
+        if (value !== null) values[itemKey] = value;
+      } catch(e) {}
+    });
+    try {
+      localStorage.setItem(key, JSON.stringify({
+        reason: reason || 'cloud_restore',
+        createdAt: new Date().toISOString(),
+        values
+      }));
+      const backupKeys = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const existingKey = localStorage.key(i);
+        if (existingKey && existingKey.startsWith('quiz_restore_backup_')) backupKeys.push(existingKey);
+      }
+      backupKeys.sort().slice(0, Math.max(0, backupKeys.length - 3)).forEach(oldKey => {
+        try { localStorage.removeItem(oldKey); } catch(e) {}
+      });
+      console.log('[sync restore] local backup created before restore', { key, savedKeys: Object.keys(values).length });
+      return { key, values };
+    } catch(error) {
+      warnSync('local restore backup', error);
+      return null;
+    }
+  }
+
+  function restoreLocalBackupSnapshot(backup) {
+    if (!backup || !backup.values) return;
+    restorableLocalKeys().forEach(itemKey => {
+      try { localStorage.removeItem(itemKey); } catch(e) {}
+    });
+    Object.keys(backup.values).forEach(itemKey => {
+      try { localStorage.setItem(itemKey, backup.values[itemKey]); } catch(e) {}
+    });
+  }
+
+  function clearStaleSessionSummaryIfNoHistory() {
+    const history = readJSON(KEYS.history, []);
+    if (Array.isArray(history) && history.length) return;
+    try {
+      if (localStorage.getItem(KEYS.sessionSummary) !== null) {
+        localStorage.removeItem(KEYS.sessionSummary);
+        console.log('[sync restore] stale session summary cleared because restored history is empty');
+      }
+    } catch(e) {}
+  }
+
   async function restoreCloudAppStateToLocal(ctx, cloudRows) {
     if (!ctx) return;
+    let backup = null;
     try {
       const rows = cloudRows || await fetchCloudAppState(ctx);
+      if (!hasCloudMeaningfulNonProfileData(rows) && hasMeaningfulLocalProgressData()) {
+        console.warn('[sync safety] Use account progress blocked because cloud is empty/profile-only while this device has local progress.');
+        if (typeof alert === 'function') {
+          alert('Account progress looks empty, so this device progress was kept. Your local sessions were not replaced.');
+        }
+        return false;
+      }
+      backup = createLocalRestoreBackup('cloud_restore');
+      if (!backup) throw new Error('Could not create local backup before cloud restore.');
       clearRestorableLocalAppState();
       restoreFetchedCloudAppStateToLocal(rows);
-      markConflictResolved(ctx, 'account', pendingConflictSignature || conflictParts(rows));
+      clearStaleSessionSummaryIfNoHistory();
 
       const verified = await markLocalSyncedAfterVerifiedCloudMatch(ctx, rows);
-      if (!verified) warnSync('cloud restore verification', new Error('Restored cloud state did not match local signature.'));
+      if (!verified) {
+        warnSync('cloud restore verification', new Error('Restored cloud state did not match local signature.'));
+      } else {
+        markConflictResolved(ctx, 'account', pendingConflictSignature || conflictParts(rows));
+      }
       refreshAfterCloudRestore();
+      return verified;
     } catch(error) {
+      restoreLocalBackupSnapshot(backup);
       warnSync('cloud restore', error);
+      return false;
+    }
+  }
+
+  async function restoreCloudBackupSnapshotToSupabase(ctx, rows) {
+    if (!ctx || !rows) return;
+    const [
+      profileRow,
+      progressRow,
+      settingsRow,
+      sessionRows,
+      milestoneRows,
+      weaknessRow,
+      srRow,
+      dailyRows
+    ] = rows;
+
+    if (profileRow) await awaitRequest('rollback user_profile', ctx.client.from('user_profile').upsert(profileRow, { onConflict: 'user_id' }));
+    if (progressRow) await awaitRequest('rollback user_progress', ctx.client.from('user_progress').upsert(progressRow, { onConflict: 'user_id' }));
+    if (settingsRow) await awaitRequest('rollback user_settings', ctx.client.from('user_settings').upsert(settingsRow, { onConflict: 'user_id' }));
+    if (Array.isArray(sessionRows) && sessionRows.length) {
+      await awaitRequest('rollback sessions', ctx.client.from('sessions').insert(sessionRows));
+    }
+    if (Array.isArray(milestoneRows) && milestoneRows.length) {
+      await awaitRequest('rollback achievements_or_milestones', ctx.client.from('achievements_or_milestones').upsert(milestoneRows, { onConflict: 'user_id,milestone_id' }));
+    }
+    if (weaknessRow) await awaitRequest('rollback weakness_stats', ctx.client.from('weakness_stats').upsert(weaknessRow, { onConflict: 'user_id' }));
+    if (srRow) await awaitRequest('rollback spaced_repetition_queue', ctx.client.from('spaced_repetition_queue').upsert(srRow, { onConflict: 'user_id' }));
+    if (Array.isArray(dailyRows) && dailyRows.length) {
+      await awaitRequest('rollback daily_challenges', ctx.client.from('daily_challenges').upsert(dailyRows, { onConflict: 'user_id,challenge_date' }));
     }
   }
 
@@ -1420,9 +1698,11 @@
     const ctx = getClientAndUser();
     closeProgressConflictModal();
     if (!ctx) return;
-    await restoreCloudAppStateToLocal(ctx, pendingConflictRows);
-    pendingConflictRows = null;
-    pendingConflictSignature = null;
+    const restored = await restoreCloudAppStateToLocal(ctx, pendingConflictRows);
+    if (restored) {
+      pendingConflictRows = null;
+      pendingConflictSignature = null;
+    }
   }
 
   function requestKeepDeviceProgress() {
@@ -1433,12 +1713,77 @@
     const ctx = getClientAndUser();
     closeReplaceAccountModal();
     if (!ctx) return;
+    let cloudBackupRows = null;
     try {
-      await resetSupabaseAppData({ preserveProfile: null, requireSuccess: true });
-      await uploadLocalAppStateToSupabase(ctx);
-      markConflictResolved(ctx, 'device', pendingConflictSignature || conflictParts(pendingConflictRows));
-      pendingConflictRows = null;
-      pendingConflictSignature = null;
+      debugKeepDeviceSync('safety flow start', { userId: ctx.user.id });
+      cloudReadFailed = false;
+      cloudBackupRows = await fetchCloudAppState(ctx);
+      if (cloudReadFailed) throw new Error('Could not create cloud backup before replacing account progress.');
+      debugKeepDeviceSync('cloud backup/fetch result', {
+        hasCloudProgress: hasCloudProgressData(cloudBackupRows),
+        hasCloudNonProfileProgress: hasCloudMeaningfulNonProfileData(cloudBackupRows)
+      });
+
+      debugKeepDeviceSync('local upload preflight start');
+      const preflightUpload = await uploadFullLocalStateToSupabase(ctx);
+      const preflightVerification = await verifyCloudContainsLocalNonAvatarData(ctx);
+      if (!preflightVerification.ok) {
+        throw new Error('Could not verify local progress in cloud before replacing account progress.');
+      }
+      debugKeepDeviceSync('local upload preflight success', {
+        containsLocalNonAvatarData: true,
+        avatarUploadFailed: !!(preflightUpload && preflightUpload.avatarUploadFailed)
+      });
+
+      debugKeepDeviceSync('cloud reset start');
+      try {
+        await resetSupabaseAppData({ preserveProfile: null, requireSuccess: true });
+      } catch(resetError) {
+        debugKeepDeviceSync('cloud reset failure; attempting rollback', { error: resetError && resetError.message ? resetError.message : resetError });
+        try {
+          await restoreCloudBackupSnapshotToSupabase(ctx, cloudBackupRows);
+          debugKeepDeviceSync('cloud rollback from backup success');
+        } catch(rollbackError) {
+          warnSync('replace account progress rollback', rollbackError);
+        }
+        throw resetError;
+      }
+      debugKeepDeviceSync('cloud reset success');
+
+      debugKeepDeviceSync('local upload after reset start');
+      let finalResult = null;
+      try {
+        finalResult = await uploadLocalAppStateToSupabase(ctx, { allowAvatarOnlyMismatch: true });
+      } catch(uploadError) {
+        debugKeepDeviceSync('local upload failure after reset; attempting rollback', { error: uploadError && uploadError.message ? uploadError.message : uploadError });
+        try {
+          await restoreCloudBackupSnapshotToSupabase(ctx, cloudBackupRows);
+          debugKeepDeviceSync('cloud rollback from backup success');
+        } catch(rollbackError) {
+          warnSync('replace account progress rollback', rollbackError);
+        }
+        throw uploadError;
+      }
+
+      debugKeepDeviceSync('local upload after reset success', {
+        verified: !!(finalResult && finalResult.verified),
+        nonAvatarVerified: !!(finalResult && finalResult.nonAvatarVerified),
+        avatarUploadFailed: !!(finalResult && finalResult.avatarUploadFailed)
+      });
+
+      if (finalResult && finalResult.verified) {
+        markConflictResolved(ctx, 'device', pendingConflictSignature || conflictParts(pendingConflictRows));
+        pendingConflictRows = null;
+        pendingConflictSignature = null;
+        return;
+      }
+
+      if (finalResult && finalResult.nonAvatarVerified && finalResult.avatarUploadFailed) {
+        console.warn('[sync safety] Keep device progress uploaded sessions/progress, but conflict was not marked resolved because avatar still differs.');
+        return;
+      }
+
+      throw new Error('Could not verify cloud after replacing account progress.');
     } catch(error) {
       warnSync('replace account progress', error);
     }
