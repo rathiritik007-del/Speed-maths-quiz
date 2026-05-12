@@ -389,7 +389,6 @@
       padding-bottom: clamp(96px, 22vw, 120px);
     }
     body:not([data-active-screen])[data-boot-screen="welcome"] #s-welcome,
-    body:not([data-active-screen])[data-boot-screen="dashboard"] #s-dashboard,
     .screen.active { display: flex; }
     body:not([data-active-screen]) .screen { pointer-events: none; }
 
