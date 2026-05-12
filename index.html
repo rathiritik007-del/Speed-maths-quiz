@@ -39,7 +39,27 @@
     })();
   </script>
   <title>Mental Math Trainer</title>
-  <meta name="theme-color" content="#3d0a57">
+  <script>
+    (function () {
+      try {
+        var baseTheme = localStorage.getItem("quiz_base_theme");
+        if (baseTheme !== "light" && baseTheme !== "dark" && baseTheme !== "vibrant") {
+          baseTheme = "dark";
+        }
+        var theme = localStorage.getItem("quiz_theme") || "default";
+        document.documentElement.dataset.baseTheme = baseTheme;
+        if (theme === "minimal") {
+          document.documentElement.dataset.theme = "minimal";
+        } else {
+          document.documentElement.removeAttribute("data-theme");
+        }
+      } catch (error) {
+        document.documentElement.dataset.baseTheme = "dark";
+        document.documentElement.removeAttribute("data-theme");
+      }
+    })();
+  </script>
+  <meta name="theme-color" content="#101114">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Mental Math Trainer">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">

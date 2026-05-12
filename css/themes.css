@@ -1,19 +1,19 @@
 :root {
       /* ── Accent family ── */
       --acc:     #B8D45C;   /* primary accent */
-      --acc-hi:  #C5D86D;   /* accent highlight / slider knob */
-      --acc-lo:  #7BA832;   /* accent dark / gradient start */
-      --acc-vlo: #5a7d25;   /* accent very dark */
+      --acc-hi:  #c4d980;   /* accent highlight / slider knob */
+      --acc-lo:  #9bbd2c;   /* accent dark / gradient start */
+      --acc-vlo: #789224;   /* accent very dark */
 
       /* ── Base shade family: p0 darkest → p7 muted ── */
-      --p0: #0d0015;   /* page body bg */
-      --p1: #23022e;   /* deep bg / toggle unchecked */
-      --p2: #2d0a3d;   /* dark surface / cards */
-      --p3: #3d0a57;   /* medium-dark surface / inputs */
-      --p4: #573280;   /* medium surface / toggle checked */
-      --p5: #6b3d9a;   /* button gradients / lighter */
-      --p6: #7b44a8;   /* focus rings */
-      --p7: #ada8b6;   /* muted / wrong color */
+      --p0: #101114;   /* page body bg */
+      --p1: #17191d;   /* deep bg / toggle unchecked */
+      --p2: #202329;   /* dark surface / cards */
+      --p3: #2a2e34;   /* medium-dark surface / inputs */
+      --p4: #343941;   /* medium surface / toggle checked */
+      --p5: #424851;   /* button gradients / lighter */
+      --p6: #565d66;   /* focus rings */
+      --p7: #a8adb4;   /* muted / wrong color */
 
       /* ── Semantic aliases (auto-cascade when p0–p7 are overridden) ── */
       --bg:     var(--p0);
@@ -23,19 +23,19 @@
       --inp:    var(--p2);
       --hov:    var(--p5);
       --bar-bg: var(--p2);
-      --ok-bg:  #141f06;
-      --ok-fb:  #0a1a03;
-      --ok-bd:  #0d1a03;
-      --no-bd:  var(--p3);
-      --btn-txt: #0d0015;
+      --ok-bg:  #12281a;
+      --ok-fb:  #0d2114;
+      --ok-bd:  #2f7d46;
+      --no-bd:  #e06161;
+      --btn-txt: #101114;
 
       /* Neutral theme architecture tokens */
-      --acc-2: #8fb7ff;
-      --acc-2-hi: #b5ccff;
-      --acc-2-lo: #5f83c8;
-      --text-primary: #f4f2ea;
-      --text-secondary: #b8b4aa;
-      --text-muted: #858078;
+      --acc-2: #d4c05c;
+      --acc-2-hi: #d9ca80;
+      --acc-2-lo: #bda52c;
+      --text-primary: #f3f1eb;
+      --text-secondary: #b7b3aa;
+      --text-muted: #86827a;
       --border: rgba(255,255,255,0.10);
       --border-strong: rgba(255,255,255,0.18);
       --surface-glass: color-mix(in srgb, var(--surf), transparent 8%);
@@ -43,9 +43,9 @@
       --surface-soft: var(--p2);
       --app-gradient: linear-gradient(160deg, color-mix(in srgb, var(--p4), transparent 90%) 0%, color-mix(in srgb, var(--p0), transparent 55%) 100%);
       --header-gradient: linear-gradient(145deg, color-mix(in srgb, var(--p5), transparent 72%) 0%, color-mix(in srgb, var(--p2), transparent 22%) 100%);
-      --shadow-app: 0 26px 70px rgba(0,0,0,0.55), inset 0 1px 0 var(--border);
-      --shadow-card: 0 12px 28px rgba(0,0,0,0.24), inset 0 1px 0 var(--border);
-      --focus-ring: 0 0 0 3px color-mix(in srgb, var(--acc), transparent 78%);
+      --shadow-app: 0 26px 70px rgba(0,0,0,0.50), inset 0 1px 0 rgba(255,255,255,0.06);
+      --shadow-card: 0 12px 28px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.05);
+      --focus-ring: 0 0 0 3px color-mix(in srgb, var(--acc), transparent 76%);
       --ok: #46b86a;
       --ok-text: #eaffef;
       --err: #e06161;
