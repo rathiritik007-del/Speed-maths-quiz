@@ -592,6 +592,7 @@
       text-align: center;
       outline: none;
       font-family: 'Inter', sans-serif;
+      appearance: textfield;
       -moz-appearance: textfield;
     }
     .num-inp::-webkit-inner-spin-button,
@@ -989,6 +990,7 @@
       outline: none;
       transition: border-color 0.2s, box-shadow 0.2s;
       font-family: 'Inter', sans-serif;
+      appearance: textfield;
       -moz-appearance: textfield;
       min-width: 0;
     }
