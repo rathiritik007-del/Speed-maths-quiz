@@ -3358,6 +3358,8 @@ select:focus {
       border-radius: 16px; padding: 11px 14px;
       flex-direction: row; flex-wrap: wrap; gap: 7px 12px; align-items: center;
       animation: fbIn 0.35s cubic-bezier(0.22,1,0.36,1) both;
+      touch-action: pan-y;
+      will-change: transform, opacity;
     }
     .session-summary-card.show { display: flex; }
     .session-summary-card.dismiss-right {

@@ -918,10 +918,86 @@ function dismissSessionSummary() {
   }, 280);
 }
 
+function initSessionSummarySwipe(card) {
+  if (!card || card._swipeDismissEnabled) return;
+  card._swipeDismissEnabled = true;
+
+  let startX = 0;
+  let startY = 0;
+  let currentX = 0;
+  let dragging = false;
+  const SWIPE_THRESHOLD = 70;
+  const DRAG_THRESHOLD = 8;
+  const INTERACTIVE_SELECTOR = 'button, a, input, label, select, textarea';
+
+  function resetDragStyles(animated) {
+    if (animated) {
+      card.style.transition = 'transform 0.18s ease, opacity 0.18s ease';
+      card.style.transform = '';
+      card.style.opacity = '';
+      window.setTimeout(() => {
+        card.style.transition = '';
+      }, 190);
+      return;
+    }
+    card.style.transition = '';
+    card.style.transform = '';
+    card.style.opacity = '';
+  }
+
+  card.addEventListener('pointerdown', event => {
+    if (!card.classList.contains('show')) return;
+    if (event.target && event.target.closest(INTERACTIVE_SELECTOR)) return;
+    startX = event.clientX;
+    startY = event.clientY;
+    currentX = 0;
+    dragging = true;
+    card.setPointerCapture?.(event.pointerId);
+  }, { passive: true });
+
+  card.addEventListener('pointermove', event => {
+    if (!dragging) return;
+    const dx = event.clientX - startX;
+    const dy = event.clientY - startY;
+
+    if (!currentX && Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > DRAG_THRESHOLD) {
+      dragging = false;
+      currentX = 0;
+      resetDragStyles(false);
+      card.releasePointerCapture?.(event.pointerId);
+      return;
+    }
+
+    currentX = dx;
+    const resistance = Math.abs(dx) > SWIPE_THRESHOLD ? 0.45 : 1;
+    const capped = Math.sign(dx) * (Math.min(Math.abs(dx), SWIPE_THRESHOLD) + Math.max(0, Math.abs(dx) - SWIPE_THRESHOLD) * resistance);
+    card.style.transition = 'none';
+    card.style.transform = `translateX(${capped}px)`;
+    card.style.opacity = String(Math.max(0.45, 1 - Math.abs(capped) / 180));
+  }, { passive: true });
+
+  function endSwipe(event) {
+    if (!dragging) return;
+    dragging = false;
+    card.releasePointerCapture?.(event.pointerId);
+    if (Math.abs(currentX) >= SWIPE_THRESHOLD) {
+      resetDragStyles(false);
+      dismissSessionSummary();
+      return;
+    }
+    currentX = 0;
+    resetDragStyles(true);
+  }
+
+  card.addEventListener('pointerup', endSwipe, { passive: true });
+  card.addEventListener('pointercancel', endSwipe, { passive: true });
+}
+
 function renderSessionSummaryCard() {
   const s = getSessionSummary();
   const card = document.getElementById('sessionSummaryCard');
   if (!s || !card) { card && card.classList.remove('show'); return; }
+  initSessionSummarySwipe(card);
   // Only show if from last 4 hours
   if (Date.now() - s.ts > 4 * 3600 * 1000) { card.classList.remove('show'); return; }
 
