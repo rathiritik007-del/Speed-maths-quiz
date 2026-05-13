@@ -1,4 +1,4 @@
-const CACHE_NAME = "mental-math-trainer-shell-v1.2.9";
+const CACHE_NAME = "mental-math-trainer-shell-v1.3.0";
 
 const STATIC_SHELL = [
   "/",
