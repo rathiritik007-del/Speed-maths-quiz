@@ -412,9 +412,15 @@
     };
   }
 
+  function appSessionId(session) {
+    if (!session) return null;
+    return session.session_id || session.id || null;
+  }
+
   function mapSessionRow(userId, session) {
     return {
       user_id: userId,
+      session_id: appSessionId(session),
       total_questions: session.total,
       correct_answers: session.score,
       accuracy: session.pct,
@@ -437,6 +443,7 @@
   }
 
   function rowSessionKey(row) {
+    if (row && row.session_id) return String(row.session_id);
     if (row && row.raw_data) return sessionKey(row.raw_data);
     const legacyParts = [
       row && row.created_at,
@@ -501,29 +508,50 @@
     if (!Array.isArray(history) || !history.length) return;
     const existingRows = await requestData(
       'migration sessions',
-      ctx.client.from('sessions').select('raw_data,created_at,correct_answers,total_questions,accuracy').eq('user_id', ctx.user.id),
+      ctx.client.from('sessions').select('session_id,raw_data,created_at,correct_answers,total_questions,accuracy').eq('user_id', ctx.user.id),
       []
     );
     const existingKeys = new Set((Array.isArray(existingRows) ? existingRows : [])
       .map(rowSessionKey)
       .filter(Boolean));
-    const rows = dedupeSessionsByKey(history)
-      .filter(session => session && !existingKeys.has(sessionKey(session)))
+    const deduped = dedupeSessionsByKey(history);
+    const rowsWithSessionId = deduped
+      .filter(session => session && appSessionId(session))
       .map(session => mapSessionRow(ctx.user.id, session));
-    if (rows.length) await awaitRequest('migration sessions', ctx.client.from('sessions').insert(rows));
+    const legacyRows = deduped
+      .filter(session => session && !appSessionId(session) && !existingKeys.has(sessionKey(session)))
+      .map(session => mapSessionRow(ctx.user.id, session));
+
+    if (rowsWithSessionId.length) {
+      await awaitRequest('migration sessions upsert', ctx.client.from('sessions').upsert(rowsWithSessionId, { onConflict: 'user_id,session_id' }));
+    }
+    if (legacyRows.length) {
+      await awaitRequest('migration legacy sessions insert', ctx.client.from('sessions').insert(legacyRows));
+    }
   }
 
   async function uploadSingleSessionIfMissing(ctx, session) {
     if (!ctx || !session) return false;
     const key = sessionKey(session);
+    const sessionId = appSessionId(session);
     debugSessionSync('upload requested', {
-      session_id: session.session_id || null,
+      session_id: sessionId,
       canonicalKey: key
     });
     if (!key) return false;
+    if (sessionId) {
+      try {
+        await awaitRequest('single session upsert', ctx.client.from('sessions').upsert(mapSessionRow(ctx.user.id, session), { onConflict: 'user_id,session_id' }));
+        debugSessionSync('upload upserted', { canonicalKey: key, session_id: sessionId });
+        return true;
+      } catch(error) {
+        debugSessionSync('upload failed', { canonicalKey: key, session_id: sessionId, error });
+        throw error;
+      }
+    }
     const existingRows = await requestData(
       'session upload lookup',
-      ctx.client.from('sessions').select('raw_data,created_at,correct_answers,total_questions,accuracy').eq('user_id', ctx.user.id),
+      ctx.client.from('sessions').select('session_id,raw_data,created_at,correct_answers,total_questions,accuracy').eq('user_id', ctx.user.id),
       []
     );
     const existingKeys = new Set((Array.isArray(existingRows) ? existingRows : []).map(rowSessionKey).filter(Boolean));
@@ -708,6 +736,14 @@
     const copy = { ...(parts || {}) };
     delete copy.avatar;
     return copy;
+  }
+
+  function signatureWithoutAvatar(signature) {
+    try {
+      return JSON.stringify(signaturePartsWithoutAvatar(JSON.parse(signature || '{}')));
+    } catch(e) {
+      return null;
+    }
   }
 
   function signaturesMatchExceptAvatar(rows) {
@@ -1154,15 +1190,22 @@
     }
   }
 
-  function markLocalSyncedForUser(ctx, cloudRows) {
+  function markLocalSyncedForUser(ctx, cloudRows, options) {
     if (!ctx || !ctx.user || !ctx.user.id) return;
     const localSig = localSignature();
     const cloudSig = cloudRows ? cloudSignature(cloudRows) : null;
+    const nonAvatarVerified = !!(options && options.nonAvatarVerified);
+    const localNonAvatarSig = nonAvatarVerified ? signatureWithoutAvatar(localSig) : null;
+    const cloudNonAvatarSig = nonAvatarVerified ? signatureWithoutAvatar(cloudSig) : null;
     try {
       localStorage.setItem(localSyncMarkerKey(ctx.user.id), JSON.stringify({
         userId: ctx.user.id,
         local: localSig,
         cloud: cloudSig,
+        localNonAvatar: localNonAvatarSig,
+        cloudNonAvatar: cloudNonAvatarSig,
+        nonAvatarVerified,
+        avatarPending: !!(options && options.avatarPending),
         syncedAt: new Date().toISOString(),
         schemaVersion: SYNC_MARKER_SCHEMA_VERSION
       }));
@@ -1170,6 +1213,8 @@
       debugSyncMarker('written', {
         userId: ctx.user.id,
         hasCloudSignature: !!cloudSig,
+        nonAvatarVerified,
+        avatarPending: !!(options && options.avatarPending),
         schemaVersion: SYNC_MARKER_SCHEMA_VERSION
       });
     } catch(e) {}
@@ -1187,13 +1232,22 @@
       else if (saved.userId !== ctx.user.id) reason = 'user mismatch';
       else if (!saved.cloud) reason = 'missing cloud signature';
       else if (!currentCloud) reason = 'missing current cloud signature';
+      else if (saved.local === currentLocal && saved.cloud === currentCloud) trusted = true;
+      else if (saved.nonAvatarVerified
+        && saved.localNonAvatar
+        && saved.cloudNonAvatar
+        && saved.localNonAvatar === signatureWithoutAvatar(currentLocal)
+        && saved.cloudNonAvatar === signatureWithoutAvatar(currentCloud)) {
+        trusted = true;
+        reason = 'non-avatar trusted';
+      }
       else if (saved.local !== currentLocal) reason = 'local changed';
       else if (saved.cloud !== currentCloud) reason = 'cloud changed';
-      else trusted = true;
       debugSyncMarker('checked', {
         userId: ctx.user.id,
         trusted,
-        reason: trusted ? 'trusted' : reason,
+        reason,
+        mode: saved && saved.nonAvatarVerified ? 'non-avatar' : 'full',
         hasSavedCloudSignature: !!(saved && saved.cloud),
         hasCurrentCloudSignature: !!currentCloud
       });
@@ -1208,13 +1262,18 @@
     }
   }
 
-  function markConflictResolved(ctx, source, parts) {
+  function markConflictResolved(ctx, source, parts, options) {
     if (!ctx || !source || !parts) return;
     try {
+      const nonAvatarVerified = !!(options && options.nonAvatarVerified);
       localStorage.setItem(conflictResolvedKey(ctx.user.id), JSON.stringify({
         source,
         local: parts.local,
         cloud: parts.cloud,
+        localNonAvatar: nonAvatarVerified ? signatureWithoutAvatar(parts.local) : null,
+        cloudNonAvatar: nonAvatarVerified ? signatureWithoutAvatar(parts.cloud) : null,
+        nonAvatarVerified,
+        avatarPending: !!(options && options.avatarPending),
         resolvedAt: new Date().toISOString()
       }));
       sessionStorage.removeItem(conflictDismissedKey(ctx.user.id));
@@ -1227,7 +1286,14 @@
       const saved = JSON.parse(localStorage.getItem(conflictResolvedKey(ctx.user.id)) || 'null');
       if (!saved) return false;
       if (saved.source === 'account') return saved.cloud === parts.cloud && saved.local === parts.local;
-      if (saved.source === 'device') return saved.cloud === parts.cloud && saved.local === parts.local;
+      if (saved.source === 'device') {
+        if (saved.cloud === parts.cloud && saved.local === parts.local) return true;
+        return !!(saved.nonAvatarVerified
+          && saved.localNonAvatar
+          && saved.cloudNonAvatar
+          && saved.localNonAvatar === signatureWithoutAvatar(parts.local)
+          && saved.cloudNonAvatar === signatureWithoutAvatar(parts.cloud));
+      }
       return false;
     } catch(e) {
       return false;
@@ -1779,7 +1845,12 @@
       }
 
       if (finalResult && finalResult.nonAvatarVerified && finalResult.avatarUploadFailed) {
-        console.warn('[sync safety] Keep device progress uploaded sessions/progress, but conflict was not marked resolved because avatar still differs.');
+        const verifiedRows = finalResult.rows || await fetchCloudAppState(ctx);
+        markLocalSyncedForUser(ctx, verifiedRows, { nonAvatarVerified: true, avatarPending: true });
+        markConflictResolved(ctx, 'device', conflictParts(verifiedRows), { nonAvatarVerified: true, avatarPending: true });
+        pendingConflictRows = null;
+        pendingConflictSignature = null;
+        console.warn('[sync safety] Keep device progress uploaded and non-avatar data verified. Progress conflict was marked resolved, but avatar upload/match still needs retry.');
         return;
       }
 
