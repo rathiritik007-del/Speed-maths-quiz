@@ -75,6 +75,10 @@
     return 'quiz_local_sync_marker_' + userId;
   }
 
+  function accountSyncMetaKey(userId) {
+    return 'quiz_account_sync_meta_' + userId;
+  }
+
   function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
@@ -116,6 +120,10 @@
 
   function debugKeepDeviceSync(message, details) {
     console.log('[keep device sync] ' + message, details || {});
+  }
+
+  function debugAccountMeta(message, details) {
+    console.log('[account sync meta] ' + message, details || {});
   }
 
   function runRequest(scope, request, onSuccess) {
@@ -232,6 +240,149 @@
       warnSync(scope, error);
       return fallback;
     }
+  }
+
+  function normalizeAccountSyncMeta(row) {
+    if (!row) return null;
+    return {
+      userId: row.user_id || row.userId || null,
+      resetGeneration: Number(row.reset_generation ?? row.resetGeneration ?? 0) || 0,
+      lastResetAt: row.last_reset_at || row.lastResetAt || null,
+      updatedAt: row.updated_at || row.updatedAt || null,
+      schemaVersion: Number(row.schema_version ?? row.schemaVersion ?? 1) || 1,
+      lastWriterDeviceId: row.last_writer_device_id || row.lastWriterDeviceId || null,
+      lastWriteSource: row.last_write_source || row.lastWriteSource || null
+    };
+  }
+
+  async function fetchAccountSyncMeta(ctx) {
+    if (!ctx || !ctx.user || !ctx.user.id) return null;
+    const row = await requestData(
+      'account_sync_meta fetch',
+      ctx.client.from('account_sync_meta').select('*').eq('user_id', ctx.user.id).maybeSingle(),
+      null
+    );
+    const meta = normalizeAccountSyncMeta(row);
+    debugAccountMeta('fetched', {
+      userId: ctx.user.id,
+      exists: !!meta,
+      resetGeneration: meta ? meta.resetGeneration : null
+    });
+    return meta;
+  }
+
+  async function ensureAccountSyncMeta(ctx) {
+    if (!ctx || !ctx.user || !ctx.user.id) return null;
+    cloudReadFailed = false;
+    const existing = await fetchAccountSyncMeta(ctx);
+    if (cloudReadFailed) return null;
+    if (existing) return existing;
+    const now = new Date().toISOString();
+    const row = {
+      user_id: ctx.user.id,
+      reset_generation: 0,
+      updated_at: now,
+      schema_version: 1,
+      last_write_source: 'meta_init'
+    };
+    const data = await awaitRequest(
+      'account_sync_meta create',
+      ctx.client.from('account_sync_meta').upsert(row, { onConflict: 'user_id' }).select('*').single()
+    );
+    const meta = normalizeAccountSyncMeta(data || row);
+    debugAccountMeta('created generation 0', { userId: ctx.user.id });
+    return meta;
+  }
+
+  function getLocalAccountSyncMeta(userId) {
+    if (!userId) return null;
+    return normalizeAccountSyncMeta(readJSON(accountSyncMetaKey(userId), null));
+  }
+
+  function setLocalAccountSyncMeta(userId, meta) {
+    if (!userId || !meta) return;
+    const normalized = normalizeAccountSyncMeta(meta);
+    if (!normalized) return;
+    writeJSON(accountSyncMetaKey(userId), {
+      resetGeneration: normalized.resetGeneration,
+      lastSeenResetAt: normalized.lastResetAt,
+      cloudMetaUpdatedAt: normalized.updatedAt,
+      syncedAt: new Date().toISOString(),
+      schemaVersion: normalized.schemaVersion || 1
+    });
+    debugAccountMeta('local marker written', {
+      userId,
+      resetGeneration: normalized.resetGeneration
+    });
+  }
+
+  function isLocalGenerationStale(userId, cloudMeta) {
+    if (!userId || !cloudMeta) return false;
+    const localMeta = getLocalAccountSyncMeta(userId);
+    const localGeneration = localMeta ? localMeta.resetGeneration : 0;
+    const cloudGeneration = Number(cloudMeta.resetGeneration || 0);
+    const stale = cloudGeneration > localGeneration;
+    debugAccountMeta('generation checked', {
+      userId,
+      localGeneration,
+      cloudGeneration,
+      stale
+    });
+    return stale;
+  }
+
+  async function updateAccountSyncMeta(ctx, values) {
+    if (!ctx || !ctx.user || !ctx.user.id) return null;
+    const now = new Date().toISOString();
+    const row = {
+      user_id: ctx.user.id,
+      updated_at: now,
+      schema_version: 1,
+      ...values
+    };
+    const data = await awaitRequest(
+      'account_sync_meta update',
+      ctx.client.from('account_sync_meta').upsert(row, { onConflict: 'user_id' }).select('*').single()
+    );
+    const meta = normalizeAccountSyncMeta(data || row);
+    setLocalAccountSyncMeta(ctx.user.id, meta);
+    return meta;
+  }
+
+  async function incrementAccountResetGeneration(ctx, source) {
+    if (!ctx || !ctx.user || !ctx.user.id) return null;
+    const current = await ensureAccountSyncMeta(ctx);
+    if (!current) return null;
+    const nextGeneration = (Number(current.resetGeneration) || 0) + 1;
+    const now = new Date().toISOString();
+    const meta = await updateAccountSyncMeta(ctx, {
+      reset_generation: nextGeneration,
+      last_reset_at: now,
+      last_write_source: source || 'reset'
+    });
+    debugAccountMeta('reset generation incremented', {
+      userId: ctx.user.id,
+      resetGeneration: nextGeneration,
+      source: source || 'reset'
+    });
+    return meta;
+  }
+
+  async function ensureGenerationAllowsUpload(ctx) {
+    if (!ctx || !ctx.user || !ctx.user.id) return false;
+    const cloudMeta = await ensureAccountSyncMeta(ctx);
+    if (!cloudMeta || cloudReadFailed) return false;
+    if (!isLocalGenerationStale(ctx.user.id, cloudMeta)) return true;
+    cloudReadFailed = false;
+    const cloudRows = await fetchCloudAppState(ctx);
+    if (!cloudReadFailed) {
+      await restoreCloudGenerationToLocal(ctx, cloudRows, cloudMeta);
+    }
+    console.warn('[account sync meta] local upload blocked because this device has stale pre-reset data', {
+      userId: ctx.user.id,
+      resetGeneration: cloudMeta.resetGeneration
+    });
+    return false;
   }
 
   function mapProfileRow(userId) {
@@ -532,6 +683,7 @@
 
   async function uploadSingleSessionIfMissing(ctx, session) {
     if (!ctx || !session) return false;
+    if (!await ensureGenerationAllowsUpload(ctx)) return false;
     const key = sessionKey(session);
     const sessionId = appSessionId(session);
     debugSessionSync('upload requested', {
@@ -793,6 +945,9 @@
 
   async function uploadFullLocalStateAndMarkSynced(ctx, options) {
     if (!ctx || !ctx.user || !ctx.user.id) return false;
+    if (!await ensureGenerationAllowsUpload(ctx)) {
+      throw new Error('Local upload blocked because account reset generation is newer than this device.');
+    }
     if (fullSyncInFlight) {
       fullSyncQueued = true;
       return fullSyncInFlight;
@@ -1629,6 +1784,52 @@
     } catch(e) {}
   }
 
+  async function restoreCloudGenerationToLocal(ctx, rows, cloudMeta) {
+    if (!ctx) return false;
+    let backup = null;
+    try {
+      backup = createLocalRestoreBackup('stale_generation');
+      if (!backup) throw new Error('Could not create stale local backup before account reset restore.');
+      console.warn('[account sync meta] stale local generation detected; local data quarantined before cloud restore', {
+        userId: ctx.user.id,
+        backupKey: backup.key,
+        resetGeneration: cloudMeta ? cloudMeta.resetGeneration : null
+      });
+      clearRestorableLocalAppState();
+      restoreFetchedCloudAppStateToLocal(rows || []);
+      clearStaleSessionSummaryIfNoHistory();
+      try { localStorage.removeItem(localSyncMarkerKey(ctx.user.id)); } catch(e) {}
+      try { localStorage.removeItem(conflictResolvedKey(ctx.user.id)); } catch(e) {}
+      try { sessionStorage.removeItem(conflictDismissedKey(ctx.user.id)); } catch(e) {}
+      setLocalAccountSyncMeta(ctx.user.id, cloudMeta);
+      const verified = await markLocalSyncedAfterVerifiedCloudMatch(ctx, rows);
+      if (!verified) {
+        warnSync('stale generation cloud restore verification', new Error('Restored cloud state did not match local signature.'));
+      }
+      refreshAfterCloudRestore();
+      return true;
+    } catch(error) {
+      restoreLocalBackupSnapshot(backup);
+      warnSync('stale generation cloud restore', error);
+      return false;
+    }
+  }
+
+  function isLocalDataUnchangedSinceLastSync(ctx) {
+    if (!ctx || !ctx.user || !ctx.user.id) return false;
+    try {
+      const saved = JSON.parse(localStorage.getItem(localSyncMarkerKey(ctx.user.id)) || 'null');
+      if (!saved || saved.userId !== ctx.user.id) return false;
+      const currentLocal = localSignature();
+      if (saved.local === currentLocal) return true;
+      return !!(saved.nonAvatarVerified
+        && saved.localNonAvatar
+        && saved.localNonAvatar === signatureWithoutAvatar(currentLocal));
+    } catch(e) {
+      return false;
+    }
+  }
+
   async function restoreCloudAppStateToLocal(ctx, cloudRows) {
     if (!ctx) return;
     let backup = null;
@@ -1766,6 +1967,8 @@
     if (!ctx) return;
     const restored = await restoreCloudAppStateToLocal(ctx, pendingConflictRows);
     if (restored) {
+      const cloudMeta = await ensureAccountSyncMeta(ctx);
+      if (cloudMeta) setLocalAccountSyncMeta(ctx.user.id, cloudMeta);
       pendingConflictRows = null;
       pendingConflictSignature = null;
     }
@@ -1838,6 +2041,7 @@
       });
 
       if (finalResult && finalResult.verified) {
+        await incrementAccountResetGeneration(ctx, 'keep_device');
         markConflictResolved(ctx, 'device', pendingConflictSignature || conflictParts(pendingConflictRows));
         pendingConflictRows = null;
         pendingConflictSignature = null;
@@ -1846,6 +2050,7 @@
 
       if (finalResult && finalResult.nonAvatarVerified && finalResult.avatarUploadFailed) {
         const verifiedRows = finalResult.rows || await fetchCloudAppState(ctx);
+        await incrementAccountResetGeneration(ctx, 'keep_device');
         markLocalSyncedForUser(ctx, verifiedRows, { nonAvatarVerified: true, avatarPending: true });
         markConflictResolved(ctx, 'device', conflictParts(verifiedRows), { nonAvatarVerified: true, avatarPending: true });
         pendingConflictRows = null;
@@ -1899,31 +2104,47 @@
       let conflictToOpen = null;
       if (showStatus) showProfileSyncStatus();
       try {
+        const cloudMeta = await ensureAccountSyncMeta(ctx);
+        if (!cloudMeta || cloudReadFailed) return;
+
+        cloudReadFailed = false;
+        const cloudRows = await fetchCloudAppState(ctx);
+        if (showStatus) await keepSyncingVisibleSince(startedAt);
+        if (cloudReadFailed) return;
+
+        if (isLocalGenerationStale(ctx.user.id, cloudMeta)) {
+          await restoreCloudGenerationToLocal(ctx, cloudRows, cloudMeta);
+          return;
+        }
+
         if (!hasMeaningfulLocalAppData()) {
-          cloudReadFailed = false;
-          const cloudRows = await fetchCloudAppState(ctx);
-          if (showStatus) await keepSyncingVisibleSince(startedAt);
-          if (cloudReadFailed) return;
           if (hasCloudProgressData(cloudRows)) {
             await restoreCloudAppStateToLocal(ctx, cloudRows);
+            setLocalAccountSyncMeta(ctx.user.id, cloudMeta);
             return;
           }
           if (!hasLocalProfileOnly()) return;
           // Onboarding-only local profiles are uploaded only for brand-new cloud accounts.
         } else {
-          cloudReadFailed = false;
-          const cloudRows = await fetchCloudAppState(ctx);
-          if (showStatus) await keepSyncingVisibleSince(startedAt);
-          if (cloudReadFailed) return;
           if (hasCloudProgressData(cloudRows)) {
             const parts = conflictParts(cloudRows);
             const signature = JSON.stringify(parts);
             if (parts.local === parts.cloud) {
               await markLocalSyncedAfterVerifiedCloudMatch(ctx, cloudRows);
+              setLocalAccountSyncMeta(ctx.user.id, cloudMeta);
               return;
             }
             if (isLocalUnchangedSinceUserSync(ctx, cloudRows)) {
               await syncAllLocalAppStateToSupabase();
+              setLocalAccountSyncMeta(ctx.user.id, cloudMeta);
+              return;
+            }
+            if (isLocalDataUnchangedSinceLastSync(ctx)) {
+              debugSyncMarker('local unchanged; restoring newer same-generation cloud state', {
+                userId: ctx.user.id
+              });
+              await restoreCloudAppStateToLocal(ctx, cloudRows);
+              setLocalAccountSyncMeta(ctx.user.id, cloudMeta);
               return;
             }
             debugSyncMarker('not trusted; continuing to conflict decision', {
@@ -1939,6 +2160,7 @@
           return;
         }
         await uploadLocalAppStateToSupabase(ctx);
+        setLocalAccountSyncMeta(ctx.user.id, cloudMeta);
       } catch(error) {
         warnSync('migration', error);
       } finally {
@@ -2022,6 +2244,9 @@
     });
     if (verificationErrors.length) {
       throw new Error('Cloud reset verification failed: ' + verificationErrors.join(', '));
+    }
+    if (options && options.updateGeneration) {
+      await incrementAccountResetGeneration(ctx, options.generationSource || 'reset');
     }
     return rows;
   }

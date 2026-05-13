@@ -2226,7 +2226,7 @@ async function performResetProfile() {
 
   try {
     console.log('[reset sync] cloud reset requested', { userId: resetUserId || null });
-    await window.resetSupabaseAppData?.({ preserveProfile: preservedProfile, requireSuccess: true });
+    await window.resetSupabaseAppData?.({ preserveProfile: preservedProfile, requireSuccess: true, updateGeneration: true, generationSource: 'reset_profile' });
     console.log('[reset sync] cloud reset verified; local clear started', { userId: resetUserId || null });
     keysToClear.forEach(key => {
       try { localStorage.removeItem(key); } catch(e){}

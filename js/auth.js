@@ -10,7 +10,7 @@
   let lastRenderedLoggedIn = null;
 
   async function refreshAuthState(options) {
-    const shouldRunPostLoginSync = !!(options && options.runPostLoginSync);
+    const shouldRunPostLoginSync = options ? !!options.runPostLoginSync : true;
 
     if (!window.supabaseClient) {
       console.warn("Supabase client missing.");
@@ -55,7 +55,10 @@
     updateAuthUI();
     window.updateSyncNotice?.();
     if (window.authState.isLoggedIn && shouldRunPostLoginSync) {
-      window.migrateLocalAppStateToSupabase?.({ showStatus: true });
+      const showSyncStatus = options && Object.prototype.hasOwnProperty.call(options, "showSyncStatus")
+        ? !!options.showSyncStatus
+        : true;
+      window.migrateLocalAppStateToSupabase?.({ showStatus: showSyncStatus });
     }
 
     return data.user || null;
@@ -365,7 +368,7 @@ async function handleAuthRedirectIfNeeded() {
   const handledRedirect = await handleAuthRedirectIfNeeded();
 
   if (!handledRedirect) {
-    await refreshAuthState();
+    await refreshAuthState({ runPostLoginSync: true, showSyncStatus: false });
   }
 });
 })();
