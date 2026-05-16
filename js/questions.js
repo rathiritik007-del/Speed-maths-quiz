@@ -3343,18 +3343,24 @@ function seededRandom(seed) {
  */
 function getDailyChallengeConfig() {
   const level = getXPData().currentLevel;
+  const label = levelTitle(level);
 
   // Level brackets → challenge config
   // range: [from, to], qCount, timerSecs (0 = off), type, reverseChance (0–1)
   let bracket, cfg;
-  if      (level <= 5)  { bracket = 'beginner';     cfg = { from:1, to:10, qCount:10, timerSecs:0,  type:'squares', reverse:false, label:'Beginner'     }; }
-  else if (level <= 10) { bracket = 'apprentice';   cfg = { from:1, to:12, qCount:10, timerSecs:0,  type:'both',    reverse:false, label:'Apprentice'   }; }
-  else if (level <= 18) { bracket = 'scholar';      cfg = { from:1, to:15, qCount:12, timerSecs:12, type:'both',    reverse:false, label:'Scholar'      }; }
-  else if (level <= 28) { bracket = 'expert';       cfg = { from:1, to:20, qCount:15, timerSecs:10, type:'both',    reverse:false, label:'Expert'       }; }
-  else if (level <= 38) { bracket = 'master';       cfg = { from:1, to:25, qCount:15, timerSecs:8,  type:'both',    reverse:true,  label:'Master'       }; }
-  else                  { bracket = 'grandmaster';  cfg = { from:1, to:30, qCount:20, timerSecs:7,  type:'both',    reverse:true,  label:'Grandmaster'  }; }
+  if      (level <= 3)  { bracket = 'beginner';     cfg = { from:1, to:10, qCount:10, timerSecs:0,  type:'squares', reverse:false }; }
+  else if (level <= 7)  { bracket = 'apprentice';   cfg = { from:1, to:12, qCount:10, timerSecs:0,  type:'both',    reverse:false }; }
+  else if (level <= 12) { bracket = 'student';      cfg = { from:1, to:15, qCount:12, timerSecs:0,  type:'both',    reverse:false }; }
+  else if (level <= 18) { bracket = 'practitioner'; cfg = { from:1, to:15, qCount:12, timerSecs:12, type:'both',    reverse:false }; }
+  else if (level <= 25) { bracket = 'skilled';      cfg = { from:1, to:20, qCount:15, timerSecs:10, type:'both',    reverse:false }; }
+  else if (level <= 32) { bracket = 'advanced';     cfg = { from:1, to:22, qCount:15, timerSecs:9,  type:'both',    reverse:false }; }
+  else if (level <= 39) { bracket = 'expert';       cfg = { from:1, to:25, qCount:15, timerSecs:8,  type:'both',    reverse:true  }; }
+  else if (level <= 45) { bracket = 'master';       cfg = { from:1, to:30, qCount:20, timerSecs:7,  type:'both',    reverse:true  }; }
+  else if (level <= 49) { bracket = 'grandmaster';  cfg = { from:1, to:30, qCount:20, timerSecs:7,  type:'both',    reverse:true  }; }
+  else                  { bracket = 'legend';       cfg = { from:1, to:30, qCount:20, timerSecs:6,  type:'both',    reverse:true  }; }
 
   cfg.bracket = bracket;
+  cfg.label = label;
   return cfg;
 }
 
