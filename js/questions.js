@@ -153,6 +153,27 @@ function setMultType(btn){
   if(focusSubEl) focusSubEl.textContent = multSubType === 'tables' ? 'Pick specific tables' : 'Pick specific numbers';
 }
 
+function formatQuestionText(q) {
+  if (!q) return '';
+  if (q.type === 'table') return `${q.n} × ${q.m}`;
+  if (q.type === 'add') return `${q.n} + ${q.m}`;
+  if (q.type === 'sub') return `${q.n} − ${q.m}`;
+  if (q.reverse && q.type === 'square') return `√${q.answer.toLocaleString()}`;
+  if (q.reverse && q.type === 'cube') return `∛${q.answer.toLocaleString()}`;
+  const sym = q.type === 'square' ? '²' : q.type === 'cube' ? '³' : '';
+  return `${q.n}${sym}`;
+}
+
+function setQuestionExpression(q) {
+  const el = document.getElementById('qExpr');
+  if (!el) return;
+  if (q?.reverse && q.type === 'cube') {
+    el.innerHTML = `<span class="cube-root"><span class="cube-root-index">3</span><span class="cube-root-symbol">√</span><span class="cube-root-radicand">${q.answer.toLocaleString()}</span></span>`;
+  } else {
+    el.textContent = formatQuestionText(q);
+  }
+}
+
   function show(id){
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
@@ -525,7 +546,7 @@ function setMultType(btn){
     document.getElementById('progFill').style.width  = `${(cur/total)*100}%`;
     const badge=document.getElementById('qBadge');
     if(q.type==='table'){
-      badge.textContent = 'Tables';
+      badge.textContent = q.dcKind === 'mult2d' ? 'Multiplication' : 'Tables';
       badge.className = 'q-badge badge-sq';
     } else if(q.type==='add'){
       badge.textContent = 'Addition';
@@ -540,21 +561,21 @@ function setMultType(btn){
     const isRetry = retrySet.has(cur);
     const _qLabel = document.getElementById('qLabel'); if(_qLabel) _qLabel.innerHTML = `Question ${String(cur+1).padStart(2,'0')}` + (isRetry ? '<span class="retry-badge">RETRY</span>' : '');
     if(q.type==='table'){
-      document.getElementById('qExpr').textContent = `${q.n} × ${q.m}`;
+      setQuestionExpression(q);
       document.getElementById('qSub').textContent = 'What is the answer?';
     } else if(q.type==='add'){
-      document.getElementById('qExpr').textContent = `${q.n} + ${q.m}`;
+      setQuestionExpression(q);
       document.getElementById('qSub').textContent = 'What is the sum?';
     } else if(q.type==='sub'){
-      document.getElementById('qExpr').textContent = `${q.n} − ${q.m}`;
+      setQuestionExpression(q);
       document.getElementById('qSub').textContent = 'What is the difference?';
     } else if(q.reverse){
-      document.getElementById('qExpr').textContent = q.answer.toLocaleString();
+      setQuestionExpression(q);
       document.getElementById('qSub').textContent  = q.type==='square' ? 'What number squared gives this?' : 'What number cubed gives this?';
-      badge.textContent = q.type==='square' ? '² Reverse Square' : '³ Reverse Cube';
+      badge.textContent = q.type==='square' ? 'Reverse Square' : 'Reverse Cube';
       badge.className = 'q-badge badge-rev';
     } else {
-      document.getElementById('qExpr').textContent = `${q.n}${sym}`;
+      setQuestionExpression(q);
     }
     const _fb = document.getElementById('fbBox');
     _fb.classList.remove('visible', 'fb-ok', 'fb-no');
@@ -1071,14 +1092,8 @@ function startTimer(){
       wrongMap: {}
     };
     document.getElementById('reviewList').innerHTML = results.map(r=>{
-      const sym=r.q.type==='square'?'²':r.q.type==='cube'?'³':'';
       const cls=r.correct?'ri-ok':'ri-no', mark=r.correct?'✓':'✗';
-      let disp;
-      if(r.q.type==='table')       disp = `${r.q.n}×${r.q.m}`;
-      else if(r.q.type==='add')    disp = `${r.q.n}+${r.q.m}`;
-      else if(r.q.type==='sub')    disp = `${r.q.n}−${r.q.m}`;
-      else if(r.q.reverse)         disp = r.q.answer.toLocaleString();
-      else                         disp = `${r.q.n}${sym}`;
+      const disp = formatQuestionText(r.q);
       const correctAns = (r.q.type==='table'||r.q.type==='add'||r.q.type==='sub') ? r.q.answer : (r.q.reverse ? r.q.n : r.q.answer);
       const note=r.correct?`${correctAns}`:r.timedOut?`${correctAns} (time's up)`:`${correctAns} (you: ${r.userAnswer})`;
       if (summary[r.q.type]) {
@@ -2392,12 +2407,7 @@ function exportResults(){
 
   const rows = results.map((r, i) => {
     const q   = r.q;
-    const sym = q.type === 'square' ? '²' : q.type === 'cube' ? '³' : '';
-    let qStr;
-    if(q.type === 'table')    qStr = `${q.n} × ${q.m}`;
-    else if(q.type === 'add') qStr = `${q.n} + ${q.m}`;
-    else if(q.type === 'sub') qStr = `${q.n} − ${q.m}`;
-    else                      qStr = `${q.n}${sym}`;
+    const qStr = formatQuestionText(q);
     const correctAns = (q.type==='table'||q.type==='add'||q.type==='sub') ? q.answer : (q.reverse ? q.n : q.answer);
     const userAns = r.correct ? '—' : (r.timedOut ? "time's up" : r.userAnswer);
     const rowBg = r.correct ? '#f0fce8' : '#fff2f2';
@@ -3345,23 +3355,135 @@ function getDailyChallengeConfig() {
   const level = getXPData().currentLevel;
   const label = levelTitle(level);
 
-  // Level brackets → challenge config
-  // range: [from, to], qCount, timerSecs (0 = off), type, reverseChance (0–1)
+  // Level brackets -> deterministic mixed-skill challenge config.
   let bracket, cfg;
-  if      (level <= 3)  { bracket = 'beginner';     cfg = { from:1, to:10, qCount:10, timerSecs:0,  type:'squares', reverse:false }; }
-  else if (level <= 7)  { bracket = 'apprentice';   cfg = { from:1, to:12, qCount:10, timerSecs:0,  type:'both',    reverse:false }; }
-  else if (level <= 12) { bracket = 'student';      cfg = { from:1, to:15, qCount:12, timerSecs:0,  type:'both',    reverse:false }; }
-  else if (level <= 18) { bracket = 'practitioner'; cfg = { from:1, to:15, qCount:12, timerSecs:12, type:'both',    reverse:false }; }
-  else if (level <= 25) { bracket = 'skilled';      cfg = { from:1, to:20, qCount:15, timerSecs:10, type:'both',    reverse:false }; }
-  else if (level <= 32) { bracket = 'advanced';     cfg = { from:1, to:22, qCount:15, timerSecs:9,  type:'both',    reverse:false }; }
-  else if (level <= 39) { bracket = 'expert';       cfg = { from:1, to:25, qCount:15, timerSecs:8,  type:'both',    reverse:true  }; }
-  else if (level <= 45) { bracket = 'master';       cfg = { from:1, to:30, qCount:20, timerSecs:7,  type:'both',    reverse:true  }; }
-  else if (level <= 49) { bracket = 'grandmaster';  cfg = { from:1, to:30, qCount:20, timerSecs:7,  type:'both',    reverse:true  }; }
-  else                  { bracket = 'legend';       cfg = { from:1, to:30, qCount:20, timerSecs:6,  type:'both',    reverse:true  }; }
+  if (level <= 3) {
+    bracket = 'beginner';
+    cfg = {
+      qCount: 10, timerSecs: 0, subtitle: 'Squares + Addition',
+      squareRange: [1, 10], addRange: [1, 20],
+      reverseChance: 0,
+      mix: [{ skill:'square', count:5 }, { skill:'add', count:5 }]
+    };
+  } else if (level <= 7) {
+    bracket = 'apprentice';
+    cfg = {
+      qCount: 10, timerSecs: 0, subtitle: 'Squares, Tables + Addition',
+      squareRange: [1, 12], tableRange: [2, 5], tableUpTo: 10, addRange: [1, 30],
+      reverseChance: 0,
+      mix: [{ skill:'square', count:4 }, { skill:'table', count:3 }, { skill:'add', count:3 }]
+    };
+  } else if (level <= 12) {
+    bracket = 'student';
+    cfg = {
+      qCount: 12, timerSecs: 0, subtitle: 'Mixed Skills',
+      squareRange: [1, 15], cubeRange: [1, 15], tableRange: [2, 10], tableUpTo: 10, arithRange: [10, 99],
+      reverseChance: 0,
+      mix: [{ skill:'square', count:3 }, { skill:'cube', count:2 }, { skill:'table', count:3 }, { skill:'add', count:2 }, { skill:'sub', count:2 }]
+    };
+  } else if (level <= 18) {
+    bracket = 'practitioner';
+    cfg = {
+      qCount: 12, timerSecs: 12, subtitle: 'Timed Mixed Skills',
+      squareRange: [1, 16], cubeRange: [1, 15], tableRange: [2, 12], tableUpTo: 10, arithRange: [10, 120],
+      reverseChance: 0,
+      mix: [{ skill:'square', count:2 }, { skill:'cube', count:2 }, { skill:'table', count:3 }, { skill:'add', count:2 }, { skill:'sub', count:3 }]
+    };
+  } else if (level <= 25) {
+    bracket = 'skilled';
+    cfg = {
+      qCount: 15, timerSecs: 10, subtitle: 'Timed Mixed Skills',
+      squareRange: [1, 20], cubeRange: [1, 20], tableRange: [2, 12], tableUpTo: 12, arithRange: [10, 199],
+      reverseChance: 0,
+      mix: [{ skill:'square', count:3 }, { skill:'cube', count:2 }, { skill:'table', count:3 }, { skill:'add', count:4 }, { skill:'sub', count:3 }]
+    };
+  } else if (level <= 32) {
+    bracket = 'advanced';
+    cfg = {
+      qCount: 15, timerSecs: 9, subtitle: 'Advanced Mixed Skills',
+      squareRange: [1, 22], cubeRange: [1, 20], tableRange: [2, 12], tableUpTo: 12, arithRange: [10, 199], mult2dRange: [10, 19],
+      reverseChance: 0,
+      mix: [{ skill:'square', count:2 }, { skill:'cube', count:2 }, { skill:'table', count:3 }, { skill:'add', count:3 }, { skill:'sub', count:3 }, { skill:'mult2d', count:2 }]
+    };
+  } else if (level <= 39) {
+    bracket = 'expert';
+    cfg = {
+      qCount: 15, timerSecs: 8, subtitle: 'Full Mixed Set',
+      squareRange: [1, 25], cubeRange: [1, 25], tableRange: [2, 12], tableUpTo: 12, arithRange: [10, 299], mult2dRange: [10, 49],
+      reverseChance: 0.18,
+      mix: [{ skill:'square', count:2 }, { skill:'cube', count:2 }, { skill:'table', count:2 }, { skill:'add', count:3 }, { skill:'sub', count:2 }, { skill:'mult2d', count:4 }]
+    };
+  } else if (level <= 45) {
+    bracket = 'master';
+    cfg = {
+      qCount: 18, timerSecs: 7, subtitle: 'Full Mixed Set',
+      squareRange: [1, 30], cubeRange: [1, 25], tableRange: [2, 12], tableUpTo: 12, arithRange: [10, 499], mult2dRange: [10, 69],
+      reverseChance: 0.28,
+      mix: [{ skill:'square', count:3 }, { skill:'cube', count:2 }, { skill:'table', count:2 }, { skill:'add', count:3 }, { skill:'sub', count:3 }, { skill:'mult2d', count:5 }]
+    };
+  } else if (level <= 49) {
+    bracket = 'grandmaster';
+    cfg = {
+      qCount: 20, timerSecs: 7, subtitle: 'Hard Mixed Set',
+      squareRange: [1, 30], cubeRange: [1, 30], tableRange: [2, 12], tableUpTo: 12, arithRange: [10, 999], mult2dRange: [10, 89],
+      reverseChance: 0.36,
+      mix: [{ skill:'square', count:3 }, { skill:'cube', count:3 }, { skill:'table', count:2 }, { skill:'add', count:4 }, { skill:'sub', count:3 }, { skill:'mult2d', count:5 }]
+    };
+  } else {
+    bracket = 'legend';
+    cfg = {
+      qCount: 20, timerSecs: 6, subtitle: 'Legend Mixed Set',
+      squareRange: [1, 30], cubeRange: [1, 30], tableRange: [2, 12], tableUpTo: 12, arithRange: [10, 999], mult2dRange: [10, 99],
+      reverseChance: 0.45,
+      mix: [{ skill:'square', count:3 }, { skill:'cube', count:3 }, { skill:'table', count:2 }, { skill:'add', count:4 }, { skill:'sub', count:3 }, { skill:'mult2d', count:5 }]
+    };
+  }
 
   cfg.bracket = bracket;
   cfg.label = label;
   return cfg;
+}
+
+function dcRandInt(rng, min, max) {
+  return Math.floor(rng() * (max - min + 1)) + min;
+}
+
+function dcRange(cfg, key, fallback) {
+  return cfg[key] || fallback;
+}
+
+function createDailyChallengeQuestion(skill, cfg, rng) {
+  if (skill === 'square') {
+    const [from, to] = dcRange(cfg, 'squareRange', [1, 10]);
+    const n = dcRandInt(rng, from, to);
+    return { n, type:'square', answer:n*n, reverse:rng() < (cfg.reverseChance || 0) };
+  }
+  if (skill === 'cube') {
+    const [from, to] = dcRange(cfg, 'cubeRange', [1, 10]);
+    const n = dcRandInt(rng, from, to);
+    return { n, type:'cube', answer:n*n*n, reverse:rng() < (cfg.reverseChance || 0) };
+  }
+  if (skill === 'table') {
+    const [from, to] = dcRange(cfg, 'tableRange', [2, 10]);
+    const n = dcRandInt(rng, from, to);
+    const m = dcRandInt(rng, 1, cfg.tableUpTo || 10);
+    return { n, m, type:'table', answer:n*m, reverse:false, dcKind:'table' };
+  }
+  if (skill === 'mult2d') {
+    const [from, to] = dcRange(cfg, 'mult2dRange', [10, 19]);
+    const n = dcRandInt(rng, from, to);
+    const m = dcRandInt(rng, from, to);
+    return { n, m, type:'table', answer:n*m, reverse:false, dcKind:'mult2d' };
+  }
+  const rangeKey = skill === 'sub' ? 'subRange' : 'addRange';
+  const [from, to] = dcRange(cfg, rangeKey, dcRange(cfg, 'arithRange', [10, 99]));
+  const a = dcRandInt(rng, from, to);
+  const b = dcRandInt(rng, from, to);
+  if (skill === 'sub') {
+    const big = Math.max(a, b), small = Math.min(a, b);
+    return { n:big, m:small, type:'sub', answer:big-small, reverse:false };
+  }
+  return { n:a, m:b, type:'add', answer:a+b, reverse:false };
 }
 
 function generateDailyChallenge() {
@@ -3371,13 +3493,15 @@ function generateDailyChallenge() {
   const rng = seededRandom(dateStr + '_' + cfg.bracket);
   const pool = [];
 
-  for (let n = cfg.from; n <= cfg.to; n++) {
-    if (cfg.type === 'squares' || cfg.type === 'both') {
-      pool.push({ n, type:'square', answer:n*n,   reverse:cfg.reverse ? (rng() > 0.6) : false });
+  cfg.mix.forEach(item => {
+    for (let i = 0; i < item.count; i++) {
+      pool.push(createDailyChallengeQuestion(item.skill, cfg, rng));
     }
-    if (cfg.type === 'cubes' || cfg.type === 'both') {
-      pool.push({ n, type:'cube',   answer:n*n*n, reverse:cfg.reverse ? (rng() > 0.7) : false });
-    }
+  });
+
+  while (pool.length < cfg.qCount) {
+    const item = cfg.mix[pool.length % cfg.mix.length];
+    pool.push(createDailyChallengeQuestion(item.skill, cfg, rng));
   }
 
   // Deterministic shuffle
@@ -3386,8 +3510,7 @@ function generateDailyChallenge() {
     [pool[i], pool[j]] = [pool[j], pool[i]];
   }
 
-  // Recompute answers for any reverse questions (answer = n for reverse)
-  return pool.slice(0, cfg.qCount).map(q => ({ ...q, answer: q.reverse ? q.n : q.answer }));
+  return pool.slice(0, cfg.qCount);
 }
 
 let isDailyChallenge = false;
@@ -3450,7 +3573,7 @@ function updateDailyChallengeBtn() {
     btn.disabled = true;
   } else {
     const cfg = getDailyChallengeConfig();
-    const typeStr = cfg.type === 'squares' ? 'Squares only' : cfg.type === 'cubes' ? 'Cubes only' : 'Squares & Cubes';
+    const typeStr = cfg.subtitle || 'Mixed Skills';
     const pillText = cfg.timerSecs ? `${cfg.label} • ${cfg.qCount} Qs • ${cfg.timerSecs}s` : `${cfg.label} • ${cfg.qCount} Qs`;
     if (badge) { badge.textContent = pillText; badge.className = 'daily-challenge-badge avail'; }
     if (sub)   sub.textContent = typeStr;

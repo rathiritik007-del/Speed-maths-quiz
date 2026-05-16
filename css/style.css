@@ -957,6 +957,16 @@
       text-align: center;
       margin: clamp(8px, 2.5vw, 12px) 0 clamp(4px, 1.5vw, 8px);
     }
+    .cube-root {
+      display: inline-flex;
+      align-items: baseline;
+    }
+    .cube-root-index {
+      font-size: 0.35em;
+      line-height: 1;
+      margin-right: -0.12em;
+      transform: translate(0.96em, -1.82em);
+    }
     .q-sub {
       font-size: clamp(11px, 3vw, 14px);
       color: rgba(239,248,226,0.35);
