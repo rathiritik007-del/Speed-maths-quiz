@@ -3189,33 +3189,29 @@ select:focus {
       margin-bottom: 20px;
     }
     .levelup-emblem-ring {
-      position: absolute; inset: 0;
+      position: absolute;
+      inset: -14px;
       border-radius: 50%;
-      background: conic-gradient(
-        from 0deg,
-        color-mix(in srgb, var(--acc), transparent 20%),
-        color-mix(in srgb, var(--acc-lo), transparent 5%),
-        var(--acc),
-        color-mix(in srgb, var(--acc-lo), transparent 5%),
-        color-mix(in srgb, var(--acc), transparent 20%)
-      );
-      padding: 3px;
-      box-shadow:
-        0 0 28px color-mix(in srgb, var(--acc), transparent 35%),
-        inset 0 0 12px rgba(0,0,0,0.6);
-      animation: ringRotate 8s linear infinite;
+      background: radial-gradient(circle, color-mix(in srgb, var(--acc), transparent 35%) 0%, color-mix(in srgb, var(--acc), transparent 74%) 36%, transparent 70%);
+      filter: blur(2px);
+      pointer-events: none;
     }
     @keyframes ringRotate {
       from { transform: rotate(0deg); }
       to   { transform: rotate(360deg); }
     }
     .levelup-emblem-inner {
-      position: absolute; inset: 3px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 30%, var(--p4), var(--p1));
+      position: absolute; inset: 0;
+      background: transparent;
       display: flex; align-items: center; justify-content: center;
-      font-size: 38px;
-      filter: drop-shadow(0 2px 8px rgba(0,0,0,0.6));
+      padding: 0;
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,0.38));
+    }
+    .levelup-badge-img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
     }
 
     @keyframes levelNumIn {
@@ -3875,56 +3871,51 @@ select:focus {
     .dash-xp-top { display: none; }
     .dash-xp-left { display: flex; align-items: center; gap: 12px; }
     .dash-xp-level {
-      width: 48px; height: 48px;
-      border-radius: 50%;
-      background: color-mix(in srgb, var(--acc), transparent 88%);
-      border: 3px solid color-mix(in srgb, var(--acc), transparent 56%);
-      box-shadow: 0 0 8px color-mix(in srgb, var(--acc), transparent 88%);
-      font-size: 15px; font-weight: 900; color: var(--acc);
-      display: flex; align-items: center; justify-content: center;
+      width: 45px;
+      height: 50px;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: contain;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      color: transparent;
+      display: block;
       flex-shrink: 0;
-      transition: border-radius 0.2s ease, clip-path 0.2s ease, box-shadow 0.2s ease;
+      overflow: visible;
+      transition: filter 0.2s ease, transform 0.2s ease;
+      filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.12));
     }
     .dash-xp-level.xp-shape-beginner {
-      border-radius: 50%;
-      clip-path: none;
+      background-image: url("../assets/level-badges/beginner.svg");
     }
     .dash-xp-level.xp-shape-apprentice {
-      border-radius: 13px;
-      clip-path: none;
+      background-image: url("../assets/level-badges/apprentice.svg");
     }
     .dash-xp-level.xp-shape-student {
-      border-radius: 18px;
-      clip-path: none;
+      background-image: url("../assets/level-badges/student.svg");
     }
     .dash-xp-level.xp-shape-practitioner {
-      border-radius: 10px;
-      clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0 50%);
+      background-image: url("../assets/level-badges/practitioner.svg");
     }
     .dash-xp-level.xp-shape-skilled {
-      border-radius: 10px;
-      clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%);
+      background-image: url("../assets/level-badges/skilled.svg");
     }
     .dash-xp-level.xp-shape-advanced {
-      border-radius: 8px;
-      clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+      background-image: url("../assets/level-badges/advanced.svg");
     }
     .dash-xp-level.xp-shape-expert {
-      border-radius: 10px;
-      clip-path: polygon(18% 4%, 82% 4%, 96% 28%, 84% 82%, 50% 100%, 16% 82%, 4% 28%);
+      background-image: url("../assets/level-badges/expert.svg");
     }
     .dash-xp-level.xp-shape-master {
-      border-radius: 8px;
-      clip-path: polygon(14% 0, 86% 0, 100% 30%, 84% 84%, 50% 100%, 16% 84%, 0 30%);
+      background-image: url("../assets/level-badges/master.svg");
     }
     .dash-xp-level.xp-shape-grandmaster {
-      border-radius: 8px;
-      clip-path: polygon(50% 0, 88% 12%, 100% 42%, 86% 82%, 50% 100%, 14% 82%, 0 42%, 12% 12%);
+      background-image: url("../assets/level-badges/grandmaster.svg");
     }
     .dash-xp-level.xp-shape-legend {
-      border-radius: 8px;
-      clip-path: polygon(50% 0, 62% 26%, 90% 12%, 78% 40%, 100% 50%, 78% 60%, 90% 88%, 62% 74%, 50% 100%, 38% 74%, 10% 88%, 22% 60%, 0 50%, 22% 40%, 10% 12%, 38% 26%);
-      box-shadow: 0 0 10px color-mix(in srgb, var(--acc), transparent 84%);
+      background-image: url("../assets/level-badges/legend.svg");
+      filter: drop-shadow(0 3.5px 6px rgba(0, 0, 0, 0.14));
     }
     .dash-xp-info {
       display: grid;
@@ -3938,7 +3929,16 @@ select:focus {
     }
     .dash-xp-title { grid-column: 1; grid-row: 1; font-size: 14px; font-weight: 750; color: rgba(239,248,226,0.85); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .dash-xp-sub   { grid-column: 1; grid-row: 2; font-size: 11px; color: rgba(239,248,226,0.35); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .dash-xp-bar-wrap { grid-column: 2; grid-row: 1 / span 2; width: 100%; max-width: 132px; margin: 0 0 0 auto; justify-self: end; }
+    .dash-xp-current {
+      font-size: 11px;
+      font-weight: 800;
+      color: rgba(239,248,226,0.72);
+      letter-spacing: 0.01em;
+      line-height: 1.1;
+      text-align: left;
+      white-space: nowrap;
+    }
+    .dash-xp-bar-wrap { grid-column: 2; grid-row: 1 / span 2; width: 100%; max-width: 132px; margin: 0 0 0 auto; justify-self: end; display: flex; flex-direction: column; gap: 5px; }
     .dash-xp-bar-bg { height: 5px; border-radius: 99px; background: color-mix(in srgb, var(--p4), transparent 60%); overflow: hidden; }
     .dash-xp-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--acc-lo), var(--acc)); transition: width 0.6s cubic-bezier(0.22,1,0.36,1); }
 
@@ -3948,9 +3948,8 @@ select:focus {
         padding: 9px 14px;
       }
       .dash-xp-level {
-        width: 44px;
-        height: 44px;
-        font-size: 13px;
+        width: 45px;
+        height: 50px;
       }
       .dash-xp-info {
         grid-template-columns: minmax(0, 1fr) minmax(76px, 30%);

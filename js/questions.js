@@ -2961,6 +2961,10 @@ function levelShapeClass(level) {
   return 'xp-shape-' + levelTitle(level).toLowerCase();
 }
 
+function levelBadgeAssetPath(level) {
+  return `assets/level-badges/${levelTitle(level).toLowerCase()}.svg`;
+}
+
 /**
  * addXP — called after each correct answer.
  * bonus=true when current session answer-streak is 3+
@@ -3016,10 +3020,12 @@ function updateDashXP(animateLevelUp) {
     level:  document.getElementById('dashXpLevel'),
     title:  document.getElementById('dashXpTitle'),
     sub:    document.getElementById('dashXpSub'),
+    current: document.getElementById('dashXpCurrent'),
     bar:    document.getElementById('dashXpBar'),
   };
   if (el.level) {
-    el.level.textContent = `Lv ${level}`;
+    el.level.textContent = '';
+    el.level.setAttribute('aria-label', `${levelTitle(level)} badge, level ${level}`);
     el.level.classList.remove(
       'xp-shape-beginner',
       'xp-shape-apprentice',
@@ -3035,6 +3041,7 @@ function updateDashXP(animateLevelUp) {
     el.level.classList.add(levelShapeClass(level));
   }
   if (el.title) el.title.textContent = levelTitle(level);
+  if (el.current) el.current.textContent = `Level - ${level}`;
   if (el.sub)   el.sub.textContent   = `${xpIn} / ${xpNeeded} XP to next level`;
 
   if (el.bar) {
@@ -3052,9 +3059,15 @@ function updateDashXP(animateLevelUp) {
   }
 
   // Animate level number if levelling up
-  if (animateLevelUp && el.level) {
-    restartAnimationClass(el.level, 'levelup-pop');
-    el.level.addEventListener('animationend', () => el.level.classList.remove('levelup-pop'), { once: true });
+  if (animateLevelUp) {
+    if (el.level) {
+      restartAnimationClass(el.level, 'levelup-pop');
+      el.level.addEventListener('animationend', () => el.level.classList.remove('levelup-pop'), { once: true });
+    }
+    if (el.current) {
+      restartAnimationClass(el.current, 'levelup-pop');
+      el.current.addEventListener('animationend', () => el.current.classList.remove('levelup-pop'), { once: true });
+    }
     if (el.bar) {
       restartAnimationClass(el.bar, 'levelup-flash');
       el.bar.addEventListener('animationend', () => el.bar.classList.remove('levelup-flash'), { once: true });

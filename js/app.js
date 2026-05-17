@@ -755,9 +755,11 @@ function checkLevelUp(newLevel) {
 }
 
 function showLevelUpModal(level) {
-  const emojis = ['⭐','🌟','💫','🔥','💎','👑','🏆','🦅','🌙','🎯'];
-  const emoji  = emojis[Math.min(Math.floor((level-1)/5), emojis.length-1)];
-  document.getElementById('levelUpGlow').textContent  = emoji;
+  const levelUpBadgeImg = document.getElementById('levelUpBadgeImg');
+  if (levelUpBadgeImg) {
+    levelUpBadgeImg.src = levelBadgeAssetPath(level);
+    levelUpBadgeImg.alt = `${levelTitle(level)} badge`;
+  }
   document.getElementById('levelUpNum').textContent   = 'Level ' + level;
   document.getElementById('levelUpTitle').textContent = levelTitle(level);
 

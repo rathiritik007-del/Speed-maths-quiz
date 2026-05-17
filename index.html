@@ -244,11 +244,12 @@
 
     <!-- XP / Level Row -->
     <div class="dash-xp-row">
-      <div class="dash-xp-level" id="dashXpLevel">Lv 1</div>
+      <div class="dash-xp-level xp-shape-beginner" id="dashXpLevel" aria-label="Beginner badge"></div>
       <div class="dash-xp-info">
         <div class="dash-xp-title" id="dashXpTitle">Beginner</div>
         <div class="dash-xp-sub" id="dashXpSub">0 XP to next level</div>
         <div class="dash-xp-bar-wrap">
+          <div class="dash-xp-current" id="dashXpCurrent">Level - 1</div>
           <div class="dash-xp-bar-bg">
             <div class="dash-xp-bar-fill" id="dashXpBar" style="width:0%"></div>
           </div>
@@ -1068,7 +1069,9 @@
     <div class="levelup-hero">
       <div class="levelup-emblem">
         <div class="levelup-emblem-ring"></div>
-        <div class="levelup-emblem-inner" id="levelUpGlow">⭐</div>
+        <div class="levelup-emblem-inner" id="levelUpGlow">
+          <img class="levelup-badge-img" id="levelUpBadgeImg" src="assets/level-badges/beginner.svg" alt="Beginner badge">
+        </div>
       </div>
       <div class="levelup-label">Level Up</div>
       <div class="levelup-level" id="levelUpNum">2</div>

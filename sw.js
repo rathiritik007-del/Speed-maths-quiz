@@ -1,4 +1,4 @@
-const CACHE_NAME = "mental-math-trainer-shell-v1.3.0";
+const CACHE_NAME = "mental-math-trainer-shell-v1.3.1";
 
 const STATIC_SHELL = [
   "/",
@@ -15,6 +15,16 @@ const STATIC_SHELL = [
   "/js/sync.js",
   "/js/ui.js",
   "/js/app.js",
+  "/assets/level-badges/beginner.svg",
+  "/assets/level-badges/apprentice.svg",
+  "/assets/level-badges/student.svg",
+  "/assets/level-badges/practitioner.svg",
+  "/assets/level-badges/skilled.svg",
+  "/assets/level-badges/advanced.svg",
+  "/assets/level-badges/expert.svg",
+  "/assets/level-badges/master.svg",
+  "/assets/level-badges/grandmaster.svg",
+  "/assets/level-badges/legend.svg",
   "/icons/icon-192.png",
   "/icons/icon-512.png"
 ];

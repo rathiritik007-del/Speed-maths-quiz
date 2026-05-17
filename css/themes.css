@@ -643,17 +643,20 @@ html[data-theme="minimal"] {
   html[data-base-theme="light"] .pb-new {
     color: var(--acc-vlo);
   }
-  /* XP level badge: invert for light backgrounds so it stays visible */
+  /* XP level badge assets keep their original colors across themes */
   html[data-base-theme="light"] .dash-xp-level {
-    background: color-mix(in srgb, var(--acc-vlo), transparent 82%);
-    border-color: color-mix(in srgb, var(--acc-vlo), transparent 50%);
-    color: var(--acc-vlo);
+    background-color: transparent;
+    border-color: transparent;
+    color: transparent;
     box-shadow: none;
   }
   html[data-base-theme="light"] .dash-xp-title {
     color: var(--text-primary);
   }
   html[data-base-theme="light"] .dash-xp-sub {
+    color: var(--text-secondary);
+  }
+  html[data-base-theme="light"] .dash-xp-current {
     color: var(--text-secondary);
   }
   html[data-base-theme="light"] .dash-xp-bar-bg {
@@ -1606,61 +1609,51 @@ html[data-theme="minimal"] {
   }
   .dash-xp-left { display: none !important; }
   .dash-xp-level {
-    width: 48px !important;
-    height: 48px !important;
-    font-size: clamp(14px,3vw,15px) !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    background: color-mix(in srgb, var(--p4), transparent 30%) !important;
-    border: 3px solid color-mix(in srgb, var(--acc), transparent 56%) !important;
-    border-radius: 50% !important;
+    width: 45px !important;
+    height: 50px !important;
+    display: block !important;
+    background-color: transparent !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-size: contain !important;
+    border: 0 !important;
+    border-radius: 0 !important;
     line-height: 1 !important;
     flex-shrink: 0 !important;
-    box-shadow: 0 0 8px color-mix(in srgb, var(--acc), transparent 88%) !important;
-    color: var(--acc) !important;
-    font-weight: 900 !important;
+    box-shadow: none !important;
+    color: transparent !important;
+    filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.12)) !important;
   }
   .dash-xp-level.xp-shape-beginner {
-    border-radius: 50% !important;
-    clip-path: none !important;
+    background-image: url("../assets/level-badges/beginner.svg") !important;
   }
   .dash-xp-level.xp-shape-apprentice {
-    border-radius: 13px !important;
-    clip-path: none !important;
+    background-image: url("../assets/level-badges/apprentice.svg") !important;
   }
   .dash-xp-level.xp-shape-student {
-    border-radius: 18px !important;
-    clip-path: none !important;
+    background-image: url("../assets/level-badges/student.svg") !important;
   }
   .dash-xp-level.xp-shape-practitioner {
-    border-radius: 10px !important;
-    clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0 50%) !important;
+    background-image: url("../assets/level-badges/practitioner.svg") !important;
   }
   .dash-xp-level.xp-shape-skilled {
-    border-radius: 10px !important;
-    clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%) !important;
+    background-image: url("../assets/level-badges/skilled.svg") !important;
   }
   .dash-xp-level.xp-shape-advanced {
-    border-radius: 8px !important;
-    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%) !important;
+    background-image: url("../assets/level-badges/advanced.svg") !important;
   }
   .dash-xp-level.xp-shape-expert {
-    border-radius: 10px !important;
-    clip-path: polygon(18% 4%, 82% 4%, 96% 28%, 84% 82%, 50% 100%, 16% 82%, 4% 28%) !important;
+    background-image: url("../assets/level-badges/expert.svg") !important;
   }
   .dash-xp-level.xp-shape-master {
-    border-radius: 8px !important;
-    clip-path: polygon(14% 0, 86% 0, 100% 30%, 84% 84%, 50% 100%, 16% 84%, 0 30%) !important;
+    background-image: url("../assets/level-badges/master.svg") !important;
   }
   .dash-xp-level.xp-shape-grandmaster {
-    border-radius: 8px !important;
-    clip-path: polygon(50% 0, 88% 12%, 100% 42%, 86% 82%, 50% 100%, 14% 82%, 0 42%, 12% 12%) !important;
+    background-image: url("../assets/level-badges/grandmaster.svg") !important;
   }
   .dash-xp-level.xp-shape-legend {
-    border-radius: 8px !important;
-    clip-path: polygon(50% 0, 62% 26%, 90% 12%, 78% 40%, 100% 50%, 78% 60%, 90% 88%, 62% 74%, 50% 100%, 38% 74%, 10% 88%, 22% 60%, 0 50%, 22% 40%, 10% 12%, 38% 26%) !important;
-    box-shadow: 0 0 10px color-mix(in srgb, var(--acc), transparent 84%) !important;
+    background-image: url("../assets/level-badges/legend.svg") !important;
+    filter: drop-shadow(0 3.5px 6px rgba(0, 0, 0, 0.14)) !important;
   }
   .dash-xp-info {
     display: grid !important;
@@ -1694,6 +1687,14 @@ html[data-theme="minimal"] {
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
   }
+  .dash-xp-current {
+    font-size: clamp(10px,2.2vw,11px) !important;
+    font-weight: 800 !important;
+    color: rgba(239,248,226,0.72) !important;
+    line-height: 1.1 !important;
+    text-align: left !important;
+    white-space: nowrap !important;
+  }
   .dash-xp-bar-wrap {
     grid-column: 2 !important;
     grid-row: 1 / span 2 !important;
@@ -1702,6 +1703,9 @@ html[data-theme="minimal"] {
     width: 100% !important;
     margin: 0 0 0 auto !important;
     justify-self: end !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 5px !important;
   }
   .dash-xp-bar-bg { height: 5px !important; }
 
@@ -1712,9 +1716,8 @@ html[data-theme="minimal"] {
     }
 
     .dash-xp-level {
-      width: 44px !important;
-      height: 44px !important;
-      font-size: 13px !important;
+      width: 45px !important;
+      height: 50px !important;
     }
 
     .dash-xp-info {
@@ -2387,8 +2390,11 @@ html[data-theme="minimal"] {
     opacity: 0.86;
   }
   html[data-base-theme="light"] .dash-xp-level {
-    color: var(--light-action-tone);
-    border-color: color-mix(in srgb, var(--acc), transparent 38%);
+    color: transparent !important;
+    border-color: transparent;
+  }
+  html[data-base-theme="light"] .dash-xp-current {
+    color: var(--light-soft-ink) !important;
   }
   html[data-base-theme="light"] .dash-session-date,
   html[data-base-theme="light"] .dash-session-score,
